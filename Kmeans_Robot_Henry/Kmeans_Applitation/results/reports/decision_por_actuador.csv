@@ -1,0 +1,7 @@
+id_actuador,estado,prevalencia_pct,c0,c1,c2,c3,bandera,prioridad,accion_recomendada
+A1_Cadera_Derecha,DEGRADADO,100.0,0,0,0,9,DOMINIO CLARO,NORMAL,Mantenimiento en 30-60 dias
+A2_Rodilla_Derecha,CRITICO,100.0,0,0,9,0,DOMINIO CLARO,NORMAL,Investigar inmediatamente / posible reemplazo
+A4_Cadera_Izquierda,FUNCIONAL,100.0,0,9,0,0,DOMINIO CLARO,NORMAL,Mantenimiento rutinario
+A5_Rodilla_Izquierda,CRITICO,100.0,0,0,9,0,DOMINIO CLARO,NORMAL,Investigar inmediatamente / posible reemplazo
+A6_Tobillo_Izquierda,FUNCIONAL,100.0,0,9,0,0,DOMINIO CLARO,NORMAL,Mantenimiento rutinario
+A3_Tobillo_Derecha,OPTIMO,88.9,8,1,0,0,DOMINIO CLARO,NORMAL,Operacion normal

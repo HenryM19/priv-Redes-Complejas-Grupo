@@ -189,6 +189,41 @@ Se evaluaron K = 2…9 usando tres criterios:
 - Reducción de 9 dimensiones a 3 con mínima pérdida de información
 - PC1 (41.6%) es dominante → concentra el patrón principal de degradación
 
+### Ecuaciones de las Componentes Principales (PCA)
+
+Se aplica normalización estándar por variable antes de PCA:
+
+$$z_i = \frac{x_i - \mu_i}{\sigma_i}$$
+
+Convención de variables:
+- $z_1$: tiempo_uso_acumulado_h
+- $z_2$: ciclos_activacion_M
+- $z_3$: numero_reparaciones
+- $z_4$: fallos_temporales
+- $z_5$: temp_operacional_promedio_C
+- $z_6$: temp_maxima_alcanzada_C
+- $z_7$: dias_ultima_calibracion
+- $z_8$: dias_ultimo_servicio
+- $z_9$: numero_logs_error
+
+**PC1 (41.57%):**
+
+$$
+\mathbf{PC_1} = 0.3126\,z_1 + 0.3140\,z_2 + 0.3583\,z_3 + 0.4396\,z_4 + 0.3574\,z_5 + 0.3604\,z_6 + 0.1272\,z_7 + 0.1130\,z_8 + 0.4421\,z_9
+$$
+
+**PC2 (21.80%):**
+
+$$
+\mathbf{PC_2} = 0.3372\,z_1 + 0.3343\,z_2 - 0.0865\,z_3 - 0.1940\,z_4 - 0.1651\,z_5 - 0.2063\,z_6 + 0.5571\,z_7 + 0.5515\,z_8 - 0.2124\,z_9
+$$
+
+**PC3 (15.97%):**
+
+$$
+\mathbf{PC_3} = 0.5081\,z_1 + 0.5070\,z_2 + 0.1030\,z_3 - 0.1054\,z_4 - 0.1805\,z_5 - 0.2715\,z_6 - 0.4027\,z_7 - 0.4283\,z_8 - 0.1055\,z_9
+$$
+
 ---
 
 ## 📈 Tabla de Estadísticas por Cluster
@@ -205,6 +240,50 @@ Se evaluaron K = 2…9 usando tres criterios:
 | **Logs error** | 6.7 | 4.9 | 40.4 | 13.4 |
 | **Días s/ calibración** | 124 | 131 | 178 | 195 |
 | **Días s/ servicio** | 201 | 218 | 287 | 354 |
+
+---
+
+## 7️⃣ Sistema de Decisión por Prevalencia (por actuador)
+
+La decisión final por motor se calcula por mayoría de evidencia entre las 9 variables, en lugar de usar solo distancia a centroide en 3D.
+
+### Paso 1: Asignar cluster por variable (cuartiles)
+
+Para cada variable $v_j$ y cada valor del actuador, se asigna:
+
+- Cluster 0 si $x \leq P25(v_j)$
+- Cluster 1 si $P25(v_j) < x \leq P50(v_j)$
+- Cluster 2 si $P50(v_j) < x \leq P75(v_j)$
+- Cluster 3 si $x > P75(v_j)$
+
+### Paso 2: Contar prevalencia por cluster
+
+Si $n_k$ es el número de variables asignadas al cluster $k$:
+
+$$n_k = \sum_{j=1}^{9}\mathbf{1}(c_j = k)$$
+
+La prevalencia del cluster dominante es:
+
+$$\text{Prevalencia} = \frac{\max(n_0,n_1,n_2,n_3)}{9}\times 100\%$$
+
+### Paso 3: Mapear a estado y acción
+
+- C0 predominante → ✅ ÓPTIMO → Operación normal
+- C1 predominante → ✅ FUNCIONAL → Mantenimiento rutinario
+- C2 predominante → 🔴 CRÍTICO → Investigación inmediata / posible reemplazo
+- C3 predominante → 🟠 DEGRADADO → Mantenimiento en 30-60 días
+
+### Regla de desempate recomendada
+
+Si hay empate de conteos, elegir el cluster de mayor severidad: C2 > C3 > C1 > C0.
+
+### Ejemplo (A1_Cadera_Derecha)
+
+Asignaciones por variable: C2, C2, C0, C2, C1, C2, C2, C2, C1
+
+Conteo: C0=1, C1=2, C2=6, C3=0
+
+Estado final: 🔴 CRÍTICO, con prevalencia de $6/9 = 66.7\%$ en C2.
 
 ---
 
