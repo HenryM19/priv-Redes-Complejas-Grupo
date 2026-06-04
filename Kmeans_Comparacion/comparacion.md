@@ -1,200 +1,186 @@
-# Comparación de Enfoques K-Means: Inferencia de VLANs vs. Mantenimiento Robótico
-
-**Universidad de Cuenca | DEET | Maestría en Ciencias de la Ingeniería Eléctrica**  
-**Fecha:** 2026-06-03
-
+---
+title: "Comparación de Enfoques K-Means: Exoesqueleto vs. Mantenimiento Robótico Sintético"
+author:
+  - "Ing. Jean Carlo Aucapina"
+  - "Ing. Henry Maldonado"
+date: "2026-06-03"
 ---
 
 ## 1. Contexto General
 
 Este documento compara dos aplicaciones independientes del algoritmo K-Means implementadas en Julia,
 ambas desarrolladas en el marco del curso de Redes Complejas. Aunque comparten el mismo núcleo
-algorítmico, difieren en dominio, features, objetivo y criterios de evaluación.
+algorítmico, difieren en el origen de los datos, el dominio de aplicación y la interpretación de los
+clusters resultantes.
 
-| Dimensión | Proyecto A — Inferencia de VLANs (Jean) | Proyecto B — Mantenimiento Robótico (Henry) |
+| Dimensión | Proyecto A — Exoesqueleto (Henry) | Proyecto B — Robótica Sintética (Jean) |
 |---|---|---|
-| **Dominio** | Redes de computadoras | Robótica industrial |
-| **Objetivo** | Inferir segmentación lógica de red sin configuración de switches | Clasificar actuadores por estado de mantenimiento |
-| **Datos** | Tráfico de red sintético (flujos IP) | Inventario de actuadores con telemetría de sensores |
-| **Salida del modelo** | Mapa IP → VLAN inferida | Mapa pieza → estado (Programado / Urgente / Reemplazo) |
-| **Carpeta** | `Kmeans_Robot_Jean/` | `Kmeans_Robot_Henry/` |
+| **Dominio** | Biomecánica / robótica médica | Mantenimiento predictivo industrial |
+| **Objetivo** | Agrupar mediciones de actuadores de exoesqueleto por perfil de operación | Clasificar actuadores robóticos por estado de degradación |
+| **Datos** | Reales — telemetría de sensores de exoesqueleto (mediciones diarias) | Sintéticos — inventario de 120 actuadores generado por `synthesis.jl` |
+| **Unidad de análisis** | Medición diaria de un actuador (filas del log) | Actuador individual (pieza física) |
+| **Salida del modelo** | Mapa medición → perfil de operación (4 clusters) | Mapa pieza → estado (Programado / Urgente / Reemplazo) |
+| **Carpeta** | `Kmeans_Robot_Henry/` | `Kmeans_Robot_Jean/Robotica_kmeans_sintetico/` |
 
 ---
 
-## 2. Metodología — Proyecto A: Inferencia de VLANs
+## 2. Metodología — Proyecto A: Exoesqueleto (Henry)
 
 ### 2.1 Descripción del Problema
 
-En redes corporativas, las VLANs segmentan el tráfico para mejorar seguridad y rendimiento.
-Cuando no se dispone de la configuración del switch, es posible **inferir la segmentación lógica**
-analizando los patrones de comunicación entre hosts directamente desde capturas de tráfico (PCAP).
+Un exoesqueleto robótico contiene múltiples actuadores (cadera, rodilla, tobillo, etc.) cuyo
+comportamiento varía según la sesión de rehabilitación, el paciente y el desgaste acumulado.
+El Proyecto A aplica K-Means sobre el **log histórico de mediciones diarias** para descubrir
+automáticamente patrones de operación: ¿qué grupos de mediciones comparten el mismo perfil
+de carga, temperatura y desgaste?
 
-**Escenario simulado:** red con 3 VLANs latentes, 36 hosts, 1500 flujos de entrenamiento,
-probabilidad de flujo intra-VLAN $p_{intra} = 0.85$.
+A diferencia del Proyecto B, aquí no se parte de etiquetas conocidas de estado — los clusters
+emergen exclusivamente de los datos de los sensores.
 
-### 2.2 Pipeline
+**Dataset:** 663 mediciones diarias de actuadores de exoesqueleto, año 2024.
 
-```
-ENTRADA (PCAP real o CSV sintético)
-       │
-       ▼
-train_test_split() — 70% train / 30% test (cronológico)
-       │
-       ▼
-features.jl — 10 features por host
-       │
-       ▼
-clustering.jl — auto_select_k() → K* → kmeans_best()
-       │
-  ┌────┴────┐
-  ▼         ▼
-Train    Test → assign_new_flows() (usando centroides de train)
-  │         │
-  └────┬────┘
-       ▼
-reporting.jl — tabla VLANs + evaluación de estabilidad
-       │
-       ▼
-animation.jl — GIFs de convergencia y selección de K
-```
+### 2.2 Features — 9 Variables de Telemetría
 
-### 2.3 Representación de Datos — Grafo de Tráfico
+| Feature | Descripción |
+|---|---|
+| `tiempo_uso_acumulado_h` | Horas acumuladas de uso del actuador |
+| `ciclos_activacion_M` | Millones de ciclos de activación completados |
+| `numero_reparaciones` | Reparaciones realizadas hasta la fecha |
+| `fallos_temporales` | Fallos temporales registrados |
+| `temp_operacional_promedio_C` | Temperatura promedio durante operación (°C) |
+| `temp_maxima_alcanzada_C` | Temperatura máxima alcanzada (°C) |
+| `dias_ultima_calibracion` | Días desde la última calibración |
+| `dias_ultimo_servicio` | Días desde el último servicio técnico |
+| `numero_logs_error` | Entradas de error en el log del sistema |
 
-La red se modela como grafo dirigido ponderado $G = (V, E, w)$:
-- $V$ = hosts (IPs únicas)
-- $E$ = pares (src_ip, dst_ip)
-- $w(e)$ = bytes totales del flujo $e$
+No existe feature dominante con peso explícito — todas las variables contribuyen en igualdad
+de condiciones. La señal de agrupamiento emerge de la correlación natural entre temperatura,
+ciclos y errores de log.
 
-### 2.4 Feature Engineering — 10 Features por Host
+### 2.3 Selección de K
 
-| # | Feature | Peso | Descripción |
-|:---:|---|:---:|---|
-| 1 | `out_flows` | ×1.0 | Flujos salientes totales |
-| 2 | `in_flows` | ×1.0 | Flujos entrantes totales |
-| 3 | `out_bytes` | ×1.0 | Bytes enviados |
-| 4 | `in_bytes` | ×1.0 | Bytes recibidos |
-| 5 | `unique_peers` | ×1.0 | Peers distintos contactados (grado del nodo) |
-| 6 | `bytes_per_flow` | ×1.0 | Bytes medios por flujo — proxy del tipo de aplicación |
-| 7 | `ratio_intra` | **×2.0** | Fracción de flujos hacia el mismo /24 — **señal principal de VLAN** |
-| 8 | `tcp_ratio` | ×1.5 | Fracción de flujos TCP (vs UDP/ICMP) |
-| 9 | `port_entropy` | ×1.5 | Entropía de Shannon de puertos destino |
-| 10 | `med_duration` | ×1.0 | Duración mediana de flujo (ms) |
+Se evaluaron K ∈ [2, 9] usando silhouette + Davies-Bouldin score.
 
-**Feature clave:** `ratio_intra` (×2) captura el principio fundamental de las VLANs:
-los hosts dentro de la misma red lógica se comunican principalmente entre sí.
-
-**Entropía de puertos:**
-$$H_{ports}(i) = -\sum_{p} \Pr[p] \log_2 \Pr[p]$$
-Valores bajos → servidor (pocas opciones de puerto). Valores altos → cliente (puertos aleatorios).
-
-### 2.5 Normalización Z-score Ponderada
-
-$$z_{ij} = w_j \cdot \frac{x_{ij} - \mu_j}{\sigma_j}$$
-
-donde $w_j$ es el peso por feature, $\mu_j$ y $\sigma_j$ se calculan exclusivamente sobre
-el conjunto de entrenamiento (sin data leakage).
-
-### 2.6 Selección Automática de K
-
-Sin conocer el número de VLANs, el algoritmo evalúa $K \in [2, 8]$ usando:
-
-**1. Silhouette coefficient:**
-$$s(i) = \frac{b(i) - a(i)}{\max(a(i),\, b(i))} \in [-1, 1]$$
-
-donde $a(i)$ = distancia media intra-cluster y $b(i)$ = distancia media al cluster más cercano.
-Se maximiza $\bar{s}(K)$.
-
-**2. Elbow (segunda derivada de inercia):**
-$$\Delta^2 J(K) = J(K-1) - 2J(K) + J(K+1)$$
-
-Decisión final: $K^* = \arg\max_K \bar{s}(K)$, con elbow como tiebreaker.
-
-### 2.7 Resultados
-
-| K | Inercia (WCSS) | Silhouette | Elbow Δ²J | Seleccionado |
+| K | Inercia | Silhouette | Davies-Bouldin | Seleccionado |
 |:---:|---:|:---:|:---:|:---:|
-| 2 | 402.3 | 0.4001 | — | |
-| 3 | 281.2 | 0.4901 | 69.50 | |
-| 4 | 229.5 | 0.5172 | 5.56 | |
-| **5** | **183.4** | **0.5246** | 15.58 | **✓** |
-| 6 | 152.9 | 0.4992 | — | |
+| 2 | 2 866.4 | **0.3087** | 1.305 | |
+| 3 | 2 268.8 | 0.2727 | 1.270 | |
+| **4** | **1 911.5** | 0.2659 | 1.229 | **✓** |
+| 5 | 1 599.8 | 0.2749 | **1.083** | |
+| 6 | 1 429.4 | 0.2723 | 1.075 | |
+| 7 | 1 292.3 | 0.2617 | 1.092 | |
+| 8 | 1 180.8 | 0.2704 | **1.031** | |
+| 9 | 1 096.6 | 0.2541 | 1.040 | |
 
-**K* = 5** (silhouette máximo = 0.5246). El algoritmo identificó 5 clusters a partir de 3 VLANs
-latentes — 2 VLANs con sub-grupos de comportamiento diferenciado se separaron naturalmente.
+**K* = 4** — elección basada en combinación de métricas. El silhouette global es bajo (~0.27)
+porque los datos son reales y continuos: no existen grupos perfectamente separados, sino
+transiciones graduales entre perfiles de operación.
 
-**Tabla de VLANs inferidas (conjunto de entrenamiento):**
+### 2.4 Resultados de Clustering
 
-| VLAN inferida | Hosts | % Intra-VLAN | Bytes medios/flujo | Purity |
-|---|:---:|:---:|:---:|:---:|
-| VLAN_10 | 8 | 53.4% | 6 653 B | **1.000** |
-| VLAN_20 | 4 | 34.8% | 4 550 B | **1.000** |
-| VLAN_30 | 5 | 25.2% | 7 048 B | **1.000** |
-| VLAN_40 | 12 | 83.8% | 11 785 B | **1.000** |
-| VLAN_50 | 7 | 45.3% | 4 354 B | **1.000** |
+| Cluster | Perfil inferido | Mediciones | Silhouette aprox. |
+|:---:|---|:---:|:---:|
+| C0 | Operación normal — baja carga, baja temperatura | alto | ~0.31 |
+| C1 | Operación media — carga moderada, calibración reciente | alto | ~0.27 |
+| C2 | Operación intensa — alta temperatura, muchos errores | medio | ~0.27 |
+| C3 | Sobrecarga / desgaste — altos ciclos, fallos frecuentes | medio | ~0.24 |
 
-**Purity global: 1.000** — clusters perfectamente homogéneos respecto a VLANs reales.
+Los clusters no tienen etiqueta de referencia (ground truth): su interpretación surge de observar
+los valores medios de cada feature por grupo.
 
-**Evaluación en conjunto de prueba:**
+**Métricas de calidad:**
+- Silhouette global: **0.2659**
+- Davies-Bouldin: **1.229**
+- Calinski-Harabasz: **246.6**
+- PCA varianza explicada: PC1=41.6%, PC2=21.8%, PC3=16.0% (total 79.4%)
 
-| VLAN | Stability |
-|---|:---:|
-| VLAN_10 | 0.625 |
-| VLAN_20 | 0.000 |
-| VLAN_30 | 0.400 |
-| VLAN_40 | **1.000** |
-| VLAN_50 | 0.714 |
-
-Silhouette: Train = 0.5246 → Test = 0.4244 (degradación esperada y aceptable).
-
-### 2.8 Visualizaciones
+### 2.5 Visualizaciones
 
 #### Método del Codo y Silhouette (selección de K)
 
 ![Método del Codo](../Kmeans_Robot_Henry/01_metodo_codo.png)
 
-Esta gráfica responde la pregunta central del Proyecto A: ¿cuántas VLANs hay en la red si no se conoce la configuración del switch? El eje X recorre los valores candidatos de K y el eje Y muestra dos métricas simultáneas: la inercia (WCSS), que decrece monótonamente, y el coeficiente de silhouette, que tiene un máximo. El punto donde la inercia deja de bajar significativamente — el "codo" — coincide visualmente con el pico del silhouette en K = 5. Que el codo aparezca ahí y no en K = 3 (número real de VLANs) es en sí un resultado: los hosts dentro de cada VLAN tienen sub-perfiles de tráfico diferenciados que el modelo captura naturalmente, dividiendo cada VLAN en sub-grupos cohesionados.
+Esta gráfica responde la pregunta central: ¿cuántos perfiles de operación distintos existen en
+los datos del exoesqueleto? El eje X recorre K ∈ [2, 9] y el eje Y muestra la inercia (WCSS),
+que decrece monótonamente. El "codo" — el punto donde la caída de inercia se aplana — sugiere
+K = 4 como punto de quiebre natural. Que el silhouette sea relativamente bajo en todos los
+valores (~0.27) es informativo por sí mismo: los datos de telemetría real no forman grupos
+perfectamente separados porque los actuadores transitan continuamente entre estados de carga,
+y no existe un umbral brusco entre "operación normal" y "sobrecarga". Esto distingue el
+análisis de datos reales del de datos sintéticos.
 
 #### PCA 3D — Proyección de Clusters
 
 ![PCA 3D Scatter](../Kmeans_Robot_Henry/02_pca_3d_scatter.png)
 
-Los 10 features por host se proyectan en las 3 primeras componentes principales (PC1, PC2, PC3), que en conjunto retienen la mayor parte de la varianza del espacio original. Cada punto es un host IP; el color indica el cluster K-Means asignado. El propósito de esta visualización es comprobar que los clusters no son artefactos del algoritmo: si los colores forman grupos visualmente separados en el espacio PCA — que no fue visto por K-Means — los clusters tienen estructura real. Una nube compacta de un solo color con separación espacial respecto a otras nubes confirma que K-Means encontró grupos genuinos en el espacio de features de red.
+Las 9 features se proyectan en las 3 primeras componentes principales (PC1=41.6%, PC2=21.8%,
+PC3=16.0%), que en conjunto retienen el 79.4% de la varianza total. Cada punto es una
+medición diaria de un actuador; el color indica el cluster asignado. Esta proyección permite
+verificar que los 4 clusters tienen cierta separación espacial en el espacio reducido, aunque
+los bordes entre clusters son difusos — consistente con el silhouette bajo. PC1 captura
+principalmente la varianza de `tiempo_uso_acumulado_h` y `ciclos_activacion_M`; PC2 recoge
+la señal térmica (`temp_operacional_promedio_C`, `temp_maxima_alcanzada_C`). Un cluster de
+color distinto y alejado del centro representa el perfil de sobrecarga extrema.
 
 #### Estadísticas por Cluster
 
 ![Estadísticas Clusters](../Kmeans_Robot_Henry/03_estadisticas_clusters.png)
 
-Esta gráfica permite interpretar el significado operacional de cada cluster: no solo dónde caen los hosts en el espacio matemático, sino qué comportamiento de red los caracteriza. Cada panel muestra la distribución de una feature clave (boxplot o barras) desglosada por cluster. Un cluster donde `ratio_intra` es alto y `port_entropy` es bajo corresponde a hosts que se comunican principalmente dentro de su segmento de red y siempre al mismo servicio — perfil típico de un servidor dentro de una VLAN corporativa. Clusters con `out_bytes` elevado y `unique_peers` alto apuntan a hosts con rol de gateway o proxy. Sin esta gráfica, los clusters serían solo números; con ella, cada número se convierte en un perfil de tráfico interpretable.
+Esta gráfica convierte los clusters matemáticos en perfiles operacionales interpretables.
+Cada panel muestra la distribución de una feature clave desglosada por cluster (C0–C3).
+El patrón que permite interpretar cada grupo: C0 tiene bajos valores en casi todas las
+variables — operación liviana y reciente; C2 muestra temperaturas y logs de error
+significativamente más altos — operación bajo estrés; C3 concentra los actuadores con
+más horas acumuladas y mayor número de reparaciones — componentes al final de su ciclo
+de vida. Sin esta gráfica los clusters son abstracciones numéricas; con ella cada cluster
+recibe un nombre operacional.
+
+#### Distribución de Actuadores por Cluster
+
+![Distribución Actuadores](../Kmeans_Robot_Henry/04_distribucion_actuadores.png)
+
+Muestra cuántas mediciones diarias cayeron en cada cluster y de qué actuadores físicos
+provienen. Es relevante para detectar si ciertos actuadores (por ejemplo, los de cadera
+que soportan mayor carga) se concentran sistemáticamente en los clusters de mayor estrés.
+Un actuador que aparece frecuentemente en C2 o C3 es candidato prioritario para revisión
+técnica, incluso si sus mediciones individuales no superan umbrales de alarma.
+
+#### Matriz de Correlación
+
+![Matriz Correlación](../Kmeans_Robot_Henry/05_matriz_correlacion.png)
+
+Antes de aplicar K-Means, esta gráfica muestra la correlación lineal entre las 9 features.
+Correlaciones altas entre `tiempo_uso_acumulado_h` y `ciclos_activacion_M` indican que
+ambas features miden esencialmente lo mismo (el uso total del actuador), lo que puede
+inflar artificialmente el peso de esa dimensión en el clustering. Correlaciones bajas entre
+features térmicas y features de uso sugieren que aportan información complementaria.
+Esta matriz es la justificación de por qué se necesitan 9 variables en lugar de 3 o 4:
+cada feature aporta señal no redundante al modelo.
 
 #### Varianza Explicada por PCA
 
 ![Varianza PCA](../Kmeans_Robot_Henry/06_varianza_pca.png)
 
-Antes de confiar en la proyección PCA 3D, es necesario saber cuánta información se pierde al reducir de 10 dimensiones a 3. Esta gráfica muestra la varianza explicada acumulada por cada componente principal. Que los primeros 3 componentes expliquen ~79% de la varianza total significa que la proyección 3D preserva la mayor parte de la estructura del espacio de features: los grupos visibles en el scatter 3D son representativos de los grupos reales en 10 dimensiones. Si este porcentaje fuera bajo (< 50%), la visualización 3D sería engañosa y habría que usar más componentes o técnicas no lineales como t-SNE.
-
-#### Convergencia K-Means
-
-![Convergencia](../Kmeans_Robot_Henry/results/fig3_convergencia_clusters2.png)
-
-Esta imagen muestra el estado del algoritmo en una iteración intermedia del proceso de asignación-actualización de Lloyd. Cada punto es un host; los colores reflejan la asignación actual al cluster más cercano; las estrellas o cruces marcan la posición de los centroides en ese paso. La convergencia del algoritmo se puede leer observando que los centroides se desplazan poco entre iteraciones — cuando las estrellas dejan de moverse, el algoritmo terminó. La imagen captura por qué K-Means++ es importante: los centroides iniciales bien distribuidos hacen que la convergencia sea rápida y que no queden clusters vacíos o degenerados.
-
-#### Clusters Ground Truth vs Inferidos
-
-![Clusters Ground Truth](../Kmeans_Robot_Henry/results/fig1_clusters_gt.png)
-
-Esta comparación directa mide la calidad real del modelo. El panel izquierdo colorea cada host según la VLAN real (configuración del switch, ground truth); el panel derecho usa el cluster K-Means inferido. Cuando los colores de ambos paneles coinciden en la misma posición espacial, el modelo acertó. La purity = 1.000 obtenida en training se refleja aquí: los grupos del panel derecho son internamente homogéneos respecto al panel izquierdo — ningún cluster mezcla hosts de distintas VLANs reales. El hecho de que aparezcan 5 clusters en la derecha frente a 3 VLANs en la izquierda muestra la sub-segmentación detectada automáticamente.
+Cuantifica cuánta información se pierde al proyectar de 9 dimensiones a 3 para visualización.
+Con PC1+PC2+PC3 explicando el 79.4% de la varianza, la proyección 3D preserva la mayor parte
+de la estructura del espacio de features. El 20.6% restante (repartido entre PC4–PC9) es
+ruido o varianza menor que el modelo no captura en la visualización — pero sí está presente
+en el clustering real. Que PC1 domine con 41.6% confirma que hay una dirección principal
+de variación (el eje de uso/desgaste acumulado) que organiza la mayoría de los datos.
 
 ---
 
-## 3. Metodología — Proyecto B: Mantenimiento Robótico
+## 3. Metodología — Proyecto B: Robótica Sintética (Jean)
 
 ### 3.1 Descripción del Problema
 
 Un sistema de mantenimiento predictivo necesita clasificar automáticamente actuadores robóticos
-(servos, motores brushless, actuadores hidráulicos, etc.) en tres categorías de intervención,
-usando exclusivamente datos de telemetría — sin etiquetas previas de estado.
+industriales en tres categorías de intervención usando exclusivamente telemetría — sin etiquetas
+previas de estado. A diferencia del Proyecto A, los datos son **sintéticos y controlados**: cada
+actuador fue generado con un estado de degradación explícito, lo que permite calcular purity
+exacta y verificar que el modelo recupera la estructura diseñada.
 
-**Inventario:** 120 actuadores, 5 tipos distintos. Split: 84 train / 36 test.
+**Dataset:** 120 actuadores sintéticos, 5 tipos. Split: 84 train / 36 test.
 
 ### 3.2 Pipeline
 
@@ -242,9 +228,9 @@ requiere reemplazo independientemente de otras métricas.
 
 ### 3.4 Selección Automática de K
 
-Se evaluaron K ∈ [2, 6] con el mismo criterio silhouette + elbow que en Proyecto A.
+Se evaluaron K ∈ [2, 6] con criterio silhouette + elbow (segunda derivada de inercia Δ²J).
 
-| K | Inercia | Silhouette | Elbow Score | Seleccionado |
+| K | Inercia | Silhouette | Elbow Δ²J | Seleccionado |
 |:---:|---:|:---:|:---:|:---:|
 | 2 | 714.6 | 0.6811 | — | |
 | **3** | **365.1** | **0.6718** | **253.30** | **✓** |
@@ -259,11 +245,12 @@ El elbow es pronunciado (Δ²J = 253.3), confirmando que 3 es el punto de quiebr
 
 | Cluster | Estado | Piezas | Vida Útil Media | Fallos/1000h | Drift (mm) | Purity |
 |:---:|---|:---:|:---:|:---:|:---:|:---:|
-| C1 | Mantenimiento Programado | 21 | 110.8% | 10.98 | 1.498 | **1.000** |
+| C1 | Mantenimiento Programado | 21 | 110.8% | 10.981 | 1.498 | **1.000** |
 | C2 | Mantenimiento Urgente | 34 | 26.4% | 0.263 | 0.041 | **1.000** |
 | C3 | Reemplazo | 29 | 70.4% | 3.512 | 0.454 | **1.000** |
 
-**Purity global: 1.000** — los 3 clusters corresponden perfectamente a los 3 estados de degradación.
+**Purity global: 1.000** — los 3 clusters corresponden perfectamente a los 3 estados de
+degradación diseñados en la síntesis. Silhouette train = 0.6718.
 
 **Evaluación en conjunto de prueba:**
 
@@ -273,29 +260,50 @@ El elbow es pronunciado (Δ²J = 253.3), confirmando que 3 es el punto de quiebr
 | C2 — Urgente | 34 | 0.176 |
 | C3 — Reemplazo | 29 | 0.103 |
 
-La baja estabilidad en test (~0.1) se explica por el pequeño tamaño del test set (36 piezas)
-y la naturaleza continua de la degradación: un actuador en la frontera entre estados puede
-clasificarse diferente según el período de observación.
-
 ### 3.6 Visualizaciones
 
-#### Selección de K — Codo y Silhouette (Robótica)
+#### Selección de K — Codo y Silhouette (Robótica Sintética)
 
-![K Selection](../Kmeans_Robot_Henry/Robotica_kmeans_sintetico/results/animations/k_selection.gif)
+![K Selection](../Kmeans_Robot_Jean/Robotica_kmeans_sintetico/results/animations/k_selection.gif)
 
-Esta animación reproduce el proceso de selección automática de K: en cada frame se añade una barra correspondiente a un valor candidato de K, mostrando simultáneamente la inercia (WCSS) y el coeficiente de silhouette. La barra resaltada en rojo al finalizar la animación señala K\* = 3, el punto donde el silhouette alcanza un máximo local y el elbow (Δ²J = 253.3) es pronunciado. Que K\* = 3 coincida exactamente con los tres estados operacionales reales (Programado / Urgente / Reemplazo) valida que el algoritmo, sin conocer las etiquetas, encontró la misma estructura que un experto en mantenimiento definiría. La animación hace visible el razonamiento que de otro modo quedaría oculto en una tabla de números.
+Esta animación revela el proceso de selección automática de K ejecutado por `auto_select_k()`:
+en cada frame se añade una barra correspondiente a un valor candidato de K, mostrando
+simultáneamente la inercia (WCSS) y el coeficiente de silhouette para ese K. La barra
+resaltada al finalizar señala K\* = 3, el punto donde el silhouette alcanza un máximo local
+y el elbow (Δ²J = 253.3) es pronunciado. Comparada con el Proyecto A, la animación muestra
+una curva de silhouette con un pico más nítido y valores más altos (~0.67 vs ~0.27): los
+datos sintéticos fueron diseñados con clusters bien separados, por lo que el algoritmo
+los encuentra con facilidad y alta confianza. El K elegido coincide exactamente con los
+3 estados operacionales reales del problema de mantenimiento.
 
-#### Convergencia del Algoritmo K-Means (Robótica)
+#### Convergencia del Algoritmo K-Means (Robótica Sintética)
 
-![Convergencia KMeans](../Kmeans_Robot_Henry/Robotica_kmeans_sintetico/results/animations/kmeans_convergencia.gif)
+![Convergencia KMeans](../Kmeans_Robot_Jean/Robotica_kmeans_sintetico/results/animations/kmeans_convergencia.gif)
 
-Esta animación muestra el proceso iterativo de Lloyd proyectado en 2 componentes principales (PCA 2D) para hacer visible lo que ocurre en el espacio de 10 features. Cada punto representa un actuador; el color indica el cluster al que pertenece en esa iteración; las estrellas son los centroides actuales. Frame a frame se puede ver cómo los centroides se desplazan hacia el centro de masa de sus respectivos grupos y cómo algunos actuadores reasignan su cluster al cruzar la frontera de Voronoi. La convergencia rápida — en pocas iteraciones — es consecuencia directa de la inicialización K-Means++: los centroides iniciales ya están bien distribuidos, por lo que el algoritmo no desperdicia iteraciones escapando de configuraciones degeneradas.
+Esta animación muestra el proceso iterativo de Lloyd proyectado en 2 componentes principales
+(PCA 2D) para hacer visible lo que ocurre en el espacio de 10 features. Cada punto es un
+actuador; el color indica el cluster al que pertenece en esa iteración; las estrellas son los
+centroides actuales. Frame a frame se observa cómo los centroides se desplazan hacia el centro
+de masa de sus respectivos grupos y cómo algunos actuadores reasignan su cluster al cruzar
+la frontera de Voronoi. La convergencia es rápida — pocas iteraciones — consecuencia de la
+inicialización K-Means++: los centroides iniciales ya están bien distribuidos en el espacio.
+A diferencia del Proyecto A, los clusters en PCA 2D son visualmente compactos y separados,
+reflejando la estructura sintética controlada de los datos.
 
-#### Scatter por Features Clave (Robótica)
+#### Scatter por Features Clave (Robótica Sintética)
 
-![Feature Scatter](../Kmeans_Robot_Henry/Robotica_kmeans_sintetico/results/animations/feature_scatter.gif)
+![Feature Scatter](../Kmeans_Robot_Jean/Robotica_kmeans_sintetico/results/animations/feature_scatter.gif)
 
-Esta animación rota entre distintos pares de features originales — `pct_vida_util`, `drift_posicional_mm` y `vibracion_rms` — coloreando cada actuador según su cluster asignado. Su propósito es demostrar que la separación entre clusters no es un artefacto de la reducción PCA, sino que existe directamente en el espacio de features físicas medibles. Cuando los tres clusters aparecen claramente separados en los ejes de `pct_vida_util` vs `tasa_fallo`, el resultado es interpretable por un ingeniero de mantenimiento sin necesidad de álgebra lineal: los actuadores de Reemplazo tienen vida útil alta pero fallos frecuentes, los de Mantenimiento Urgente tienen vida útil baja y fallos casi nulos (son piezas nuevas con historial limpio), y los Programados se ubican en una zona intermedia. La separabilidad lineal en el espacio original confirma que las features elegidas capturan los mecanismos reales de degradación.
+Esta animación rota entre distintos pares de features originales — `pct_vida_util`,
+`drift_posicional_mm` y `vibracion_rms` — coloreando cada actuador según su cluster asignado.
+Su propósito es demostrar que la separación entre clusters existe directamente en el espacio
+de features físicas medibles, sin necesidad de reducción dimensional. Cuando los tres clusters
+aparecen claramente separados en los ejes de `pct_vida_util` vs `tasa_fallo`, el resultado es
+interpretable por un ingeniero sin álgebra lineal: los actuadores de Reemplazo tienen vida útil
+alta pero fallos frecuentes; los de Mantenimiento Urgente tienen vida útil baja y fallos casi
+nulos (piezas nuevas con historial limpio); los Programados se ubican en zona intermedia.
+La separabilidad lineal en el espacio original confirma que las features elegidas capturan
+los mecanismos reales de degradación.
 
 ---
 
@@ -303,130 +311,121 @@ Esta animación rota entre distintos pares de features originales — `pct_vida_
 
 ### 4.1 Núcleo Algorítmico Compartido
 
-Ambos proyectos implementan **exactamente el mismo motor K-Means desde cero** en Julia:
+Ambos proyectos implementan K-Means desde cero en Julia con los mismos componentes base:
 
 | Componente | Implementación |
 |---|---|
 | Inicialización | K-Means++ — primer centroide aleatorio; siguientes con prob ∝ D(x)² |
-| Paso E | `assign_labels()` — distancia euclidiana al cuadrado `dist2(x,c) = ‖x−c‖²` |
+| Paso E | `assign_labels()` — distancia euclidiana al cuadrado |
 | Paso M | `update_centroids()` — media del cluster; clusters vacíos reciben punto aleatorio |
-| Criterio de parada | `‖μₖ(t) − μₖ(t−1)‖ < ε = 1e-6` o maxiter = 300 |
-| Multi-restart | `kmeans_best()` — 10 corridas con semillas distintas, retiene menor inercia |
-| Selección de K | `auto_select_k()` — silhouette máximo + elbow Δ²J como tiebreaker |
-| Normalización | Z-score ponderada: $z_{ij} = w_j \cdot (x_{ij} - \mu_j) / \sigma_j$ |
-| Reducción visual | PCA desde cero: eigendecomposición de la matriz de covarianza |
+| Criterio de parada | `‖μₖ(t) − μₖ(t−1)‖ < ε` o maxiter fijo |
+| Reducción visual | PCA desde cero — eigendecomposición de la matriz de covarianza |
 
 ### 4.2 Diferencias Clave
 
-| Aspecto | Proyecto A — VLANs | Proyecto B — Robótica |
+| Aspecto | Proyecto A — Exoesqueleto (Henry) | Proyecto B — Robótica Sintética (Jean) |
 |---|---|---|
-| **Dominio** | Tráfico de red (cyberseguridad / redes) | Telemetría industrial (mantenimiento) |
-| **Unidad de análisis** | Host (dirección IP) | Actuador (pieza mecánica) |
-| **Dimensión del espacio** | 10 features de comportamiento de red | 10 features de desgaste físico |
-| **Feature dominante** | `ratio_intra` ×2 (fracción tráfico local) | `pct_vida_util` ×2.5 (vida útil consumida) |
-| **K óptimo** | K* = 5 (≠ 3 VLANs reales → sub-grupos) | K* = 3 (= estados de mantenimiento) |
-| **Silhouette (train)** | 0.5246 — separación moderada | **0.6718** — separación buena |
-| **Purity** | 1.000 | 1.000 |
-| **Estabilidad (test)** | 0.0 – 1.0 (heterogénea por VLAN) | ~0.1 (baja, uniforme) |
-| **Interpretabilidad K** | Difícil (K ≠ VLANs reales) | Alta (K = categorías operacionales) |
-| **Soporte datos reales** | Sí — acepta CSV de tshark/Zeek/NetFlow | Solo datos sintéticos (diseño extensible) |
-| **Split temporal** | Cronológico (flujos por timestamp) | Aleatorio estratificado |
-| **Animaciones** | `kmeans_convergence.gif`, `k_selection.gif` | `kmeans_convergencia.gif`, `k_selection.gif`, `feature_scatter.gif` |
-| **Exports adicionales** | Grafos de aristas (DOT, CSV) | Mapa de piezas (CSV), tabla de clusters |
+| **Origen de datos** | Real — sensores físicos de exoesqueleto | Sintético — generado por `synthesis.jl` |
+| **Unidad de análisis** | Medición diaria de un actuador | Actuador individual (pieza física) |
+| **N muestras** | 663 mediciones | 120 actuadores (84 train / 36 test) |
+| **Dimensión** | 9 features de telemetría | 10 features de desgaste (con pesos) |
+| **Feature dominante** | Sin pesos explícitos — todas iguales | `pct_vida_util` ×2.5 |
+| **K óptimo** | K* = 4 | K* = 3 |
+| **Silhouette** | 0.2659 — separación baja (datos reales, frontera difusa) | **0.6718** — separación alta (datos sintéticos, grupos bien definidos) |
+| **Purity** | Sin ground truth — no calculable | **1.000** (ground truth sintético disponible) |
+| **Selección de K** | Silhouette + Davies-Bouldin + Calinski-Harabasz | Silhouette + elbow Δ²J |
+| **Normalización** | Z-score estándar | Z-score **ponderada** por feature |
+| **Interpretación clusters** | Perfiles de operación inferidos post-hoc | Estados de mantenimiento conocidos a priori |
+| **Animaciones** | Estáticas (PNG) | Dinámicas (GIF): convergencia, K-selection, scatter |
+| **Validación externa** | No disponible | Train/test split con estabilidad por cluster |
 
-### 4.3 Comparación de Silhouette
-
-El Proyecto B obtiene un silhouette significativamente mayor (0.67 vs 0.52):
+### 4.3 Por Qué Silhouette Difiere Tanto (0.27 vs 0.67)
 
 | Causa | Explicación |
 |---|---|
-| Features más discriminantes | `pct_vida_util`, `tasa_fallo`, `drift` tienen rangos muy diferentes entre estados: C1 tiene `pct_vida_util` ≈ 111%, C2 ≈ 26%, C3 ≈ 70% — separación natural alta |
-| K correcto | K* = 3 coincide con la estructura real del problema; en VLANs K* = 5 con 3 VLANs reales introduce clusters más pequeños y fronterizos |
-| Menor ruido inter-cluster | Los actuadores en estado "Reemplazo" tienen un perfil muy distinto a los "Urgentes" — no hay solapamiento natural |
-
-### 4.4 Estabilidad Train → Test
-
-| Proyecto | Causa de baja/heterogénea estabilidad |
-|---|---|
-| **A — VLANs** | VLAN_20 (4 hosts) es demasiado pequeña; el comportamiento del host cambia con el tráfico del período de test. VLAN_40 (12 hosts) es estable porque el perfil TCP/bytes-grandes es consistente en el tiempo. |
-| **B — Robótica** | Los actuadores en frontera entre estados de desgaste pueden clasificarse en un cluster diferente según el período de muestreo. La baja estabilidad (~0.1) refleja que el test set (36 piezas) es pequeño y muchas piezas están en zona de transición. |
+| **Naturaleza de los datos** | Datos reales contienen ruido, outliers y transiciones graduales entre estados. Datos sintéticos tienen grupos perfectamente separados por diseño. |
+| **K correcto vs. K* elegido** | En el Proyecto A, K=4 no es el máximo silhouette (K=2 tiene 0.31) — se sacrifica silhouette por granularidad operacional. En el Proyecto B, K=3 es el máximo de silhouette Y el K correcto. |
+| **Feature engineering** | Los pesos explícitos en Proyecto B amplifican la separación natural entre clusters; en Proyecto A todas las features contribuyen igual y algunas son ruidosas. |
+| **Tamaño de muestra** | 663 mediciones incluyen actuadores en estados de transición que el modelo no puede asignar a un cluster con alta confianza. |
 
 ---
 
 ## 5. Análisis Comparativo Visual
 
-### 5.1 Inercia vs K
+### 5.1 Curva de Inercia
 
-Ambos proyectos muestran el codo característico de K-Means. La diferencia:
-- **Proyecto A:** codo suave en K=3–5, silhouette peak en K=5 → estructura de datos más compleja
-- **Proyecto B:** codo pronunciado en K=3 (Δ²J = 253), silhouette peak en K=2 pero K=3 es tiebreaker → estructura limpia con 3 grupos naturales
+Ambos proyectos muestran el codo característico de K-Means:
+
+- **Proyecto A (exoesqueleto):** codo suave, difuso entre K=3–5. La inercia inicial es alta
+  (2 866 en K=2) y cae gradualmente — estructura de datos compleja sin grupos evidentes.
+- **Proyecto B (sintético):** codo pronunciado en K=3 (Δ²J = 253.3). La inercia cae bruscamente
+  de K=2 a K=3 y luego se aplana — estructura limpia con 3 grupos naturales.
 
 ### 5.2 Ejemplo de Asignación
 
-**Proyecto A — Host 10.3.0.15 → VLAN_20:**
+**Proyecto A — Medición A1\_Cadera\_Derecha, 2024-01-01 → C0:**
 ```
-tcp_ratio = 0.962   (casi todo TCP)
-ratio_intra = 0.923 (92.3% tráfico local)
-port_entropy = 0.24 (casi siempre el mismo puerto destino)
-med_duration = 4015 ms
-→ Perfil: cliente SSH (accede siempre al puerto 22)
+tiempo_uso_acumulado_h = 1868.4  (uso moderado)
+ciclos_activacion_M    = 16.1    (ciclos moderados)
+fallos_temporales      = 3       (algunos fallos)
+temp_operacional_C     = 52.9    (temperatura normal)
+numero_logs_error      = 8       (errores bajos)
+→ Perfil: operación estándar, sin señales de desgaste extremo
 ```
 
 **Proyecto B — Actuador #14 → C2 (Mantenimiento Urgente):**
 ```
-pct_vida_util = 21.2%   (vida útil al 21% → reciente)
-tasa_fallo = 0.263/1000h (fallos bajos)
-drift = 0.038 mm        (desviación mínima)
-dias_sin_mant = 47      (mantenimiento reciente)
-→ Pieza nueva que necesita mantenimiento preventivo antes de degradarse
+pct_vida_util          = 21.2%   (pieza nueva)
+tasa_fallo             = 0.263   (fallos bajos)
+drift_posicional       = 0.038mm (desviación mínima)
+dias_sin_mant          = 47      (mantenimiento reciente)
+→ Pieza nueva que requiere intervención preventiva antes de degradarse
 ```
 
 ---
 
 ## 6. Conclusiones y Recomendación de Enfoque
 
-### 6.1 Cuál es mejor para su dominio
+### 6.1 Cuál Es Mejor para Su Dominio
 
-Ambos proyectos obtienen **purity = 1.00** — perfecto en training. La diferencia real está
-en **estabilidad en datos nuevos** y **alineación con la semántica del dominio**.
-
-| Criterio | Proyecto A — VLANs | Proyecto B — Robótica | Ganador |
+| Criterio | Proyecto A — Exoesqueleto | Proyecto B — Robótica Sintética | Ganador |
 |---|:---:|:---:|:---:|
-| Silhouette (train) | 0.525 | **0.672** | B |
-| Purity | 1.000 | 1.000 | Empate |
-| Estabilidad VLAN_40 / C más grande | **1.000** | 0.176 | A |
-| K alineado con semántica | No (5 ≠ 3 VLANs) | **Sí (3 = 3 estados)** | B |
-| Soporte datos reales | **Sí** | No | A |
-| Complejidad pipeline | Alta (modular, CLI) | Media (modular, sin CLI) | A (más completo) |
-| Interpretabilidad clusters | Media | **Alta** | B |
+| Silhouette | 0.265 | **0.672** | B |
+| Separación visual clusters (PCA) | Difusa | **Compacta** | B |
+| Purity con ground truth | N/A | **1.000** | B |
+| Aplicabilidad a datos reales | **Sí** | Solo sintético | A |
+| Interpretación post-hoc | Necesaria | **Inmediata** (K=estados) | B |
+| Riqueza de métricas de selección de K | **Alta** (silhouette+DB+CH) | Media (silhouette+elbow) | A |
+| Soporte para datos continuos/ruidosos | **Sí** | No diseñado para eso | A |
 
 ### 6.2 Recomendación
 
-**Para aplicaciones de red (inferencia de VLANs):** el Proyecto A es superior.
-Su pipeline acepta tráfico real (tshark/Zeek/NetFlow), tiene split temporal correcto,
-y genera grafos de aristas exportables a Gephi/Graphviz. El hecho de que K* ≠ número
-de VLANs reales no es un fallo — es un descubrimiento: las VLANs tienen sub-perfiles de
-tráfico que el modelo captura con mayor granularidad que la configuración original del switch.
+**Para análisis de datos reales de sensores (exoesqueleto, IoT, PLCs):** el enfoque del
+Proyecto A es el correcto. Los datos reales no tienen ground truth, los clusters son difusos,
+y usar múltiples métricas de selección de K (silhouette + DB + CH) es necesario porque ninguna
+métrica única es concluyente. El silhouette bajo (~0.27) no es un fallo del modelo — es una
+propiedad honesta de los datos.
 
-**Para aplicaciones de mantenimiento predictivo (robótica):** el Proyecto B es superior.
-El silhouette más alto (0.67 vs 0.52) indica clusters más cohesionados y separados.
-K* = 3 coincide exactamente con los estados operacionales reales (Programado / Urgente /
-Reemplazo), lo que facilita la toma de decisiones sin traducción adicional.
+**Para diseño y validación de pipelines de clustering:** el Proyecto B es superior como
+framework de referencia. La generación sintética controlada permite verificar que el algoritmo
+recupera exactamente la estructura diseñada (purity=1.0), lo que sirve para validar la
+implementación antes de aplicarla a datos reales. El pipeline modular (`synthesis.jl`,
+`features.jl`, `clustering.jl`, `reporting.jl`, `animation.jl`) es reutilizable para
+cualquier dominio con 3 estados discretos bien separados.
 
-**Como base algorítmica:** ambos usan el mismo motor — cualquiera sirve de template
-para nuevas aplicaciones de K-Means en Julia con inicialización K-means++, selección
-automática de K, y validación train/test.
+**Como base algorítmica:** ambos usan el mismo motor K-Means++ — cualquiera sirve de template
+para nuevas aplicaciones en Julia con selección automática de K y validación cuantitativa.
 
 ### 6.3 Mejoras Futuras Compartidas
 
 | Mejora | Aplica a |
 |---|---|
-| Reemplazar K-Means por DBSCAN para clusters no esféricos | A y B |
+| Reemplazar K-Means por DBSCAN para clusters no esféricos | A (prioritario — datos reales ruidosos) |
 | Usar t-SNE o UMAP en lugar de PCA para visualización | A y B |
-| Aumentar el tamaño del test set para estabilidad más representativa | A y B |
-| Agregar soporte para streaming (datos en tiempo real) | A (prioridad) |
-| Conectar con APIs de CMMS o SCADA para datos reales | B (prioridad) |
-| Validación cruzada k-fold en lugar de un único split | A y B |
+| Validación cruzada k-fold en lugar de un único split | B |
+| Agregar ground truth parcial al exoesqueleto (etiquetado manual de sesiones) | A |
+| Conectar Proyecto B con datos reales de SCADA/CMMS | B (prioridad) |
+| Análisis temporal de deriva de clusters (concept drift) | A (prioridad) |
 
 ---
 
@@ -434,22 +433,34 @@ automática de K, y validación train/test.
 
 ```
 priv-Redes-Complejas-Grupo/
-├── Kmeans_Robot_Jean/          ← Proyecto A: Inferencia de VLANs
-│   └── (pipeline modular en src/)
+├── Kmeans_Robot_Henry/                  ← Proyecto A: Exoesqueleto (Henry)
+│   ├── exoesqueleto_actuadores.csv      — dataset original
+│   ├── exoesqueleto_con_clusters.csv    — mediciones con cluster asignado
+│   ├── analisis_kmeans.json             — métricas K-selection y centroides PCA
+│   ├── 01_metodo_codo.png               — curva inercia vs K
+│   ├── 02_pca_3d_scatter.png            — proyección PCA 3D con clusters
+│   ├── 03_estadisticas_clusters.png     — distribución de features por cluster
+│   ├── 04_distribucion_actuadores.png   — mediciones por actuador y cluster
+│   ├── 05_matriz_correlacion.png        — correlación entre features
+│   ├── 06_varianza_pca.png              — varianza explicada por componente PCA
+│   └── reporte_exoesqueleto_kmeans.md   — reporte completo del análisis
 │
-├── Kmeans_Robot_Henry/         ← Proyecto B: Mantenimiento Robótico
-│   ├── src/                    ← Motor K-Means compartido
-│   │   ├── clustering.jl       — K-Means++, auto_select_k, silhouette
-│   │   ├── features.jl         — 10 features + z-score ponderado
-│   │   ├── synthesis.jl        — generación de tráfico/inventario sintético
-│   │   ├── reporting.jl        — tablas y métricas
-│   │   ├── graphs.jl           — exportación DOT/CSV (VLANs)
-│   │   └── animation.jl        — GIFs de convergencia y selección de K
-│   ├── results/                ← Resultados Proyecto A (VLANs)
-│   └── Robotica_kmeans_sintetico/results/ ← Resultados Proyecto B (Robótica)
+├── Kmeans_Robot_Jean/                   ← Proyecto B: Robótica Sintética (Jean)
+│   └── Robotica_kmeans_sintetico/
+│       ├── src/                         — pipeline modular Julia
+│       │   ├── synthesis.jl             — generación del dataset sintético
+│       │   ├── features.jl              — 10 features + z-score ponderado
+│       │   ├── clustering.jl            — K-Means++, auto_select_k, silhouette
+│       │   ├── reporting.jl             — tablas y métricas
+│       │   └── animation.jl             — GIFs de convergencia y selección de K
+│       └── results/
+│           ├── animations/              — k_selection.gif, kmeans_convergencia.gif, feature_scatter.gif
+│           ├── raw/                     — piezas_completo.csv, piezas_train.csv, piezas_test.csv
+│           ├── report/                  — tabla_clusters.csv, mapa_piezas.csv, test_evaluacion.csv
+│           └── reporte.md              — reporte generado por el pipeline
 │
 └── Kmeans_Comparacion/
-    └── comparacion.md          ← este documento
+    └── comparacion.md                   ← este documento
 ```
 
 ---
