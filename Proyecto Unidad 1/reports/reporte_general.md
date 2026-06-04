@@ -1,9 +1,11 @@
-﻿# Reporte General — Detección de Anomalías en Redes
-
-**Universidad de Cuenca | DEET | Maestría en Ciencias de la Ingeniería Eléctrica**
-**Autor:** Jean Carlo Aucapina | **Fecha:** Abril 2026
-**Lenguaje:** Julia | **Entorno:** `Proyecto_Unidad1/` (Pkg.activate)
-
+﻿---
+title: "Reporte General — Detección de Anomalías en Redes"
+author:
+  - "Ing. Jean Carlo Aucapina"
+  - "Ing. Henry Maldonado"
+  - "Ing. Efraín Alvarado"
+  - "Ing. Luis Andrade"
+date: "Abril 2026"
 ---
 
 ## Índice
@@ -43,7 +45,15 @@ Grafo no dirigido ponderado G = (V, E, w) representando una red corporativa sint
 
 ![Grafo de Red Corporativa](../results/figures/grafo_red.png)
 
-*Colores por tipo: rojo=firewall, naranja=router, azul=servidor, verde=host, morado=IoT/impresora.*
+El grafo muestra la topología completa de la red corporativa sintética modelada. Cada nodo representa un dispositivo real con un rol funcional distinto — el firewall actúa como único punto de entrada desde el exterior, los routers concentran el tráfico de cada segmento, y los hosts, servidores e IoT forman las hojas de la jerarquía. Los colores permiten identificar de inmediato qué tipo de dispositivo corresponde a cada posición de la red: rojo para el firewall, naranja para routers, azul para servidores, verde para PCs, morado para IoT e impresora. El grosor o posicionamiento de los enlaces refleja la estructura jerárquica: la mayoría de los nodos hoja tienen un único camino hacia el exterior, lo que explica visualmente por qué la densidad es baja (0.1211) y por qué existen puntos únicos de fallo. Esta imagen es la referencia base para interpretar todas las métricas calculadas en las partes siguientes.
+
+*Colores por tipo de nodo:*
+
+- Rojo: firewall
+- Naranja: router
+- Azul: servidor
+- Verde: host / PC
+- Morado: IoT / impresora
 
 ### Respuestas
 
@@ -454,42 +464,3 @@ El Desafío Extra confirma que la misma metodología (score compuesto + z-score)
 4. **Detección de botnet por diversidad de puertos** es efectiva para Mirai y generalizable: cualquier malware de propagación horizontal genera firma de alta diversidad de puertos que el z-score detecta con alta precisión.
 
 ---
-
-## Archivos del Proyecto {#archivos}
-
-### Scripts
-
-| Archivo | Descripción |
-|---------|-------------|
-| `practica_redes_aucapina.jl` | Script principal Julia — Partes 1-5 + Desafío Extra |
-| `Project.toml` | Entorno Julia (dependencias) |
-
-### Reportes
-
-| Archivo | Parte |
-|---------|-------|
-| `reporte_parte1.md` | Construcción del grafo |
-| `reporte_parte2.md` | Centralidad |
-| `reporte_parte3.md` | Anomalías estadísticas |
-| `reporte_parte4.md` | Simulación SIR |
-| `reporte_parte5.md` | Resiliencia |
-| `reporte_bonus.md` | Detección de botnet IoT-23 |
-| `reporte_general.md` | Este documento |
-
-### Figuras (22 total)
-
-**Partes 1-5:** grafo_red.png, grafo_centralidad_bc.png, centralidad_barras.png, centralidad_heatmap.png, grafo_anomalias.png, anomalias_scatter.png, zscore_barras.png, sir_comparacion.png, sir_betas.png, sir_cuarentena.png, sir_estado_final.png, resiliencia_grafo.png, resiliencia_impacto.png, resiliencia_componentes.png
-
-**Desafío Extra:** botnet_Capture11_Miraiscan_scatter.png, botnet_Capture11_Miraiscan_zscore.png, botnet_Capture31_Miraivariant_scatter.png, botnet_Capture31_Miraivariant_zscore.png, botnet_Capture421_C&CDownload_scatter.png, botnet_comparacion.png, botnet_confusion_multi.png, botnet_comunidades_multi.png
-
-### Ejecución
-
-```bash
-julia --project=Proyecto_Unidad1 Proyecto_Unidad1/practica_redes_aucapina.jl
-```
-
-Tiempo estimado: 3-5 minutos (lectura 300k líneas IoT-23 + cálculo BC).
-
----
-
-*Proyecto completado — Abril 2026 | Jean Carlo Aucapina | DEET/UCuenca*

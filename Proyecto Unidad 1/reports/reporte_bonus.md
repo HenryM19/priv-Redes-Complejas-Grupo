@@ -1,7 +1,13 @@
+﻿---
+title: "Reporte — Desafío Extra: Detección de Botnet con Dataset IoT-23"
+author: "Ing. Jean Carlo Aucapina · Ing. Henry Maldonado · Ing. Efraín Alvarado · Ing. Luis Andrade"
+date: "Abril 2026"
+---
+
 # Reporte — Desafío Extra: Detección de Botnet con Dataset IoT-23
 
 **Universidad de Cuenca | DEET | Maestría en Ciencias de la Ingeniería Eléctrica**
-**Autor:** Jean Carlo Aucapina | **Fecha:** Abril 2026
+**Autores:** Ing. Jean Carlo Aucapina · Ing. Henry Maldonado · Ing. Efraín Alvarado · Ing. Luis Andrade | **Fecha:** Abril 2026
 
 ---
 

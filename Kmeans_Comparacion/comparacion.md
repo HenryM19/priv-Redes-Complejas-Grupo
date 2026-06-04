@@ -152,38 +152,37 @@ Silhouette: Train = 0.5246 → Test = 0.4244 (degradación esperada y aceptable)
 
 ![Método del Codo](../Kmeans_Robot_Henry/01_metodo_codo.png)
 
-*Curva de inercia vs K. El quiebre de pendiente indica el K óptimo.*
+Esta gráfica responde la pregunta central del Proyecto A: ¿cuántas VLANs hay en la red si no se conoce la configuración del switch? El eje X recorre los valores candidatos de K y el eje Y muestra dos métricas simultáneas: la inercia (WCSS), que decrece monótonamente, y el coeficiente de silhouette, que tiene un máximo. El punto donde la inercia deja de bajar significativamente — el "codo" — coincide visualmente con el pico del silhouette en K = 5. Que el codo aparezca ahí y no en K = 3 (número real de VLANs) es en sí un resultado: los hosts dentro de cada VLAN tienen sub-perfiles de tráfico diferenciados que el modelo captura naturalmente, dividiendo cada VLAN en sub-grupos cohesionados.
 
 #### PCA 3D — Proyección de Clusters
 
 ![PCA 3D Scatter](../Kmeans_Robot_Henry/02_pca_3d_scatter.png)
 
-*Proyección en las 3 primeras componentes principales (PC1+PC2+PC3). Los colores
-corresponden a los 4 clusters encontrados en el análisis de exoesqueleto.*
+Los 10 features por host se proyectan en las 3 primeras componentes principales (PC1, PC2, PC3), que en conjunto retienen la mayor parte de la varianza del espacio original. Cada punto es un host IP; el color indica el cluster K-Means asignado. El propósito de esta visualización es comprobar que los clusters no son artefactos del algoritmo: si los colores forman grupos visualmente separados en el espacio PCA — que no fue visto por K-Means — los clusters tienen estructura real. Una nube compacta de un solo color con separación espacial respecto a otras nubes confirma que K-Means encontró grupos genuinos en el espacio de features de red.
 
 #### Estadísticas por Cluster
 
 ![Estadísticas Clusters](../Kmeans_Robot_Henry/03_estadisticas_clusters.png)
 
-*Distribución de features clave por cluster.*
+Esta gráfica permite interpretar el significado operacional de cada cluster: no solo dónde caen los hosts en el espacio matemático, sino qué comportamiento de red los caracteriza. Cada panel muestra la distribución de una feature clave (boxplot o barras) desglosada por cluster. Un cluster donde `ratio_intra` es alto y `port_entropy` es bajo corresponde a hosts que se comunican principalmente dentro de su segmento de red y siempre al mismo servicio — perfil típico de un servidor dentro de una VLAN corporativa. Clusters con `out_bytes` elevado y `unique_peers` alto apuntan a hosts con rol de gateway o proxy. Sin esta gráfica, los clusters serían solo números; con ella, cada número se convierte en un perfil de tráfico interpretable.
 
 #### Varianza Explicada por PCA
 
 ![Varianza PCA](../Kmeans_Robot_Henry/06_varianza_pca.png)
 
-*Los primeros 3 componentes explican ~79% de la varianza total.*
+Antes de confiar en la proyección PCA 3D, es necesario saber cuánta información se pierde al reducir de 10 dimensiones a 3. Esta gráfica muestra la varianza explicada acumulada por cada componente principal. Que los primeros 3 componentes expliquen ~79% de la varianza total significa que la proyección 3D preserva la mayor parte de la estructura del espacio de features: los grupos visibles en el scatter 3D son representativos de los grupos reales en 10 dimensiones. Si este porcentaje fuera bajo (< 50%), la visualización 3D sería engañosa y habría que usar más componentes o técnicas no lineales como t-SNE.
 
-#### Convergencia K-Means (GIF)
+#### Convergencia K-Means
 
 ![Convergencia](../Kmeans_Robot_Henry/results/fig3_convergencia_clusters2.png)
 
-*Trayectoria de centroides durante iteraciones del algoritmo Lloyd.*
+Esta imagen muestra el estado del algoritmo en una iteración intermedia del proceso de asignación-actualización de Lloyd. Cada punto es un host; los colores reflejan la asignación actual al cluster más cercano; las estrellas o cruces marcan la posición de los centroides en ese paso. La convergencia del algoritmo se puede leer observando que los centroides se desplazan poco entre iteraciones — cuando las estrellas dejan de moverse, el algoritmo terminó. La imagen captura por qué K-Means++ es importante: los centroides iniciales bien distribuidos hacen que la convergencia sea rápida y que no queden clusters vacíos o degenerados.
 
 #### Clusters Ground Truth vs Inferidos
 
 ![Clusters Ground Truth](../Kmeans_Robot_Henry/results/fig1_clusters_gt.png)
 
-*Comparación entre la segmentación real (izquierda) y la inferida por K-Means (derecha).*
+Esta comparación directa mide la calidad real del modelo. El panel izquierdo colorea cada host según la VLAN real (configuración del switch, ground truth); el panel derecho usa el cluster K-Means inferido. Cuando los colores de ambos paneles coinciden en la misma posición espacial, el modelo acertó. La purity = 1.000 obtenida en training se refleja aquí: los grupos del panel derecho son internamente homogéneos respecto al panel izquierdo — ningún cluster mezcla hosts de distintas VLANs reales. El hecho de que aparezcan 5 clusters en la derecha frente a 3 VLANs en la izquierda muestra la sub-segmentación detectada automáticamente.
 
 ---
 
@@ -280,25 +279,23 @@ clasificarse diferente según el período de observación.
 
 ### 3.6 Visualizaciones
 
-#### Selección de K — Codo y Silhouette
+#### Selección de K — Codo y Silhouette (Robótica)
 
 ![K Selection](../Kmeans_Robot_Henry/Robotica_kmeans_sintetico/results/animations/k_selection.gif)
 
-*Animación GIF: las barras de inercia y silhouette se revelan K por K. La barra roja indica K*=3.*
+Esta animación reproduce el proceso de selección automática de K: en cada frame se añade una barra correspondiente a un valor candidato de K, mostrando simultáneamente la inercia (WCSS) y el coeficiente de silhouette. La barra resaltada en rojo al finalizar la animación señala K\* = 3, el punto donde el silhouette alcanza un máximo local y el elbow (Δ²J = 253.3) es pronunciado. Que K\* = 3 coincida exactamente con los tres estados operacionales reales (Programado / Urgente / Reemplazo) valida que el algoritmo, sin conocer las etiquetas, encontró la misma estructura que un experto en mantenimiento definiría. La animación hace visible el razonamiento que de otro modo quedaría oculto en una tabla de números.
 
-#### Convergencia K-Means
+#### Convergencia del Algoritmo K-Means (Robótica)
 
 ![Convergencia KMeans](../Kmeans_Robot_Henry/Robotica_kmeans_sintetico/results/animations/kmeans_convergencia.gif)
 
-*Proyección PCA 2D (n×10 → n×2). Cada punto es un actuador; los colores indican el cluster.
-Las estrellas son los centroides. Se observa convergencia en pocas iteraciones.*
+Esta animación muestra el proceso iterativo de Lloyd proyectado en 2 componentes principales (PCA 2D) para hacer visible lo que ocurre en el espacio de 10 features. Cada punto representa un actuador; el color indica el cluster al que pertenece en esa iteración; las estrellas son los centroides actuales. Frame a frame se puede ver cómo los centroides se desplazan hacia el centro de masa de sus respectivos grupos y cómo algunos actuadores reasignan su cluster al cruzar la frontera de Voronoi. La convergencia rápida — en pocas iteraciones — es consecuencia directa de la inicialización K-Means++: los centroides iniciales ya están bien distribuidos, por lo que el algoritmo no desperdicia iteraciones escapando de configuraciones degeneradas.
 
-#### Scatter por Features Clave
+#### Scatter por Features Clave (Robótica)
 
 ![Feature Scatter](../Kmeans_Robot_Henry/Robotica_kmeans_sintetico/results/animations/feature_scatter.gif)
 
-*GIF rotando entre pares de features: `pct_vida_util`, `drift_posicional`, `vibracion_rms`.
-Los tres clusters son linealmente separables en el espacio de features originales.*
+Esta animación rota entre distintos pares de features originales — `pct_vida_util`, `drift_posicional_mm` y `vibracion_rms` — coloreando cada actuador según su cluster asignado. Su propósito es demostrar que la separación entre clusters no es un artefacto de la reducción PCA, sino que existe directamente en el espacio de features físicas medibles. Cuando los tres clusters aparecen claramente separados en los ejes de `pct_vida_util` vs `tasa_fallo`, el resultado es interpretable por un ingeniero de mantenimiento sin necesidad de álgebra lineal: los actuadores de Reemplazo tienen vida útil alta pero fallos frecuentes, los de Mantenimiento Urgente tienen vida útil baja y fallos casi nulos (son piezas nuevas con historial limpio), y los Programados se ubican en una zona intermedia. La separabilidad lineal en el espacio original confirma que las features elegidas capturan los mecanismos reales de degradación.
 
 ---
 
