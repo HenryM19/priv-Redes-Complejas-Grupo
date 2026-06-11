@@ -137,21 +137,11 @@
         }
 
         /* ── NAV ── */
-        .nav-controls {
-            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-            display:flex; gap:20px; align-items:center; z-index:100;
-            background:rgba(8,12,18,.9); padding:10px 26px;
-            border-radius:12px; border:1px solid rgba(255,255,255,0.07);
-            backdrop-filter:blur(14px);
-        }
-        .nav-controls a {
-            color:#90caf9; text-decoration:none; font-size:.88em;
-            padding:6px 18px; background:rgba(124,131,232,.18);
-            border:1px solid rgba(124,131,232,.32); border-radius:8px;
-            transition:background .2s;
-        }
+            .nav-controls { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:20px; align-items:center; z-index:100; background:rgba(8,12,18,0.92); padding:10px 26px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px); }
+        .nav-controls a { color:#90caf9; text-decoration:none; font-size:.88em; padding:6px 18px; background:rgba(124,131,232,.18); border:1px solid rgba(124,131,232,.32); border-radius:8px; transition:background .2s; }
         .nav-controls a:hover { background:rgba(124,131,232,.36); }
-        .slide-ctr { color:#363d5a; font-size:.85em; }
+        .slide-ctr { color:#4a5270; font-size:.85em; }
+        .slide-counter-nav { color:#4a5270; font-size:.85em; }
     </style>
 </head>
 <body>
@@ -189,12 +179,6 @@
     </div>
 </div>
 
-<div class="nav-controls">
-    <a href="20_simulaciones_empresas.html">← Anterior</a>
-    <span class="slide-ctr">21 / 21</span>
-    <span style="opacity:0.25;font-size:.88em;padding:6px 18px;">Fin →</span>
-</div>
-
 <script>
     // Muestra el video si tiene src, si no muestra placeholder
     const video = document.getElementById('main-video');
@@ -205,5 +189,10 @@
         placeholder.style.display = 'none';
     }
 </script>
+<div class="nav-controls">
+    <a href="20_simulaciones_empresas.html">← Anterior</a>
+    <span class="slide-ctr">20 / 21</span>
+    <span style="opacity:0.25;font-size:.88em;padding:6px 18px;">Fin →</span>
+</div>
 </body>
 </html>

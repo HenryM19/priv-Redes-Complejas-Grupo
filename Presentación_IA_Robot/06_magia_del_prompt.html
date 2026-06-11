@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>06 – Prototipado Acelerado con IA</title>
+    <title>06 – La Magia del Prompt</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -27,14 +27,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 36px 56px 88px;
+            padding: 40px 80px 88px;
             background:
-                radial-gradient(ellipse 70% 45% at 50% -5%, rgba(124,131,232,0.13) 0%, transparent 65%),
+                radial-gradient(ellipse 65% 45% at 50% -5%, rgba(124,131,232,0.12) 0%, transparent 65%),
                 linear-gradient(160deg, #0d1117 0%, #0a0f1a 100%);
         }
 
-        /* ── TITLE ── */
-        .slide-title { text-align:center; margin-bottom:28px; }
+        .slide-title { text-align:center; margin-bottom:32px; }
         .slide-title h2 {
             font-size: 2em;
             font-weight: 700;
@@ -46,337 +45,197 @@
             color: #4a5270;
         }
 
-        /* ══════════════════════════════════════
-           MAIN: left = metrics | right = hub
-        ══════════════════════════════════════ */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 36px;
+        .content-wrap {
             width: 100%;
-            max-width: 1080px;
-            align-items: center;
-        }
-
-        /* ─── LEFT: TIME METRICS ─── */
-        .metrics-col {
+            max-width: 860px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 20px;
         }
 
-        .metrics-header {
-            font-size: 0.78em;
-            font-weight: 700;
-            color: #4a5270;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .comparison-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .comp-card {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.07);
+        /* prompt input box */
+        .prompt-box {
             background: rgba(255,255,255,0.03);
-        }
-        .comp-card.before { border-color: rgba(239,83,80,0.2); background: rgba(239,83,80,0.05); }
-        .comp-card.after  { border-color: rgba(105,240,174,0.2); background: rgba(105,240,174,0.05); }
-
-        .comp-icon { font-size:1.4em; flex-shrink:0; margin-top:1px; }
-        .comp-body {}
-        .comp-label {
-            font-size: 0.78em;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .comp-card.before .comp-label { color: #ef9a9a; }
-        .comp-card.after  .comp-label { color: #69f0ae; }
-        .comp-time {
-            font-size: 1.5em;
-            font-weight: 700;
-            line-height: 1.1;
-            margin-top: 2px;
-        }
-        .comp-card.before .comp-time { color: #ef9a9a; }
-        .comp-card.after  .comp-time { color: #69f0ae; }
-        .comp-detail {
-            font-size: 0.75em;
-            color: #4a5270;
-            margin-top: 3px;
-            line-height: 1.4;
-        }
-
-        /* speedup badge */
-        .speedup-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px 16px;
+            border: 1px solid rgba(124,131,232,0.3);
             border-radius: 14px;
-            background: rgba(124,131,232,0.08);
-            border: 1px solid rgba(124,131,232,0.25);
+            padding: 20px 24px;
+            position: relative;
         }
-        .speedup-num {
-            font-size: 2em;
+        .prompt-box::before {
+            content: 'ENTRADA — Prompt de usuario';
+            position: absolute;
+            top: -10px;
+            left: 18px;
+            background: #0d1117;
+            padding: 0 8px;
+            font-size: 0.7em;
             font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
             color: #7c83e8;
         }
-        .speedup-text {
-            font-size: 0.8em;
-            color: #6878a8;
-            line-height: 1.4;
+        .prompt-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.97em;
+            color: #80cbc4;
+            line-height: 1.6;
+        }
+        .prompt-text span {
+            color: #ffb74d;
+            font-weight: 500;
         }
 
-        /* ─── RIGHT: HUB ─── */
-        .hub-wrap {
+        /* arrow */
+        .arrow-down {
+            text-align: center;
+            font-size: 1.4em;
+            color: #7c83e8;
+            opacity: 0.6;
+        }
+
+        /* interpretation section */
+        .interp-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 20px 24px;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-
-        .conn-svg {
+        .interp-box::before {
+            content: 'Claude interpreta esto como';
             position: absolute;
-            top:0; left:0;
-            width:100%; height:100%;
-            pointer-events:none;
-            overflow:visible;
-            z-index:0;
+            top: -10px;
+            left: 18px;
+            background: #0d1117;
+            padding: 0 8px;
+            font-size: 0.7em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #64b5f6;
         }
 
-        .col { display:flex; flex-direction:column; gap:14px; z-index:1; }
-        .col-left  { align-items:flex-end; }
-        .col-right { align-items:flex-start; }
+        .interp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 4px;
+        }
 
-        /* service card */
-        .scard {
+        .interp-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            background: rgba(105,240,174,0.04);
+            border: 1px solid rgba(105,240,174,0.12);
+        }
+        .interp-check {
+            color: #69f0ae;
+            font-size: 1em;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .interp-text {
+            font-size: 0.85em;
+            color: #a8b0cc;
+            line-height: 1.45;
+        }
+        .interp-text strong {
+            color: #c5caf7;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* result badge */
+        .result-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 11px 15px;
-            width: 220px;
-            border-radius: 13px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(12px);
-            transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
-            cursor: default;
+            gap: 14px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            background: rgba(255,183,77,0.07);
+            border: 1px solid rgba(255,183,77,0.22);
         }
-        .col-left  .scard:hover { transform:translateX(-5px); }
-        .col-right .scard:hover { transform:translateX(5px); }
-        .scard:hover {
-            border-color: rgba(124,131,232,0.5);
-            box-shadow: 0 0 22px rgba(124,131,232,0.2);
+        .result-icon { font-size: 1.3em; flex-shrink: 0; }
+        .result-text {
+            font-size: 0.9em;
+            color: #c5caf7;
+            line-height: 1.5;
         }
+        .result-text strong { color: #ffb74d; }
 
-        .scard-logo {
-            width:42px; height:42px;
-            border-radius:10px;
-            background:rgba(255,255,255,0.07);
-            border:1px solid rgba(255,255,255,0.1);
-            display:flex; align-items:center; justify-content:center;
-            flex-shrink:0; padding:5px;
-        }
-        .scard-logo img { width:100%; height:100%; object-fit:contain; border-radius:6px; }
-
-        .scard-text { display:flex; flex-direction:column; }
-        .scard-name { font-size:0.88em; font-weight:600; color:#c5caf7; }
-        .scard-cap  { font-size:0.72em; color:#7c83e8; margin-top:1px; font-weight:500; }
-        .scard-desc { font-size:0.7em;  color:#4a5270; margin-top:1px; }
-
-        /* center node */
-        .hub-center {
-            flex-shrink:0;
-            display:flex; flex-direction:column;
-            align-items:center; gap:10px;
-            margin:0 28px; z-index:1;
-        }
-        .hub-ring {
-            position:relative;
-            width:130px; height:130px;
-            display:flex; align-items:center; justify-content:center;
-        }
-        .hub-ring::before {
-            content:'';
-            position:absolute; inset:-3px;
-            border-radius:50%;
-            background:conic-gradient(from 0deg,#7c83e8 0%,#64b5f6 33%,#80cbc4 66%,#7c83e8 100%);
-            animation:spin 5s linear infinite; z-index:0;
-        }
-        .hub-ring::after {
-            content:''; position:absolute; inset:2px;
-            border-radius:50%; background:#0d1117; z-index:1;
-        }
-        @keyframes spin { to { transform:rotate(360deg); } }
-        .hub-pulse {
-            position:absolute; inset:-20px; border-radius:50%;
-            background:radial-gradient(circle,rgba(124,131,232,0.22) 0%,transparent 70%);
-            animation:pulse-anim 2.8s ease-in-out infinite; z-index:0; pointer-events:none;
-        }
-        @keyframes pulse-anim {
-            0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.18);opacity:1}
-        }
-        .hub-inner {
-            position:relative; z-index:2;
-            width:100%; height:100%; border-radius:50%;
-            display:flex; align-items:center; justify-content:center;
-            background:radial-gradient(circle at 38% 32%,#1c2545,#0a0f1a);
-        }
-        .hub-inner img {
-            width:68px; height:68px; object-fit:contain;
-            filter:drop-shadow(0 0 14px rgba(124,131,232,0.55));
-        }
-        .hub-label { text-align:center; }
-        .hub-label-main {
-            display:block; font-size:0.82em; font-weight:700;
-            color:#7c83e8; letter-spacing:2px; text-transform:uppercase;
-        }
-        .hub-label-sub { display:block; font-size:0.7em; color:#363d5a; margin-top:2px; }
-
-        /* ── NAV ── */
-        .nav-controls {
-            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-            display:flex; gap:20px; align-items:center; z-index:100;
-            background:rgba(8,12,18,.9); padding:10px 26px;
-            border-radius:12px; border:1px solid rgba(255,255,255,0.07);
-            backdrop-filter:blur(14px);
-        }
-        .nav-controls a {
-            color:#90caf9; text-decoration:none; font-size:.88em;
-            padding:6px 18px; background:rgba(124,131,232,.18);
-            border:1px solid rgba(124,131,232,.32); border-radius:8px;
-            transition:background .2s;
-        }
+        /* nav */
+            .nav-controls { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:20px; align-items:center; z-index:100; background:rgba(8,12,18,0.92); padding:10px 26px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px); }
+        .nav-controls a { color:#90caf9; text-decoration:none; font-size:.88em; padding:6px 18px; background:rgba(124,131,232,.18); border:1px solid rgba(124,131,232,.32); border-radius:8px; transition:background .2s; }
         .nav-controls a:hover { background:rgba(124,131,232,.36); }
-        .slide-ctr { color:#363d5a; font-size:.85em; }
+        .slide-ctr { color:#4a5270; font-size:.85em; }
+        .slide-counter-nav { color:#4a5270; font-size:.85em; }
     </style>
 </head>
 <body>
 <div class="slide">
 
     <div class="slide-title">
-        <h2>Prototipado Acelerado: Claude como Centro del Flujo</h2>
-        <p>No solo modelos 3D — código, versiones y documentación desde una misma interfaz</p>
+        <h2>La Magia del Prompt</h2>
+        <p>De una descripción en lenguaje natural a un modelo parametrizado y validado</p>
     </div>
 
-    <div class="main-grid">
+    <div class="content-wrap">
 
-        <!-- ═══ LEFT: METRICS ═══ -->
-        <div class="metrics-col">
-            <div class="metrics-header">Impacto en tiempos</div>
-
-            <div class="comparison-row">
-                <div class="comp-card before">
-                    <div class="comp-icon">⚙️</div>
-                    <div class="comp-body">
-                        <div class="comp-label">Sin IA</div>
-                        <div class="comp-time">Semanas</div>
-                        <div class="comp-detail">Experto por herramienta, código manual,<br>ciclos largos de prueba y error</div>
-                    </div>
-                </div>
-
-                <div class="comp-card after">
-                    <div class="comp-icon">🚀</div>
-                    <div class="comp-body">
-                        <div class="comp-label">Con Claude + MCP</div>
-                        <div class="comp-time">Horas</div>
-                        <div class="comp-detail">Un solo agente conectado a todas<br>las herramientas del proyecto</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="speedup-badge">
-                <div class="speedup-num">10–50×</div>
-                <div class="speedup-text">reducción en tiempo<br>de prototipado</div>
+        <!-- INPUT PROMPT -->
+        <div class="prompt-box">
+            <div class="prompt-text">
+                "Crea un brazo robótico industrial con <span>6 articulaciones</span>,
+                <span>gripper paralelo de 2 dedos</span>,
+                base fija en <span>z = 0</span>"
             </div>
         </div>
 
-        <!-- ═══ RIGHT: HUB ═══ -->
-        <div class="hub-wrap" id="hub-wrap">
-            <svg class="conn-svg" id="conn-svg"></svg>
+        <div class="arrow-down">↓</div>
 
-            <!-- LEFT SERVICES -->
-            <div class="col col-left">
-                <div class="scard" id="c-github">
-                    <div class="scard-logo"><img src="assets/github.png" alt="GitHub"></div>
-                    <div class="scard-text">
-                        <span class="scard-name">GitHub</span>
-                        <span class="scard-cap">Control de versiones</span>
-                        <span class="scard-desc">Commits, PRs, CI/CD</span>
+        <!-- INTERPRETATION GRID -->
+        <div class="interp-box">
+            <div class="interp-grid">
+                <div class="interp-item">
+                    <span class="interp-check">✅</span>
+                    <div class="interp-text">
+                        <strong>Estructura cinemática</strong>
+                        6 eslabones (links) + 6 articulaciones (joints) + gripper 2 DOF
                     </div>
                 </div>
-                <div class="scard" id="c-vscode">
-                    <div class="scard-logo"><img src="assets/visual_studio_code.webp" alt="VS Code"></div>
-                    <div class="scard-text">
-                        <span class="scard-name">VS Code</span>
-                        <span class="scard-cap">Código &amp; debugging</span>
-                        <span class="scard-desc">Edición, tests, linting</span>
+                <div class="interp-item">
+                    <span class="interp-check">✅</span>
+                    <div class="interp-text">
+                        <strong>Proporciones realistas</strong>
+                        Dimensiones basadas en robots industriales tipo FANUC / UR
                     </div>
                 </div>
-                <div class="scard" id="c-gdrive">
-                    <div class="scard-logo"><img src="assets/google_drive.png" alt="Google Drive"></div>
-                    <div class="scard-text">
-                        <span class="scard-name">Google Drive</span>
-                        <span class="scard-cap">Documentación</span>
-                        <span class="scard-desc">Reports, manuales, specs</span>
+                <div class="interp-item">
+                    <span class="interp-check">✅</span>
+                    <div class="interp-text">
+                        <strong>Parámetros dinámicos</strong>
+                        Masas, inercias, fricción y límites de movimiento por joint
+                    </div>
+                </div>
+                <div class="interp-item">
+                    <span class="interp-check">✅</span>
+                    <div class="interp-text">
+                        <strong>Formato exportable</strong>
+                        URDF compatible con ROS 2 e Isaac Lab listo para simular
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- CENTER -->
-            <div class="hub-center" id="hub-center">
-                <div class="hub-ring" id="hub-ring">
-                    <div class="hub-pulse"></div>
-                    <div class="hub-inner">
-                        <img src="assets/claude.png" alt="Claude">
-                    </div>
-                </div>
-                <div class="hub-label">
-                    <span class="hub-label-main">Claude</span>
-                    <span class="hub-label-sub">MCP Protocol</span>
-                </div>
-            </div>
-
-            <!-- RIGHT SERVICES -->
-            <div class="col col-right">
-                <div class="scard" id="c-blender">
-                    <div class="scard-logo"><img src="assets/blender.png" alt="Blender"></div>
-                    <div class="scard-text">
-                        <span class="scard-name">Blender</span>
-                        <span class="scard-cap">Modelos 3D &amp; URDF</span>
-                        <span class="scard-desc">Diseño de robots</span>
-                    </div>
-                </div>
-                <div class="scard" id="c-fusion">
-                    <div class="scard-logo"><img src="assets/fusion.png" alt="Fusion 360"></div>
-                    <div class="scard-text">
-                        <span class="scard-name">Fusion 360</span>
-                        <span class="scard-cap">CAD &amp; simulación</span>
-                        <span class="scard-desc">Piezas mecánicas, FEA</span>
-                    </div>
-                </div>
-                <div class="scard" id="c-images">
-                    <div class="scard-logo" style="background:rgba(124,131,232,0.1);border-color:rgba(124,131,232,0.2);">
-                        <span style="font-size:1.5em;">🖼️</span>
-                    </div>
-                    <div class="scard-text">
-                        <span class="scard-name">Generación visual</span>
-                        <span class="scard-cap">Renders &amp; diagramas</span>
-                        <span class="scard-desc">Documentación visual</span>
-                    </div>
-                </div>
+        <!-- RESULT -->
+        <div class="result-row">
+            <span class="result-icon">🎯</span>
+            <div class="result-text">
+                <strong>Resultado:</strong> Sin escribir una sola línea de código, obtenemos
+                un modelo completamente parametrizado, validado y listo para simulación.
             </div>
         </div>
 
@@ -385,82 +244,8 @@
 
 <div class="nav-controls">
     <a href="04_pipeline_completo.html">← Anterior</a>
-    <span class="slide-ctr">6 / 19</span>
+    <span class="slide-ctr">5 / 21</span>
     <a href="07_validacion_simulacion.html">Siguiente →</a>
 </div>
-
-<script>
-(function () {
-    const COLORS = { left:'#7c83e8', right:'#80cbc4' };
-
-    function draw() {
-        const svg  = document.getElementById('conn-svg');
-        const wrap = document.getElementById('hub-wrap');
-        const ring = document.getElementById('hub-ring');
-        if (!svg || !wrap || !ring) return;
-
-        const W  = wrap.getBoundingClientRect();
-        const R  = ring.getBoundingClientRect();
-        const cx = R.left + R.width  / 2 - W.left;
-        const cy = R.top  + R.height / 2 - W.top;
-
-        svg.setAttribute('viewBox', `0 0 ${W.width} ${W.height}`);
-
-        const defs = `<defs>
-            <linearGradient id="gl" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="${COLORS.left}" stop-opacity="0.1"/>
-                <stop offset="100%" stop-color="${COLORS.left}" stop-opacity="0.85"/>
-            </linearGradient>
-            <linearGradient id="gr" x1="100%" y1="0%" x2="0%" y2="0%">
-                <stop offset="0%" stop-color="${COLORS.right}" stop-opacity="0.1"/>
-                <stop offset="100%" stop-color="${COLORS.right}" stop-opacity="0.85"/>
-            </linearGradient>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2.2" result="b"/>
-                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-        </defs>`;
-
-        let paths = '';
-
-        function pathFor(id, side) {
-            const el = document.getElementById(id);
-            if (!el) return '';
-            const ER = el.getBoundingClientRect();
-            const ex = side === 'left' ? ER.right - W.left : ER.left - W.left;
-            const ey = ER.top + ER.height / 2 - W.top;
-            const cp1x = ex + (cx - ex) * 0.45;
-            const cp2x = ex + (cx - ex) * 0.55;
-            const grad = side === 'left' ? 'url(#gl)' : 'url(#gr)';
-            const col  = side === 'left' ? COLORS.left : COLORS.right;
-            const dir  = side === 'left' ? -240 : 240;
-
-            return `
-            <path d="M ${ex} ${ey} C ${cp1x} ${ey} ${cp2x} ${cy} ${cx} ${cy}"
-                  fill="none" stroke="${grad}" stroke-width="1.8"
-                  stroke-dasharray="7 5" opacity="0.8" filter="url(#glow)">
-                <animate attributeName="stroke-dashoffset"
-                         from="0" to="${dir}" dur="2.2s" repeatCount="indefinite"/>
-            </path>
-            <circle cx="${ex}" cy="${ey}" r="3.5" fill="${col}" opacity="0.85" filter="url(#glow)"/>`;
-        }
-
-        paths += pathFor('c-github','left');
-        paths += pathFor('c-vscode','left');
-        paths += pathFor('c-gdrive','left');
-        paths += pathFor('c-blender','right');
-        paths += pathFor('c-fusion','right');
-        paths += pathFor('c-images','right');
-
-        svg.innerHTML = defs + paths;
-    }
-
-    if (document.readyState === 'complete') { draw(); }
-    else { window.addEventListener('load', draw); }
-
-    let t;
-    window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 80); });
-})();
-</script>
 </body>
 </html>

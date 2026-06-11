@@ -227,33 +227,11 @@
         .highlight-box strong { color: #ffb74d; }
 
         /* ── NAV ── */
-        .nav-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            z-index: 100;
-            background: rgba(8,12,18,0.9);
-            padding: 10px 26px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.07);
-            backdrop-filter: blur(14px);
-        }
-        .nav-controls a {
-            color: #90caf9;
-            text-decoration: none;
-            font-size: 0.88em;
-            padding: 6px 18px;
-            background: rgba(124,131,232,0.18);
-            border: 1px solid rgba(124,131,232,0.32);
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .nav-controls a:hover { background: rgba(124,131,232,0.36); }
-        .slide-ctr { color: #363d5a; font-size: 0.85em; }
+            .nav-controls { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:20px; align-items:center; z-index:100; background:rgba(8,12,18,0.92); padding:10px 26px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px); }
+        .nav-controls a { color:#90caf9; text-decoration:none; font-size:.88em; padding:6px 18px; background:rgba(124,131,232,.18); border:1px solid rgba(124,131,232,.32); border-radius:8px; transition:background .2s; }
+        .nav-controls a:hover { background:rgba(124,131,232,.36); }
+        .slide-ctr { color:#4a5270; font-size:.85em; }
+        .slide-counter-nav { color:#4a5270; font-size:.85em; }
     </style>
 </head>
 <body>
@@ -333,103 +311,8 @@
 
 <div class="nav-controls">
     <a href="02_agente_ia.html">← Anterior</a>
-    <span class="slide-ctr">3 / 19</span>
+    <span class="slide-ctr">3 / 21</span>
     <a href="04_pipeline_completo.html">Siguiente →</a>
 </div>
-
-<script>
-(function () {
-    const COLORS = { left: '#7c83e8', right: '#80cbc4' };
-
-    function draw() {
-        const svg  = document.getElementById('conn-svg');
-        const wrap = document.getElementById('hub-wrap');
-        const hub  = document.getElementById('hub-center');
-
-        // positions relative to hub-wrap
-        const W  = wrap.getBoundingClientRect();
-        const H  = hub.getBoundingClientRect();
-
-        // Claude ring center (first child of hub-center is .hub-ring)
-        const ring = hub.querySelector('.hub-ring').getBoundingClientRect();
-        const cx = ring.left + ring.width  / 2 - W.left;
-        const cy = ring.top  + ring.height / 2 - W.top;
-
-        svg.setAttribute('viewBox', `0 0 ${W.width} ${W.height}`);
-
-        const defs = `
-        <defs>
-            <linearGradient id="gl" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="${COLORS.left}"  stop-opacity="0.12"/>
-                <stop offset="100%" stop-color="${COLORS.left}" stop-opacity="0.9"/>
-            </linearGradient>
-            <linearGradient id="gr" x1="100%" y1="0%" x2="0%" y2="0%">
-                <stop offset="0%" stop-color="${COLORS.right}"  stop-opacity="0.12"/>
-                <stop offset="100%" stop-color="${COLORS.right}" stop-opacity="0.9"/>
-            </linearGradient>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2" result="b"/>
-                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-        </defs>`;
-
-        let paths = '';
-
-        function pathFor(cardId, side) {
-            const card = document.getElementById(cardId);
-            if (!card) return '';
-            const R   = card.getBoundingClientRect();
-            // connection point: middle of the edge facing the center
-            const ex  = side === 'left'
-                ? R.right - W.left          // right edge of left card
-                : R.left  - W.left;         // left  edge of right card
-            const ey  = R.top + R.height / 2 - W.top;
-
-            const grad = side === 'left' ? 'url(#gl)' : 'url(#gr)';
-            const cp1x = ex + (cx - ex) * 0.45;
-            const cp2x = ex + (cx - ex) * 0.55;
-
-            // travelling dot keyframe offset
-            const uid  = cardId + '-' + side;
-            const dir  = side === 'left' ? 1 : -1;
-
-            return `
-            <!-- ${cardId} -->
-            <path id="p-${uid}"
-                  d="M ${ex} ${ey} C ${cp1x} ${ey} ${cp2x} ${cy} ${cx} ${cy}"
-                  fill="none" stroke="${grad}" stroke-width="2"
-                  stroke-dasharray="7 5" opacity="0.8" filter="url(#glow)">
-                <animate attributeName="stroke-dashoffset"
-                         from="${dir > 0 ? 0 : -240}" to="${dir > 0 ? -240 : 0}"
-                         dur="2s" repeatCount="indefinite"/>
-            </path>
-            <!-- endpoint dot -->
-            <circle cx="${ex}" cy="${ey}" r="4"
-                    fill="${side === 'left' ? COLORS.left : COLORS.right}"
-                    opacity="0.85" filter="url(#glow)"/>
-            `;
-        }
-
-        paths += pathFor('c-github', 'left');
-        paths += pathFor('c-gdrive', 'left');
-        paths += pathFor('c-blender', 'right');
-        paths += pathFor('c-vscode',  'right');
-        paths += pathFor('c-fusion',  'right');
-
-        svg.innerHTML = defs + paths;
-    }
-
-    // draw after fonts + images settle
-    if (document.readyState === 'complete') {
-        draw();
-    } else {
-        window.addEventListener('load', draw);
-    }
-
-    // redraw on resize (debounced)
-    let t;
-    window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 80); });
-})();
-</script>
 </body>
 </html>

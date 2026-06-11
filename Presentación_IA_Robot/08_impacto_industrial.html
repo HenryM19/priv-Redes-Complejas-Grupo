@@ -340,34 +340,13 @@
             height: auto;
             padding-bottom: 80px;
         }
-        .nav-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            z-index: 1000;
-            background: rgba(13,17,23,0.85);
-            padding: 10px 24px;
-            border-radius: 8px;
-            border: 1px solid #3d5a8a;
-        }
-        .nav-controls a {
-            color: #90caf9;
-            text-decoration: none;
-            font-size: 0.95em;
-            padding: 6px 14px;
-            background: #7c83e8;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-        .nav-controls a:hover { background: #64b5f6; }
-        .slide-counter-nav {
-            color: #90caf9;
-            font-size: 0.9em;
-        }
+
+        
+            .nav-controls { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:20px; align-items:center; z-index:100; background:rgba(8,12,18,0.92); padding:10px 26px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px); }
+        .nav-controls a { color:#90caf9; text-decoration:none; font-size:.88em; padding:6px 18px; background:rgba(124,131,232,.18); border:1px solid rgba(124,131,232,.32); border-radius:8px; transition:background .2s; }
+        .nav-controls a:hover { background:rgba(124,131,232,.36); }
+        .slide-ctr { color:#4a5270; font-size:.85em; }
+        .slide-counter-nav { color:#4a5270; font-size:.85em; }
     </style>
 </head>
 <body>
@@ -406,9 +385,9 @@
         </div>
     </div>
     <div class="nav-controls">
-        <a href="07_validacion_simulacion.html">← Anterior</a>
-        <span class="slide-counter-nav">8 / 19</span>
-        <a href="09_transicion_jean.html">Siguiente →</a>
-    </div>
+    <a href="07_validacion_simulacion.html">← Anterior</a>
+    <span class="slide-ctr">7 / 21</span>
+    <a href="09_transicion_jean.html">Siguiente →</a>
+</div>
 </body>
 </html>
