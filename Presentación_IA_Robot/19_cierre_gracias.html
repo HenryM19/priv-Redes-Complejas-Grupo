@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>19 Cierre Gracias</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', '-apple-system', sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 80px;
+            text-align: center;
+            position: relative;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ========== PALETA DE COLORES ========== */
+        .slide.cover {
+            background: linear-gradient(135deg, #1a2540 0%, #0d1117 100%);
+        }
+
+        .slide.henry {
+            background: linear-gradient(135deg, #0f1419 0%, #161b22 100%);
+        }
+
+        .slide.jean {
+            background: linear-gradient(135deg, #1a1f26 0%, #0d1117 100%);
+        }
+
+        /* ========== TÍTULOS ========== */
+        h1 {
+            font-size: 2.8em;
+            color: #7c83e8;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #7c83e8;
+            padding-bottom: 15px;
+            text-shadow: 0 0 20px rgba(124, 131, 232, 0.3);
+        }
+
+        h2 {
+            font-size: 2.2em;
+            color: #64b5f6;
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            color: #80cbc4;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #90caf9;
+            margin-top: 15px;
+        }
+
+        .meta {
+            color: #7c83e8;
+            font-size: 0.95em;
+            margin-top: 20px;
+        }
+
+        /* ========== CONTENIDO ========== */
+        p, li {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #d0d4da;
+            margin: 12px 0;
+        }
+
+        strong {
+            color: #ffb74d;
+            font-weight: 600;
+        }
+
+        em {
+            color: #a5d6a7;
+            font-style: italic;
+        }
+
+        code {
+            background: #1e2130;
+            color: #80cbc4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95em;
+        }
+
+        .highlight-box {
+            background: #1a2540;
+            border-left: 4px solid #7c83e8;
+            border-radius: 0 8px 8px 0;
+            padding: 20px 25px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .metric-box {
+            background: #0d1f0d;
+            border: 1px solid #2e7d32;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            display: inline-block;
+            min-width: 200px;
+        }
+
+        .metric-value {
+            font-size: 1.8em;
+            color: #69f0ae;
+            font-weight: bold;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #a5d6a7;
+            margin-top: 5px;
+        }
+
+        /* ========== LAYOUT MULTI-COLUMNA ========== */
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .pill {
+            display: inline-block;
+            background: #1e2a4a;
+            border: 1px solid #3d5a8a;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 0.85em;
+            color: #90caf9;
+            margin: 5px;
+        }
+
+        /* ========== VIDEO PLACEHOLDER ========== */
+        .video-container {
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16/9;
+            background: #1e2130;
+            border: 2px solid #7c83e8;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1a2540, #0d1117);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .play-icon {
+            font-size: 3em;
+            color: #7c83e8;
+        }
+
+        .video-text {
+            font-size: 0.95em;
+            color: #90caf9;
+        }
+
+        /* ========== TABLA ========== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
+        th {
+            background: #1e2a4a;
+            color: #90caf9;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #7c83e8;
+        }
+
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #2a2f45;
+        }
+
+        tr:nth-child(even) td {
+            background: #161b2e;
+        }
+
+        /* ========== CONTROLES ========== */
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        button {
+            background: #7c83e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #64b5f6;
+            box-shadow: 0 0 15px rgba(100, 181, 246, 0.5);
+        }
+
+        button:disabled {
+            background: #2a2f45;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* ========== INDICADOR DE DIAPOSITIVA ========== */
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            color: #90caf9;
+            font-size: 0.95em;
+        }
+
+        /* ========== LISTA ========== */
+        ul, ol {
+            text-align: left;
+            margin: 15px auto;
+            max-width: 800px;
+        }
+
+        li {
+            margin: 10px 0;
+            margin-left: 30px;
+        }
+
+        /* ========== LOGOTIPOS / BADGES ========== */
+        .tech-badge {
+            display: inline-block;
+            background: #1e2a4a;
+            border: 1px solid #3d5a8a;
+            padding: 8px 14px;
+            border-radius: 6px;
+            margin: 5px;
+            font-size: 0.9em;
+            color: #80cbc4;
+        }
+
+        /* ========== DIAGRAMA ASCII ========== */
+        .diagram {
+            font-family: 'IBM Plex Mono', monospace;
+            color: #80cbc4;
+            background: #1e2130;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-size: 0.85em;
+            overflow-x: auto;
+            text-align: left;
+        }
+
+        /* ========== ANIMACIONES PARA CONTENIDO ========== */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        .slide-title {
+            margin-bottom: 40px;
+        }
+
+    
+        /* Standalone slide overrides */
+        body { overflow: auto; }
+        .slide {
+            display: flex !important;
+            min-height: 100vh;
+            height: auto;
+            padding-bottom: 80px;
+        }
+        .nav-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(13,17,23,0.85);
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: 1px solid #3d5a8a;
+        }
+        .nav-controls a {
+            color: #90caf9;
+            text-decoration: none;
+            font-size: 0.95em;
+            padding: 6px 14px;
+            background: #7c83e8;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .nav-controls a:hover { background: #64b5f6; }
+        .slide-counter-nav {
+            color: #90caf9;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+<div class="slide cover">
+            <h1>Gracias</h1>
+            <div style="margin-top: 50px;">
+                <p style="font-size: 1.15em; margin-bottom: 20px;">
+                    <strong>Stack Tecnológico Utilizado</strong>
+                </p>
+                <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                    <span class="tech-badge">Isaac Lab 2.3</span>
+                    <span class="tech-badge">Isaac Sim 5.1</span>
+                    <span class="tech-badge">ROS 2 Humble</span>
+                    <span class="tech-badge">Godot 4</span>
+                    <span class="tech-badge">PPO (rsl_rl)</span>
+                    <span class="tech-badge">Docker</span>
+                    <span class="tech-badge">Claude + MCP</span>
+                </div>
+            </div>
+            <div style="margin-top: 60px; border-top: 1px solid #3d5a8a; padding-top: 30px;">
+                <p style="font-size: 1.05em;">
+                    📦 Repositorio: <code>ros2_godot_robot_starter</code><br>
+                    🔗 GitHub: [enlace del repositorio]
+                </p>
+            </div>
+            <p style="margin-top: 40px; font-size: 0.95em; color: #7c83e8;">
+                Preguntas y discusión →
+            </p>
+        </div>
+    </div>
+
+    <!-- CONTROLES DE NAVEGACIÓN -->
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">19</span>
+    </div>
+    
+    <div class="controls">
+        <button id="prev-btn" onclick="previousSlide()">← Anterior</button>
+        <button id="next-btn" onclick="nextSlide()">Siguiente →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Navegación por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        // Inicializar
+        showSlide(0);
+    </script>
+</body>
+</html>
+    </div>
+    <div class="nav-controls">
+        <a href="18_conclusiones.html">← Anterior</a>
+        <span class="slide-counter-nav">19 / 19</span>
+        <span style="opacity:0.3">Siguiente →</span>
+    </div>
+</body>
+</html>
