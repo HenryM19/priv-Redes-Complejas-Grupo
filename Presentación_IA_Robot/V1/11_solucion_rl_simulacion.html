@@ -353,7 +353,9 @@
     <div class="presentation">
 <div class="slide jean">
             <h2>La Solución: Aprendizaje por Refuerzo en Simulación</h2>
-            <div class="diagram" style="font-size: 0.9em; margin-top: 30px;">
+            <div class="columns" style="margin-top: 25px; align-items: center;">
+                <div class="column">
+                    <div class="diagram" style="font-size: 0.8em;">
                 AGENTE (Red Neuronal)
                     │
              acción │ (ángulos de joints)
@@ -365,11 +367,22 @@
             └─────────────────┘
 
     1 iteración = 64 brazos × 30 pasos = 1920 experiencias
+                    </div>
+                    <p style="margin-top: 20px;">
+                        <strong>Ventajas:</strong> 30,000+ iteraciones en horas | Sin daño hardware |
+                        Millones de intentos paralelos
+                    </p>
+                </div>
+                <div class="column">
+                    <div class="video-container" style="margin: 0;">
+                        <video src="assets/andrem4c_train_64envs.mp4" autoplay loop muted playsinline
+                               style="width:100%; height:100%; object-fit:cover;"></video>
+                    </div>
+                    <p style="font-size: 0.85em; color: #90caf9; text-align: center; margin-top: 10px;">
+                        64 brazos andrem4c entrenando en paralelo (Isaac Lab, RTX 3070)
+                    </p>
+                </div>
             </div>
-            <p style="margin-top: 30px;">
-                <strong>Ventajas:</strong> 30,000+ iteraciones en horas | Sin daño hardware | 
-                Millones de intentos paralelos
-            </p>
         </div>
     </div>
     <div class="nav-controls">

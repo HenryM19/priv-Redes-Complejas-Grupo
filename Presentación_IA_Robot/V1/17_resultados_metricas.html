@@ -353,37 +353,93 @@
     <div class="presentation">
 <div class="slide jean">
             <h2>Resultados y Métricas de Entrenamiento</h2>
-            <table style="margin-top: 30px;">
-                <tr>
-                    <th>Métrica</th>
-                    <th>No Converge</th>
-                    <th>Converge ✅</th>
-                </tr>
-                <tr>
-                    <td>position_error</td>
-                    <td>Plano / sube</td>
-                    <td>Baja sostenidamente</td>
-                </tr>
-                <tr>
-                    <td>fine_grained_reward</td>
-                    <td>≈ 0</td>
-                    <td>Crece hasta ~0.08</td>
-                </tr>
-                <tr>
-                    <td>value_loss</td>
-                    <td>Explota (10²¹)</td>
-                    <td>Estabiliza &lt; 100</td>
-                </tr>
-                <tr>
-                    <td>episode_length</td>
-                    <td>Cae (&lt; 100)</td>
-                    <td>Sube (→ 360)</td>
-                </tr>
-            </table>
-            <div class="highlight-box" style="margin-top: 30px;">
-                <p style="margin: 0;">
-                    <strong>Configuración ganadora:</strong> action_scale=1.0 | init_noise_std=1.0 | 
-                    sin curriculum | dt=1/120 | 64 entornos
+            <div class="columns" style="margin-top: 25px;">
+                <div class="column">
+                    <h3 style="font-size: 1em;">Señales de convergencia (TensorBoard)</h3>
+                    <table style="font-size: 0.85em;">
+                        <tr>
+                            <th>Métrica</th>
+                            <th>No Converge</th>
+                            <th>Converge ✅</th>
+                        </tr>
+                        <tr>
+                            <td>position_error</td>
+                            <td>Plano / sube</td>
+                            <td>Baja sostenidamente</td>
+                        </tr>
+                        <tr>
+                            <td>fine_grained_reward</td>
+                            <td>≈ 0</td>
+                            <td>Crece hasta ~0.08</td>
+                        </tr>
+                        <tr>
+                            <td>value_loss</td>
+                            <td>Explota (10²¹)</td>
+                            <td>Estabiliza &lt; 100</td>
+                        </tr>
+                        <tr>
+                            <td>episode_length</td>
+                            <td>Cae (&lt; 100)</td>
+                            <td>Sube (→ 360)</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="column">
+                    <h3 style="font-size: 1em;">Resultados finales (andrem4c)</h3>
+                    <table style="font-size: 0.85em;">
+                        <tr>
+                            <th>Tarea</th>
+                            <th>Iter.</th>
+                            <th>Resultado</th>
+                        </tr>
+                        <tr>
+                            <td>Reach</td>
+                            <td>5900</td>
+                            <td>Error TCP <strong>6.8 mm</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Sort por color</td>
+                            <td>3000</td>
+                            <td><strong>67%</strong> cajas al bin correcto</td>
+                        </tr>
+                    </table>
+                    <h3 style="font-size: 1em; margin-top: 15px;">Tasa de éxito: 30 episodios × condición</h3>
+                    <table style="font-size: 0.85em;">
+                        <tr>
+                            <th>Controlador</th>
+                            <th>Nominal</th>
+                            <th>Ruido de luz</th>
+                            <th>Fuera de zona</th>
+                        </tr>
+                        <tr>
+                            <td>Clásico (HSV+IK)</td>
+                            <td>70%</td>
+                            <td>60%</td>
+                            <td>47%</td>
+                        </tr>
+                        <tr>
+                            <td>Híbrido (IA+IK)</td>
+                            <td>50%</td>
+                            <td><strong>77%</strong></td>
+                            <td><strong>60%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>RL puro (PPO)</td>
+                            <td>73%</td>
+                            <td>87%*</td>
+                            <td>53%</td>
+                        </tr>
+                    </table>
+                    <p style="font-size: 0.7em; color: #8b92b0; margin-top: 5px;">
+                        * El RL recibe el comando de bin directo (no percibe color); su columna de ruido no es comparable.
+                    </p>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 20px;">
+                <p style="margin: 0; font-size: 0.9em;">
+                    <strong>Lectura clave:</strong> el clásico se degrada al salir de su calibración (70→47%);
+                    el híbrido — percepción aprendida + la misma IK — resiste el ruido de luz (77% vs 60%).
+                    Configuración: init_noise_std=1.0 | sin curriculum | dt=1/120 | 64 entornos
                 </p>
             </div>
         </div>
