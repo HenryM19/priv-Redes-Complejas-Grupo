@@ -372,35 +372,57 @@
 </head>
 <body>
     <div class="presentation">
-<div class="slide henry">
+        <div class="slide henry">
             <div class="slide-title">
                 <h2>¿Qué es un Agente de IA?</h2>
             </div>
-            <div class="highlight-box">
+            
+            <!-- Definición unificada arriba -->
+            <div class="highlight-box" style="width: 100%; max-width: 1000px;">
                 <p style="font-size: 1.15em; margin: 0;">
-                    Un <strong>agente de IA</strong> es un sistema autónomo que <em>percibe su entorno</em>, 
-                    <em>toma decisiones</em> y <em>actúa</em> para alcanzar objetivos específicos.
+                    Un <strong>Agente de IA</strong> es un sistema autónomo diseñado para alcanzar objetivos específicos. 
+                    A diferencia de un chatbot pasivo, no solo responde: **razona, planifica y ejecuta acciones** de principio a fin en entornos digitales.
                 </p>
             </div>
-            <div style="margin-top: 40px; max-width: 900px;">
-                <div class="diagram">
-PERCEPCIÓN
-    ↓
-[AGENTE INTELIGENTE]
-    ↓
-ACCIÓN → Impacto en el mundo
+
+            <!-- Distribución en dos columnas abajo -->
+            <div class="columns" style="max-width: 1000px; margin-top: 20px;">
+                
+                <!-- Columna Izquierda: El motor cognitivo (Explicación del LLM) -->
+                <div class="column">
+                    <h3>🧠 El Cerebro: ¿Qué es un LLM?</h3>
+                    <p style="font-size: 0.95em;">
+                        Significa <em>Large Language Model</em> (Gran Modelo de Lenguaje). Son IAs avanzadas entrenadas con millones de textos (como GPT-4 o Claude).
+                    </p>
+                    <ul style="font-size: 0.95em; margin-left: 20px;">
+                        <li>En un agente, el LLM no se usa para chatear.</li>
+                        <li>Funciona como el <strong>motor de razonamiento</strong>.</li>
+                        <li>Interpreta órdenes humanas y decide los pasos a seguir.</li>
+                    </ul>
                 </div>
+
+                <!-- Columna Derecha: El flujo operativo del Agente -->
+                <div class="column">
+                    <h3>🛠️ Las Manos: Acción Digital</h3>
+                    <p style="font-size: 0.95em;">
+                        El agente conecta ese "cerebro" cognitivo con herramientas reales para alterar su entorno:
+                    </p>
+                    <div class="diagram" style="padding: 12px; font-size: 0.8em; margin: 10px 0;">
+[ Instrucción Humana ]
+         ↓
+ 🧠 LLM (Planifica y Razona)
+         ↓
+ 🛠️ Herramientas (APIs / Código / Web)
+         ↓
+[ 🎯 Objetivo Completado Autónomamente ]
+                    </div>
+                </div>
+
             </div>
-            <div style="margin-top: 30px;">
-                <p><strong>En robótica:</strong></p>
-                <ul style="margin-top: 15px;">
-                    <li>📡 <strong>Percepción:</strong> Sensores (cámaras, encoders, IMU)</li>
-                    <li>🧠 <strong>Inteligencia:</strong> Red neuronal que decide los movimientos</li>
-                    <li>⚙️ <strong>Acción:</strong> Motores mueven el brazo robótico</li>
-                </ul>
-            </div>
+
         </div>
     </div>
+    
     <div class="nav-controls">
         <a href="01_portada.html">← Anterior</a>
         <span class="slide-counter-nav">2 / 19</span>

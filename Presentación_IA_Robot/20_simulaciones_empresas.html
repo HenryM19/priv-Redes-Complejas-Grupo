@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20 – Simulaciones en Entornos Reales de Empresas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #080c12;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        .slide {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 56px 88px;
+            background:
+                radial-gradient(ellipse 70% 45% at 50% -5%, rgba(100,181,246,0.1) 0%, transparent 65%),
+                linear-gradient(160deg, #0d1117 0%, #0a0f1a 100%);
+        }
+
+        /* ── TITLE ── */
+        .slide-title { text-align:center; margin-bottom:30px; }
+        .slide-title h2 {
+            font-size: 1.95em;
+            font-weight: 700;
+            color: #c5caf7;
+        }
+        .slide-title p {
+            margin-top: 7px;
+            font-size: 0.92em;
+            color: #4a5270;
+        }
+
+        /* ── TWO VIDEO GRID ── */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            width: 100%;
+            max-width: 1080px;
+        }
+
+        .video-card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* header label */
+        .video-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .video-tag {
+            font-size: 0.72em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid;
+        }
+        .tag-industry { color: #ffb74d; border-color: rgba(255,183,77,0.35); background: rgba(255,183,77,0.07); }
+        .tag-logistics { color: #64b5f6; border-color: rgba(100,181,246,0.35); background: rgba(100,181,246,0.07); }
+
+        .video-title-text {
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #c5caf7;
+        }
+
+        /* video frame */
+        .video-frame {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03),
+                0 8px 40px rgba(0,0,0,0.6),
+                0 0 50px rgba(100,181,246,0.07);
+            background: #060a10;
+        }
+        .video-frame:hover {
+            border-color: rgba(124,131,232,0.4);
+            box-shadow:
+                0 0 0 1px rgba(124,131,232,0.1),
+                0 8px 40px rgba(0,0,0,0.7),
+                0 0 50px rgba(124,131,232,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .video-topbar {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            z-index: 2;
+        }
+        .bar-industry  { background: linear-gradient(90deg, #ffb74d, #ff8f00); }
+        .bar-logistics { background: linear-gradient(90deg, #64b5f6, #1976d2); }
+
+        .video-frame video {
+            width: 100%;
+            display: block;
+        }
+
+        /* caption */
+        .video-caption {
+            font-size: 0.78em;
+            color: #363d5a;
+            line-height: 1.5;
+        }
+
+        /* ── NAV ── */
+        .nav-controls {
+            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+            display:flex; gap:20px; align-items:center; z-index:100;
+            background:rgba(8,12,18,.9); padding:10px 26px;
+            border-radius:12px; border:1px solid rgba(255,255,255,0.07);
+            backdrop-filter:blur(14px);
+        }
+        .nav-controls a {
+            color:#90caf9; text-decoration:none; font-size:.88em;
+            padding:6px 18px; background:rgba(124,131,232,.18);
+            border:1px solid rgba(124,131,232,.32); border-radius:8px;
+            transition:background .2s;
+        }
+        .nav-controls a:hover { background:rgba(124,131,232,.36); }
+        .slide-ctr { color:#363d5a; font-size:.85em; }
+    </style>
+</head>
+<body>
+<div class="slide">
+
+    <div class="slide-title">
+        <h2>Simulaciones en Entornos Reales de Empresas</h2>
+        <p>Gemelos digitales aplicados a procesos industriales y logísticos reales</p>
+    </div>
+
+    <div class="videos-grid">
+
+        <!-- VIDEO 1: Bandas transportadoras -->
+        <div class="video-card">
+            <div class="video-header">
+                <span class="video-tag tag-industry">Manufactura</span>
+                <span class="video-title-text">Bandas Transportadoras Industriales</span>
+            </div>
+            <div class="video-frame">
+                <div class="video-topbar bar-industry"></div>
+                <video controls preload="metadata">
+                    <source src="assets/bandas_transportadoras.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="video-caption">
+                Simulación física de línea de producción con bandas transportadoras —
+                entrenamiento de agentes de control sin riesgo para el hardware real.
+            </div>
+        </div>
+
+        <!-- VIDEO 2: Amazon -->
+        <div class="video-card">
+            <div class="video-header">
+                <span class="video-tag tag-logistics">Logística</span>
+                <span class="video-title-text">Almacén Automatizado — Amazon</span>
+            </div>
+            <div class="video-frame">
+                <div class="video-topbar bar-logistics"></div>
+                <video controls preload="metadata">
+                    <source src="assets/video_amazon.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="video-caption">
+                Gemelo digital de centro logístico con robots móviles autónomos —
+                optimización de rutas y coordinación multi-agente en simulación GPU.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="nav-controls">
+    <a href="19_cierre_gracias.html">← Anterior</a>
+    <span class="slide-ctr">20 / 21</span>
+    <a href="21_simulacion_featured.html">Siguiente →</a>
+</div>
+</body>
+</html>

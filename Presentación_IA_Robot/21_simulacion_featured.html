@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>21 – Simulación Destacada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #080c12;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        .slide {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 80px 88px;
+            background:
+                radial-gradient(ellipse 70% 45% at 50% -5%, rgba(128,203,196,0.1) 0%, transparent 65%),
+                linear-gradient(160deg, #0d1117 0%, #0a0f1a 100%);
+        }
+
+        /* ── TITLE ── */
+        .slide-title { text-align:center; margin-bottom:28px; }
+        .slide-title h2 {
+            font-size: 1.95em;
+            font-weight: 700;
+            color: #c5caf7;
+        }
+        .slide-title p {
+            margin-top: 7px;
+            font-size: 0.92em;
+            color: #4a5270;
+        }
+
+        /* ── FEATURED VIDEO ── */
+        .featured-wrap {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .video-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .video-tag {
+            font-size: 0.72em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 6px;
+            color: #80cbc4;
+            border: 1px solid rgba(128,203,196,0.35);
+            background: rgba(128,203,196,0.07);
+        }
+        .video-hint {
+            font-size: 0.78em;
+            color: #363d5a;
+        }
+
+        .video-frame {
+            position: relative;
+            width: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(128,203,196,0.2);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03),
+                0 12px 60px rgba(0,0,0,0.7),
+                0 0 80px rgba(128,203,196,0.08);
+            background: #060a10;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .video-frame:hover {
+            border-color: rgba(128,203,196,0.45);
+            box-shadow:
+                0 0 0 1px rgba(128,203,196,0.1),
+                0 12px 60px rgba(0,0,0,0.7),
+                0 0 80px rgba(128,203,196,0.18);
+        }
+
+        .video-topbar {
+            position: absolute;
+            top:0; left:0; right:0;
+            height: 3px;
+            background: linear-gradient(90deg, #80cbc4, #4db6ac, #26c6da);
+            z-index: 2;
+        }
+
+        .video-frame video {
+            width: 100%;
+            display: block;
+        }
+
+        /* placeholder shown when video is empty */
+        .video-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            background: linear-gradient(135deg, #0d1a1a, #080c12);
+        }
+        .placeholder-icon { font-size: 3.5em; opacity: 0.3; }
+        .placeholder-text {
+            font-size: 0.9em;
+            color: #363d5a;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .video-caption {
+            font-size: 0.82em;
+            color: #4a5270;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* ── NAV ── */
+        .nav-controls {
+            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+            display:flex; gap:20px; align-items:center; z-index:100;
+            background:rgba(8,12,18,.9); padding:10px 26px;
+            border-radius:12px; border:1px solid rgba(255,255,255,0.07);
+            backdrop-filter:blur(14px);
+        }
+        .nav-controls a {
+            color:#90caf9; text-decoration:none; font-size:.88em;
+            padding:6px 18px; background:rgba(124,131,232,.18);
+            border:1px solid rgba(124,131,232,.32); border-radius:8px;
+            transition:background .2s;
+        }
+        .nav-controls a:hover { background:rgba(124,131,232,.36); }
+        .slide-ctr { color:#363d5a; font-size:.85em; }
+    </style>
+</head>
+<body>
+<div class="slide">
+
+    <div class="slide-title">
+        <h2>Simulación Destacada</h2>
+        <p>Demostración en entorno real</p>
+    </div>
+
+    <div class="featured-wrap">
+        <div class="video-header">
+            <span class="video-tag">Demo principal</span>
+            <span class="video-hint">Reemplaza este video con el que necesites</span>
+        </div>
+
+        <div class="video-frame" id="video-frame">
+            <div class="video-topbar"></div>
+            <!-- Cambia el src por el video que quieras mostrar -->
+            <video id="main-video" controls preload="metadata" style="display:none;">
+                <source src="" type="video/mp4">
+            </video>
+            <div class="video-placeholder" id="placeholder">
+                <div class="placeholder-icon">🎬</div>
+                <div class="placeholder-text">
+                    Video pendiente<br>
+                    <code style="font-size:0.85em;color:#4a5270;">Edita el &lt;source src=""&gt; con la ruta de tu video</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="video-caption">
+            Descripción de la simulación — edita este texto para describir el contenido del video.
+        </div>
+    </div>
+</div>
+
+<div class="nav-controls">
+    <a href="20_simulaciones_empresas.html">← Anterior</a>
+    <span class="slide-ctr">21 / 21</span>
+    <span style="opacity:0.25;font-size:.88em;padding:6px 18px;">Fin →</span>
+</div>
+
+<script>
+    // Muestra el video si tiene src, si no muestra placeholder
+    const video = document.getElementById('main-video');
+    const placeholder = document.getElementById('placeholder');
+    const src = video.querySelector('source').getAttribute('src');
+    if (src && src.trim() !== '') {
+        video.style.display = 'block';
+        placeholder.style.display = 'none';
+    }
+</script>
+</body>
+</html>

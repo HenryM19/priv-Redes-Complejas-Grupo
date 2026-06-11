@@ -3,343 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>03 Mcp Servers</title>
+    <title>03 – Agentes Conectados: MCP Servers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', 'Inter', '-apple-system', sans-serif;
-            background: #0d1117;
+            font-family: 'Inter', sans-serif;
+            background: #080c12;
             color: #e6edf3;
-            overflow: hidden;
-        }
-
-        .presentation {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-        }
-
-        .slide {
-            width: 100%;
-            height: 100%;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 60px 80px;
-            text-align: center;
-            position: relative;
-            animation: fadeIn 0.6s ease-in;
-        }
-
-        .slide.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* ========== PALETA DE COLORES ========== */
-        .slide.cover {
-            background: linear-gradient(135deg, #1a2540 0%, #0d1117 100%);
-        }
-
-        .slide.henry {
-            background: linear-gradient(135deg, #0f1419 0%, #161b22 100%);
-        }
-
-        .slide.jean {
-            background: linear-gradient(135deg, #1a1f26 0%, #0d1117 100%);
-        }
-
-        /* ========== TÍTULOS ========== */
-        h1 {
-            font-size: 2.8em;
-            color: #7c83e8;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #7c83e8;
-            padding-bottom: 15px;
-            text-shadow: 0 0 20px rgba(124, 131, 232, 0.3);
-        }
-
-        h2 {
-            font-size: 2.2em;
-            color: #64b5f6;
-            margin-bottom: 30px;
-        }
-
-        h3 {
-            font-size: 1.3em;
-            color: #80cbc4;
-            margin-bottom: 20px;
-        }
-
-        .subtitle {
-            font-size: 1.2em;
-            color: #90caf9;
-            margin-top: 15px;
-        }
-
-        .meta {
-            color: #7c83e8;
-            font-size: 0.95em;
-            margin-top: 20px;
-        }
-
-        /* ========== CONTENIDO ========== */
-        p, li {
-            font-size: 1.1em;
-            line-height: 1.8;
-            color: #d0d4da;
-            margin: 12px 0;
-        }
-
-        strong {
-            color: #ffb74d;
-            font-weight: 600;
-        }
-
-        em {
-            color: #a5d6a7;
-            font-style: italic;
-        }
-
-        code {
-            background: #1e2130;
-            color: #80cbc4;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.95em;
-        }
-
-        .highlight-box {
-            background: #1a2540;
-            border-left: 4px solid #7c83e8;
-            border-radius: 0 8px 8px 0;
-            padding: 20px 25px;
-            margin: 20px 0;
-            text-align: left;
-        }
-
-        .metric-box {
-            background: #0d1f0d;
-            border: 1px solid #2e7d32;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px;
-            display: inline-block;
-            min-width: 200px;
-        }
-
-        .metric-value {
-            font-size: 1.8em;
-            color: #69f0ae;
-            font-weight: bold;
-        }
-
-        .metric-label {
-            font-size: 0.9em;
-            color: #a5d6a7;
-            margin-top: 5px;
-        }
-
-        /* ========== LAYOUT MULTI-COLUMNA ========== */
-        .columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            width: 100%;
-            text-align: left;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-        }
-
-        .pill {
-            display: inline-block;
-            background: #1e2a4a;
-            border: 1px solid #3d5a8a;
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 0.85em;
-            color: #90caf9;
-            margin: 5px;
-        }
-
-        /* ========== VIDEO PLACEHOLDER ========== */
-        .video-container {
-            width: 100%;
-            max-width: 800px;
-            aspect-ratio: 16/9;
-            background: #1e2130;
-            border: 2px solid #7c83e8;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 20px auto;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .video-placeholder {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #1a2540, #0d1117);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .play-icon {
-            font-size: 3em;
-            color: #7c83e8;
-        }
-
-        .video-text {
-            font-size: 0.95em;
-            color: #90caf9;
-        }
-
-        /* ========== TABLA ========== */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 0.95em;
-        }
-
-        th {
-            background: #1e2a4a;
-            color: #90caf9;
-            padding: 10px;
-            text-align: left;
-            border-bottom: 2px solid #7c83e8;
-        }
-
-        td {
-            padding: 8px 10px;
-            border-bottom: 1px solid #2a2f45;
-        }
-
-        tr:nth-child(even) td {
-            background: #161b2e;
-        }
-
-        /* ========== CONTROLES ========== */
-        .controls {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            z-index: 1000;
-        }
-
-        button {
-            background: #7c83e8;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.95em;
-            transition: all 0.3s ease;
-        }
-
-        button:hover {
-            background: #64b5f6;
-            box-shadow: 0 0 15px rgba(100, 181, 246, 0.5);
-        }
-
-        button:disabled {
-            background: #2a2f45;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        /* ========== INDICADOR DE DIAPOSITIVA ========== */
-        .slide-counter {
-            position: fixed;
-            top: 20px;
-            right: 30px;
-            color: #90caf9;
-            font-size: 0.95em;
-        }
-
-        /* ========== LISTA ========== */
-        ul, ol {
-            text-align: left;
-            margin: 15px auto;
-            max-width: 800px;
-        }
-
-        li {
-            margin: 10px 0;
-            margin-left: 30px;
-        }
-
-        /* ========== LOGOTIPOS / BADGES ========== */
-        .tech-badge {
-            display: inline-block;
-            background: #1e2a4a;
-            border: 1px solid #3d5a8a;
-            padding: 8px 14px;
-            border-radius: 6px;
-            margin: 5px;
-            font-size: 0.9em;
-            color: #80cbc4;
-        }
-
-        /* ========== DIAGRAMA ASCII ========== */
-        .diagram {
-            font-family: 'IBM Plex Mono', monospace;
-            color: #80cbc4;
-            background: #1e2130;
-            padding: 20px;
-            border-radius: 6px;
-            margin: 20px 0;
-            font-size: 0.85em;
-            overflow-x: auto;
-            text-align: left;
-        }
-
-        /* ========== ANIMACIONES PARA CONTENIDO ========== */
-        .fade-in {
-            animation: fadeIn 0.8s ease-in;
-        }
-
-        .slide-title {
-            margin-bottom: 40px;
-        }
-
-    
-        /* Standalone slide overrides */
-        body { overflow: auto; }
-        .slide {
-            display: flex !important;
             min-height: 100vh;
-            height: auto;
-            padding-bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
         }
+
+        .slide {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 60px 90px;
+            background:
+                radial-gradient(ellipse 70% 50% at 50% -5%, rgba(124,131,232,0.14) 0%, transparent 65%),
+                linear-gradient(160deg, #0d1117 0%, #0a0f1a 100%);
+        }
+
+        /* ── TITLE ── */
+        .slide-title { text-align: center; margin-bottom: 42px; }
+        .slide-title h2 {
+            font-size: 2.1em;
+            font-weight: 700;
+            color: #c5caf7;
+            letter-spacing: -0.3px;
+        }
+        .slide-title p {
+            margin-top: 8px;
+            font-size: 1em;
+            color: #4a5270;
+        }
+
+        /* ── HUB LAYOUT ── */
+        .hub-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1040px;
+            gap: 0;
+        }
+
+        /* SVG lives behind everything */
+        .conn-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 0;
+        }
+
+        /* ── COLUMNS ── */
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            flex: 1;
+            z-index: 1;
+        }
+        .col-left  { align-items: flex-end; }
+        .col-right { align-items: flex-start; }
+
+        /* ── SERVICE CARD ── */
+        .scard {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            width: 248px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            cursor: default;
+        }
+        .col-left  .scard:hover { transform: translateX(-6px); }
+        .col-right .scard:hover { transform: translateX(6px);  }
+        .scard:hover {
+            border-color: rgba(124,131,232,0.55);
+            box-shadow: 0 0 28px rgba(124,131,232,0.22), 0 6px 24px rgba(0,0,0,0.5);
+        }
+
+        .scard-logo {
+            width: 52px; height: 52px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.11);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            padding: 6px;
+        }
+        .scard-logo img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            border-radius: 7px;
+        }
+        .scard-text { display: flex; flex-direction: column; }
+        .scard-name {
+            font-size: 1em;
+            font-weight: 600;
+            color: #c5caf7;
+        }
+        .scard-desc {
+            font-size: 0.78em;
+            color: #4a5270;
+            margin-top: 3px;
+        }
+
+        /* ── CENTER NODE ── */
+        .hub-center {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin: 0 36px;
+            z-index: 1;
+        }
+
+        .hub-ring {
+            position: relative;
+            width: 152px; height: 152px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* spinning conic border */
+        .hub-ring::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #7c83e8 0%, #64b5f6 33%, #80cbc4 66%, #7c83e8 100%);
+            animation: spin 5s linear infinite;
+            z-index: 0;
+        }
+        /* mask inner */
+        .hub-ring::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            background: #0d1117;
+            z-index: 1;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* outer glow pulse */
+        .hub-pulse {
+            position: absolute;
+            inset: -22px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,131,232,0.22) 0%, transparent 70%);
+            animation: pulse-anim 2.8s ease-in-out infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+        @keyframes pulse-anim {
+            0%, 100% { transform: scale(1);    opacity: 0.5; }
+            50%       { transform: scale(1.18); opacity: 1;   }
+        }
+
+        .hub-inner {
+            position: relative;
+            z-index: 2;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at 38% 32%, #1c2545, #0a0f1a);
+        }
+        .hub-inner img {
+            width: 80px; height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 14px rgba(124,131,232,0.55));
+        }
+
+        .hub-label { text-align: center; }
+        .hub-label-main {
+            display: block;
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #7c83e8;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .hub-label-sub {
+            display: block;
+            font-size: 0.72em;
+            color: #363d5a;
+            margin-top: 3px;
+        }
+
+        /* ── HIGHLIGHT ── */
+        .highlight-box {
+            margin-top: 34px;
+            max-width: 840px;
+            width: 100%;
+            background: rgba(124,131,232,0.07);
+            border: 1px solid rgba(124,131,232,0.22);
+            border-radius: 14px;
+            padding: 16px 24px;
+            backdrop-filter: blur(10px);
+            font-size: 0.93em;
+            color: #9098b8;
+            line-height: 1.65;
+        }
+        .highlight-box strong { color: #ffb74d; }
+
+        /* ── NAV ── */
         .nav-controls {
             position: fixed;
             bottom: 20px;
@@ -348,61 +235,201 @@
             display: flex;
             gap: 20px;
             align-items: center;
-            z-index: 1000;
-            background: rgba(13,17,23,0.85);
-            padding: 10px 24px;
-            border-radius: 8px;
-            border: 1px solid #3d5a8a;
+            z-index: 100;
+            background: rgba(8,12,18,0.9);
+            padding: 10px 26px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.07);
+            backdrop-filter: blur(14px);
         }
         .nav-controls a {
             color: #90caf9;
             text-decoration: none;
-            font-size: 0.95em;
-            padding: 6px 14px;
-            background: #7c83e8;
-            border-radius: 6px;
+            font-size: 0.88em;
+            padding: 6px 18px;
+            background: rgba(124,131,232,0.18);
+            border: 1px solid rgba(124,131,232,0.32);
+            border-radius: 8px;
             transition: background 0.2s;
         }
-        .nav-controls a:hover { background: #64b5f6; }
-        .slide-counter-nav {
-            color: #90caf9;
-            font-size: 0.9em;
-        }
+        .nav-controls a:hover { background: rgba(124,131,232,0.36); }
+        .slide-ctr { color: #363d5a; font-size: 0.85em; }
     </style>
 </head>
 <body>
-    <div class="presentation">
-<div class="slide henry">
-            <div class="slide-title">
-                <h2>Agentes Conectados: MCP Servers</h2>
+<div class="slide">
+
+    <div class="slide-title">
+        <h2>Agentes Conectados: MCP Servers</h2>
+        <p>Un agente de IA puede conectarse a múltiples aplicaciones y servicios</p>
+    </div>
+
+    <div class="hub-wrap" id="hub-wrap">
+        <svg class="conn-svg" id="conn-svg"></svg>
+
+        <!-- LEFT -->
+        <div class="col col-left">
+            <div class="scard" id="c-github">
+                <div class="scard-logo"><img src="assets/github.png" alt="GitHub"></div>
+                <div class="scard-text">
+                    <span class="scard-name">GitHub</span>
+                    <span class="scard-desc">Repos, commits, PRs automáticos</span>
+                </div>
             </div>
-            <p style="margin-bottom: 30px;">Un agente de IA puede conectarse a múltiples aplicaciones y servicios</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; max-width: 900px; margin: 0 auto;">
-                <div style="background: #1a2540; padding: 20px; border-radius: 8px; border-left: 3px solid #7c83e8;">
-                    <h3 style="margin: 0 0 10px 0;">🔧 GitHub API</h3>
-                    <p style="font-size: 0.95em;">Crear repos, commits, PRs automáticamente</p>
-                </div>
-                <div style="background: #1a2540; padding: 20px; border-radius: 8px; border-left: 3px solid #64b5f6;">
-                    <h3 style="margin: 0 0 10px 0;">📊 Google Drive</h3>
-                    <p style="font-size: 0.95em;">Leer/escribir documentos, hojas de cálculo</p>
-                </div>
-                <div style="background: #1a2540; padding: 20px; border-radius: 8px; border-left: 3px solid #80cbc4;">
-                    <h3 style="margin: 0 0 10px 0;">⚙️ Blender API</h3>
-                    <p style="font-size: 0.95em;">Generar modelos 3D, URDF, simulaciones</p>
+            <div class="scard" id="c-gdrive">
+                <div class="scard-logo"><img src="assets/google_drive.png" alt="Google Drive"></div>
+                <div class="scard-text">
+                    <span class="scard-name">Google Drive</span>
+                    <span class="scard-desc">Docs y hojas de cálculo</span>
                 </div>
             </div>
-            <div class="highlight-box" style="margin-top: 40px;">
-                <p style="margin: 0;">
-                    ✨ <strong>Caso práctico:</strong> Claude (agente IA) + MCP Blender → 
-                    Diseñó automáticamente un brazo robótico 6-DOF desde descripciones textuales
-                </p>
+        </div>
+
+        <!-- CENTER -->
+        <div class="hub-center" id="hub-center">
+            <div class="hub-ring">
+                <div class="hub-pulse"></div>
+                <div class="hub-inner">
+                    <img src="assets/claude.png" alt="Claude">
+                </div>
+            </div>
+            <div class="hub-label">
+                <span class="hub-label-main">Claude</span>
+                <span class="hub-label-sub">MCP Protocol</span>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col col-right">
+            <div class="scard" id="c-blender">
+                <div class="scard-logo"><img src="assets/blender.png" alt="Blender"></div>
+                <div class="scard-text">
+                    <span class="scard-name">Blender</span>
+                    <span class="scard-desc">Modelos 3D y URDF</span>
+                </div>
+            </div>
+            <div class="scard" id="c-vscode">
+                <div class="scard-logo"><img src="assets/visual_studio_code.webp" alt="VS Code"></div>
+                <div class="scard-text">
+                    <span class="scard-name">VS Code</span>
+                    <span class="scard-desc">Edición de código</span>
+                </div>
+            </div>
+            <div class="scard" id="c-fusion">
+                <div class="scard-logo"><img src="assets/fusion.png" alt="Fusion 360"></div>
+                <div class="scard-text">
+                    <span class="scard-name">Fusion 360</span>
+                    <span class="scard-desc">CAD y simulación</span>
+                </div>
             </div>
         </div>
     </div>
-    <div class="nav-controls">
-        <a href="02_agente_ia.html">← Anterior</a>
-        <span class="slide-counter-nav">3 / 19</span>
-        <a href="04_pipeline_completo.html">Siguiente →</a>
+
+    <div class="highlight-box">
+        ✨ <strong>Caso práctico:</strong> Claude + MCP Blender →
+        Diseñó automáticamente un brazo robótico 6-DOF desde descripciones textuales, sin escribir código.
     </div>
+</div>
+
+<div class="nav-controls">
+    <a href="02_agente_ia.html">← Anterior</a>
+    <span class="slide-ctr">3 / 19</span>
+    <a href="04_pipeline_completo.html">Siguiente →</a>
+</div>
+
+<script>
+(function () {
+    const COLORS = { left: '#7c83e8', right: '#80cbc4' };
+
+    function draw() {
+        const svg  = document.getElementById('conn-svg');
+        const wrap = document.getElementById('hub-wrap');
+        const hub  = document.getElementById('hub-center');
+
+        // positions relative to hub-wrap
+        const W  = wrap.getBoundingClientRect();
+        const H  = hub.getBoundingClientRect();
+
+        // Claude ring center (first child of hub-center is .hub-ring)
+        const ring = hub.querySelector('.hub-ring').getBoundingClientRect();
+        const cx = ring.left + ring.width  / 2 - W.left;
+        const cy = ring.top  + ring.height / 2 - W.top;
+
+        svg.setAttribute('viewBox', `0 0 ${W.width} ${W.height}`);
+
+        const defs = `
+        <defs>
+            <linearGradient id="gl" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="${COLORS.left}"  stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="${COLORS.left}" stop-opacity="0.9"/>
+            </linearGradient>
+            <linearGradient id="gr" x1="100%" y1="0%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="${COLORS.right}"  stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="${COLORS.right}" stop-opacity="0.9"/>
+            </linearGradient>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>`;
+
+        let paths = '';
+
+        function pathFor(cardId, side) {
+            const card = document.getElementById(cardId);
+            if (!card) return '';
+            const R   = card.getBoundingClientRect();
+            // connection point: middle of the edge facing the center
+            const ex  = side === 'left'
+                ? R.right - W.left          // right edge of left card
+                : R.left  - W.left;         // left  edge of right card
+            const ey  = R.top + R.height / 2 - W.top;
+
+            const grad = side === 'left' ? 'url(#gl)' : 'url(#gr)';
+            const cp1x = ex + (cx - ex) * 0.45;
+            const cp2x = ex + (cx - ex) * 0.55;
+
+            // travelling dot keyframe offset
+            const uid  = cardId + '-' + side;
+            const dir  = side === 'left' ? 1 : -1;
+
+            return `
+            <!-- ${cardId} -->
+            <path id="p-${uid}"
+                  d="M ${ex} ${ey} C ${cp1x} ${ey} ${cp2x} ${cy} ${cx} ${cy}"
+                  fill="none" stroke="${grad}" stroke-width="2"
+                  stroke-dasharray="7 5" opacity="0.8" filter="url(#glow)">
+                <animate attributeName="stroke-dashoffset"
+                         from="${dir > 0 ? 0 : -240}" to="${dir > 0 ? -240 : 0}"
+                         dur="2s" repeatCount="indefinite"/>
+            </path>
+            <!-- endpoint dot -->
+            <circle cx="${ex}" cy="${ey}" r="4"
+                    fill="${side === 'left' ? COLORS.left : COLORS.right}"
+                    opacity="0.85" filter="url(#glow)"/>
+            `;
+        }
+
+        paths += pathFor('c-github', 'left');
+        paths += pathFor('c-gdrive', 'left');
+        paths += pathFor('c-blender', 'right');
+        paths += pathFor('c-vscode',  'right');
+        paths += pathFor('c-fusion',  'right');
+
+        svg.innerHTML = defs + paths;
+    }
+
+    // draw after fonts + images settle
+    if (document.readyState === 'complete') {
+        draw();
+    } else {
+        window.addEventListener('load', draw);
+    }
+
+    // redraw on resize (debounced)
+    let t;
+    window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 80); });
+})();
+</script>
 </body>
 </html>
