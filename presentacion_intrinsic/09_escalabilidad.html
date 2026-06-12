@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>09 · Escalabilidad</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Meta Pro','FF Meta','Segoe UI',sans-serif; background:#001530; color:#fff; }
+.slide {
+    min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; padding:40px 50px 110px;
+    background:linear-gradient(135deg,#001530 0%,#002856 100%);
+}
+.brand { position:fixed; top:16px; right:22px; background:#fff; border-radius:10px;
+         padding:6px 14px; z-index:50; }
+.brand img { height:26px; display:block; }
+h2 { font-size:2.05em; font-weight:800; color:#fff; margin-bottom:6px; }
+.sub { color:#7fb3e8; font-size:1em; margin-bottom:24px; }
+
+.seed {
+    background:rgba(255,255,255,0.1); border:1px solid #fff; color:#fff;
+    border-radius:14px; padding:10px 30px; font-size:0.95em; margin-bottom:14px;
+    font-weight:700; animation:pop .5s ease both;
+}
+.fan {
+    width:2px; height:22px; margin-bottom:14px;
+    background:repeating-linear-gradient(180deg,#7fb3e8 0 5px,transparent 5px 10px);
+    animation:pop .5s .3s ease both;
+}
+@keyframes pop { from{opacity:0; transform:scale(.85);} to{opacity:1; transform:scale(1);} }
+
+.grid { display:grid; grid-template-columns:repeat(3,400px); gap:24px; }
+.card {
+    background:rgba(255,255,255,0.06); border:1px solid rgba(127,179,232,0.45);
+    border-radius:16px; padding:16px; text-align:center;
+    animation:rise .6s ease both; animation-delay:calc(.4s + var(--i) * .3s);
+}
+@keyframes rise { from{opacity:0; transform:translateY(25px);} to{opacity:1; transform:none;} }
+.card h3 { color:#fff; font-size:1.02em; margin-bottom:10px; font-weight:800; }
+.card h3 span { margin-right:6px; }
+.yt {
+    position:relative; width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden;
+    border:1px solid rgba(207,226,247,0.4);
+}
+.yt iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+.card .proof {
+    margin-top:10px; font-size:0.78em; color:#b8c4d4; line-height:1.4;
+}
+.card .proof b { color:#fff; }
+
+.edu {
+    margin-top:24px; display:flex; align-items:center; gap:18px;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(127,179,232,0.45);
+    border-radius:16px; padding:14px 30px;
+    animation:rise .6s 1.5s ease both;
+}
+.edu .ico { font-size:2em; }
+.edu .t { text-align:left; font-size:0.92em; color:#b8c4d4; }
+.edu .t b { color:#fff; display:block; font-size:1.05em; }
+
+.foot { margin-top:22px; font-size:1.12em; color:#d9dee5; animation:rise .6s 1.8s ease both; }
+.foot b { color:#fff; font-weight:800; }
+
+.nav-controls {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    display:flex; gap:20px; align-items:center; z-index:100;
+    background:rgba(0,21,48,0.92); padding:10px 26px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(14px);
+}
+.nav-controls a {
+    color:#cfe2f7; text-decoration:none; font-size:0.88em; padding:6px 18px;
+    background:rgba(127,179,232,0.18); border:1px solid rgba(127,179,232,0.4);
+    border-radius:8px; transition:background 0.2s;
+}
+.nav-controls a:hover { background:rgba(127,179,232,0.38); }
+.slide-ctr { color:#5d7a9c; font-size:0.85em; }
+</style>
+</head>
+<body>
+<div class="brand"><img src="assets/logo_ucuenca.png" alt="UCUENCA"></div>
+<div class="slide">
+    <h2>El método escala más allá de un brazo</h2>
+    <p class="sub">Misma receta: simular masivamente → aprender → transferir</p>
+
+    <div class="seed">Modelo + simulador GPU + aprendizaje = receta reutilizable</div>
+    <div class="fan"></div>
+
+    <div class="grid">
+        <div class="card" style="--i:0">
+            <h3><span>🐕</span>Enseñar a caminar</h3>
+            <div class="yt">
+                <iframe src="https://www.youtube.com/embed/PjWvf90l4cg?autoplay=1&mute=1&loop=1&playlist=PjWvf90l4cg&rel=0"
+                        title="ANYmal Parkour" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="proof"><b>ANYmal · ETH Zürich</b> — locomoción 100% aprendida en simulación, transferida al robot real</div>
+        </div>
+        <div class="card" style="--i:1">
+            <h3><span>🦿</span>Exoesqueletos y movilidad</h3>
+            <div class="yt">
+                <iframe src="https://www.youtube.com/embed/VSXlu8ft_Fs?autoplay=1&mute=1&loop=1&playlist=VSXlu8ft_Fs&rel=0"
+                        title="Wandercraft + NVIDIA" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="proof"><b>Wandercraft + NVIDIA</b> — marcha asistida entrenada en sim antes de tocar al paciente</div>
+        </div>
+        <div class="card" style="--i:2">
+            <h3><span>🏭</span>Plantas enteras</h3>
+            <div class="yt">
+                <iframe src="https://www.youtube.com/embed/-eVpGu3Th-w?autoplay=1&mute=1&loop=1&playlist=-eVpGu3Th-w&rel=0"
+                        title="BMW Omniverse" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="proof"><b>BMW + Omniverse</b> — fábrica completa como gemelo digital · −30% costo de planificación</div>
+        </div>
+    </div>
+
+    <div class="edu">
+        <div class="ico">🎓</div>
+        <div class="t">
+            <b>Y en educación</b>
+            Cualquier universidad entrena robots sin comprarlos: una GPU y un URDF — este proyecto, U. de Cuenca
+        </div>
+    </div>
+
+    <div class="foot">No resolvimos un problema — adoptamos una <b>forma de resolverlos</b></div>
+</div>
+
+<div class="nav-controls">
+    <a href="08_godot.html">← Anterior</a>
+    <span class="slide-ctr">9 / 10</span>
+    <a href="10_trl.html">Siguiente →</a>
+</div>
+</body>
+</html>

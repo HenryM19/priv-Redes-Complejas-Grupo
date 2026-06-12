@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>08 · Celda Industrial</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Meta Pro','FF Meta','Segoe UI',sans-serif; background:#001530; color:#fff; }
+.slide {
+    min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; padding:40px 60px 110px;
+    background:linear-gradient(135deg,#002856 0%,#001530 100%);
+}
+.brand { position:fixed; top:16px; right:22px; background:#fff; border-radius:10px;
+         padding:6px 14px; z-index:50; }
+.brand img { height:26px; display:block; }
+h2 { font-size:2.1em; font-weight:800; color:#fff; margin-bottom:6px; }
+.sub { color:#7fb3e8; font-size:1em; margin-bottom:28px; }
+
+.loop { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+.lnode {
+    background:rgba(255,255,255,0.06); border:1px solid rgba(127,179,232,0.45);
+    border-radius:12px; padding:12px 22px; text-align:center;
+    animation:pop .5s ease both; animation-delay:calc(var(--i) * .3s);
+}
+@keyframes pop { from{opacity:0; transform:scale(.85);} to{opacity:1; transform:scale(1);} }
+.lnode .ico { font-size:1.5em; }
+.lnode .t { color:#cfe2f7; font-size:0.82em; margin-top:4px; }
+.lnode.hero { border-color:#fff; background:rgba(255,255,255,0.12); }
+.lnode.hero .t { color:#fff; }
+.biarrow {
+    color:#7fb3e8; font-size:1.2em; width:46px; text-align:center; position:relative;
+    animation:pop .5s ease both; animation-delay:calc(var(--i) * .3s);
+}
+.biarrow::after {
+    content:''; position:absolute; left:2px; right:2px; bottom:-6px; height:2px;
+    background:repeating-linear-gradient(90deg,#cfe2f7 0 6px,transparent 6px 12px);
+    animation:dash 1s linear infinite;
+}
+@keyframes dash { to { background-position:12px 0; } }
+
+.videos { display:flex; gap:34px; }
+.vbox { width:480px; display:flex; flex-direction:column; gap:10px;
+        animation:pop .6s 1.2s ease both; }
+.vframe {
+    border-radius:14px; overflow:hidden; border:1px solid rgba(207,226,247,0.5);
+    box-shadow:0 10px 40px rgba(0,0,0,0.5); position:relative;
+}
+.vframe::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px; z-index:2;
+    background:linear-gradient(90deg,#fff,#7fb3e8,#002856);
+}
+.vframe video { display:block; width:100%; }
+.vcap { font-size:0.85em; color:#93a5bd; text-align:center; }
+.vcap b { color:#fff; }
+
+.modes { display:flex; gap:16px; margin-top:24px; animation:pop .6s 1.5s ease both; }
+.mode {
+    font-size:0.85em; padding:7px 18px; border-radius:20px;
+    border:1px solid rgba(127,179,232,0.45); color:#cfe2f7; background:rgba(255,255,255,0.05);
+}
+.mode.win { border-color:#fff; color:#fff; background:rgba(255,255,255,0.12); font-weight:700; }
+
+.nav-controls {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    display:flex; gap:20px; align-items:center; z-index:100;
+    background:rgba(0,21,48,0.92); padding:10px 26px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(14px);
+}
+.nav-controls a {
+    color:#cfe2f7; text-decoration:none; font-size:0.88em; padding:6px 18px;
+    background:rgba(127,179,232,0.18); border:1px solid rgba(127,179,232,0.4);
+    border-radius:8px; transition:background 0.2s;
+}
+.nav-controls a:hover { background:rgba(127,179,232,0.38); }
+.slide-ctr { color:#5d7a9c; font-size:0.85em; }
+</style>
+</head>
+<body>
+<div class="brand"><img src="assets/logo_ucuenca.png" alt="UCUENCA"></div>
+<div class="slide">
+    <h2>El reto destilado a una celda industrial</h2>
+    <p class="sub">Percibir → decidir → actuar: la misma esencia del Intrinsic Challenge, en una banda clasificadora</p>
+
+    <div class="loop">
+        <div class="lnode" style="--i:0"><div class="ico">🎮</div><div class="t">Godot<br>banda + cajas</div></div>
+        <div class="biarrow" style="--i:1">⇄</div>
+        <div class="lnode" style="--i:1"><div class="ico">🔗</div><div class="t">rosbridge<br>ROS 2</div></div>
+        <div class="biarrow" style="--i:2">⇄</div>
+        <div class="lnode hero" style="--i:2"><div class="ico">🧠</div><div class="t">Percepción aprendida<br>+ IK clásica</div></div>
+    </div>
+
+    <div class="videos">
+        <div class="vbox">
+            <div class="vframe">
+                <video controls muted loop autoplay playsinline>
+                    <source src="videos/clasificador_banda.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="vcap"><b>Clasificación por color</b> · empuje al bin correcto</div>
+        </div>
+        <div class="vbox">
+            <div class="vframe">
+                <video controls muted loop>
+                    <source src="videos/clasificador_banda_2.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="vcap"><b>Robustez</b> · funciona bajo iluminación variable</div>
+        </div>
+    </div>
+
+    <div class="modes">
+        <div class="mode">1 · Clásico (HSV)</div>
+        <div class="mode win">2 · Híbrido: IA percibe, IK mueve ★</div>
+        <div class="mode">3 · RL end-to-end</div>
+    </div>
+</div>
+
+<div class="nav-controls">
+    <a href="07_isaac_sim.html">← Anterior</a>
+    <span class="slide-ctr">8 / 10</span>
+    <a href="09_escalabilidad.html">Siguiente →</a>
+</div>
+</body>
+</html>

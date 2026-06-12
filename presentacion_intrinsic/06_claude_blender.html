@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>06 · Claude + Blender</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Meta Pro','FF Meta','Segoe UI',sans-serif; background:#001530; color:#fff; }
+.slide {
+    min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; padding:40px 60px 110px;
+    background:linear-gradient(135deg,#002856 0%,#001530 100%);
+}
+.brand { position:fixed; top:16px; right:22px; background:#fff; border-radius:10px;
+         padding:6px 14px; z-index:50; }
+.brand img { height:26px; display:block; }
+h2 { font-size:2em; font-weight:800; color:#fff; margin-bottom:6px; }
+.sub { color:#7fb3e8; font-size:1em; margin-bottom:26px; }
+
+.two-col { display:flex; gap:48px; align-items:center; }
+
+/* ── flujo vertical texto → modelo ── */
+.diagram { display:flex; flex-direction:column; align-items:stretch; width:400px; }
+.dstep {
+    display:flex; align-items:center; gap:14px;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(127,179,232,0.45);
+    border-radius:12px; padding:10px 16px;
+    animation:pop .45s ease both; animation-delay:calc(var(--i) * .3s);
+}
+@keyframes pop { from{opacity:0; transform:translateX(-18px);} to{opacity:1; transform:none;} }
+.dstep .ico { font-size:1.4em; width:34px; text-align:center; }
+.dstep .ico img { width:26px; height:26px; object-fit:contain; vertical-align:middle; }
+.dstep .name { color:#fff; font-size:0.92em; font-weight:700; }
+.dstep .det { color:#93a5bd; font-size:0.78em; font-family:'IBM Plex Mono',monospace; }
+.dstep.in  { border-color:#fff; background:rgba(255,255,255,0.1); }
+.dstep.out { border-color:#fff; background:rgba(255,255,255,0.1); }
+.dline {
+    width:2px; height:16px; margin:2px 0 2px 32px;
+    background:repeating-linear-gradient(180deg,#7fb3e8 0 5px,transparent 5px 10px);
+    animation:pop .45s ease both; animation-delay:calc(var(--i) * .3s);
+}
+
+/* ── video ── */
+.vbox { width:560px; display:flex; flex-direction:column; gap:10px;
+        animation:fadeIn .8s 1.4s ease both; }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+.vframe {
+    border-radius:14px; overflow:hidden; border:1px solid rgba(207,226,247,0.5);
+    box-shadow:0 10px 40px rgba(0,0,0,0.5); position:relative;
+}
+.vframe::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px; z-index:2;
+    background:linear-gradient(90deg,#fff,#7fb3e8,#002856);
+}
+.vframe video { display:block; width:100%; }
+.vcap { font-size:0.85em; color:#93a5bd; text-align:center; }
+.vcap b { color:#fff; }
+
+/* ── ecosistema MCP ── */
+.eco { display:flex; gap:14px; margin-top:28px; align-items:center;
+       animation:fadeIn .8s 2s ease both; }
+.eco-label { color:#93a5bd; font-size:0.85em; margin-right:8px; }
+.tool {
+    background:#fff; border-radius:10px; padding:8px; width:46px; height:46px;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .2s;
+}
+.tool:hover { transform:translateY(-5px); }
+.tool img { max-width:30px; max-height:30px; object-fit:contain; }
+
+.punch { margin-top:22px; font-size:1.1em; color:#d9dee5; animation:fadeIn .8s 2.3s ease both; }
+.punch b { color:#fff; font-weight:800; }
+
+.nav-controls {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    display:flex; gap:20px; align-items:center; z-index:100;
+    background:rgba(0,21,48,0.92); padding:10px 26px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(14px);
+}
+.nav-controls a {
+    color:#cfe2f7; text-decoration:none; font-size:0.88em; padding:6px 18px;
+    background:rgba(127,179,232,0.18); border:1px solid rgba(127,179,232,0.4);
+    border-radius:8px; transition:background 0.2s;
+}
+.nav-controls a:hover { background:rgba(127,179,232,0.38); }
+.slide-ctr { color:#5d7a9c; font-size:0.85em; }
+</style>
+</head>
+<body>
+<div class="brand"><img src="assets/logo_ucuenca.png" alt="UCUENCA"></div>
+<div class="slide">
+    <h2>Modelar también con IA: Claude + Blender</h2>
+    <p class="sub">Del texto al modelo 3D listo para simular — cero líneas de código a mano</p>
+
+    <div class="two-col">
+        <div class="diagram">
+            <div class="dstep in" style="--i:0">
+                <div class="ico">📝</div>
+                <div><div class="name">Instrucción en lenguaje natural</div>
+                <div class="det">"Crea un brazo 6-DOF con gripper paralelo"</div></div>
+            </div>
+            <div class="dline" style="--i:1"></div>
+            <div class="dstep" style="--i:1">
+                <div class="ico"><img src="assets/claude.png" alt="Claude"></div>
+                <div><div class="name">Claude (LLM)</div>
+                <div class="det">interpreta · razona · genera código</div></div>
+            </div>
+            <div class="dline" style="--i:2"></div>
+            <div class="dstep" style="--i:2">
+                <div class="ico">🔌</div>
+                <div><div class="name">MCP Server — Blender</div>
+                <div class="det">execute_blender_code( script )</div></div>
+            </div>
+            <div class="dline" style="--i:3"></div>
+            <div class="dstep" style="--i:3">
+                <div class="ico"><img src="assets/blender.png" alt="Blender"></div>
+                <div><div class="name">Blender ejecuta bpy</div>
+                <div class="det">eslabones · joints · masas · fricción</div></div>
+            </div>
+            <div class="dline" style="--i:4"></div>
+            <div class="dstep out" style="--i:4">
+                <div class="ico">📦</div>
+                <div><div class="name">Modelo 3D + URDF</div>
+                <div class="det">robot_arm.urdf → Isaac Lab / ROS 2</div></div>
+            </div>
+        </div>
+
+        <div class="vbox">
+            <div class="vframe">
+                <video controls muted loop autoplay playsinline>
+                    <source src="videos/video_modelamiento_henry.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="vcap"><b>Demostración real</b> · brazo generado por instrucciones de texto</div>
+        </div>
+    </div>
+
+    <div class="eco">
+        <span class="eco-label">Un agente, muchas herramientas:</span>
+        <div class="tool"><img src="assets/blender.png" title="Blender"></div>
+        <div class="tool"><img src="assets/fusion.png" title="Fusion 360"></div>
+        <div class="tool"><img src="assets/visual_studio_code.webp" title="VS Code"></div>
+        <div class="tool"><img src="assets/github.png" title="GitHub"></div>
+        <div class="tool"><img src="assets/google_drive.png" title="Google Drive"></div>
+    </div>
+
+    <div class="punch">Prototipado: de <b>semanas</b> → a <b>horas</b></div>
+</div>
+
+<div class="nav-controls">
+    <a href="05_intrinsic_ia.html">← Anterior</a>
+    <span class="slide-ctr">6 / 10</span>
+    <a href="07_isaac_sim.html">Siguiente →</a>
+</div>
+</body>
+</html>

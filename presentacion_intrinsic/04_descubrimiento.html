@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>04 · El Giro</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Meta Pro','FF Meta','Segoe UI',sans-serif; background:#001530; color:#fff; }
+.slide {
+    min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; padding:50px 70px 110px;
+    background:linear-gradient(135deg,#002856 0%,#001530 100%);
+}
+.brand { position:fixed; top:16px; right:22px; background:#fff; border-radius:10px;
+         padding:6px 14px; z-index:50; }
+.brand img { height:26px; display:block; }
+h2 { font-size:2.3em; font-weight:800; color:#fff; margin-bottom:8px; }
+.sub { color:#7fb3e8; font-size:1.05em; margin-bottom:60px; }
+
+.cards { display:flex; gap:36px; }
+.card {
+    width:280px; background:rgba(255,255,255,0.06); border:1px solid rgba(127,179,232,0.45);
+    border-radius:18px; padding:34px 26px; text-align:center;
+    animation:rise .6s ease both; animation-delay:calc(var(--i) * .35s);
+    transition:transform .25s, box-shadow .25s;
+}
+.card:hover { transform:translateY(-8px); box-shadow:0 12px 35px rgba(127,179,232,0.25); }
+@keyframes rise { from{opacity:0; transform:translateY(30px);} to{opacity:1; transform:none;} }
+.card .logo { font-size:3em; margin-bottom:16px; }
+.card h3 { color:#fff; font-size:1.25em; margin-bottom:10px; font-weight:800; }
+.card p { color:#b8c4d4; font-size:0.92em; line-height:1.5; }
+.card .tag {
+    display:inline-block; margin-top:16px; font-size:0.78em; color:#cfe2f7;
+    background:rgba(127,179,232,0.15); border:1px solid rgba(127,179,232,0.45);
+    border-radius:20px; padding:4px 14px;
+}
+.card.hero { border-color:#fff; background:rgba(255,255,255,0.1); }
+.card.hero .tag { color:#fff; border-color:rgba(255,255,255,0.6); }
+
+.insight { margin-top:60px; font-size:1.25em; color:#d9dee5; animation:rise .6s 1.3s ease both; }
+.insight b { color:#fff; font-weight:800; }
+
+.nav-controls {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    display:flex; gap:20px; align-items:center; z-index:100;
+    background:rgba(0,21,48,0.92); padding:10px 26px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(14px);
+}
+.nav-controls a {
+    color:#cfe2f7; text-decoration:none; font-size:0.88em; padding:6px 18px;
+    background:rgba(127,179,232,0.18); border:1px solid rgba(127,179,232,0.4);
+    border-radius:8px; transition:background 0.2s;
+}
+.nav-controls a:hover { background:rgba(127,179,232,0.38); }
+.slide-ctr { color:#5d7a9c; font-size:0.85em; }
+</style>
+</head>
+<body>
+<div class="brand"><img src="assets/logo_ucuenca.png" alt="UCUENCA"></div>
+<div class="slide">
+    <h2>El giro: no modelar lo que ya está resuelto</h2>
+    <p class="sub">Descubrimos un ecosistema donde la física ya viene incluida</p>
+
+    <div class="cards">
+        <div class="card" style="--i:0">
+            <div class="logo">🦾</div>
+            <h3>MuJoCo</h3>
+            <p>Física de contactos precisa y rápida — el estándar en investigación</p>
+            <div class="tag">DeepMind</div>
+        </div>
+        <div class="card hero" style="--i:1">
+            <div class="logo">🤗</div>
+            <h3>LeRobot</h3>
+            <p>Aprendizaje por imitación (ACT) — el robot aprende viendo demostraciones</p>
+            <div class="tag">Hugging Face · reto Intrinsic</div>
+        </div>
+        <div class="card hero" style="--i:2">
+            <div class="logo">⚡</div>
+            <h3>Isaac Lab</h3>
+            <p>Miles de robots entrenando en paralelo sobre GPU — RL a escala industrial</p>
+            <div class="tag">NVIDIA · generalización</div>
+        </div>
+    </div>
+
+    <div class="insight">
+        Las semanas de ecuaciones se convierten en <b>horas de simulación</b>
+    </div>
+</div>
+
+<div class="nav-controls">
+    <a href="03_clasico.html">← Anterior</a>
+    <span class="slide-ctr">4 / 10</span>
+    <a href="05_intrinsic_ia.html">Siguiente →</a>
+</div>
+</body>
+</html>

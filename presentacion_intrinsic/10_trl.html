@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>10 · TRL</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Meta Pro','FF Meta','Segoe UI',sans-serif; background:#001530; color:#fff; }
+.slide {
+    min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; padding:45px 60px 110px;
+    background:linear-gradient(135deg,#002856 0%,#001530 100%);
+}
+.brand { position:fixed; top:16px; right:22px; background:#fff; border-radius:10px;
+         padding:6px 14px; z-index:50; }
+.brand img { height:26px; display:block; }
+h2 { font-size:2.1em; font-weight:800; color:#fff; margin-bottom:6px; }
+.sub { color:#7fb3e8; font-size:1em; margin-bottom:45px; }
+
+.trl-row { display:flex; gap:10px; align-items:flex-end; }
+.trl {
+    width:118px; border-radius:14px 14px 6px 6px; padding:14px 8px 12px;
+    text-align:center; position:relative; transform-origin:bottom;
+    animation:grow .5s ease both; animation-delay:calc(var(--i) * .18s);
+}
+@keyframes grow { from{opacity:0; transform:scaleY(.3);} to{opacity:1; transform:scaleY(1);} }
+.trl .num {
+    background:rgba(0,21,48,0.85); border-radius:50%; width:52px; height:52px;
+    margin:0 auto 10px; display:flex; align-items:center; justify-content:center;
+    font-weight:bold; font-size:0.95em; color:#fff;
+}
+.trl .desc { font-size:0.68em; line-height:1.35; color:rgba(0,21,48,0.85); font-weight:700; }
+.t1 { height:170px; background:#f5e642; }
+.t2 { height:185px; background:#f08a24; }
+.t3 { height:200px; background:#d4527e; }
+.t4 { height:215px; background:#5fb0f0; }
+.t5 { height:230px; background:#9b7fe8; }
+.t6 { height:245px; background:#1fa86a; }
+.t7 { height:260px; background:#b5d435; }
+.t8 { height:275px; background:#f05548; }
+.t9 { height:290px; background:#f060c0; }
+.t6,.t7,.t8,.t9 { filter:saturate(.25) brightness(.55); }
+.t5 { filter:saturate(.55) brightness(.8); }
+
+.here {
+    position:absolute; top:-66px; left:50%; transform:translateX(-50%);
+    background:#fff; color:#002856; font-weight:bold; font-size:0.72em;
+    padding:6px 12px; border-radius:8px; white-space:nowrap;
+    animation:bounce 1.6s 1.8s ease-in-out infinite;
+}
+.here::after {
+    content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+    border:8px solid transparent; border-top-color:#fff;
+}
+@keyframes bounce { 0%,100%{transform:translate(-50%,0);} 50%{transform:translate(-50%,-8px);} }
+.next {
+    position:absolute; top:-40px; left:50%; transform:translateX(-50%);
+    color:#cfe2f7; font-size:0.72em; white-space:nowrap;
+    animation:fadeIn 1s 2.4s ease both;
+}
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+.envs { display:flex; gap:10px; margin-top:18px; width:1142px; }
+.env {
+    text-align:center; padding:10px 0; border-radius:8px; font-size:0.82em;
+    letter-spacing:2px; font-weight:700; animation:fadeIn .8s 2s ease both;
+}
+.env.lab  { flex:3.1; background:rgba(255,255,255,0.16); color:#fff; }
+.env.sim  { flex:3.1; background:rgba(127,179,232,0.22); color:#cfe2f7; }
+.env.real { flex:3.1; background:rgba(255,255,255,0.04); color:#93a5bd;
+            border:1px dashed rgba(147,165,189,0.5); }
+
+.legend { display:flex; gap:30px; margin-top:34px; animation:fadeIn .8s 2.6s ease both; }
+.leg { display:flex; align-items:center; gap:10px; font-size:0.9em; color:#b8c4d4; }
+.sw { width:14px; height:14px; border-radius:4px; }
+.sw.done { background:#5fb0f0; }
+.sw.next { background:#9b7fe8; opacity:.7; }
+
+.thanks { margin-top:36px; font-size:1.3em; color:#fff; font-weight:800;
+          animation:fadeIn .8s 3s ease both; }
+
+.nav-controls {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    display:flex; gap:20px; align-items:center; z-index:100;
+    background:rgba(0,21,48,0.92); padding:10px 26px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(14px);
+}
+.nav-controls a {
+    color:#cfe2f7; text-decoration:none; font-size:0.88em; padding:6px 18px;
+    background:rgba(127,179,232,0.18); border:1px solid rgba(127,179,232,0.4);
+    border-radius:8px; transition:background 0.2s;
+}
+.nav-controls a:hover { background:rgba(127,179,232,0.38); }
+.slide-ctr { color:#5d7a9c; font-size:0.85em; }
+</style>
+</head>
+<body>
+<div class="brand"><img src="assets/logo_ucuenca.png" alt="UCUENCA"></div>
+<div class="slide">
+    <h2>¿Dónde estamos? — Nivel de Maduración Tecnológica</h2>
+    <p class="sub">Validado en laboratorio y simulación · el camino al entorno real está trazado</p>
+
+    <div class="trl-row">
+        <div class="trl t1" style="--i:0"><div class="num">TRL 1</div><div class="desc">Principios básicos observados</div></div>
+        <div class="trl t2" style="--i:1"><div class="num">TRL 2</div><div class="desc">Concepto de tecnología formulado</div></div>
+        <div class="trl t3" style="--i:2"><div class="num">TRL 3</div><div class="desc">Prueba de concepto</div></div>
+        <div class="trl t4" style="--i:3">
+            <div class="here">★ ESTAMOS AQUÍ</div>
+            <div class="num">TRL 4</div><div class="desc">Validación en laboratorio</div>
+        </div>
+        <div class="trl t5" style="--i:4">
+            <div class="next">→ siguiente paso</div>
+            <div class="num">TRL 5</div><div class="desc">Validación en entorno relevante</div>
+        </div>
+        <div class="trl t6" style="--i:5"><div class="num">TRL 6</div><div class="desc">Condiciones cercanas a reales</div></div>
+        <div class="trl t7" style="--i:6"><div class="num">TRL 7</div><div class="desc">Demostración en entorno real</div></div>
+        <div class="trl t8" style="--i:7"><div class="num">TRL 8</div><div class="desc">Sistema completo calificado</div></div>
+        <div class="trl t9" style="--i:8"><div class="num">TRL 9</div><div class="desc">Operación exitosa real</div></div>
+    </div>
+
+    <div class="envs">
+        <div class="env lab">ENTORNO DE LABORATORIO</div>
+        <div class="env sim">ENTORNO DE SIMULACIÓN</div>
+        <div class="env real">ENTORNO REAL</div>
+    </div>
+
+    <div class="legend">
+        <div class="leg"><div class="sw done"></div> TRL 1–4 · logrado: concepto, simulación masiva, demo en Jetson</div>
+        <div class="leg"><div class="sw next"></div> TRL 5+ · pendiente: brazo físico en condiciones de planta</div>
+    </div>
+
+    <div class="thanks">Gracias</div>
+</div>
+
+<div class="nav-controls">
+    <a href="09_escalabilidad.html">← Anterior</a>
+    <span class="slide-ctr">10 / 10</span>
+    <a href="01_portada.html">⟲ Inicio</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>01 · Portada</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family:'Meta Pro','FF Meta','Segoe UI','Inter',sans-serif;
+    background:#001530; color:#fff; overflow:hidden;
+}
+.slide {
+    width:100vw; height:100vh; position:relative;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    text-align:center; overflow:hidden;
+}
+.bgvid {
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; opacity:0.20;
+}
+.veil {
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at center, rgba(0,40,86,0.35) 0%, rgba(0,21,48,0.95) 100%);
+}
+.content { position:relative; z-index:2; animation:rise 1.2s ease both; }
+@keyframes rise { from{opacity:0; transform:translateY(30px);} to{opacity:1; transform:none;} }
+
+.kicker {
+    display:inline-block; font-size:0.95em; letter-spacing:4px; color:#cfe2f7;
+    border:1px solid rgba(207,226,247,0.45); border-radius:30px; padding:8px 26px;
+    margin-bottom:34px; text-transform:uppercase;
+    animation:glow 3s ease-in-out infinite;
+}
+@keyframes glow {
+    0%,100% { box-shadow:0 0 6px rgba(207,226,247,0.12); }
+    50%     { box-shadow:0 0 22px rgba(207,226,247,0.4); }
+}
+h1 {
+    font-size:3.5em; font-weight:800; line-height:1.15; max-width:13em; color:#fff;
+}
+.sub { margin-top:24px; font-size:1.25em; color:#7fb3e8; }
+
+.flowline {
+    position:relative; z-index:2; margin-top:44px;
+    display:flex; gap:14px; align-items:center; font-size:0.9em; color:#b8c4d4;
+}
+.dot { width:9px; height:9px; border-radius:50%; background:#7fb3e8; animation:blink 1.6s infinite; }
+.dot:nth-child(3) { animation-delay:0.4s; }
+.dot:nth-child(5) { animation-delay:0.8s; }
+@keyframes blink { 0%,100%{opacity:0.25;} 50%{opacity:1;} }
+
+.authors { position:relative; z-index:2; margin-top:48px; font-size:1.1em; color:#fff;
+           animation:rise 1.2s .4s ease both; }
+.authors b { font-weight:800; }
+.authors span { color:#93a5bd; }
+
+.logos {
+    position:relative; z-index:2; margin-top:26px; display:flex; gap:0;
+    background:#fff; border-radius:14px; padding:12px 28px; align-items:center;
+    animation:rise 1.2s .6s ease both;
+}
+.logos img { height:52px; display:block; }
+
+.nav-controls {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    display:flex; gap:20px; align-items:center; z-index:100;
+    background:rgba(0,21,48,0.92); padding:10px 26px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(14px);
+}
+.nav-controls a {
+    color:#cfe2f7; text-decoration:none; font-size:0.88em; padding:6px 18px;
+    background:rgba(127,179,232,0.18); border:1px solid rgba(127,179,232,0.4);
+    border-radius:8px; transition:background 0.2s;
+}
+.nav-controls a:hover { background:rgba(127,179,232,0.38); }
+.slide-ctr { color:#5d7a9c; font-size:0.85em; }
+</style>
+</head>
+<body>
+<div class="slide">
+    <video class="bgvid" autoplay muted loop playsinline>
+        <source src="videos/entrenamiento_issac_sim_recorrido.mp4" type="video/mp4">
+    </video>
+    <div class="veil"></div>
+
+    <div class="content">
+        <div class="kicker">Intrinsic Challenge → IA</div>
+        <h1>Resolviendo problemas de robótica clásica<br>en tiempos de IA</h1>
+        <p class="sub">Del modelado a mano al aprendizaje en simulación masiva</p>
+    </div>
+
+    <div class="flowline">
+        <span>Problema</span><span class="dot"></span>
+        <span>Aprendizaje</span><span class="dot"></span>
+        <span>Simulación</span><span class="dot"></span>
+        <span>Mundo real</span>
+    </div>
+
+    <div class="authors">
+        <b>Jean Aucapiña</b> · <b>Henry Maldonado</b><br>
+        <span>Universidad de Cuenca · 2026</span>
+    </div>
+
+    <div class="logos">
+        <img src="assets/logo_deet.jpeg" alt="UCUENCA · DEET">
+    </div>
+</div>
+
+<div class="nav-controls">
+    <span class="slide-ctr">1 / 10</span>
+    <a href="02_problema.html">Siguiente →</a>
+</div>
+</body>
+</html>

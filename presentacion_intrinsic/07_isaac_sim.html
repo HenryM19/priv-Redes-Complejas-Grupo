@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>07 · Isaac Sim a Escala</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Meta Pro','FF Meta','Segoe UI',sans-serif; background:#001530; color:#fff; }
+.slide {
+    min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; padding:40px 60px 110px;
+    background:linear-gradient(135deg,#001530 0%,#002856 100%);
+}
+.brand { position:fixed; top:16px; right:22px; background:#fff; border-radius:10px;
+         padding:6px 14px; z-index:50; }
+.brand img { height:26px; display:block; }
+h2 { font-size:2.1em; font-weight:800; color:#fff; margin-bottom:6px; }
+.sub { color:#7fb3e8; font-size:1em; margin-bottom:28px; }
+
+.flow { display:flex; align-items:center; gap:8px; margin-bottom:28px; }
+.step {
+    background:rgba(255,255,255,0.06); border:1px solid rgba(127,179,232,0.45);
+    border-radius:12px; padding:12px 20px; text-align:center;
+    animation:pop .5s ease both; animation-delay:calc(var(--i) * .3s);
+}
+@keyframes pop { from{opacity:0; transform:scale(.85);} to{opacity:1; transform:scale(1);} }
+.step .ico { font-size:1.5em; }
+.step .t { color:#cfe2f7; font-size:0.82em; margin-top:4px; }
+.arrow {
+    color:#7fb3e8; font-size:1.3em; position:relative; width:34px; text-align:center;
+    animation:pop .5s ease both; animation-delay:calc(var(--i) * .3s);
+}
+.arrow::after {
+    content:''; position:absolute; left:0; right:0; bottom:-6px; height:2px;
+    background:repeating-linear-gradient(90deg,#7fb3e8 0 6px,transparent 6px 12px);
+    animation:dash 1s linear infinite;
+}
+@keyframes dash { to { background-position:12px 0; } }
+.step.hot { border-color:#fff; background:rgba(255,255,255,0.12); }
+.step.hot .t { color:#fff; }
+
+.videos { display:flex; gap:34px; align-items:flex-start; }
+.vbox { display:flex; flex-direction:column; gap:10px; animation:pop .6s 1.4s ease both; }
+.vframe {
+    border-radius:14px; overflow:hidden; border:1px solid rgba(207,226,247,0.5);
+    box-shadow:0 10px 40px rgba(0,0,0,0.5); position:relative;
+}
+.vframe::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px; z-index:2;
+    background:linear-gradient(90deg,#fff,#7fb3e8,#002856);
+}
+.vframe video { display:block; width:100%; }
+.vbox.big { width:640px; }
+.vbox.small { width:380px; }
+.vcap { font-size:0.85em; color:#93a5bd; text-align:center; }
+.vcap b { color:#fff; }
+
+.nav-controls {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    display:flex; gap:20px; align-items:center; z-index:100;
+    background:rgba(0,21,48,0.92); padding:10px 26px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(14px);
+}
+.nav-controls a {
+    color:#cfe2f7; text-decoration:none; font-size:0.88em; padding:6px 18px;
+    background:rgba(127,179,232,0.18); border:1px solid rgba(127,179,232,0.4);
+    border-radius:8px; transition:background 0.2s;
+}
+.nav-controls a:hover { background:rgba(127,179,232,0.38); }
+.slide-ctr { color:#5d7a9c; font-size:0.85em; }
+</style>
+</head>
+<body>
+<div class="brand"><img src="assets/logo_ucuenca.png" alt="UCUENCA"></div>
+<div class="slide">
+    <h2>Entrenar sin ecuaciones: Isaac Sim</h2>
+    <p class="sub">El brazo modelado con IA aprende de cero — 64 copias a la vez, nadie escribió la cinemática</p>
+
+    <div class="flow">
+        <div class="step" style="--i:0"><div class="ico">📐</div><div class="t">URDF<br>(Claude + Blender)</div></div>
+        <div class="arrow" style="--i:1">→</div>
+        <div class="step" style="--i:1"><div class="ico">🌐</div><div class="t">USD<br>Isaac Sim</div></div>
+        <div class="arrow" style="--i:2">→</div>
+        <div class="step" style="--i:2"><div class="ico">🧠</div><div class="t">PPO · RL<br>64 entornos</div></div>
+        <div class="arrow" style="--i:3">→</div>
+        <div class="step" style="--i:3"><div class="ico">📈</div><div class="t">Recompensa<br>↑ iterativa</div></div>
+        <div class="arrow" style="--i:4">→</div>
+        <div class="step hot" style="--i:4"><div class="ico">📦</div><div class="t">Política<br>ONNX</div></div>
+    </div>
+
+    <div class="videos">
+        <div class="vbox big">
+            <div class="vframe">
+                <video controls muted loop autoplay playsinline>
+                    <source src="videos/entrenamiento_64brazostipocuka_issacsim_reachpoint.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="vcap"><b>Entrenamiento masivo</b> · 64 brazos en paralelo · tarea reach-point</div>
+        </div>
+        <div class="vbox small">
+            <div class="vframe">
+                <video controls muted loop>
+                    <source src="videos/modelo_entrenad_issacsim.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="vcap"><b>Resultado</b> · política ya entrenada</div>
+        </div>
+    </div>
+</div>
+
+<div class="nav-controls">
+    <a href="06_claude_blender.html">← Anterior</a>
+    <span class="slide-ctr">7 / 10</span>
+    <a href="08_godot.html">Siguiente →</a>
+</div>
+</body>
+</html>
