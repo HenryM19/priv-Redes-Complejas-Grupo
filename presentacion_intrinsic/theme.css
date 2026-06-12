@@ -1,0 +1,216 @@
+/* ==========================================================================
+   THEME.CSS — Sistema de diseño compartido de la presentación Intrinsic→IA
+   Paleta institucional U. de Cuenca: azul #002856 + blancos + grises
+   Tipografía: Meta Pro Bold (fallbacks: FF Meta, Segoe UI, Inter)
+   Modos: dark (defecto) y light vía html[data-theme]
+   ========================================================================== */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Escala tipográfica fluida: todo el contenido crece con la pantalla */
+html {
+    font-size: clamp(15px, 0.45vw + 0.95vh + 4px, 26px);
+}
+
+/* ---------- Tokens de marca (constantes) ---------- */
+:root {
+    --brand:      #002856;
+    --navy-deep:  #001530;
+    --navy-mid:   #0a3263;
+    --blue-soft:  #7fb3e8;
+    --blue-pale:  #cfe2f7;
+    --white:      #ffffff;
+    --gray-100:   #f4f7fb;
+    --gray-300:   #d9e2ec;
+    --gray-500:   #93a5bd;
+    --gray-600:   #5d7a9c;
+}
+
+/* ---------- MODO OSCURO: fondo azul profundo, textos claros ---------- */
+html[data-theme="dark"] {
+    --bg-grad:        linear-gradient(135deg, #002856 0%, #001530 80%);
+    --bg-solid:       #001530;
+    --surface:        rgba(255, 255, 255, 0.06);
+    --surface-2:      rgba(255, 255, 255, 0.13);
+    --card-border:    rgba(127, 179, 232, 0.45);
+    --border-strong:  #ffffff;
+    --heading:        #ffffff;
+    --text:           #e8eef6;
+    --text-2:         #cfe2f7;
+    --muted:          #93a5bd;
+    --accent:         #7fb3e8;
+    --accent-strong:  #ffffff;
+    --line:           #7fb3e8;
+    --shadow:         0 14px 44px rgba(0, 0, 0, 0.55);
+    --chip-bg:        rgba(127, 179, 232, 0.18);
+    --chip-border:    rgba(127, 179, 232, 0.45);
+    --nav-bg:         rgba(0, 21, 48, 0.92);
+    --nav-border:     rgba(255, 255, 255, 0.14);
+    --diagram-fill:   rgba(127, 179, 232, 0.10);
+    --veil-a:         rgba(0, 40, 86, 0.40);
+    --veil-b:         rgba(0, 21, 48, 0.95);
+}
+
+/* ---------- MODO CLARO: fondo claro, textos azul institucional ---------- */
+html[data-theme="light"] {
+    --bg-grad:        linear-gradient(135deg, #ffffff 0%, #e4ecf6 80%);
+    --bg-solid:       #f4f7fb;
+    --surface:        #ffffff;
+    --surface-2:      #e9f0f9;
+    --card-border:    rgba(0, 40, 86, 0.30);
+    --border-strong:  #002856;
+    --heading:        #002856;
+    --text:           #1c3a63;
+    --text-2:         #0a3263;
+    --muted:          #5d7a9c;
+    --accent:         #2f6396;
+    --accent-strong:  #002856;
+    --line:           #2f6396;
+    --shadow:         0 14px 36px rgba(0, 40, 86, 0.16);
+    --chip-bg:        rgba(0, 40, 86, 0.06);
+    --chip-border:    rgba(0, 40, 86, 0.30);
+    --nav-bg:         rgba(255, 255, 255, 0.94);
+    --nav-border:     rgba(0, 40, 86, 0.18);
+    --diagram-fill:   rgba(0, 40, 86, 0.05);
+    --veil-a:         rgba(255, 255, 255, 0.55);
+    --veil-b:         rgba(244, 247, 251, 0.96);
+}
+
+body {
+    font-family: 'Meta Pro Bold', 'Meta Pro', 'FF Meta', 'Segoe UI', 'Inter', sans-serif;
+    background: var(--bg-grad);
+    background-attachment: fixed;
+    color: var(--text);
+    overflow: hidden;
+    transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* ---------- Estructura base de diapositiva ---------- */
+.slide {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 3.5vh 3.5vw 10vh;
+    gap: 2.4vh;
+    overflow: hidden;
+}
+
+h2 {
+    font-size: 2.45rem; font-weight: 800; line-height: 1.12;
+    color: var(--heading); text-align: center;
+}
+.sub {
+    color: var(--accent); font-size: 1.18rem; text-align: center;
+    margin-top: 0.35rem;
+}
+.head { animation: fadeIn .8s ease both; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rise   { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@keyframes pop    { from { opacity: 0; transform: scale(.86); } to { opacity: 1; transform: scale(1); } }
+
+/* ---------- Logo institucional ---------- */
+.brand {
+    position: fixed; top: 1.6vh; right: 1.2vw;
+    background: #fff; border: 1px solid var(--nav-border);
+    border-radius: 12px; padding: 0.45rem 0.9rem; z-index: 50;
+    box-shadow: var(--shadow);
+}
+.brand img { height: 2rem; display: block; }
+
+/* ---------- Tarjetas y píldoras genéricas ---------- */
+.card, .pill, .step, .lnode {
+    background: var(--surface);
+    border: 1.5px solid var(--card-border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    transition: background 0.35s, border-color 0.35s;
+}
+.hot, .hero {
+    border-color: var(--border-strong) !important;
+    background: var(--surface-2) !important;
+}
+
+/* ---------- Flujos horizontales ---------- */
+.flow { display: flex; align-items: stretch; justify-content: center; gap: 0.6rem; }
+.step {
+    padding: 1rem 1.5rem; text-align: center;
+    display: flex; flex-direction: column; justify-content: center;
+    animation: pop .5s ease both; animation-delay: calc(var(--i) * .28s);
+}
+.step .ico { font-size: 2.1rem; }
+.step .t   { color: var(--text-2); font-size: 1rem; margin-top: 0.45rem; line-height: 1.3; }
+.step.hot .t { color: var(--heading); font-weight: 700; }
+.arrow {
+    color: var(--accent); font-size: 1.7rem; position: relative;
+    width: 2.4rem; display: flex; align-items: center; justify-content: center;
+    animation: pop .5s ease both; animation-delay: calc(var(--i) * .28s);
+}
+.arrow::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -0.45rem; height: 2px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
+    animation: dash 1s linear infinite;
+}
+@keyframes dash { to { background-position: 12px 0; } }
+
+/* ---------- Videos ---------- */
+.vframe {
+    border-radius: 16px; overflow: hidden;
+    border: 1.5px solid var(--card-border);
+    box-shadow: var(--shadow); position: relative;
+    background: #000;
+}
+.vframe::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; z-index: 2;
+    background: linear-gradient(90deg, var(--accent-strong), var(--accent), var(--brand));
+}
+.vframe video { display: block; width: 100%; }
+.vcap { font-size: 1rem; color: var(--muted); text-align: center; line-height: 1.35; }
+.vcap b { color: var(--heading); }
+
+/* ---------- Frase de cierre ---------- */
+.punch {
+    font-size: 1.3rem; color: var(--text);
+    border-left: 5px solid var(--accent-strong);
+    padding: 0.8rem 1.4rem; background: var(--surface);
+    border-radius: 0 12px 12px 0; text-align: left;
+}
+.punch b { color: var(--heading); font-weight: 800; }
+
+/* ---------- Barra de navegación (inyectada por theme.js) ---------- */
+.nav-controls {
+    position: fixed; bottom: 1.6vh; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 1.1rem; align-items: center; z-index: 100;
+    background: var(--nav-bg); padding: 0.55rem 1.4rem; border-radius: 14px;
+    border: 1px solid var(--nav-border); backdrop-filter: blur(14px);
+    box-shadow: var(--shadow);
+}
+.nav-controls a {
+    color: var(--text-2); text-decoration: none; font-size: 0.95rem;
+    padding: 0.4rem 1rem; background: var(--chip-bg);
+    border: 1px solid var(--chip-border); border-radius: 9px;
+    transition: background 0.2s; white-space: nowrap;
+}
+.nav-controls a:hover { background: var(--surface-2); }
+.slide-ctr { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+
+.theme-toggle {
+    cursor: pointer; font-size: 1.05rem; line-height: 1;
+    padding: 0.4rem 0.8rem; border-radius: 9px;
+    background: var(--chip-bg); border: 1px solid var(--chip-border);
+    color: var(--text-2);
+    font-family: inherit;
+    transition: background 0.2s, transform 0.2s;
+}
+.theme-toggle:hover { background: var(--surface-2); transform: scale(1.06); }
+
+/* ---------- SVG de esquemas: clases utilitarias ---------- */
+.diagram-svg { width: 100%; height: auto; display: block; }
+.svg-box     { fill: var(--surface); stroke: var(--card-border); stroke-width: 1.5; }
+.svg-box-hot { fill: var(--diagram-fill); stroke: var(--border-strong); stroke-width: 2; }
+.svg-line    { stroke: var(--line); stroke-width: 2.5; fill: none; }
+.svg-dash    { stroke: var(--line); stroke-width: 2.5; fill: none; stroke-dasharray: 7 7; animation: svgdash 1.1s linear infinite; }
+@keyframes svgdash { to { stroke-dashoffset: -14; } }
+.svg-title   { fill: var(--heading); font-weight: 800; }
+.svg-text    { fill: var(--text-2); }
+.svg-muted   { fill: var(--muted); }
+.svg-accent  { fill: var(--accent); }
