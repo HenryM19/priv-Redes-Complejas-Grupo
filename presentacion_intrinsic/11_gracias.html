@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>01 · Portada</title>
+<title>11 · Gracias</title>
 <script>document.documentElement.dataset.theme = (function(){try{return localStorage.getItem('ic-theme')||'dark'}catch(e){return 'dark'}})();</script>
 <link rel="stylesheet" href="theme.css">
 <style>
@@ -29,23 +29,25 @@ html[data-theme="light"] .bgvid { opacity:0.14; }
     50%     { box-shadow:0 0 26px var(--chip-bg), 0 0 10px var(--chip-bg); }
 }
 h1 {
-    font-size:3.9rem; font-weight:800; line-height:1.12;
-    max-width:14em; margin:0 auto; color:var(--heading);
+    font-size:4.6rem; font-weight:800; line-height:1.1;
+    color:var(--heading);
 }
-.sub1 { margin-top:1.4rem; font-size:1.45rem; color:var(--accent); }
-
-.flowline {
-    position:relative; z-index:2; margin-top:2.6rem;
-    display:flex; gap:1rem; align-items:center; justify-content:center;
-    font-size:1.1rem; color:var(--text-2); font-weight:700;
+.q {
+    margin-top:1.2rem; font-size:1.9rem; color:var(--accent); font-weight:800;
+    animation:rise 1.2s .3s ease both;
 }
-.dot { width:0.55rem; height:0.55rem; border-radius:50%; background:var(--accent); animation:blink 1.6s infinite; }
-.dot:nth-of-type(2) { animation-delay:0.4s; }
-.dot:nth-of-type(3) { animation-delay:0.8s; }
-@keyframes blink { 0%,100%{opacity:0.25;} 50%{opacity:1;} }
+.takeaway {
+    position:relative; z-index:2; margin-top:2.4rem;
+    font-size:1.2rem; color:var(--text);
+    border-left:5px solid var(--accent-strong);
+    padding:0.8rem 1.4rem; background:var(--surface);
+    border-radius:0 12px 12px 0; text-align:left; max-width:46em;
+    box-shadow:var(--shadow); animation:rise 1.2s .5s ease both;
+}
+.takeaway b { color:var(--heading); font-weight:800; }
 
-.authors { position:relative; z-index:2; margin-top:2.6rem; font-size:1.3rem;
-           color:var(--heading); animation:rise 1.2s .4s ease both; }
+.authors { position:relative; z-index:2; margin-top:2.4rem; font-size:1.3rem;
+           color:var(--heading); animation:rise 1.2s .7s ease both; }
 .authors b { font-weight:800; }
 .authors span { color:var(--muted); font-size:1.05rem; }
 
@@ -53,7 +55,7 @@ h1 {
     position:relative; z-index:2; margin-top:1.6rem; display:flex;
     background:#fff; border:1px solid var(--nav-border); border-radius:16px;
     padding:0.8rem 1.8rem; align-items:center;
-    animation:rise 1.2s .6s ease both; box-shadow:var(--shadow);
+    animation:rise 1.2s .9s ease both; box-shadow:var(--shadow);
 }
 .logos img { height:3.4rem; display:block; }
 </style>
@@ -67,15 +69,13 @@ h1 {
 
     <div class="content">
         <div class="kicker">Intrinsic Challenge → IA</div>
-        <h1>Resolviendo problemas de robótica clásica<br>en tiempos de IA</h1>
-        <p class="sub1">Del modelado a mano al aprendizaje en simulación masiva</p>
+        <h1>Gracias</h1>
+        <p class="q">¿Preguntas?</p>
     </div>
 
-    <div class="flowline">
-        <span>Problema</span><span class="dot"></span>
-        <span>Aprendizaje</span><span class="dot"></span>
-        <span>Simulación</span><span class="dot"></span>
-        <span>Mundo real</span>
+    <div class="takeaway">
+        No resolvimos un problema — adoptamos una <b>forma de resolverlos</b>:
+        simular masivamente → aprender → transferir
     </div>
 
     <div class="authors">
@@ -88,7 +88,7 @@ h1 {
     </div>
 </div>
 
-<script>window.SLIDE = { index:1, total:11, next:'02_problema.html' };</script>
+<script>window.SLIDE = { index:11, total:11, prev:'10_trl.html', next:'01_portada.html' };</script>
 <script src="theme.js"></script>
 </body>
 </html>

@@ -24,9 +24,9 @@
 .card h3 span { margin-right:0.4rem; }
 .yt {
     position:relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden;
-    border:1px solid var(--card-border);
+    border:1px solid var(--card-border); background:#000;
 }
-.yt iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+.yt video, .yt img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .card .proof { margin-top:0.7rem; font-size:0.92rem; color:var(--muted); line-height:1.4; }
 .card .proof b { color:var(--heading); }
 
@@ -66,24 +66,23 @@
         <div class="card" style="--i:0">
             <h3><span>🐕</span>Enseñar a caminar</h3>
             <div class="yt">
-                <iframe src="https://www.youtube.com/embed/PjWvf90l4cg?autoplay=1&mute=1&loop=1&playlist=PjWvf90l4cg&rel=0"
-                        title="ANYmal Parkour" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <video autoplay muted loop playsinline>
+                    <source src="videos/anymal-sim2sim-results.mp4" type="video/mp4">
+                </video>
             </div>
             <div class="proof"><b>ANYmal · ETH Zürich</b> — locomoción 100% aprendida en simulación, transferida al robot real</div>
         </div>
         <div class="card" style="--i:1">
             <h3><span>🦿</span>Exoesqueletos y movilidad</h3>
             <div class="yt">
-                <iframe src="https://www.youtube.com/embed/VSXlu8ft_Fs?autoplay=1&mute=1&loop=1&playlist=VSXlu8ft_Fs&rel=0"
-                        title="Wandercraft + NVIDIA" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <img src="videos/wandervraft.gif" alt="Wandercraft + NVIDIA">
             </div>
             <div class="proof"><b>Wandercraft + NVIDIA</b> — marcha asistida entrenada en sim antes de tocar al paciente</div>
         </div>
         <div class="card" style="--i:2">
             <h3><span>🏭</span>Plantas enteras</h3>
             <div class="yt">
-                <iframe src="https://www.youtube.com/embed/-eVpGu3Th-w?autoplay=1&mute=1&loop=1&playlist=-eVpGu3Th-w&rel=0"
-                        title="BMW Omniverse" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <img src="videos/4g-90867625-bmw-nvidia.gif" alt="BMW + Omniverse">
             </div>
             <div class="proof"><b>BMW + Omniverse</b> — fábrica completa como gemelo digital · −30% costo de planificación</div>
         </div>
@@ -100,7 +99,7 @@
     <div class="foot">No resolvimos un problema — adoptamos una <b>forma de resolverlos</b></div>
 </div>
 
-<script>window.SLIDE = { index:9, total:10, prev:'08_godot.html', next:'10_trl.html' };</script>
+<script>window.SLIDE = { index:9, total:11, prev:'08_godot.html', next:'10_trl.html' };</script>
 <script src="theme.js"></script>
 </body>
 </html>
