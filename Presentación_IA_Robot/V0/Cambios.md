@@ -1,0 +1,1 @@
+- Usar protocolos estándar permite una fácil integración de estos sistemas simulados en hardwre físico.
