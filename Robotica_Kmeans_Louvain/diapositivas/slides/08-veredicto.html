@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Veredicto</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+  :root{--ink:#16181d;--paper:#f4f1ea;--line:#cbc3b4;--muted:#6f6a5f;--accent:#3b4cca;--ok:#2f9e6e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper);font-family:'Archivo',sans-serif;color:var(--ink)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:84px 120px}
+  .slide::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--line) 0.7px,transparent 0.7px);background-size:34px 34px;opacity:.20;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1.5px solid var(--ink);padding-bottom:20px;z-index:2}
+  .head{z-index:2;margin-top:38px}
+  .secno{font-family:'Space Mono',monospace;font-size:20px;letter-spacing:.3em;color:var(--accent)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:74px;line-height:1;letter-spacing:-.02em;margin-top:14px}
+  h2 em{font-style:italic;color:var(--accent)}
+  .body{flex:1;display:flex;gap:64px;align-items:center;z-index:2}
+
+  .figure{flex:1.35;border:1.5px solid var(--ink);background:#fff;padding:18px;box-shadow:14px 14px 0 rgba(22,24,29,.10)}
+  .figure img{width:100%;display:block}
+  .figcap{font-family:'Space Mono',monospace;font-size:15px;color:var(--muted);text-align:center;padding-top:10px;letter-spacing:.04em}
+
+  .panel{flex:1;display:flex;flex-direction:column;gap:26px}
+  .lead{font-family:'Fraunces',serif;font-style:italic;font-size:34px;line-height:1.32;color:var(--ink)}
+  .lead b{font-style:normal;font-weight:600;color:var(--accent)}
+
+  .metrics{display:flex;gap:18px}
+  .metric{flex:1;border:1.5px solid var(--ink);padding:22px 20px;background:#fff;text-align:center}
+  .metric .v{font-family:'Fraunces',serif;font-weight:700;font-size:62px;line-height:1;color:var(--ok)}
+  .metric .l{font-family:'Space Mono',monospace;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+
+  .note{font-size:21px;color:var(--muted);line-height:1.5;border-left:3px solid var(--accent);padding-left:22px}
+  .footer{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:17px;color:var(--muted);z-index:2}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="masthead"><span>K-Means vs Louvain</span><span>Veredicto</span></div>
+  <div class="head">
+    <div class="secno">06 — RESULTADO CLAVE</div>
+    <!-- numbering aligned: deck position 08 -->
+
+    <h2>Dos caminos, <em>una misma</em> estructura</h2>
+  </div>
+
+  <div class="body">
+    <div class="figure">
+      <img src="../assets/img/comparacion_kmeans_louvain.png" alt="Comparación K-Means vs Louvain">
+      <div class="figcap">Misma proyección PCA · izquierda K-Means · derecha Louvain · membresías idénticas</div>
+    </div>
+
+    <div class="panel">
+      <div class="lead">K&#8209;Means (geométrico) y Louvain (grafo) <b>no comparten nada</b> en su formulación — y aun así agrupan los actuadores de forma idéntica.</div>
+      <div class="metrics">
+        <div class="metric"><div class="v">1.000</div><div class="l">ARI</div></div>
+        <div class="metric"><div class="v">1.000</div><div class="l">NMI</div></div>
+        <div class="metric"><div class="v">1.000</div><div class="l">Purity</div></div>
+      </div>
+      <div class="note">Que dos métodos sin nada en común coincidan es evidencia fuerte de que los <b>3 estados de mantenimiento son estructura real</b> del dataset — no un artefacto de un algoritmo.</div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Universidad de Cuenca · DEET</span><span>08 / 10</span></div>
+</div>
+</body>
+</html>

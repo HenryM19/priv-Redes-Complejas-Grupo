@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Cómo funciona K-Means</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+  :root{--ink:#16181d;--paper:#f4f1ea;--line:#cbc3b4;--muted:#6f6a5f;--accent:#3b4cca;--prog:#2f9e6e;--urg:#e0a82e;--reem:#d2503c}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper);font-family:'Archivo',sans-serif;color:var(--ink)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:84px 120px}
+  .slide::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--line) 0.7px,transparent 0.7px);background-size:34px 34px;opacity:.20;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1.5px solid var(--ink);padding-bottom:20px;z-index:2}
+  .head{z-index:2;margin-top:38px;display:flex;align-items:baseline;gap:24px}
+  .secno{font-family:'Space Mono',monospace;font-size:20px;letter-spacing:.3em;color:var(--accent)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:74px;line-height:1;letter-spacing:-.02em;margin-top:14px}
+  .tag{font-family:'Space Mono',monospace;font-size:17px;border:1.5px solid var(--ink);padding:8px 16px;letter-spacing:.1em;text-transform:uppercase}
+  .body{flex:1;display:flex;gap:60px;align-items:center;z-index:2}
+  .diagram{flex:1.1;border:1.5px solid var(--ink);background:#fff;box-shadow:12px 12px 0 rgba(22,24,29,.08);padding:24px;max-height:640px;display:flex;align-items:center}
+  .diagram svg{max-height:592px}
+  .steps{flex:.95;display:flex;flex-direction:column;gap:24px}
+  .step{display:flex;gap:24px;align-items:flex-start}
+  .step .num{font-family:'Fraunces',serif;font-weight:700;font-size:46px;line-height:1;color:var(--accent);min-width:64px}
+  .step .txt h4{font-family:'Fraunces',serif;font-size:30px;font-weight:600}
+  .step .txt p{font-size:21px;color:var(--muted);line-height:1.45;margin-top:6px}
+  .step .txt code{font-family:'Space Mono',monospace;font-size:18px;background:var(--paper);padding:2px 7px;border:1px solid var(--line)}
+  .footer{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:17px;color:var(--muted);z-index:2}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="masthead"><span>K-Means vs Louvain</span><span>Método A</span></div>
+  <div class="head">
+    <div>
+      <div class="secno">03 — CÓMO FUNCIONA K-MEANS</div>
+      <h2>Particionar por distancia</h2>
+    </div>
+  </div>
+  <div class="body">
+    <div class="diagram">
+      <svg viewBox="0 0 620 560" width="100%">
+        <!-- voronoi-ish regions -->
+        <defs></defs>
+        <!-- region fills -->
+        <polygon points="0,0 300,0 200,560 0,560" fill="#2f9e6e" opacity="0.07"/>
+        <polygon points="300,0 620,0 620,300 200,560" fill="#e0a82e" opacity="0.08"/>
+        <polygon points="620,300 620,560 200,560" fill="#d2503c" opacity="0.07"/>
+        <!-- boundary lines -->
+        <line x1="250" y1="0" x2="200" y2="560" stroke="#16181d" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.5"/>
+        <line x1="200" y1="560" x2="620" y2="280" stroke="#16181d" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.5"/>
+        <!-- points cluster green -->
+        <g fill="#2f9e6e">
+          <circle cx="80" cy="90" r="9"/><circle cx="130" cy="160" r="9"/><circle cx="60" cy="220" r="9"/><circle cx="150" cy="300" r="9"/><circle cx="100" cy="380" r="9"/><circle cx="55" cy="450" r="9"/><circle cx="170" cy="120" r="9"/>
+        </g>
+        <!-- amber -->
+        <g fill="#e0a82e">
+          <circle cx="380" cy="80" r="9"/><circle cx="450" cy="130" r="9"/><circle cx="350" cy="190" r="9"/><circle cx="430" cy="220" r="9"/><circle cx="500" cy="90" r="9"/><circle cx="320" cy="120" r="9"/><circle cx="400" cy="260" r="9"/>
+        </g>
+        <!-- red -->
+        <g fill="#d2503c">
+          <circle cx="470" cy="380" r="9"/><circle cx="540" cy="430" r="9"/><circle cx="420" cy="450" r="9"/><circle cx="560" cy="350" r="9"/><circle cx="500" cy="490" r="9"/><circle cx="380" cy="500" r="9"/>
+        </g>
+        <!-- centroids (★) -->
+        <g font-size="40" text-anchor="middle">
+          <text x="100" y="262" fill="#2f9e6e">★</text>
+          <text x="415" y="182" fill="#e0a82e">★</text>
+          <text x="485" y="438" fill="#d2503c">★</text>
+        </g>
+        <text x="310" y="548" text-anchor="middle" font-family="'Space Mono',monospace" font-size="15" fill="#6f6a5f">★ = centroide · línea ─ ─ = frontera de Voronoi</text>
+      </svg>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><div class="txt"><h4>Inicializar (K&#8209;Means++)</h4><p>Se colocan K centroides bien separados. Aquí <code>K = 3</code>.</p></div></div>
+      <div class="step"><div class="num">02</div><div class="txt"><h4>Asignar (paso E)</h4><p>Cada pieza se une al centroide <b>más cercano</b> en distancia euclidiana.</p></div></div>
+      <div class="step"><div class="num">03</div><div class="txt"><h4>Actualizar (paso M)</h4><p>Cada centroide se mueve a la <b>media</b> de su grupo.</p></div></div>
+      <div class="step"><div class="num">04</div><div class="txt"><h4>Repetir hasta converger</h4><p>Minimiza la inercia <code>Σ‖x − μ‖²</code>. Clusters esféricos (Voronoi).</p></div></div>
+    </div>
+  </div>
+  <div class="footer"><span>Universidad de Cuenca · DEET</span><span>04 / 10</span></div>
+</div>
+</body>
+</html>

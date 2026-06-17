@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Portada</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+  :root{
+    --ink:#16181d; --paper:#f4f1ea; --paper2:#eae5da;
+    --line:#cbc3b4; --muted:#6f6a5f;
+    --prog:#2f9e6e; --urg:#e0a82e; --reem:#d2503c;
+    --accent:#3b4cca;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper);font-family:'Archivo',sans-serif;color:var(--ink)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:96px 120px}
+
+  /* paper grain */
+  .slide::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--line) 0.7px,transparent 0.7px);background-size:34px 34px;opacity:.20;pointer-events:none}
+
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1.5px solid var(--ink);padding-bottom:22px;z-index:2}
+
+  .center{flex:1;display:flex;flex-direction:column;justify-content:center;z-index:2}
+  .kicker{font-family:'Space Mono',monospace;font-size:22px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);margin-bottom:34px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:128px;line-height:.96;letter-spacing:-.02em;max-width:1500px}
+  h1 em{font-style:italic;color:var(--accent)}
+  .sub{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:42px;color:var(--muted);margin-top:40px;max-width:1200px;line-height:1.3}
+
+  .vs-strip{display:flex;gap:0;margin-top:64px;max-width:1500px;border:1.5px solid var(--ink)}
+  .vs-cell{flex:1;padding:30px 38px}
+  .vs-cell:first-child{border-right:1.5px solid var(--ink)}
+  .vs-tag{font-family:'Space Mono',monospace;font-size:16px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .vs-name{font-family:'Fraunces',serif;font-size:40px;font-weight:600;margin-top:8px}
+  .vs-desc{font-size:21px;color:var(--muted);margin-top:6px}
+
+  .footer{display:flex;justify-content:space-between;align-items:flex-end;font-family:'Space Mono',monospace;font-size:18px;color:var(--muted);z-index:2}
+  .authors{display:flex;gap:42px}
+  .authors b{color:var(--ink);font-weight:700}
+  .equal{font-family:'Fraunces',serif;font-style:italic;font-size:28px;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="masthead">
+    <span>Universidad de Cuenca · DEET</span>
+    <span>Redes Complejas — 2026</span>
+  </div>
+
+  <div class="center">
+    <div class="kicker">Clustering de Actuadores Robóticos</div>
+    <h1>K&#8209;Means <em>vs</em> Louvain</h1>
+    <div class="sub">Dos paradigmas, los mismos datos: ¿llegan a la misma estructura?</div>
+
+    <div class="vs-strip">
+      <div class="vs-cell">
+        <div class="vs-tag">Método A · Particional</div>
+        <div class="vs-name">K&#8209;Means</div>
+        <div class="vs-desc">Parte el espacio por distancia a centroides</div>
+      </div>
+      <div class="vs-cell">
+        <div class="vs-tag">Método B · Grafo</div>
+        <div class="vs-name">Louvain</div>
+        <div class="vs-desc">Descubre comunidades maximizando modularidad</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="authors">
+      <span>Ing. <b>Jean Carlo Aucapina</b></span>
+      <span>Ing. <b>Henry Maldonado</b></span>
+    </div>
+    <div class="equal">ARI = NMI = 1.000 →</div>
+  </div>
+</div>
+</body>
+</html>

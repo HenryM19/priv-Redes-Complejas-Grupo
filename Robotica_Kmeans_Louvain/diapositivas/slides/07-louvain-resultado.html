@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Louvain resultado</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+  :root{--ink:#16181d;--paper:#f4f1ea;--line:#cbc3b4;--muted:#6f6a5f;--accent:#3b4cca;--ok:#2f9e6e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper);font-family:'Archivo',sans-serif;color:var(--ink)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:84px 120px}
+  .slide::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--line) 0.7px,transparent 0.7px);background-size:34px 34px;opacity:.20;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1.5px solid var(--ink);padding-bottom:20px;z-index:2}
+  .head{z-index:2;margin-top:38px}
+  .secno{font-family:'Space Mono',monospace;font-size:20px;letter-spacing:.3em;color:var(--accent)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:74px;line-height:1;letter-spacing:-.02em;margin-top:14px}
+  h2 em{font-style:italic;color:var(--accent)}
+  .body{flex:1;display:flex;gap:48px;align-items:center;z-index:2}
+  .fig{flex:1.2;border:1.5px solid var(--ink);background:#fff;padding:16px;box-shadow:12px 12px 0 rgba(22,24,29,.08)}
+  .fig img{width:100%;display:block}
+  .fig .cap{font-family:'Space Mono',monospace;font-size:15px;color:var(--muted);text-align:center;padding-top:10px;letter-spacing:.04em}
+  .panel{flex:.92;display:flex;flex-direction:column;gap:24px}
+  .lead{font-family:'Fraunces',serif;font-style:italic;font-size:32px;line-height:1.34}
+  .lead b{font-style:normal;font-weight:600;color:var(--accent)}
+  .qmetrics{display:flex;gap:18px}
+  .qm{flex:1;border:1.5px solid var(--ink);background:#fff;padding:22px;text-align:center}
+  .qm .v{font-family:'Fraunces',serif;font-weight:700;font-size:54px;line-height:1;color:var(--ok)}
+  .qm .l{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:10px}
+  .ksweep{border:1.5px solid var(--ink);background:#fff;padding:22px}
+  .ksweep .t{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .ksweep .bars{display:flex;align-items:flex-end;gap:10px;height:90px}
+  .ksweep .b{flex:1;background:var(--line);position:relative;display:flex;flex-direction:column;justify-content:flex-end}
+  .ksweep .b span{font-family:'Space Mono',monospace;font-size:12px;text-align:center;color:var(--muted);position:absolute;bottom:-22px;width:100%}
+  .ksweep .b.hit{background:var(--ok)}
+  .ksweep .b em{font-family:'Space Mono',monospace;font-size:12px;font-style:normal;text-align:center;color:#fff;padding-bottom:4px}
+  .ksweep .b.lo em{color:var(--ink)}
+  .ksweep .cap2{font-family:'Space Mono',monospace;font-size:13px;color:var(--muted);margin-top:30px}
+  .footer{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:17px;color:var(--muted);z-index:2}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="masthead"><span>K-Means vs Louvain</span><span>Método B · resultado</span></div>
+  <div class="head">
+    <div class="secno">05 — COMUNIDADES DETECTADAS</div>
+    <h2>3 comunidades, <em>Q = 0.555</em></h2>
+  </div>
+  <div class="body">
+    <div class="fig">
+      <img src="../assets/img/louvain_grafo.gif" alt="Grafo Louvain">
+      <div class="cap">Grafo k-NN de actuadores · nodos coloreados por comunidad detectada</div>
+    </div>
+    <div class="panel">
+      <div class="lead">El número de comunidades <b>no se fijó</b>: emergió de maximizar Q. Louvain encuentra exactamente <b>3</b> grupos.</div>
+      <div class="qmetrics">
+        <div class="qm"><div class="v">3</div><div class="l">Comunidades</div></div>
+        <div class="qm"><div class="v">0.555</div><div class="l">Modularidad Q</div></div>
+      </div>
+      <div class="ksweep">
+        <div class="t">Sensibilidad al parámetro k del grafo</div>
+        <div class="bars">
+          <div class="b lo" style="height:30%"><em>8</em><span>k=10</span></div>
+          <div class="b lo" style="height:42%"><em>7</em><span>k=15</span></div>
+          <div class="b lo" style="height:58%"><em>5</em><span>k=18</span></div>
+          <div class="b lo" style="height:74%"><em>4</em><span>k=20</span></div>
+          <div class="b hit" style="height:100%"><em>3 ◄</em><span>k=25</span></div>
+          <div class="b hit" style="height:100%"><em>3</em><span>k=30</span></div>
+        </div>
+        <div class="cap2">Nº de comunidades vs k · k ≈ 30% de n recupera la estructura real</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Universidad de Cuenca · DEET</span><span>07 / 10</span></div>
+</div>
+</body>
+</html>
