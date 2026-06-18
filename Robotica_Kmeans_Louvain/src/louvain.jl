@@ -224,3 +224,76 @@ function _aggregate(W::Matrix{Float64}, comm::Vector{Int}, C::Int)::Matrix{Float
     end
     return Wnew
 end
+
+"""
+    louvain_animated(W; seed, snap_every) -> (snapshots, Qs, communities, Q)
+
+Variante instrumentada de la **fase de movimiento local** sobre el grafo original.
+Captura el estado de las comunidades (asignación por nodo) cada `snap_every`
+movimientos de nodo, para animar cómo el algoritmo va fusionando nodos en
+comunidades iteración por iteración.
+
+- `snapshots` : Vector{Vector{Int}} — etiqueta de comunidad de cada nodo en cada frame.
+- `Qs`        : Vector{Float64} — modularidad en cada frame.
+
+Para el grafo k-NN denso (k≈30% n) la fase local de un nivel ya converge a la
+partición final, así que esta animación muestra el descubrimiento completo de
+las comunidades.
+"""
+function louvain_animated(W::Matrix{Float64}; seed::Int=42, snap_every::Int=6)
+    Random.seed!(seed)
+    n   = size(W, 1)
+    deg = vec(sum(W, dims=2))
+    m2  = sum(deg)
+
+    comm  = collect(1:n)               # cada nodo en su propia comunidad
+    Σ_tot = Dict{Int,Float64}(i => deg[i] for i in 1:n)
+
+    snapshots = Vector{Vector{Int}}()
+    Qs        = Float64[]
+    push!(snapshots, _relabel(copy(comm)))
+    push!(Qs, modularity(W, comm))
+
+    moves = 0
+    improved = true
+    sweep = 0
+    while improved && sweep < 100
+        improved = false
+        sweep += 1
+        for i in 1:n
+            ci = comm[i]
+            k_i_in = Dict{Int,Float64}()
+            for j in 1:n
+                W[i, j] == 0.0 && continue
+                cj = comm[j]
+                k_i_in[cj] = get(k_i_in, cj, 0.0) + W[i, j]
+            end
+            Σ_tot[ci] -= deg[i]
+            comm[i] = -1
+            best_c, best_gain = ci, 0.0
+            for (c, ki_c) in k_i_in
+                c == -1 && continue
+                gain = ki_c - Σ_tot[c] * deg[i] / m2
+                if gain > best_gain
+                    best_gain, best_c = gain, c
+                end
+            end
+            comm[i] = best_c
+            Σ_tot[best_c] = get(Σ_tot, best_c, 0.0) + deg[i]
+            if best_c != ci
+                improved = true
+                moves += 1
+                if moves % snap_every == 0
+                    push!(snapshots, _relabel(copy(comm)))
+                    push!(Qs, modularity(W, comm))
+                end
+            end
+        end
+    end
+
+    # frame final
+    push!(snapshots, _relabel(copy(comm)))
+    push!(Qs, modularity(W, comm))
+    return (snapshots=snapshots, Qs=Qs,
+            communities=_relabel(comm), Q=modularity(W, comm))
+end

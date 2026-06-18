@@ -485,6 +485,77 @@ function animate_louvain(
 end
 
 """
+    animate_louvain_iterations(W, snapshots, Qs, Z, output_path; fps, pause_frames) -> String
+
+GIF de la **iteración real** de Louvain: cada frame es un snapshot capturado
+durante la fase de movimiento local. Se ve cómo los nodos —inicialmente cada
+uno en su propia comunidad— se van fusionando en comunidades hasta converger,
+con la modularidad Q creciendo en el título.
+"""
+function animate_louvain_iterations(
+    W            ::Matrix{Float64},
+    snapshots    ::Vector{Vector{Int}},
+    Qs           ::Vector{Float64},
+    Z            ::Matrix{Float64},
+    output_path  ::String;
+    fps          ::Int = 6,
+    pause_frames ::Int = 10
+)::String
+    mkpath(dirname(output_path))
+    n    = size(W, 1)
+    wmax = maximum(W)
+    anim = Animation()
+
+    x_min, x_max = minimum(Z[:,1]) - 0.5, maximum(Z[:,1]) + 0.5
+    y_min, y_max = minimum(Z[:,2]) - 0.5, maximum(Z[:,2]) + 0.5
+    nf = length(snapshots)
+
+    for (fi, comm) in enumerate(snapshots)
+        is_init  = fi == 1
+        is_final = fi == nf
+        ncomm    = length(unique(comm))
+        Q        = Qs[fi]
+
+        etapa = is_init  ? "Inicio — cada nodo es su comunidad" :
+                is_final ? "Convergido" :
+                           "Fusionando comunidades…"
+
+        p = plot(
+            xlims=(x_min,x_max), ylims=(y_min,y_max),
+            xlabel="PC1", ylabel="PC2",
+            title="Louvain iterando — $etapa\nComunidades: $ncomm   |   Modularidad Q = $(round(Q,digits=4))",
+            titlefontsize=9, size=(820,580), dpi=110,
+            legend=false, grid=true, gridalpha=0.25,
+            framestyle=:box, background_color=:white
+        )
+        # aristas (atenuadas)
+        for i in 1:n, j in i+1:n
+            W[i,j] == 0.0 && continue
+            a = 0.03 + 0.22 * (W[i,j]/wmax)
+            plot!(p, [Z[i,1],Z[j,1]], [Z[i,2],Z[j,2]],
+                  color=:gray60, alpha=a, linewidth=0.5, label=false)
+        end
+        # nodos por comunidad actual
+        for c in sort(unique(comm))
+            idx = findall(==(c), comm)
+            col = COMMUNITY_COLORS[(c-1) % length(COMMUNITY_COLORS) + 1]
+            scatter!(p, Z[idx,1], Z[idx,2], color=col,
+                     markersize=6, markerstrokewidth=0.4,
+                     alpha=is_init ? 0.5 : 0.9, label=false)
+        end
+
+        frame(anim)
+        if is_final
+            for _ in 1:pause_frames; frame(anim); end
+        end
+    end
+
+    gif(anim, output_path; fps=fps)
+    println("  GIF Louvain iteraciones: $output_path  ($nf frames)")
+    return output_path
+end
+
+"""
     plot_side_by_side(Z, kmeans_labels, louvain_labels, output_path;
                       kmeans_title, louvain_title) -> String
 

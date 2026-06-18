@@ -125,6 +125,7 @@ function run_pipeline(cfg::Dict)
     knn_k   = isnothing(cfg[:knn_k]) ? clamp(round(Int, 0.30 * n_train), 10, n_train - 1) : cfg[:knn_k]
     W       = build_knn_graph(X_train; k=knn_k)
     lou     = louvain(W; seed=cfg[:seed])
+    lou_anim = louvain_animated(W; seed=cfg[:seed])
     @printf("  k-NN k=%d  →  comunidades=%d  |  modularidad Q=%.4f\n",
             knn_k, lou.n_communities, lou.Q)
 
@@ -166,6 +167,8 @@ function run_pipeline(cfg::Dict)
         # Louvain
         animate_louvain(W, lou.history, lou.communities, Z,
                       joinpath(anim_dir, "louvain_grafo.gif"); fps=2)
+        animate_louvain_iterations(W, lou_anim.snapshots, lou_anim.Qs, Z,
+                      joinpath(anim_dir, "louvain_iteraciones.gif"); fps=6, pause_frames=10)
         plot_graph_communities(W, lou.communities, Z,
                       joinpath(report_dir, "louvain_comunidades.png"))
         plot_side_by_side(Z, kmeans_labels, lou.communities,

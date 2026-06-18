@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Louvain iterando</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+  :root{--ink:#16181d;--paper:#f4f1ea;--line:#cbc3b4;--muted:#6f6a5f;--accent:#3b4cca;--ok:#2f9e6e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper);font-family:'Archivo',sans-serif;color:var(--ink)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:84px 120px}
+  .slide::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--line) 0.7px,transparent 0.7px);background-size:34px 34px;opacity:.20;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1.5px solid var(--ink);padding-bottom:20px;z-index:2}
+  .head{z-index:2;margin-top:38px}
+  .secno{font-family:'Space Mono',monospace;font-size:20px;letter-spacing:.3em;color:var(--accent)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:74px;line-height:1;letter-spacing:-.02em;margin-top:14px}
+  h2 em{font-style:italic;color:var(--accent)}
+  .body{flex:1;display:flex;gap:56px;align-items:center;z-index:2;min-height:0;overflow:hidden}
+  .fig{flex:1.25;border:1.5px solid var(--ink);background:#fff;padding:16px;box-shadow:12px 12px 0 rgba(22,24,29,.08);display:flex;flex-direction:column;align-items:center}
+  .fig img{max-width:100%;max-height:660px;width:auto;display:block}
+  .fig .cap{font-family:'Space Mono',monospace;font-size:15px;color:var(--muted);text-align:center;padding-top:12px;letter-spacing:.04em}
+  .panel{flex:.85;display:flex;flex-direction:column;gap:30px}
+  .lead{font-family:'Fraunces',serif;font-style:italic;font-size:33px;line-height:1.34}
+  .lead b{font-style:normal;font-weight:600;color:var(--accent)}
+  .timeline{display:flex;flex-direction:column;gap:0}
+  .tstep{display:flex;gap:22px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--line)}
+  .tstep:last-child{border-bottom:0}
+  .tstep .q{font-family:'Space Mono',monospace;font-size:17px;background:var(--ink);color:var(--paper);padding:5px 11px;min-width:96px;text-align:center}
+  .tstep.fin .q{background:var(--ok)}
+  .tstep .d h4{font-family:'Fraunces',serif;font-size:27px;font-weight:600}
+  .tstep .d p{font-size:20px;color:var(--muted);line-height:1.4;margin-top:3px}
+  .footer{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:17px;color:var(--muted);z-index:2}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="masthead"><span>K-Means vs Louvain</span><span>Método B · iteración</span></div>
+  <div class="head">
+    <div class="secno">05 — LOUVAIN PASO A PASO</div>
+    <h2>De 84 nodos a <em>3 comunidades</em></h2>
+  </div>
+  <div class="body">
+    <div class="fig">
+      <img src="../assets/img/louvain_iteraciones.gif" alt="Louvain iterando sobre el grafo">
+      <div class="cap">Fase de movimiento local sobre el grafo k-NN · color = comunidad actual · Q sube cada frame</div>
+    </div>
+    <div class="panel">
+      <div class="lead">Cada nodo arranca <b>solo</b>. Louvain lo mueve a la comunidad vecina que más sube Q, y los nodos se van <b>fusionando</b> hasta converger.</div>
+      <div class="timeline">
+        <div class="tstep"><div class="q">Q ≈ −0.01</div><div class="d"><h4>Inicio</h4><p>84 comunidades — cada actuador es la suya.</p></div></div>
+        <div class="tstep"><div class="q">Q ↑</div><div class="d"><h4>Movimiento local</h4><p>Nodos cercanos se absorben; emergen grupos densos.</p></div></div>
+        <div class="tstep fin"><div class="q">Q = 0.555</div><div class="d"><h4>Convergido</h4><p>3 comunidades estables — ningún movimiento mejora Q.</p></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Universidad de Cuenca · DEET</span><span>08 / 11</span></div>
+</div>
+</body>
+</html>
