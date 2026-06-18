@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Cuellos de botella y defensa</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;--crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:80px 110px}
+  .slide::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .slide::after{content:"";position:absolute;bottom:-220px;left:-160px;width:720px;height:720px;border-radius:50%;background:radial-gradient(circle,rgba(90,209,160,.14),transparent 65%);pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:17px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:18px;z-index:2}
+  .head{z-index:2;margin-top:32px}
+  .secno{font-family:'JetBrains Mono',monospace;font-size:19px;letter-spacing:.28em;color:var(--green)}
+  h2{font-size:62px;font-weight:700;letter-spacing:-.02em;margin-top:10px}
+  h2 em{font-style:normal;color:var(--green)}
+  .body{flex:1;display:flex;gap:50px;align-items:center;z-index:2}
+  .left{flex:.95;display:flex;flex-direction:column;gap:18px}
+  .bn-title{font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .bn{display:flex;align-items:center;gap:20px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:20px 24px}
+  .bn .node{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--amber);min-width:170px}
+  .bar{flex:1;height:22px;background:#0a0f1a;border-radius:11px;overflow:hidden}
+  .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--high),var(--crit));border-radius:11px}
+  .bn .ct{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted);min-width:80px;text-align:right}
+  .right{flex:1;display:flex;flex-direction:column;gap:18px}
+  .def{display:flex;gap:20px;align-items:flex-start;border-left:3px solid var(--green);padding:6px 0 6px 22px}
+  .def .ic{font-size:30px;line-height:1}
+  .def h4{font-size:27px;font-weight:600}
+  .def p{font-size:21px;color:var(--muted);line-height:1.45;margin-top:5px}
+  .def p b{color:var(--txt)}
+  .footer{display:flex;justify-content:space-between;align-items:flex-end;font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--muted);z-index:2}
+  .footer .big{font-size:22px;color:var(--green)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="masthead"><span>Universidad de Cuenca · DEET</span><span>Defensa</span></div>
+  <div class="head">
+    <div class="secno">06 — DE ATAQUE A DEFENSA</div>
+    <h2>Cuellos de botella = <em>dónde defender</em></h2>
+  </div>
+  <div class="body">
+    <div class="left">
+      <div class="bn-title">Nodos por los que pasan más rutas de bajo costo</div>
+      <div class="bn"><span class="node">FW-VPN</span><div class="bar"><span style="width:100%"></span></div><span class="ct">4 rutas</span></div>
+      <div class="bn"><span class="node">APP-02</span><div class="bar"><span style="width:100%"></span></div><span class="ct">4 rutas</span></div>
+      <div class="bn"><span class="node">MAIL-EX</span><div class="bar"><span style="width:75%"></span></div><span class="ct">3 rutas</span></div>
+      <div class="bn-title" style="margin-top:10px">Cortar un cuello de botella invalida múltiples rutas de ataque a la vez.</div>
+    </div>
+    <div class="right">
+      <div class="def"><span class="ic">🛡️</span><div><h4>Parchar la ruta crítica primero</h4><p>Subir el CVSS→bajar el peso de los CVEs de la ruta <b>aumenta su resistencia</b> y fuerza un camino más costoso.</p></div></div>
+      <div class="def"><span class="ic">✂️</span><div><h4>Segmentar los cuellos de botella</h4><p>Aislar/monitorear <b>FW-VPN</b> y <b>APP-02</b> rompe el 80% de las rutas de menor resistencia.</p></div></div>
+      <div class="def"><span class="ic">🎯</span><div><h4>Priorizar el eslabón más barato</h4><p>La arista de menor peso (CVE más crítico, <b>Log4Shell w=0.1</b>) es el primer parche.</p></div></div>
+    </div>
+  </div>
+  <div class="footer">
+    <span>Jean Carlo Aucapina · Henry Maldonado</span>
+    <span class="big">Dijkstra_Grafo_Ataque · 2026</span>
+  </div>
+</div>
+</body>
+</html>

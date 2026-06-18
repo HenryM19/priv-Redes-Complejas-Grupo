@@ -36,19 +36,24 @@ Dijkstra_Grafo_Ataque/
 │   ├── nvd_fetch.py      — CVEs reales (NVD live + fallback embebido)
 │   ├── attack_graph.py   — grafo dirigido por capas, w = 10 − CVSS
 │   ├── dijkstra.py       — Dijkstra desde cero + ruta crítica + cuellos de botella
-│   └── animate.py        — GIFs de la expansión paso a paso  (en progreso)
-└── results/              — generado por el pipeline
+│   ├── animate.py        — PNG del grafo + 2 GIFs (expansión + ruta crítica)
+│   └── run_pipeline.py   — orquesta todo el pipeline
+├── results/              — generado por el pipeline (reporte.md, GIFs, CSVs)
+└── diapositivas/         — deck HTML de 8 slides + PDF
 ```
 
 ## Estado
 
-🟢 Módulos core funcionando (NVD + grafo + Dijkstra).
-🟡 Animaciones GIF y diapositivas HTML — en progreso.
+🟢 **Completo** — NVD + grafo + Dijkstra + animaciones + diapositivas.
+
+Ver [RESULTADOS.md](RESULTADOS.md). Ruta crítica hallada:
+`INTERNET → FW-VPN → APP-02 → MAIL-EX → WS-ADMIN → DB-CRITICAL`
+(resistencia 0.90, 9 iteraciones).
 
 ## Ejecutar
 
 ```bash
 pip install -r requirements.txt
-python src/run_pipeline.py            # (próximamente)
-python src/dijkstra.py                # demo rápida offline
+python src/run_pipeline.py            # NVD live + fallback embebido
+python src/run_pipeline.py --offline  # solo dataset embebido
 ```

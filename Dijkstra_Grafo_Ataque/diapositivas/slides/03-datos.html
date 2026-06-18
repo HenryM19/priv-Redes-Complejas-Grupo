@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Datos NVD</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;--crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:80px 110px}
+  .slide::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:17px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:18px;z-index:2}
+  .head{z-index:2;margin-top:32px}
+  .secno{font-family:'JetBrains Mono',monospace;font-size:19px;letter-spacing:.28em;color:var(--cyan)}
+  h2{font-size:62px;font-weight:700;letter-spacing:-.02em;margin-top:10px}
+  .intro{font-size:27px;color:var(--muted);margin-top:18px;max-width:1400px;line-height:1.4;z-index:2}
+  .intro b{color:var(--cyan)}
+  .body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;z-index:2}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .cve{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:20px 22px;position:relative;overflow:hidden}
+  .cve::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+  .cve.crit::before{background:var(--crit)} .cve.high::before{background:var(--high)}
+  .cve .id{font-family:'JetBrains Mono',monospace;font-size:17px;color:var(--txt);font-weight:700}
+  .cve .name{font-size:19px;color:var(--txt);margin-top:6px}
+  .cve .meta{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+  .cve .cvss{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700}
+  .cve.crit .cvss{color:var(--crit)} .cve.high .cvss{color:var(--high)}
+  .cve .layer{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .src{display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted);margin-top:8px}
+  .src .dot{width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+  .footer{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--muted);z-index:2}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="masthead"><span>Dijkstra · Grafo de Ataque</span><span>Datos reales</span></div>
+  <div class="head">
+    <div class="secno">02 — DATOS</div>
+    <h2>CVEs reales del NVD</h2>
+  </div>
+  <div class="intro">Vulnerabilidades reales con su <b>CVSS v3 oficial</b> de la National Vulnerability Database. API live con fallback a dataset embebido de CVEs conocidos.</div>
+  <div class="body">
+    <div class="grid">
+      <div class="cve crit"><div class="id">CVE-2021-44228</div><div class="name">Log4Shell — Apache Log4j</div><div class="meta"><span class="cvss">10.0</span><span class="layer">web</span></div></div>
+      <div class="cve crit"><div class="id">CVE-2017-0144</div><div class="name">EternalBlue — SMBv1</div><div class="meta"><span class="cvss">8.1</span><span class="layer">service</span></div></div>
+      <div class="cve crit"><div class="id">CVE-2019-0708</div><div class="name">BlueKeep — RDP</div><div class="meta"><span class="cvss">9.8</span><span class="layer">service</span></div></div>
+      <div class="cve crit"><div class="id">CVE-2020-1472</div><div class="name">Zerologon — Netlogon</div><div class="meta"><span class="cvss">10.0</span><span class="layer">host</span></div></div>
+      <div class="cve crit"><div class="id">CVE-2019-19781</div><div class="name">Citrix ADC / Gateway</div><div class="meta"><span class="cvss">9.8</span><span class="layer">perimeter</span></div></div>
+      <div class="cve crit"><div class="id">CVE-2021-26855</div><div class="name">ProxyLogon — Exchange</div><div class="meta"><span class="cvss">9.8</span><span class="layer">service</span></div></div>
+      <div class="cve high"><div class="id">CVE-2021-4034</div><div class="name">PwnKit — Polkit pkexec</div><div class="meta"><span class="cvss">7.8</span><span class="layer">host</span></div></div>
+      <div class="cve crit"><div class="id">CVE-2018-13379</div><div class="name">Fortinet FortiOS SSL VPN</div><div class="meta"><span class="cvss">9.8</span><span class="layer">perimeter</span></div></div>
+    </div>
+    <div class="src"><span class="dot"></span> 20 CVEs reales · clasificados por capa: perímetro → web → servicio → host → datos</div>
+  </div>
+  <div class="footer"><span>Universidad de Cuenca · DEET</span><span>03 / 08</span></div>
+</div>
+</body>
+</html>
