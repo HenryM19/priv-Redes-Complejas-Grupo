@@ -1,0 +1,48 @@
+[
+  {
+    "node": "T1583",
+    "name": "Acquire Infrastructure",
+    "in_degree": 11,
+    "tactics": [
+      "resource-development"
+    ],
+    "dist_acumulada": 1.876
+  },
+  {
+    "node": "T1659",
+    "name": "Content Injection",
+    "in_degree": 6,
+    "tactics": [
+      "initial-access",
+      "command-and-control"
+    ],
+    "dist_acumulada": 2.688
+  },
+  {
+    "node": "T1592",
+    "name": "Gather Victim Host Information",
+    "in_degree": 5,
+    "tactics": [
+      "reconnaissance"
+    ],
+    "dist_acumulada": 0.938
+  },
+  {
+    "node": "T1485",
+    "name": "Data Destruction",
+    "in_degree": 4,
+    "tactics": [
+      "impact"
+    ],
+    "dist_acumulada": 4.063
+  },
+  {
+    "node": "T1030",
+    "name": "Data Transfer Size Limits",
+    "in_degree": 3,
+    "tactics": [
+      "exfiltration"
+    ],
+    "dist_acumulada": 3.438
+  }
+]

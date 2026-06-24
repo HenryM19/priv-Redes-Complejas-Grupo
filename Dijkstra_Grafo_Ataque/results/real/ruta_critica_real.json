@@ -1,0 +1,66 @@
+[
+  {
+    "step": 0,
+    "node": "ATTACKER",
+    "name": "Attacker (external)",
+    "tactics": [
+      "entry"
+    ],
+    "dist_acumulada": 0.0
+  },
+  {
+    "step": 1,
+    "node": "T1592",
+    "name": "Gather Victim Host Information",
+    "tactics": [
+      "reconnaissance"
+    ],
+    "dist_acumulada": 0.938
+  },
+  {
+    "step": 2,
+    "node": "T1583",
+    "name": "Acquire Infrastructure",
+    "tactics": [
+      "resource-development"
+    ],
+    "dist_acumulada": 1.876
+  },
+  {
+    "step": 3,
+    "node": "T1659",
+    "name": "Content Injection",
+    "tactics": [
+      "initial-access",
+      "command-and-control"
+    ],
+    "dist_acumulada": 2.688
+  },
+  {
+    "step": 4,
+    "node": "T1030",
+    "name": "Data Transfer Size Limits",
+    "tactics": [
+      "exfiltration"
+    ],
+    "dist_acumulada": 3.438
+  },
+  {
+    "step": 5,
+    "node": "T1485",
+    "name": "Data Destruction",
+    "tactics": [
+      "impact"
+    ],
+    "dist_acumulada": 4.063
+  },
+  {
+    "step": 6,
+    "node": "IMPACT",
+    "name": "Impact achieved",
+    "tactics": [
+      "target"
+    ],
+    "dist_acumulada": 4.073
+  }
+]

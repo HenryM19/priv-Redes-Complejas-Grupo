@@ -1,0 +1,104 @@
+[
+  {
+    "step": 0,
+    "node": "ATTACKER",
+    "name": "Atacante externo",
+    "tactics": [
+      "entry"
+    ],
+    "weight": 0.0,
+    "weight_source": "",
+    "dist_acumulada": 0.0
+  },
+  {
+    "step": 1,
+    "node": "T1078",
+    "name": "Valid Accounts",
+    "tactics": [
+      "stealth",
+      "persistence",
+      "privilege-escalation",
+      "initial-access"
+    ],
+    "weight": 0.05,
+    "weight_source": "CVE:CVE-2021-21985(CVSS=9.8)+mit=8",
+    "dist_acumulada": 0.05
+  },
+  {
+    "step": 2,
+    "node": "T1558.003",
+    "name": "Kerberoasting",
+    "tactics": [
+      "credential-access"
+    ],
+    "weight": 0.1,
+    "weight_source": "CVE:CVE-2014-6324(CVSS=9.0)+mit=3",
+    "dist_acumulada": 0.15
+  },
+  {
+    "step": 3,
+    "node": "T1087",
+    "name": "Account Discovery",
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.75,
+    "weight_source": "mitigaciones=2/8",
+    "dist_acumulada": 0.9
+  },
+  {
+    "step": 4,
+    "node": "T1021.001",
+    "name": "Remote Desktop Protocol",
+    "tactics": [
+      "lateral-movement"
+    ],
+    "weight": 0.05,
+    "weight_source": "CVE:CVE-2021-26855(CVSS=9.8)+mit=8",
+    "dist_acumulada": 0.95
+  },
+  {
+    "step": 5,
+    "node": "T1213",
+    "name": "Data from Information Repositories",
+    "tactics": [
+      "collection"
+    ],
+    "weight": 0.125,
+    "weight_source": "mitigaciones=7/8",
+    "dist_acumulada": 1.075
+  },
+  {
+    "step": 6,
+    "node": "T1071.001",
+    "name": "Web Protocols",
+    "tactics": [
+      "command-and-control"
+    ],
+    "weight": 0.05,
+    "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=2",
+    "dist_acumulada": 1.125
+  },
+  {
+    "step": 7,
+    "node": "T1048.002",
+    "name": "Exfiltration Over Asymmetric Encrypted Non-C2 Protocol",
+    "tactics": [
+      "exfiltration"
+    ],
+    "weight": 0.5,
+    "weight_source": "mitigaciones=4/8",
+    "dist_acumulada": 1.625
+  },
+  {
+    "step": 8,
+    "node": "IMPACT",
+    "name": "Impacto logrado",
+    "tactics": [
+      "target"
+    ],
+    "weight": 0.0,
+    "weight_source": "",
+    "dist_acumulada": 1.635
+  }
+]

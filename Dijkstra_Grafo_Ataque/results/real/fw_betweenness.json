@@ -1,0 +1,480 @@
+[
+  {
+    "node": "T1556",
+    "name": "Modify Authentication Process",
+    "fw_betweenness": 5179,
+    "tactics": [
+      "defense-impairment",
+      "persistence",
+      "credential-access"
+    ],
+    "degree": 27
+  },
+  {
+    "node": "T1078",
+    "name": "Valid Accounts",
+    "fw_betweenness": 5022,
+    "tactics": [
+      "stealth",
+      "persistence",
+      "privilege-escalation",
+      "initial-access"
+    ],
+    "degree": 27
+  },
+  {
+    "node": "T1205",
+    "name": "Traffic Signaling",
+    "fw_betweenness": 3639,
+    "tactics": [
+      "stealth",
+      "persistence",
+      "command-and-control"
+    ],
+    "degree": 21
+  },
+  {
+    "node": "T1072",
+    "name": "Software Deployment Tools",
+    "fw_betweenness": 3300,
+    "tactics": [
+      "execution",
+      "lateral-movement"
+    ],
+    "degree": 12
+  },
+  {
+    "node": "T1098",
+    "name": "Account Manipulation",
+    "fw_betweenness": 2316,
+    "tactics": [
+      "persistence",
+      "privilege-escalation"
+    ],
+    "degree": 20
+  },
+  {
+    "node": "T1659",
+    "name": "Content Injection",
+    "fw_betweenness": 2153,
+    "tactics": [
+      "initial-access",
+      "command-and-control"
+    ],
+    "degree": 14
+  },
+  {
+    "node": "T1622",
+    "name": "Debugger Evasion",
+    "fw_betweenness": 1972,
+    "tactics": [
+      "stealth",
+      "discovery"
+    ],
+    "degree": 12
+  },
+  {
+    "node": "T1091",
+    "name": "Replication Through Removable Media",
+    "fw_betweenness": 1934,
+    "tactics": [
+      "lateral-movement",
+      "initial-access"
+    ],
+    "degree": 15
+  },
+  {
+    "node": "T1546",
+    "name": "Event Triggered Execution",
+    "fw_betweenness": 1898,
+    "tactics": [
+      "privilege-escalation",
+      "persistence"
+    ],
+    "degree": 30
+  },
+  {
+    "node": "T1021",
+    "name": "Remote Services",
+    "fw_betweenness": 1898,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "degree": 18
+  },
+  {
+    "node": "T1053",
+    "name": "Scheduled Task/Job",
+    "fw_betweenness": 1752,
+    "tactics": [
+      "execution",
+      "persistence",
+      "privilege-escalation"
+    ],
+    "degree": 24
+  },
+  {
+    "node": "T1127",
+    "name": "Trusted Developer Utilities Proxy Execution",
+    "fw_betweenness": 1601,
+    "tactics": [
+      "stealth",
+      "execution"
+    ],
+    "degree": 18
+  },
+  {
+    "node": "T1087",
+    "name": "Account Discovery",
+    "fw_betweenness": 1591,
+    "tactics": [
+      "discovery"
+    ],
+    "degree": 10
+  },
+  {
+    "node": "T1552",
+    "name": "Unsecured Credentials",
+    "fw_betweenness": 1517,
+    "tactics": [
+      "credential-access"
+    ],
+    "degree": 21
+  },
+  {
+    "node": "T1534",
+    "name": "Internal Spearphishing",
+    "fw_betweenness": 1507,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "degree": 11
+  },
+  {
+    "node": "T1686",
+    "name": "Disable or Modify System Firewall",
+    "fw_betweenness": 1506,
+    "tactics": [
+      "defense-impairment"
+    ],
+    "degree": 14
+  },
+  {
+    "node": "T1025",
+    "name": "Data from Removable Media",
+    "fw_betweenness": 1462,
+    "tactics": [
+      "collection"
+    ],
+    "degree": 8
+  },
+  {
+    "node": "T1080",
+    "name": "Taint Shared Content",
+    "fw_betweenness": 1386,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "degree": 7
+  },
+  {
+    "node": "T1055",
+    "name": "Process Injection",
+    "fw_betweenness": 1379,
+    "tactics": [
+      "stealth",
+      "privilege-escalation"
+    ],
+    "degree": 24
+  },
+  {
+    "node": "T1211",
+    "name": "Exploitation for Stealth",
+    "fw_betweenness": 1267,
+    "tactics": [
+      "stealth"
+    ],
+    "degree": 7
+  },
+  {
+    "node": "T1125",
+    "name": "Video Capture",
+    "fw_betweenness": 1237,
+    "tactics": [
+      "collection"
+    ],
+    "degree": 10
+  },
+  {
+    "node": "T1550",
+    "name": "Use Alternate Authentication Material",
+    "fw_betweenness": 1168,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "degree": 13
+  },
+  {
+    "node": "T1074",
+    "name": "Data Staged",
+    "fw_betweenness": 1159,
+    "tactics": [
+      "collection"
+    ],
+    "degree": 10
+  },
+  {
+    "node": "T1120",
+    "name": "Peripheral Device Discovery",
+    "fw_betweenness": 1030,
+    "tactics": [
+      "discovery"
+    ],
+    "degree": 4
+  },
+  {
+    "node": "T1557",
+    "name": "Adversary-in-the-Middle",
+    "fw_betweenness": 998,
+    "tactics": [
+      "credential-access",
+      "collection"
+    ],
+    "degree": 18
+  },
+  {
+    "node": "T1016",
+    "name": "System Network Configuration Discovery",
+    "fw_betweenness": 992,
+    "tactics": [
+      "discovery"
+    ],
+    "degree": 6
+  },
+  {
+    "node": "T1563",
+    "name": "Remote Service Session Hijacking",
+    "fw_betweenness": 962,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "degree": 9
+  },
+  {
+    "node": "T1542",
+    "name": "Pre-OS Boot",
+    "fw_betweenness": 929,
+    "tactics": [
+      "stealth",
+      "persistence"
+    ],
+    "degree": 17
+  },
+  {
+    "node": "T1115",
+    "name": "Clipboard Data",
+    "fw_betweenness": 926,
+    "tactics": [
+      "collection"
+    ],
+    "degree": 6
+  },
+  {
+    "node": "T1037",
+    "name": "Boot or Logon Initialization Scripts",
+    "fw_betweenness": 921,
+    "tactics": [
+      "persistence",
+      "privilege-escalation"
+    ],
+    "degree": 19
+  },
+  {
+    "node": "T1124",
+    "name": "System Time Discovery",
+    "fw_betweenness": 910,
+    "tactics": [
+      "discovery"
+    ],
+    "degree": 5
+  },
+  {
+    "node": "T1040",
+    "name": "Network Sniffing",
+    "fw_betweenness": 894,
+    "tactics": [
+      "credential-access",
+      "discovery"
+    ],
+    "degree": 14
+  },
+  {
+    "node": "T1113",
+    "name": "Screen Capture",
+    "fw_betweenness": 862,
+    "tactics": [
+      "collection"
+    ],
+    "degree": 9
+  },
+  {
+    "node": "T1133",
+    "name": "External Remote Services",
+    "fw_betweenness": 860,
+    "tactics": [
+      "persistence",
+      "initial-access"
+    ],
+    "degree": 13
+  },
+  {
+    "node": "T1621",
+    "name": "Multi-Factor Authentication Request Generation",
+    "fw_betweenness": 818,
+    "tactics": [
+      "credential-access"
+    ],
+    "degree": 15
+  },
+  {
+    "node": "T1543",
+    "name": "Create or Modify System Process",
+    "fw_betweenness": 804,
+    "tactics": [
+      "persistence",
+      "privilege-escalation"
+    ],
+    "degree": 18
+  },
+  {
+    "node": "T1574",
+    "name": "Hijack Execution Flow",
+    "fw_betweenness": 760,
+    "tactics": [
+      "stealth",
+      "execution"
+    ],
+    "degree": 22
+  },
+  {
+    "node": "T1528",
+    "name": "Steal Application Access Token",
+    "fw_betweenness": 754,
+    "tactics": [
+      "credential-access"
+    ],
+    "degree": 12
+  },
+  {
+    "node": "T1518",
+    "name": "Software Discovery",
+    "fw_betweenness": 747,
+    "tactics": [
+      "discovery"
+    ],
+    "degree": 9
+  },
+  {
+    "node": "T1687",
+    "name": "Exploitation for Defense Impairment",
+    "fw_betweenness": 723,
+    "tactics": [
+      "defense-impairment"
+    ],
+    "degree": 7
+  },
+  {
+    "node": "T1056",
+    "name": "Input Capture",
+    "fw_betweenness": 715,
+    "tactics": [
+      "collection",
+      "credential-access"
+    ],
+    "degree": 15
+  },
+  {
+    "node": "T1197",
+    "name": "BITS Jobs",
+    "fw_betweenness": 694,
+    "tactics": [
+      "stealth",
+      "persistence",
+      "execution"
+    ],
+    "degree": 14
+  },
+  {
+    "node": "T1110",
+    "name": "Brute Force",
+    "fw_betweenness": 607,
+    "tactics": [
+      "credential-access"
+    ],
+    "degree": 12
+  },
+  {
+    "node": "T1526",
+    "name": "Cloud Service Discovery",
+    "fw_betweenness": 588,
+    "tactics": [
+      "discovery"
+    ],
+    "degree": 4
+  },
+  {
+    "node": "T1647",
+    "name": "Plist File Modification",
+    "fw_betweenness": 584,
+    "tactics": [
+      "defense-impairment"
+    ],
+    "degree": 12
+  },
+  {
+    "node": "T1606",
+    "name": "Forge Web Credentials",
+    "fw_betweenness": 548,
+    "tactics": [
+      "credential-access"
+    ],
+    "degree": 15
+  },
+  {
+    "node": "T1112",
+    "name": "Modify Registry",
+    "fw_betweenness": 538,
+    "tactics": [
+      "defense-impairment",
+      "persistence"
+    ],
+    "degree": 12
+  },
+  {
+    "node": "T1005",
+    "name": "Data from Local System",
+    "fw_betweenness": 525,
+    "tactics": [
+      "collection"
+    ],
+    "degree": 5
+  },
+  {
+    "node": "T1685",
+    "name": "Disable or Modify Tools",
+    "fw_betweenness": 515,
+    "tactics": [
+      "defense-impairment"
+    ],
+    "degree": 12
+  },
+  {
+    "node": "T1689",
+    "name": "Downgrade Attack",
+    "fw_betweenness": 515,
+    "tactics": [
+      "defense-impairment"
+    ],
+    "degree": 10
+  }
+]
