@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Cuellos de botella y defensa</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:58px 90px 56px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:2;margin:0 30px}
+  h2{font-size:56px;font-weight:700;letter-spacing:-.02em;margin:26px 30px 22px;z-index:2}
+  h2 .accent{color:var(--crit)}
+  .body{display:grid;grid-template-columns:1fr 600px;gap:40px;z-index:2;flex:1;margin:0 30px}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:start}
+  .card{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:16px 18px;opacity:0;animation:rise .55s ease forwards}
+  .card .hd{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+  .card .tid{font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:700}
+  .card .nm{font-size:18px;font-weight:500;color:var(--muted)}
+  .card .stats{display:flex;gap:20px;font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--muted);margin-bottom:9px}
+  .card .stats b{color:var(--txt)}
+  .bw{height:20px;border-radius:5px;background:var(--line);overflow:hidden}
+  .bw .f{height:100%;border-radius:5px;transform:scaleX(0);transform-origin:left;animation:grow 1s ease forwards}
+  @keyframes grow{to{transform:scaleX(1)}}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .rec{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:30px 32px;display:flex;flex-direction:column;gap:18px}
+  .rec h3{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .ri{border-radius:10px;padding:20px 22px;display:flex;gap:18px;align-items:flex-start;border-left:4px solid}
+  .ri.a{border-color:var(--green);background:rgba(90,209,160,.07)}
+  .ri.b{border-color:var(--high);background:rgba(255,140,66,.07)}
+  .ri.c{border-color:var(--cyan);background:rgba(63,182,255,.07)}
+  .ri .em{font-size:34px} .ri .tx{font-size:21px;line-height:1.35} .ri .tx b{color:var(--txt)}
+  .ri .tx .tg{font-family:'JetBrains Mono',monospace;font-size:18px}
+  .ri.a .tg{color:var(--green)} .ri.b .tg{color:var(--high)} .ri.c .tg{color:var(--cyan)}
+  .footer{position:absolute;bottom:30px;right:120px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>🚧 Cuellos de botella y <span class="accent">defensa</span></h2>
+  <div class="body">
+    <div class="cards">
+      <div class="card" style="animation-delay:.1s"><div class="hd"><span class="tid" style="color:var(--crit)">T1078</span><span class="nm">Valid Accounts</span></div><div class="stats"><span>in-deg <b>14</b></span><span>FW-betw <b>1218</b></span></div><div class="bw"><div class="f" style="width:100%;background:var(--crit)"></div></div></div>
+      <div class="card" style="animation-delay:.2s"><div class="hd"><span class="tid" style="color:var(--high)">T1558.003</span><span class="nm">Kerberoasting</span></div><div class="stats"><span>in-deg <b>11</b></span><span>FW-betw <b>1044</b></span></div><div class="bw"><div class="f" style="width:85.7%;background:var(--high);animation-delay:.1s"></div></div></div>
+      <div class="card" style="animation-delay:.3s"><div class="hd"><span class="tid" style="color:var(--cyan)">T1087</span><span class="nm">Account Discovery</span></div><div class="stats"><span>in-deg <b>9</b></span><span>FW-betw <b>836</b></span></div><div class="bw"><div class="f" style="width:68.6%;background:var(--cyan);animation-delay:.2s"></div></div></div>
+      <div class="card" style="animation-delay:.4s"><div class="hd"><span class="tid" style="color:var(--amber)">T1021.001</span><span class="nm">RDP</span></div><div class="stats"><span>in-deg <b>8</b></span><span>FW-betw <b>702</b></span></div><div class="bw"><div class="f" style="width:57.6%;background:var(--amber);animation-delay:.3s"></div></div></div>
+      <div class="card" style="animation-delay:.5s"><div class="hd"><span class="tid" style="color:var(--green)">T1213</span><span class="nm">Data from Repos</span></div><div class="stats"><span>in-deg <b>6</b></span><span>FW-betw <b>431</b></span></div><div class="bw"><div class="f" style="width:35.4%;background:var(--green);animation-delay:.4s"></div></div></div>
+      <div class="card" style="animation-delay:.6s"><div class="hd"><span class="tid" style="color:var(--purple)">T1071.001</span><span class="nm">Web Protocols C2</span></div><div class="stats"><span>in-deg <b>5</b></span><span>FW-betw <b>388</b></span></div><div class="bw"><div class="f" style="width:31.9%;background:var(--purple);animation-delay:.5s"></div></div></div>
+      <div class="card" style="animation-delay:.7s;grid-column:span 2"><div class="hd"><span class="tid" style="color:var(--high)">T1048.002</span><span class="nm">Exfiltration Asymmetric Encrypted</span></div><div class="stats"><span>in-deg <b>3</b></span><span>FW-betw <b>205</b></span></div><div class="bw"><div class="f" style="width:16.8%;background:var(--high);animation-delay:.6s"></div></div></div>
+    </div>
+    <div class="rec">
+      <h3>🛡️ Tres cortes que rompen la ruta</h3>
+      <div class="ri a"><span class="em">🛡️</span><div class="tx"><b>MFA obligatorio</b> en Valid Accounts <span class="tg">(T1078)</span> — elimina el w=0.05 del primer salto y desconecta el pivote universal.</div></div>
+      <div class="ri b"><span class="em">🔑</span><div class="tx"><b>Mitigar Kerberoasting</b> <span class="tg">(T1558.003)</span> — contraseñas de servicio largas + AES; corta el 2.º nodo de la cadena.</div></div>
+      <div class="ri c"><span class="em">🔍</span><div class="tx"><b>Monitorear RDP</b> <span class="tg">(T1021.001)</span> — el cuello de botella de lateral-movement; segmentación + detección de sesiones anómalas.</div></div>
+    </div>
+  </div>
+  <div class="footer">9 / 10</div>
+</div>
+</body>
+</html>

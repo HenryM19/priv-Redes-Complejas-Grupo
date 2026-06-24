@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Conclusiones</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:58px 90px 56px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .slide::after{content:"";position:absolute;bottom:-200px;left:-160px;width:760px;height:760px;border-radius:50%;background:radial-gradient(circle,rgba(90,209,160,.14),transparent 65%);pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:2;margin:0 30px}
+  h2{font-size:54px;font-weight:700;letter-spacing:-.02em;margin:24px 30px 4px;z-index:2}
+  h2 .accent{color:var(--green)}
+  .qre{margin:0 30px 22px;z-index:2;font-size:21px;color:var(--muted);font-style:italic;border-left:3px solid var(--line);padding-left:18px;max-width:1640px}
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:24px;z-index:2;margin:0 30px 22px}
+  .ans{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:24px 28px;opacity:0;animation:rise .6s ease forwards}
+  .ans.a{border-top:4px solid var(--crit);animation-delay:.15s} .ans.b{border-top:4px solid var(--cyan);animation-delay:.35s}
+  .ans .l{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+  .ans.a .l{color:var(--crit)} .ans.b .l{color:var(--cyan)}
+  .ans .big{font-size:24px;line-height:1.4} .ans .big b{font-family:'JetBrains Mono',monospace}
+  .ans.a .big b{color:var(--crit)} .ans.b .big b{color:var(--cyan)}
+  .ccls{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;z-index:2;margin:0 30px 22px}
+  .cc{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:22px 24px;opacity:0;animation:rise .6s ease forwards}
+  .cc:nth-child(1){animation-delay:.5s} .cc:nth-child(2){animation-delay:.65s} .cc:nth-child(3){animation-delay:.8s}
+  .cc .n{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:var(--amber)}
+  .cc .em{font-size:30px;float:right}
+  .cc p{font-size:20px;color:var(--muted);line-height:1.38;margin-top:10px} .cc p b{color:var(--txt)}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+  .cta{margin:0 30px 18px;z-index:2;text-align:center;font-size:30px;font-weight:600;color:var(--txt);border:1px dashed var(--green);border-radius:12px;padding:22px;background:rgba(90,209,160,.06)}
+  .cta b{color:var(--green)}
+  .finals{display:flex;justify-content:center;gap:18px;z-index:2;margin:0 30px}
+  .fp{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:10px 18px}
+  .fp b{color:var(--cyan)}
+  .footer{position:absolute;bottom:30px;right:120px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>✅ Respuesta y <span class="accent">conclusiones</span></h2>
+  <div class="qre">¿Cuál es la secuencia de menor resistencia de acceso a impacto y qué técnicas son cuellos de botella críticos según Dijkstra y Floyd-Warshall?</div>
+  <div class="answers">
+    <div class="ans a"><div class="l">🔴 Dijkstra · ruta de menor resistencia</div><div class="big">ATTACKER → <b>T1078 → T1558.003 → T1087 → T1021.001 → T1213 → T1071.001 → T1048.002</b> → IMPACT — costo total <b>1.635</b>.</div></div>
+    <div class="ans b"><div class="l">🔵 Floyd-Warshall · pivote universal</div><div class="big"><b>T1078 Valid Accounts</b> aparece en <b>1218</b> rutas óptimas: el cuello de botella central de toda la campaña.</div></div>
+  </div>
+  <div class="ccls">
+    <div class="cc"><span class="em">🔑</span><span class="n">01</span><p>Las <b>técnicas de credenciales</b> (T1078, T1558.003) confirman la hipótesis: son el puente crítico del ataque.</p></div>
+    <div class="cc"><span class="em">⚖️</span><span class="n">02</span><p>El peso por <b>mitigaciones + CVSS</b> hace que Dijkstra prefiera técnicas con CVEs 9.8 reales y bien explotables.</p></div>
+    <div class="cc"><span class="em">🛡️</span><span class="n">03</span><p>Cortar <b>3 nodos</b> (MFA, anti-Kerberoasting, RDP) rompe la ruta óptima y dispara su costo.</p></div>
+  </div>
+  <div class="cta">🗺️ <b>Los grafos de ataque son mapas para defensores, no solo para atacantes.</b></div>
+  <div class="finals">
+    <span class="fp"><b>71</b> técnicas analizadas</span>
+    <span class="fp"><b>653</b> aristas</span>
+    <span class="fp">Floyd-Warshall sobre matriz <b>73×73</b></span>
+    <span class="fp">Jean Carlo Aucapina · Henry Maldonado</span>
+  </div>
+  <div class="footer">10 / 10</div>
+</div>
+</body>
+</html>

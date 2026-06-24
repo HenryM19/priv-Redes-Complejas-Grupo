@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Dijkstra: ruta crítica</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:58px 90px 56px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:2;margin:0 30px}
+  h2{font-size:56px;font-weight:700;letter-spacing:-.02em;margin:26px 30px 22px;z-index:2}
+  h2 .accent{color:var(--crit)}
+  .body{display:grid;grid-template-columns:560px 1fr;gap:36px;z-index:2;flex:1;margin:0 30px}
+  .panel{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:28px 30px}
+  .panel h3{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  pre.code{font-family:'JetBrains Mono',monospace;font-size:19px;line-height:1.6;color:var(--txt)}
+  pre.code .kw{color:var(--purple)} pre.code .fn{color:var(--cyan)} pre.code .cm{color:var(--muted)} pre.code .hl{color:var(--amber)} pre.code .cr{color:var(--crit)}
+  .path{display:flex;flex-direction:column;gap:7px}
+  .node{display:flex;align-items:center;gap:16px;border:1px solid var(--line);border-radius:9px;padding:9px 16px;background:rgba(255,255,255,.02);opacity:0;animation:slidein .5s ease forwards}
+  .node .tid{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;width:108px}
+  .node .nm{flex:1;font-size:19px;font-weight:500}
+  .node .tac{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.05em;color:var(--muted);width:150px;text-align:right}
+  .node .w{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;width:92px;text-align:right}
+  .node .src{font-size:13px;color:var(--muted);width:150px;text-align:right}
+  .node.atk{border-color:var(--green)} .node.atk .tid{color:var(--green)}
+  .node.imp{border-color:var(--crit)} .node.imp .tid{color:var(--crit)}
+  @keyframes slidein{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+  .total{margin-top:14px;border:1px solid var(--crit);background:linear-gradient(90deg,rgba(255,59,92,.14),transparent);border-radius:10px;padding:16px 24px;display:flex;align-items:center;gap:18px}
+  .total .l{font-size:20px;color:var(--muted)} .total .v{font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:700;color:var(--crit)} .total .v small{font-size:20px;color:var(--muted)}
+  .insight{margin:18px 30px 0;z-index:2;display:flex;align-items:center;gap:16px;font-size:23px;border:1px dashed var(--cyan);border-radius:10px;padding:18px 26px;background:rgba(63,182,255,.06)}
+  .insight b{color:var(--cyan)}
+  .footer{position:absolute;bottom:30px;right:120px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>🔴 Dijkstra: la <span class="accent">ruta crítica</span></h2>
+  <div class="body">
+    <div class="panel">
+      <h3>Implementación propia · heap binario</h3>
+<pre class="code"><span class="kw">def</span> <span class="fn">dijkstra</span>(G, src, dst):
+  dist = {v: <span class="hl">∞</span> <span class="kw">for</span> v <span class="kw">in</span> G}
+  dist[src] = <span class="hl">0</span>
+  pq = MinHeap([(<span class="hl">0</span>, src)])     <span class="cm"># O(log V)</span>
+  <span class="kw">while</span> pq:
+    d, u = pq.<span class="fn">pop_min</span>()
+    <span class="kw">if</span> u == dst: <span class="kw">break</span>
+    <span class="kw">for</span> v, w <span class="kw">in</span> G[u]:
+      <span class="cm"># relajación</span>
+      <span class="kw">if</span> d + w &lt; dist[v]:
+        dist[v] = d + w
+        prev[v] = u
+        pq.<span class="fn">push</span>((<span class="cr">dist[v]</span>, v))
+  <span class="kw">return</span> <span class="fn">rebuild</span>(prev, dst)</pre>
+      <div style="margin-top:18px;font-size:18px;color:var(--muted)">Complejidad: <b style="color:var(--cyan);font-family:'JetBrains Mono'">O((V+E)·log V)</b> con heap binario.</div>
+    </div>
+    <div>
+      <div class="path">
+        <div class="node atk" style="animation-delay:.1s"><span class="tid">ATTACKER</span><span class="nm">Acceso inicial vía supply chain</span><span class="tac">start</span><span class="w" style="color:var(--green)">0.00</span><span class="src">—</span></div>
+        <div class="node" style="animation-delay:.25s"><span class="tid" style="color:var(--crit)">T1078</span><span class="nm">Valid Accounts</span><span class="tac">stealth</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">CVSS 9.8 · 8 mit</span></div>
+        <div class="node" style="animation-delay:.4s"><span class="tid" style="color:var(--high)">T1558.003</span><span class="nm">Kerberoasting</span><span class="tac">credential-acc</span><span class="w" style="color:var(--high)">0.10</span><span class="src">CVSS 9.0 · 3 mit</span></div>
+        <div class="node" style="animation-delay:.55s"><span class="tid" style="color:var(--cyan)">T1087</span><span class="nm">Account Discovery</span><span class="tac">discovery</span><span class="w" style="color:var(--amber)">0.75</span><span class="src">2 mit</span></div>
+        <div class="node" style="animation-delay:.7s"><span class="tid" style="color:var(--amber)">T1021.001</span><span class="nm">Remote Desktop Protocol</span><span class="tac">lateral-mov</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">CVSS 9.8 · 8 mit</span></div>
+        <div class="node" style="animation-delay:.85s"><span class="tid" style="color:var(--green)">T1213</span><span class="nm">Data from Info Repositories</span><span class="tac">collection</span><span class="w" style="color:var(--green)">0.125</span><span class="src">7 mit</span></div>
+        <div class="node" style="animation-delay:1s"><span class="tid" style="color:var(--purple)">T1071.001</span><span class="nm">Web Protocols (C2)</span><span class="tac">command-ctrl</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">CVSS 9.8 · 2 mit</span></div>
+        <div class="node" style="animation-delay:1.15s"><span class="tid" style="color:var(--high)">T1048.002</span><span class="nm">Exfil. Asymmetric Encrypted</span><span class="tac">exfiltration</span><span class="w" style="color:var(--high)">0.50</span><span class="src">4 mit</span></div>
+        <div class="node imp" style="animation-delay:1.3s"><span class="tid">IMPACT</span><span class="nm">Datos exfiltrados · objetivo logrado</span><span class="tac">end</span><span class="w" style="color:var(--crit)">—</span><span class="src">—</span></div>
+      </div>
+      <div class="total"><span class="l">Costo total de la ruta de menor resistencia:</span><span class="v">1.635 <small>(7 técnicas)</small></span></div>
+    </div>
+  </div>
+  <div class="insight">💡 <span>La ruta arranca con <b>Valid Accounts (T1078, w=0.05)</b> — credenciales comprometidas desde la propia cadena de suministro de SolarWinds.</span></div>
+  <div class="footer">7 / 10</div>
+</div>
+</body>
+</html>

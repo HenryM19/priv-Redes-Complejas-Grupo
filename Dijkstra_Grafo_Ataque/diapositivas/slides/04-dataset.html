@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>El dataset</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:60px 120px 50px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:2}
+  h2{font-size:58px;font-weight:700;letter-spacing:-.02em;margin:30px 0 4px;z-index:2}
+  h2 .accent{color:var(--cyan)}
+  .hero{display:flex;align-items:center;gap:22px;margin:22px 0 8px;z-index:2}
+  .badge{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:26px;letter-spacing:.06em;color:#0d1320;background:linear-gradient(135deg,var(--cyan),var(--green));padding:14px 24px;border-radius:8px}
+  .hero p{font-size:24px;color:var(--muted)} .hero p b{color:var(--txt)}
+  .steps{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:14px;margin-top:24px;z-index:2}
+  .step{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:24px 24px;opacity:0;animation:rise .6s ease forwards}
+  .step:nth-of-type(1){animation-delay:.15s} .step:nth-of-type(3){animation-delay:.45s} .step:nth-of-type(5){animation-delay:.75s}
+  .step .n{font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase}
+  .step h3{font-size:24px;margin:8px 0 8px;font-weight:600}
+  .step code{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--cyan);word-break:break-all}
+  .step .r{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--green);font-weight:700;margin-top:10px}
+  .sarr{display:flex;align-items:center;font-size:38px;color:var(--high);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.4;transform:translateX(0)}50%{opacity:1;transform:translateX(6px)}}
+  @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  .heat-title{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:30px 0 12px;z-index:2}
+  .heat{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;z-index:2}
+  .cell{border-radius:8px;padding:14px 14px;border:1px solid var(--line)}
+  .cell .t{font-size:16px;color:var(--txt);font-weight:500;line-height:1.15;min-height:38px}
+  .cell .c{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;margin-top:6px}
+  .note{margin-top:22px;z-index:2;display:flex;justify-content:space-between;align-items:center;font-size:20px;color:var(--muted)}
+  .note b{color:var(--amber)} .note .src{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--cyan)}
+  .footer{position:absolute;bottom:30px;right:120px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>📦 El <span class="accent">dataset</span></h2>
+  <div class="hero">
+    <span class="badge">MITRE ATT&CK · Enterprise</span>
+    <p>Base de conocimiento de adversarios en formato <b>STIX 2.1</b> — relaciones <b>campaign “uses” attack-pattern</b>.</p>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="n">Step 1 · Fuente</div><h3>Bundle STIX</h3><code>enterprise-attack.json</code><div class="r">25 842 objetos STIX</div></div>
+    <div class="sarr">→</div>
+    <div class="step"><div class="n">Step 2 · Filtro</div><h3>Campaña SolarWinds</h3><code>uses → attack-pattern</code><div class="r">71 técnicas reales</div></div>
+    <div class="sarr">→</div>
+    <div class="step"><div class="n">Step 3 · Grafo</div><h3>Construcción G=(V,E,w)</h3><code>+ ATTACKER + IMPACT</code><div class="r">73 nodos · 653 aristas</div></div>
+  </div>
+  <div class="heat-title">Técnicas por táctica (conteos reales) — color = densidad</div>
+  <div class="heat">
+    <div class="cell" style="background:rgba(63,182,255,.10)"><div class="t">Reconnaissance</div><div class="c" style="color:var(--cyan)">1</div></div>
+    <div class="cell" style="background:rgba(63,182,255,.16)"><div class="t">Resource Dev.</div><div class="c" style="color:var(--cyan)">3</div></div>
+    <div class="cell" style="background:rgba(255,140,66,.30)"><div class="t">Initial Access</div><div class="c" style="color:var(--high)">8</div></div>
+    <div class="cell" style="background:rgba(255,140,66,.20)"><div class="t">Execution</div><div class="c" style="color:var(--high)">5</div></div>
+    <div class="cell" style="background:rgba(255,59,92,.34)"><div class="t">Persistence</div><div class="c" style="color:var(--crit)">11</div></div>
+    <div class="cell" style="background:rgba(255,59,92,.34)"><div class="t">Privilege Esc.</div><div class="c" style="color:var(--crit)">11</div></div>
+    <div class="cell" style="background:rgba(255,140,66,.20)"><div class="t">Defense Impair.</div><div class="c" style="color:var(--high)">5</div></div>
+    <div class="cell" style="background:rgba(255,59,92,.40)"><div class="t">Stealth</div><div class="c" style="color:var(--crit)">12</div></div>
+    <div class="cell" style="background:rgba(255,140,66,.30)"><div class="t">Credential Acc.</div><div class="c" style="color:var(--high)">8</div></div>
+    <div class="cell" style="background:rgba(255,59,92,.30)"><div class="t">Discovery</div><div class="c" style="color:var(--crit)">10</div></div>
+    <div class="cell" style="background:rgba(255,140,66,.24)"><div class="t">Lateral Move.</div><div class="c" style="color:var(--high)">6</div></div>
+    <div class="cell" style="background:rgba(255,140,66,.24)"><div class="t">Collection</div><div class="c" style="color:var(--high)">6</div></div>
+    <div class="cell" style="background:rgba(255,140,66,.20)"><div class="t">Command & Ctrl</div><div class="c" style="color:var(--high)">5</div></div>
+    <div class="cell" style="background:rgba(63,182,255,.10)"><div class="t">Exfiltration</div><div class="c" style="color:var(--cyan)">1</div></div>
+  </div>
+  <div class="note">
+    <span>⚖️ <b>Peso de aristas</b> = mitigaciones reales ATT&CK + CVSS de CVEs documentados en NVD.</span>
+    <span class="src">github.com/mitre/cti · enterprise-attack.json</span>
+  </div>
+  <div class="footer">4 / 10</div>
+</div>
+</body>
+</html>

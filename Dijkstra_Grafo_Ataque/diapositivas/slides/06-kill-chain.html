@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Kill chain SolarWinds</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:60px 80px 56px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:2;margin:0 40px}
+  h2{font-size:56px;font-weight:700;letter-spacing:-.02em;margin:28px 40px 6px;z-index:2}
+  h2 .accent{color:var(--high)}
+  .lead{font-size:23px;color:var(--muted);margin:0 40px 28px;z-index:2}
+  .chain{display:flex;align-items:stretch;gap:6px;z-index:2;margin:0 24px;flex-wrap:nowrap}
+  .ph{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;text-align:center;opacity:0;animation:rise .5s ease forwards}
+  .chain .ph:nth-child(odd){animation-delay:calc(var(--i)*0.05s)}
+  .ph .name{font-size:14px;font-weight:600;line-height:1.15;min-height:34px;display:flex;align-items:center}
+  .ph .badge{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;margin-top:8px}
+  .ph .em{font-size:22px;margin-bottom:4px}
+  .arrow{display:flex;align-items:center;color:var(--high);font-size:22px;animation:pulse 1.5s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .legend{display:flex;gap:24px;margin:24px 40px 0;z-index:2;font-size:18px;color:var(--muted);align-items:center}
+  .legend .sw{display:inline-block;width:18px;height:18px;border-radius:4px;margin-right:8px;vertical-align:-3px}
+  .keys{margin:26px 40px 0;z-index:2;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:22px 28px}
+  .keys h3{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .keys .row{display:flex;flex-wrap:wrap;gap:14px}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:19px;padding:8px 14px;border-radius:7px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+  .chip b{color:var(--txt);font-family:'Space Grotesk'}
+  .footer{position:absolute;bottom:30px;right:120px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>⛓️ Kill chain <span class="accent">SolarWinds</span></h2>
+  <div class="lead">Las 14 tácticas de ATT&CK como cadena de fases. Color por densidad: más técnicas ⇒ fase más explotada.</div>
+  <div class="chain" id="chain"></div>
+  <div class="legend">
+    <span><span class="sw" style="background:rgba(63,182,255,.45)"></span>baja densidad (1–3)</span>
+    <span><span class="sw" style="background:rgba(255,140,66,.6)"></span>media (5–8)</span>
+    <span><span class="sw" style="background:rgba(255,59,92,.7)"></span>alta (10–12) — núcleo del ataque</span>
+  </div>
+  <div class="keys">
+    <h3>Técnicas clave por fase</h3>
+    <div class="row">
+      <span class="chip"><b>Initial Access</b> · T1195.002 supply chain</span>
+      <span class="chip"><b>Stealth</b> · T1078 Valid Accounts</span>
+      <span class="chip"><b>Credential Access</b> · T1558.003 Kerberoasting</span>
+      <span class="chip"><b>Lateral Mov.</b> · T1021.001 RDP</span>
+      <span class="chip"><b>Collection</b> · T1213 Data from Repos</span>
+      <span class="chip"><b>C2</b> · T1071.001 Web Protocols</span>
+      <span class="chip"><b>Exfiltration</b> · T1048.002 Encrypted</span>
+    </div>
+  </div>
+  <div class="footer">6 / 10</div>
+</div>
+<script>
+  const tactics=[
+    ["Reconnaissance",1,"🔭"],["Resource Dev.",3,"🧰"],["Initial Access",8,"🚪"],
+    ["Execution",5,"⚙️"],["Persistence",11,"📌"],["Privilege Esc.",11,"⬆️"],
+    ["Defense Impair.",5,"🚫"],["Stealth",12,"👤"],["Credential Acc.",8,"🔑"],
+    ["Discovery",10,"🔍"],["Lateral Mov.",6,"↔️"],["Collection",6,"📥"],
+    ["Command & Ctrl",5,"📡"],["Exfiltration",1,"📤"]
+  ];
+  const max=12;
+  function color(c){
+    const t=c/max;
+    if(c<=3) return ["rgba(63,182,255,"+(0.18+t*0.5).toFixed(2)+")","#3fb6ff"];
+    if(c<=8) return ["rgba(255,140,66,"+(0.18+t*0.55).toFixed(2)+")","#ff8c42"];
+    return ["rgba(255,59,92,"+(0.2+t*0.6).toFixed(2)+")","#ff3b5c"];
+  }
+  const chain=document.getElementById('chain');
+  tactics.forEach((tt,i)=>{
+    const [bg,fg]=color(tt[1]);
+    const ph=document.createElement('div');
+    ph.className='ph'; ph.style.setProperty('--i',i);
+    ph.style.background=bg; ph.style.borderColor=fg;
+    ph.innerHTML='<span class="em">'+tt[2]+'</span><span class="name">'+tt[0]+'</span><span class="badge" style="color:'+fg+'">'+tt[1]+'</span>';
+    chain.appendChild(ph);
+    if(i<tactics.length-1){const a=document.createElement('div');a.className='arrow';a.style.animationDelay=(i*0.12)+'s';a.textContent='›';chain.appendChild(a);}
+  });
+</script>
+</body>
+</html>

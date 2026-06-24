@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Motivación</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:64px 120px 56px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:2}
+  h2{font-size:64px;font-weight:700;letter-spacing:-.02em;margin:38px 0 8px;z-index:2}
+  h2 .ic{margin-right:18px} h2 .accent{color:var(--crit)}
+  .lead{font-size:26px;color:var(--muted);z-index:2;max-width:1300px}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:40px;z-index:2}
+  .col{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:34px 30px;opacity:0;animation:rise .7s ease forwards}
+  .col:nth-child(1){animation-delay:.15s;border-top:4px solid var(--cyan)}
+  .col:nth-child(2){animation-delay:.4s;border-top:4px solid var(--purple)}
+  .col:nth-child(3){animation-delay:.65s;border-top:4px solid var(--crit)}
+  .col .em{font-size:54px;display:block;margin-bottom:18px}
+  .col h3{font-size:30px;font-weight:600;margin-bottom:14px}
+  .col p{font-size:23px;color:var(--muted);line-height:1.4}
+  .col p b{color:var(--txt)}
+  @keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+  .timeline{margin-top:42px;z-index:2;display:flex;align-items:center;gap:0}
+  .tl-node{display:flex;flex-direction:column;align-items:center;min-width:0}
+  .tl-dot{width:22px;height:22px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 6px rgba(63,182,255,.15)}
+  .tl-node:last-child .tl-dot{background:var(--crit);box-shadow:0 0 0 6px rgba(255,59,92,.18)}
+  .tl-y{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;margin-top:14px;color:var(--txt)}
+  .tl-t{font-size:18px;color:var(--muted);margin-top:4px;text-align:center}
+  .tl-line{flex:1;height:3px;background:linear-gradient(90deg,var(--cyan),var(--crit));position:relative;overflow:hidden}
+  .tl-line::after{content:"";position:absolute;top:0;left:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:flow 2.4s linear infinite}
+  @keyframes flow{from{transform:translateX(-120%)}to{transform:translateX(360%)}}
+  .stat{margin-top:auto;z-index:2;border:1px solid var(--crit);background:linear-gradient(90deg,rgba(255,59,92,.12),transparent);border-radius:12px;padding:26px 34px;display:flex;align-items:center;gap:24px}
+  .stat .big{font-family:'JetBrains Mono',monospace;font-size:62px;font-weight:700;color:var(--crit);line-height:1}
+  .stat .txt{font-size:26px;color:var(--txt)} .stat .txt b{color:var(--amber)}
+  .footer{position:absolute;bottom:30px;right:120px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2><span class="ic">🛡️</span>¿Por qué <span class="accent">este</span> proyecto?</h2>
+  <div class="lead">Un ataque a la cadena de suministro que comprometió a 18 000 organizaciones — modelado como un grafo.</div>
+  <div class="cols">
+    <div class="col"><span class="em">🌐</span><h3>El problema</h3><p>Las infraestructuras reales son atacadas siguiendo <b>secuencias documentadas</b> de técnicas, no pasos aleatorios.</p></div>
+    <div class="col"><span class="em">🔬</span><h3>La ciencia</h3><p>La <b>teoría de grafos</b> modela esas rutas de ataque como <b>caminos mínimos</b> ponderados por dificultad.</p></div>
+    <div class="col"><span class="em">🎯</span><h3>El objetivo</h3><p>Identificar la <b>secuencia más peligrosa</b> y los <b>cuellos de botella</b> que todo defensor debe cortar.</p></div>
+  </div>
+  <div class="timeline">
+    <div class="tl-node"><div class="tl-dot"></div><div class="tl-y">2019</div><div class="tl-t">Compromiso<br>de la build</div></div>
+    <div class="tl-line"></div>
+    <div class="tl-node"><div class="tl-dot"></div><div class="tl-y">2020</div><div class="tl-t">Distribución<br>SUNBURST</div></div>
+    <div class="tl-line"></div>
+    <div class="tl-node"><div class="tl-dot"></div><div class="tl-y">DIC 2020</div><div class="tl-t">Detección<br>(FireEye)</div></div>
+  </div>
+  <div class="stat">
+    <span class="big">18 000</span>
+    <span class="txt"><b>organizaciones afectadas</b> — incluyendo múltiples agencias del gobierno de EE.&nbsp;UU.</span>
+  </div>
+  <div class="footer">2 / 10</div>
+</div>
+</body>
+</html>

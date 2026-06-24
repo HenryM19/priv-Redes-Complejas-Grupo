@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Floyd-Warshall: técnicas puente</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:58px 90px 56px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.30;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:2;margin:0 30px}
+  h2{font-size:56px;font-weight:700;letter-spacing:-.02em;margin:26px 30px 6px;z-index:2}
+  h2 .accent{color:var(--cyan)}
+  .lead{margin:0 30px 22px;z-index:2;font-family:'JetBrains Mono',monospace;font-size:23px;color:var(--muted)}
+  .lead b{color:var(--cyan)} .lead .k{color:var(--amber)}
+  .body{display:grid;grid-template-columns:620px 1fr;gap:40px;z-index:2;flex:1;margin:0 30px}
+  .panel{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:28px 30px}
+  .panel h3{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  table.mx{border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:20px;margin:0 auto}
+  table.mx td,table.mx th{width:88px;height:56px;text-align:center;border:1px solid var(--line);color:var(--txt)}
+  table.mx th{color:var(--muted);font-weight:500}
+  table.mx td.upd{color:var(--green);font-weight:700;animation:flash 2.4s ease-in-out infinite}
+  table.mx td.k{background:rgba(255,210,63,.12);color:var(--amber);font-weight:700}
+  @keyframes flash{0%,100%{background:rgba(90,209,160,.05)}50%{background:rgba(90,209,160,.28)}}
+  .mxnote{margin-top:18px;font-size:18px;color:var(--muted);text-align:center}
+  .mxnote b{color:var(--green)}
+  .rank{display:flex;flex-direction:column;gap:18px}
+  .rr{opacity:0;animation:rise .6s ease forwards}
+  .rr .top{display:flex;align-items:baseline;gap:14px;margin-bottom:7px}
+  .rr .pos{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--muted);width:46px}
+  .rr .tid{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700}
+  .rr .nm{font-size:22px;font-weight:500}
+  .rr .val{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700}
+  .rbar{height:30px;border-radius:6px;background:var(--line);overflow:hidden}
+  .rbar .f{height:100%;border-radius:6px;transform:scaleX(0);transform-origin:left;animation:grow 1.1s ease forwards}
+  @keyframes grow{to{transform:scaleX(1)}}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .insight{margin:20px 30px 0;z-index:2;display:flex;align-items:center;gap:16px;font-size:23px;border:1px dashed var(--crit);border-radius:10px;padding:18px 26px;background:rgba(255,59,92,.07)}
+  .insight b{color:var(--crit)}
+  .footer{position:absolute;bottom:30px;right:120px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>🔵 Floyd-Warshall: técnicas <span class="accent">puente</span></h2>
+  <div class="lead">Para cada par (i,j): si <span class="k">d(i,k) + d(k,j) &lt; d(i,j)</span> ⇒ <b>k es un puente</b>. Conteo sobre 73×73 = betweenness.</div>
+  <div class="body">
+    <div class="panel">
+      <h3>Matriz de distancias · relajación por k</h3>
+      <table class="mx">
+        <tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+        <tr><th>A</th><td>0</td><td>0.1</td><td class="upd">0.6</td><td class="upd">0.7</td><td>0.5</td></tr>
+        <tr><th>B</th><td>∞</td><td>0</td><td class="k">0.5</td><td class="upd">0.6</td><td>0.9</td></tr>
+        <tr><th>C</th><td>∞</td><td>∞</td><td>0</td><td>0.1</td><td class="upd">0.3</td></tr>
+        <tr><th>D</th><td>∞</td><td>∞</td><td>∞</td><td>0</td><td>0.2</td></tr>
+        <tr><th>E</th><td>∞</td><td>∞</td><td>∞</td><td>∞</td><td>0</td></tr>
+      </table>
+      <div class="mxnote">Iterando k = C: las celdas <b>verdes</b> se actualizan al pasar por C ⇒ C suma puente.</div>
+    </div>
+    <div class="rank">
+      <div class="rr" style="animation-delay:.2s"><div class="top"><span class="pos">#1</span><span class="tid" style="color:var(--crit)">T1078</span><span class="nm">Valid Accounts</span><span class="val" style="color:var(--crit)">1218</span></div><div class="rbar"><div class="f" style="width:100%;background:var(--crit)"></div></div></div>
+      <div class="rr" style="animation-delay:.35s"><div class="top"><span class="pos">#2</span><span class="tid" style="color:var(--high)">T1558.003</span><span class="nm">Kerberoasting</span><span class="val" style="color:var(--high)">1044</span></div><div class="rbar"><div class="f" style="width:85.7%;background:var(--high);animation-delay:.15s"></div></div></div>
+      <div class="rr" style="animation-delay:.5s"><div class="top"><span class="pos">#3</span><span class="tid" style="color:var(--cyan)">T1087</span><span class="nm">Account Discovery</span><span class="val" style="color:var(--cyan)">836</span></div><div class="rbar"><div class="f" style="width:68.6%;background:var(--cyan);animation-delay:.3s"></div></div></div>
+      <div class="rr" style="animation-delay:.65s"><div class="top"><span class="pos">#4</span><span class="tid" style="color:var(--cyan)">T1482</span><span class="nm">Domain Trust Discovery</span><span class="val" style="color:var(--cyan)">836</span></div><div class="rbar"><div class="f" style="width:68.6%;background:var(--cyan);animation-delay:.45s"></div></div></div>
+      <div class="rr" style="animation-delay:.8s"><div class="top"><span class="pos">#5</span><span class="tid" style="color:var(--amber)">T1021.001</span><span class="nm">Remote Desktop Protocol</span><span class="val" style="color:var(--amber)">702</span></div><div class="rbar"><div class="f" style="width:57.6%;background:var(--amber);animation-delay:.6s"></div></div></div>
+    </div>
+  </div>
+  <div class="insight">💡 <span><b>T1078</b> aparece en <b>1218 rutas óptimas</b> — es el pivote central de toda la campaña SolarWinds.</span></div>
+  <div class="footer">8 / 10</div>
+</div>
+</body>
+</html>

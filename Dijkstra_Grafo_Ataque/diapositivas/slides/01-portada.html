@@ -5,48 +5,74 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
   :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
-        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f}
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
-  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:96px 120px}
-  .slide::before{content:"";position:absolute;inset:0;
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:88px 120px}
+  .grid-bg{position:absolute;inset:0;
     background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
     background-size:64px 64px;opacity:.30;pointer-events:none}
-  .slide::after{content:"";position:absolute;top:-200px;right:-200px;width:760px;height:760px;border-radius:50%;
-    background:radial-gradient(circle,rgba(255,59,92,.16),transparent 65%);pointer-events:none}
-  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:2}
-  .center{flex:1;display:flex;flex-direction:column;justify-content:center;z-index:2}
-  .tag{display:inline-flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:.2em;text-transform:uppercase;color:var(--crit);margin-bottom:34px}
+  .slide::after{content:"";position:absolute;top:-220px;right:-180px;width:820px;height:820px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,59,92,.18),transparent 65%);pointer-events:none}
+  /* animated network */
+  svg.net{position:absolute;inset:0;width:1920px;height:1080px;pointer-events:none;z-index:1}
+  svg.net line{stroke:var(--cyan);stroke-width:1.2;opacity:.18;animation:linkpulse 5s ease-in-out infinite}
+  svg.net circle{fill:var(--cyan);opacity:.5;animation:float 7s ease-in-out infinite}
+  svg.net circle.c2{fill:var(--crit)} svg.net circle.c3{fill:var(--amber)} svg.net circle.c4{fill:var(--purple)}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+  @keyframes linkpulse{0%,100%{opacity:.08}50%{opacity:.28}}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:22px;z-index:3}
+  .center{flex:1;display:flex;flex-direction:column;justify-content:center;z-index:3}
+  .year{font-family:'JetBrains Mono',monospace;font-size:34px;letter-spacing:.42em;color:var(--crit);font-weight:700;margin-bottom:26px;animation:fadein .8s ease both}
+  .tag{display:inline-flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:.2em;text-transform:uppercase;color:var(--high);margin-bottom:30px;animation:fadein .8s .1s ease both}
   .tag .p{background:var(--crit);color:#fff;padding:4px 12px;font-weight:700;border-radius:3px}
-  h1{font-size:118px;line-height:.98;font-weight:700;letter-spacing:-.02em;max-width:1500px}
+  h1{font-size:138px;line-height:.95;font-weight:700;letter-spacing:-.02em;animation:fadein .9s .2s ease both}
   h1 .accent{color:var(--cyan)}
-  .sub{font-size:36px;color:var(--muted);margin-top:38px;max-width:1180px;line-height:1.35}
-  .sub code{font-family:'JetBrains Mono',monospace;color:var(--amber);font-size:32px}
-  .pill-row{display:flex;gap:18px;margin-top:56px}
-  .pill{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:20px 26px}
+  .sub{font-size:38px;color:var(--muted);margin-top:34px;max-width:1280px;line-height:1.34;animation:fadein .9s .35s ease both}
+  .sub b{color:var(--txt)} .sub code{font-family:'JetBrains Mono',monospace;color:var(--amber);font-size:34px}
+  .pill-row{display:flex;gap:18px;margin-top:54px;animation:fadein .9s .5s ease both}
+  .pill{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:18px 26px}
   .pill .k{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .pill .v{font-size:30px;font-weight:600;margin-top:6px}
-  .pill .v.c{color:var(--cyan)} .pill .v.g{color:var(--green)} .pill .v.r{color:var(--crit)}
-  .footer{display:flex;justify-content:space-between;align-items:flex-end;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted);z-index:2}
+  .pill .v.c{color:var(--cyan)} .pill .v.g{color:var(--green)} .pill .v.r{color:var(--crit)} .pill .v.a{color:var(--amber)}
+  @keyframes fadein{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+  .footer{display:flex;justify-content:space-between;align-items:flex-end;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted);z-index:3}
   .footer b{color:var(--txt)}
 </style>
 </head>
 <body>
 <div class="slide">
-  <div class="masthead"><span>Universidad de Cuenca · DEET</span><span>Redes Complejas — 2026</span></div>
+  <div class="grid-bg"></div>
+  <svg class="net" viewBox="0 0 1920 1080">
+    <line x1="1500" y1="180" x2="1700" y2="340"/><line x1="1700" y1="340" x2="1560" y2="520"/>
+    <line x1="1560" y1="520" x2="1780" y2="600"/><line x1="1500" y1="180" x2="1320" y2="280"/>
+    <line x1="1320" y1="280" x2="1560" y2="520"/><line x1="1780" y1="600" x2="1660" y2="800"/>
+    <line x1="1560" y1="520" x2="1660" y2="800"/><line x1="1320" y1="280" x2="1420" y2="700"/>
+    <line x1="1420" y1="700" x2="1660" y2="800"/>
+    <circle class="c2" cx="1500" cy="180" r="11" style="animation-delay:0s"/>
+    <circle cx="1700" cy="340" r="8" style="animation-delay:.6s"/>
+    <circle class="c3" cx="1560" cy="520" r="13" style="animation-delay:1.2s"/>
+    <circle cx="1780" cy="600" r="7" style="animation-delay:.3s"/>
+    <circle class="c4" cx="1320" cy="280" r="9" style="animation-delay:1.6s"/>
+    <circle class="c2" cx="1660" cy="800" r="12" style="animation-delay:.9s"/>
+    <circle cx="1420" cy="700" r="8" style="animation-delay:2s"/>
+  </svg>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
   <div class="center">
-    <div class="tag"><span class="p">P1</span> Caminos mínimos en grafos de ataque</div>
-    <h1>Dijkstra encuentra<br>la <span class="accent">ruta de ataque</span></h1>
-    <div class="sub">Modelar la red como grafo dirigido de CVEs reales. Peso <code>w = 10 − CVSS</code>: las vulnerabilidades críticas son el camino de menor resistencia.</div>
+    <div class="year">2019 — 2020</div>
+    <div class="tag"><span class="p">APT</span> Análisis de grafos sobre un ataque real</div>
+    <h1>SolarWinds<br><span class="accent">Compromise</span></h1>
+    <div class="sub"><b>Dijkstra + Floyd-Warshall</b> sobre 71 técnicas reales de <b>MITRE ATT&CK</b>. Reconstruimos la <code>ruta de menor resistencia</code> ATTACKER → IMPACT y los cuellos de botella del ataque.</div>
     <div class="pill-row">
-      <div class="pill"><div class="k">Entrada</div><div class="v g">INTERNET</div></div>
-      <div class="pill"><div class="k">Objetivo</div><div class="v r">DB-CRITICAL</div></div>
-      <div class="pill"><div class="k">Datos</div><div class="v c">CVEs reales · NVD</div></div>
+      <div class="pill"><div class="k">Técnicas</div><div class="v c">71</div></div>
+      <div class="pill"><div class="k">Nodos</div><div class="v g">73</div></div>
+      <div class="pill"><div class="k">Aristas</div><div class="v a">653</div></div>
+      <div class="pill"><div class="k">Fuente</div><div class="v r">MITRE ATT&CK</div></div>
     </div>
   </div>
   <div class="footer">
-    <span>Ing. <b>Jean Carlo Aucapina</b> · Ing. <b>Henry Maldonado</b></span>
-    <span>Dijkstra · networkx · datos NVD/CVSS</span>
+    <span>Jean Carlo Aucapina · Henry Maldonado — DEET · Redes Complejas</span>
+    <span>1 / 10</span>
   </div>
 </div>
 </body>
