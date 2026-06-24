@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía del Dataset — SolarWinds &amp; MITRE ATT&CK</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0d1320;
+    --panel: #121a2b;
+    --panel2: #1a2438;
+    --line: #1e2a40;
+    --txt: #e8edf6;
+    --muted: #8a97ad;
+    --crit: #ff3b5c;
+    --high: #ff8c42;
+    --cyan: #3fb6ff;
+    --green: #5ad1a0;
+    --amber: #ffd23f;
+    --purple: #c084fc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--txt);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    padding: 0;
+  }
+
+  /* ── Layout ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    padding: 32px 20px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+
+  .sidebar h1 {
+    font-size: 13px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .sidebar nav a {
+    display: block;
+    padding: 9px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 4px;
+    transition: background .15s, color .15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar nav a:hover { background: var(--panel2); color: var(--txt); }
+  .sidebar nav a.active { background: rgba(63,182,255,.12); color: var(--cyan); border-left-color: var(--cyan); }
+
+  .sidebar .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: rgba(63,182,255,.12);
+    color: var(--cyan);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 4px;
+  }
+
+  main {
+    margin-left: 260px;
+    padding: 60px 80px 120px;
+    max-width: 1060px;
+  }
+
+  /* ── Sections ── */
+  section {
+    padding-top: 80px;
+    margin-top: -40px;
+    border-top: 1px solid var(--line);
+    margin-bottom: 0;
+  }
+  section:first-of-type { border-top: none; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin-bottom: 20px;
+    line-height: 1.15;
+  }
+  h2 .accent { color: var(--cyan); }
+  h2 .accent-red { color: var(--crit); }
+  h2 .accent-green { color: var(--green); }
+  h2 .accent-amber { color: var(--amber); }
+
+  h3 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--txt);
+    margin: 32px 0 10px;
+  }
+
+  p { color: var(--muted); margin-bottom: 14px; }
+  p b { color: var(--txt); }
+  p .hl { color: var(--cyan); font-weight: 600; }
+  p .hl-red { color: var(--crit); font-weight: 600; }
+  p .hl-green { color: var(--green); font-weight: 600; }
+  p .hl-amber { color: var(--amber); font-weight: 600; }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    border-left: 4px solid;
+  }
+  .callout.info { background: rgba(63,182,255,.07); border-color: var(--cyan); }
+  .callout.warn { background: rgba(255,140,66,.07); border-color: var(--high); }
+  .callout.crit { background: rgba(255,59,92,.07); border-color: var(--crit); }
+  .callout.good { background: rgba(90,209,160,.07); border-color: var(--green); }
+  .callout .callout-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .callout.info .callout-title { color: var(--cyan); }
+  .callout.warn .callout-title { color: var(--high); }
+  .callout.crit .callout-title { color: var(--crit); }
+  .callout.good .callout-title { color: var(--green); }
+  .callout p { margin: 0; }
+
+  /* ── Code ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    background: rgba(63,182,255,.09);
+    color: var(--cyan);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  pre {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin: 16px 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--txt);
+  }
+  pre .c { color: var(--muted); }
+  pre .k { color: var(--purple); }
+  pre .s { color: var(--green); }
+  pre .n { color: var(--amber); }
+  pre .v { color: var(--cyan); }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+  thead th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+  tbody tr { border-bottom: 1px solid rgba(30,42,64,.8); }
+  tbody tr:hover { background: rgba(63,182,255,.04); }
+  tbody td { padding: 11px 16px; color: var(--muted); vertical-align: top; }
+  tbody td b { color: var(--txt); }
+  .td-id { font-family: 'JetBrains Mono', monospace; color: var(--cyan); font-size: 14px; }
+  .td-w { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  .w-low { color: var(--crit); }
+  .w-mid { color: var(--high); }
+  .w-hi { color: var(--green); }
+
+  /* ── Step flow ── */
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    flex: 1;
+    min-width: 160px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+  }
+  .flow-step + .flow-step { margin-left: 12px; }
+  .flow-step .fs-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .flow-step h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .flow-step p { font-size: 14px; margin: 0; }
+
+  /* ── Kill chain timeline ── */
+  .kc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .kc-item {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    position: relative;
+  }
+  .kc-item .kc-n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .kc-item .kc-c {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .kc-item.active { background: rgba(63,182,255,.10); border-color: var(--cyan); }
+  .kc-item.active .kc-c { color: var(--cyan); }
+  .kc-item .kc-c.few { color: var(--muted); }
+  .kc-item .kc-c.mid { color: var(--high); }
+  .kc-item .kc-c.many { color: var(--crit); }
+
+  /* ── Path visualization ── */
+  .path {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 20px 0;
+  }
+  .path-node {
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: center;
+    min-width: 100px;
+  }
+  .path-node .pn-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+  .path-node .pn-name {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    max-width: 110px;
+  }
+  .path-node .pn-w {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--amber);
+    margin-top: 4px;
+  }
+  .path-node.entry { border-color: var(--green); }
+  .path-node.entry .pn-id { color: var(--green); }
+  .path-node.exit { border-color: var(--crit); }
+  .path-node.exit .pn-id { color: var(--crit); }
+  .path-arr { font-size: 20px; color: var(--high); opacity: .7; }
+
+  /* ── Weight bar ── */
+  .wbar-wrap { display: flex; align-items: center; gap: 12px; margin: 6px 0; }
+  .wbar-label { font-family: 'JetBrains Mono', monospace; font-size: 13px; min-width: 90px; color: var(--txt); }
+  .wbar { flex: 1; height: 10px; background: rgba(255,255,255,.06); border-radius: 5px; overflow: hidden; }
+  .wbar-fill { height: 100%; border-radius: 5px; transition: width .6s ease; }
+  .wbar-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; min-width: 40px; text-align: right; }
+
+  /* ── Badges ── */
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: 1px solid;
+  }
+  .badge.cyan { border-color: var(--cyan); color: var(--cyan); background: rgba(63,182,255,.08); }
+  .badge.green { border-color: var(--green); color: var(--green); background: rgba(90,209,160,.08); }
+  .badge.red { border-color: var(--crit); color: var(--crit); background: rgba(255,59,92,.08); }
+  .badge.amber { border-color: var(--amber); color: var(--amber); background: rgba(255,210,63,.08); }
+  .badge.purple { border-color: var(--purple); color: var(--purple); background: rgba(192,132,252,.08); }
+
+  /* ── Analogy box ── */
+  .analogy {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .analogy .emoji { font-size: 36px; flex-shrink: 0; }
+  .analogy h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--amber); }
+  .analogy p { font-size: 15px; margin: 0; }
+
+  /* ── Glossary ── */
+  .gloss dt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--cyan);
+    font-weight: 700;
+    margin-top: 18px;
+  }
+  .gloss dd { color: var(--muted); margin-left: 0; margin-top: 4px; font-size: 15px; }
+  .gloss dd b { color: var(--txt); }
+
+  /* ── Scroll highlight ── */
+  :target { scroll-margin-top: 80px; }
+
+  /* ── Footer ── */
+  .page-footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    main { margin-left: 0; padding: 32px 24px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h1>Guía del Dataset</h1>
+  <nav>
+    <a href="#intro">Intro: el caso real</a>
+    <a href="#solarwinds">¿Qué fue SolarWinds?</a>
+    <a href="#mitre">MITRE ATT&CK</a>
+    <a href="#stix">STIX 2.1 — el formato</a>
+    <a href="#bundle">El bundle descargado</a>
+    <a href="#campaign">Campaña como objeto</a>
+    <a href="#techniques">Técnicas ATT&CK</a>
+    <a href="#relationships">Relaciones STIX</a>
+    <a href="#mitigations">Mitigaciones y peso</a>
+    <a href="#cves">CVEs y CVSS</a>
+    <a href="#graph">Cómo se construye el grafo</a>
+    <a href="#killchain">Kill chain — tácticas</a>
+    <a href="#results">Los resultados explicados</a>
+    <a href="#glossary">Glosario completo</a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+<!-- HEADER -->
+<div style="margin-bottom:60px">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">
+    Universidad de Cuenca · DEET · Redes Complejas 2026
+  </div>
+  <h1 style="font-size:48px;font-weight:700;letter-spacing:-.03em;margin-bottom:12px">
+    Guía del <span style="color:var(--cyan)">Dataset</span>
+  </h1>
+  <p style="font-size:20px;color:var(--muted);max-width:640px">
+    Todo lo que necesitas saber para entender de dónde vienen los datos, qué significa cada concepto y cómo se construye el grafo de ataque.
+  </p>
+  <div class="badge-row">
+    <span class="badge cyan">MITRE ATT&CK</span>
+    <span class="badge amber">STIX 2.1</span>
+    <span class="badge red">SolarWinds Compromise</span>
+    <span class="badge green">100% datos reales</span>
+    <span class="badge purple">71 técnicas</span>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── INTRO -->
+<section id="intro">
+  <div class="section-label">00 · Punto de partida</div>
+  <h2>¿Por qué usar <span class="accent">datos reales</span>?</h2>
+
+  <p>En muchos proyectos académicos de redes se crean grafos "de juguete" con nodos y aristas inventados. <b>Este proyecto no hace eso.</b> Queremos que el análisis tenga valor real: que Dijkstra y Floyd-Warshall den respuestas sobre un ataque que realmente ocurrió.</p>
+
+  <div class="callout info">
+    <div class="callout-title">Pregunta de investigación</div>
+    <p><b>En la campaña SolarWinds Compromise (2019–2020), ¿cuál es la secuencia de técnicas de ataque de menor resistencia desde el acceso inicial hasta el impacto, y qué técnicas representan cuellos de botella críticos según Dijkstra y Floyd-Warshall?</b></p>
+  </div>
+
+  <p>Para responder esto necesitamos:</p>
+  <ol style="color:var(--muted);padding-left:24px;line-height:2">
+    <li><b style="color:var(--txt)">Un ataque documentado</b> → SolarWinds Compromise</li>
+    <li><b style="color:var(--txt)">Las técnicas que usaron</b> → Base de datos MITRE ATT&CK</li>
+    <li><b style="color:var(--txt)">Pesos reales</b> → Mitigaciones + CVEs del NIST/NVD</li>
+    <li><b style="color:var(--txt)">Un grafo modelado</b> → DiGraph con Dijkstra y Floyd-Warshall</li>
+  </ol>
+</section>
+
+<!-- ─────────────────────────────────────────────── SOLARWINDS -->
+<section id="solarwinds">
+  <div class="section-label">01 · El caso de estudio</div>
+  <h2>¿Qué fue <span class="accent-red">SolarWinds</span>?</h2>
+
+  <p>En 2019–2020, un grupo de atacantes (atribuido a <b>APT29 / Cozy Bear</b>, vinculado a Rusia) comprometió la cadena de suministro de software de SolarWinds, una empresa que vende herramientas de monitoreo de redes llamadas <b>Orion</b>.</p>
+
+  <div class="analogy">
+    <div class="emoji">🏭</div>
+    <div>
+      <h4>Analogía: veneno en la fábrica</h4>
+      <p>Imagina que en vez de atacar cada tienda individualmente, el atacante envenena directamente la fábrica donde se produce un producto. <b>Orion</b> era usado por ~18.000 organizaciones, incluyendo agencias del gobierno de EE.UU. Al comprometer la fábrica (el proceso de build de SolarWinds), todos los clientes que actualizaron el software recibieron automáticamente el malware <b>SUNBURST</b>.</p>
+    </div>
+  </div>
+
+  <h3>¿Por qué es importante para este proyecto?</h3>
+  <p>MITRE ATT&CK documentó <b>exactamente qué técnicas usaron los atacantes</b> durante toda la campaña. No es una estimación — es el resultado de investigación forense real publicada. Eso nos da:</p>
+
+  <div class="badge-row">
+    <span class="badge red">71 técnicas documentadas</span>
+    <span class="badge amber">14 tácticas del kill chain</span>
+    <span class="badge cyan">CVEs reales con CVSS</span>
+    <span class="badge green">Mitigaciones por técnica</span>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-title">Fecha del ataque</div>
+    <p>El ataque ocurrió entre <b>marzo 2019 y diciembre 2020</b>. Fue descubierto por FireEye en diciembre 2020. Las víctimas incluyen Microsoft, Intel, Cisco, y múltiples agencias del gobierno de EE.UU. (Departamento del Tesoro, Seguridad Nacional, etc.).</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── MITRE -->
+<section id="mitre">
+  <div class="section-label">02 · La fuente de datos</div>
+  <h2><span class="accent">MITRE ATT&CK</span> — el dataset</h2>
+
+  <div class="analogy">
+    <div class="emoji">📚</div>
+    <div>
+      <h4>¿Qué es MITRE ATT&CK?</h4>
+      <p><b>MITRE</b> es una organización sin fines de lucro de EE.UU. que trabaja con el gobierno. <b>ATT&CK</b> (Adversarial Tactics, Techniques & Common Knowledge) es una base de conocimiento pública que documenta cómo los ciberatacantes reales operan en el mundo real.</p>
+    </div>
+  </div>
+
+  <p>No es una base de datos teórica — cada técnica en ATT&CK fue observada en ataques reales. MITRE la actualiza continuamente basándose en reportes de incidentes, inteligencia de amenazas y análisis forense.</p>
+
+  <h3>Estructura de ATT&CK</h3>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="fs-num">Nivel 1</div>
+      <h4>Tácticas</h4>
+      <p>El <b>objetivo</b> del atacante. ¿Qué quiere lograr ahora? Ej: "Initial Access" = entrar al sistema.</p>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">Nivel 2</div>
+      <h4>Técnicas</h4>
+      <p>El <b>cómo</b> logra ese objetivo. Ej: "Phishing" para obtener acceso inicial.</p>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">Nivel 3</div>
+      <h4>Sub-técnicas</h4>
+      <p>Variantes específicas. Ej: T1566.001 = Spearphishing con adjunto.</p>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-title">Lo que descargamos</div>
+    <p>El archivo <code>enterprise-attack.json</code> del repositorio oficial de MITRE en GitHub. Pesa ~35 MB y contiene <b>25.842 objetos STIX</b>: todas las técnicas, campañas, grupos de actores, mitigaciones y relaciones documentadas hasta la fecha.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── STIX -->
+<section id="stix">
+  <div class="section-label">03 · El formato de los datos</div>
+  <h2><span class="accent">STIX 2.1</span> — el idioma de la ciberseguridad</h2>
+
+  <div class="analogy">
+    <div class="emoji">🗣️</div>
+    <div>
+      <h4>Analogía: un idioma estándar</h4>
+      <p>Así como hay estándares para intercambiar datos médicos (HL7) o financieros (ISO 20022), la industria de ciberseguridad usa <b>STIX</b> (Structured Threat Information eXpression) para intercambiar información sobre amenazas. Es JSON, pero con estructura y tipos definidos.</p>
+    </div>
+  </div>
+
+  <h3>¿Cómo luce un objeto STIX?</h3>
+  <p>Cada objeto en el bundle es un JSON con campos estándar. Por ejemplo, una técnica ATT&CK es un objeto tipo <code>attack-pattern</code>:</p>
+
+<pre>{
+  <span class="s">"type"</span>: <span class="v">"attack-pattern"</span>,
+  <span class="s">"id"</span>: <span class="v">"attack-pattern--b17a1a56-e99c-403c-8948-561df1792c38"</span>,
+  <span class="s">"name"</span>: <span class="v">"Valid Accounts"</span>,
+  <span class="s">"external_references"</span>: [
+    { <span class="s">"source_name"</span>: <span class="v">"mitre-attack"</span>, <span class="s">"external_id"</span>: <span class="v">"T1078"</span> }
+  ],
+  <span class="s">"kill_chain_phases"</span>: [
+    { <span class="s">"kill_chain_name"</span>: <span class="v">"mitre-attack"</span>, <span class="s">"phase_name"</span>: <span class="v">"initial-access"</span> },
+    { <span class="s">"kill_chain_name"</span>: <span class="v">"mitre-attack"</span>, <span class="s">"phase_name"</span>: <span class="v">"persistence"</span> }
+  ]
+}</pre>
+
+  <h3>Tipos de objetos en el bundle</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tipo STIX</th><th>¿Qué representa?</th><th>Ejemplo</th></tr></thead>
+      <tbody>
+        <tr><td class="td-id">attack-pattern</td><td>Una <b>técnica</b> de ataque</td><td>T1078 Valid Accounts</td></tr>
+        <tr><td class="td-id">campaign</td><td>Una campaña de ataque documentada</td><td>SolarWinds Compromise</td></tr>
+        <tr><td class="td-id">course-of-action</td><td>Una <b>mitigación</b> para una técnica</td><td>M1032 Multi-factor Auth</td></tr>
+        <tr><td class="td-id">intrusion-set</td><td>Un grupo de atacantes (APT)</td><td>APT29 / Cozy Bear</td></tr>
+        <tr><td class="td-id">relationship</td><td>Conexión entre objetos</td><td>campaign "uses" attack-pattern</td></tr>
+        <tr><td class="td-id">malware</td><td>Software malicioso documentado</td><td>SUNBURST</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-title">Por qué importa el tipo</div>
+    <p>El código Python filtra por <code>type</code> para extraer exactamente lo que necesita. Cuando buscamos las técnicas de SolarWinds, filtramos objetos tipo <code>relationship</code> donde <code>relationship_type == "uses"</code> y la fuente es la campaña SolarWinds.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── BUNDLE -->
+<section id="bundle">
+  <div class="section-label">04 · La descarga</div>
+  <h2>El <span class="accent">bundle</span> descargado</h2>
+
+  <p>El script Python descarga <code>enterprise-attack.json</code> y lo guarda localmente como caché. La próxima vez lo carga del disco sin descargar de nuevo.</p>
+
+<pre><span class="c"># URL oficial del repositorio MITRE</span>
+MITRE_URL = <span class="s">"https://raw.githubusercontent.com/mitre/cti/master/"</span>
+            <span class="s">"enterprise-attack/enterprise-attack.json"</span>
+
+<span class="c"># Se guarda en data/mitre_attack.json (~35 MB)</span>
+<span class="k">def</span> <span class="n">download_mitre</span>(force=<span class="v">False</span>) -> dict:
+    <span class="k">if</span> CACHE_PATH.exists() <span class="k">and not</span> force:
+        <span class="k">return</span> json.load(open(CACHE_PATH))  <span class="c"># Usa caché local</span>
+    <span class="c"># Si no existe, descarga y guarda</span>
+    data = json.loads(urllib.request.urlopen(MITRE_URL).read())
+    json.dump(data, open(CACHE_PATH, <span class="s">"w"</span>))
+    <span class="k">return</span> data</pre>
+
+  <h3>¿Qué hay dentro?</h3>
+  <p>El bundle es un diccionario con una clave <code>"objects"</code> que contiene una lista de ~25.000 objetos STIX:</p>
+
+<pre>{
+  <span class="s">"type"</span>: <span class="v">"bundle"</span>,
+  <span class="s">"id"</span>: <span class="v">"bundle--..."</span>,
+  <span class="s">"objects"</span>: [
+    { <span class="s">"type"</span>: <span class="v">"attack-pattern"</span>, ... },  <span class="c"># técnica</span>
+    { <span class="s">"type"</span>: <span class="v">"campaign"</span>, ... },        <span class="c"># campaña</span>
+    { <span class="s">"type"</span>: <span class="v">"relationship"</span>, ... },    <span class="c"># conexión</span>
+    <span class="c"># ... 25.839 objetos más</span>
+  ]
+}</pre>
+
+  <p>El código hace una sola pasada por todos los objetos para construir un <b>índice</b> <code>id_map</code> que permite acceder a cualquier objeto en O(1) por su ID STIX:</p>
+
+<pre>id_map = {o[<span class="s">"id"</span>]: o <span class="k">for</span> o <span class="k">in</span> bundle[<span class="s">"objects"</span>]}
+<span class="c"># id_map["attack-pattern--b17..."] -> objeto completo de T1078</span></pre>
+</section>
+
+<!-- ─────────────────────────────────────────────── CAMPAIGN -->
+<section id="campaign">
+  <div class="section-label">05 · La campaña</div>
+  <h2>La <span class="accent">campaña</span> como objeto STIX</h2>
+
+  <p>Una <b>campaña</b> en MITRE ATT&CK es un conjunto de actividades de ataque con un objetivo común, realizadas por uno o más actores. SolarWinds Compromise está documentada como:</p>
+
+<pre>{
+  <span class="s">"type"</span>: <span class="v">"campaign"</span>,
+  <span class="s">"id"</span>: <span class="v">"campaign--808d6b30-df4e-4341-8248-724da4bac650"</span>,
+  <span class="s">"name"</span>: <span class="v">"SolarWinds Compromise"</span>,
+  <span class="s">"created"</span>: <span class="v">"2021-05-19"</span>,
+  <span class="s">"modified"</span>: <span class="v">"2023-09-12"</span>
+}</pre>
+
+  <p>El código encuentra esta campaña buscando por nombre:</p>
+
+<pre>campaign = next(
+    o <span class="k">for</span> o <span class="k">in</span> bundle[<span class="s">"objects"</span>]
+    <span class="k">if</span> o.get(<span class="s">"type"</span>) == <span class="v">"campaign"</span>
+    <span class="k">and</span> <span class="v">"SolarWinds"</span> <span class="k">in</span> o.get(<span class="s">"name"</span>, <span class="v">""</span>)
+)</pre>
+
+  <div class="callout good">
+    <div class="callout-title">El ID STIX es la clave</div>
+    <p>Una vez encontrada la campaña, su <code>id</code> STIX se usa para buscar todas las relaciones donde la campaña "uses" técnicas. No usamos el nombre para buscar relaciones — usamos el ID porque es único y no cambia.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── TECHNIQUES -->
+<section id="techniques">
+  <div class="section-label">06 · Los nodos del grafo</div>
+  <h2>Las <span class="accent">técnicas ATT&CK</span> — nodos del grafo</h2>
+
+  <p>Cada <b>técnica</b> (o sub-técnica) que los atacantes de SolarWinds usaron se convierte en un <b>nodo</b> del grafo. Son objetos tipo <code>attack-pattern</code> en STIX.</p>
+
+  <h3>¿Qué contiene una técnica?</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Campo STIX</th><th>¿Qué es?</th><th>Ejemplo (T1078)</th></tr></thead>
+      <tbody>
+        <tr><td class="td-id">external_id</td><td>Identificador ATT&CK</td><td><b>T1078</b></td></tr>
+        <tr><td><code>name</code></td><td>Nombre de la técnica</td><td><b>Valid Accounts</b></td></tr>
+        <tr><td><code>kill_chain_phases</code></td><td>Tácticas donde aplica</td><td>initial-access, persistence, privilege-escalation, stealth</td></tr>
+        <tr><td><code>x_mitre_platforms</code></td><td>Sistemas donde funciona</td><td>Windows, Linux, macOS, Azure AD</td></tr>
+        <tr><td><code>x_mitre_is_subtechnique</code></td><td>¿Es sub-técnica?</td><td>T1078.001 es sub-técnica de T1078</td></tr>
+        <tr><td><code>description</code></td><td>Descripción del ataque</td><td>Texto largo con cómo funciona</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Las 71 técnicas de SolarWinds</h3>
+  <p>Se extraen buscando relaciones <code>uses</code> donde el origen es la campaña y el destino es un <code>attack-pattern</code>. Solo se incluyen técnicas <b>no revocadas</b> y <b>no deprecadas</b> (ATT&CK actualiza y retira técnicas):</p>
+
+<pre>tech_ids = set()
+<span class="k">for</span> o <span class="k">in</span> bundle[<span class="s">"objects"</span>]:
+    <span class="k">if</span> (o.get(<span class="s">"type"</span>) == <span class="v">"relationship"</span>
+            <span class="k">and</span> o.get(<span class="s">"relationship_type"</span>) == <span class="v">"uses"</span>
+            <span class="k">and</span> o.get(<span class="s">"source_ref"</span>) == campaign[<span class="s">"id"</span>]       <span class="c"># La campaña la usó</span>
+            <span class="k">and</span> o.get(<span class="s">"target_ref"</span>, <span class="v">""</span>).startswith(<span class="v">"attack-pattern--"</span>)):
+        tech_ids.add(o[<span class="s">"target_ref"</span>])  <span class="c"># Agrega el ID de la técnica</span></pre>
+
+  <p>Resultado: <b>71 técnicas reales</b> documentadas en la campaña SolarWinds. Algunas tienen IDs de tipo <code>T1078</code> (técnica padre) y otras <code>T1078.001</code> (sub-técnica).</p>
+</section>
+
+<!-- ─────────────────────────────────────────────── RELATIONSHIPS -->
+<section id="relationships">
+  <div class="section-label">07 · La estructura del grafo</div>
+  <h2><span class="accent">Relaciones STIX</span> — aristas del grafo</h2>
+
+  <p>Las relaciones en STIX son objetos separados con un <code>source_ref</code> y un <code>target_ref</code>. Son el pegamento que conecta todos los objetos del bundle.</p>
+
+  <h3>Tipos de relaciones usadas</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>relationship_type</th><th>Source → Target</th><th>¿Qué significa?</th><th>Uso en el proyecto</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="td-id">uses</td>
+          <td><code>campaign</code> → <code>attack-pattern</code></td>
+          <td>La campaña empleó esta técnica</td>
+          <td><b>Extrae las 71 técnicas de SolarWinds</b></td>
+        </tr>
+        <tr>
+          <td class="td-id">mitigates</td>
+          <td><code>course-of-action</code> → <code>attack-pattern</code></td>
+          <td>Esta medida defensiva contrarresta esta técnica</td>
+          <td><b>Calcula el peso de cada nodo</b></td>
+        </tr>
+        <tr>
+          <td class="td-id">subtechnique-of</td>
+          <td><code>attack-pattern</code> → <code>attack-pattern</code></td>
+          <td>Esta es una variante específica de una técnica padre</td>
+          <td>Referencia (no se usa directamente en el grafo)</td>
+        </tr>
+        <tr>
+          <td class="td-id">uses</td>
+          <td><code>intrusion-set</code> → <code>campaign</code></td>
+          <td>Este grupo realizó esta campaña</td>
+          <td>Referencia (APT29 realizó SolarWinds)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-title">¿Por qué no hay aristas directas "técnica → técnica" en STIX?</div>
+    <p>ATT&CK no documenta qué técnica lleva a qué otra — solo documenta qué técnicas <em>usó</em> cada campaña. La <b>progresión táctica</b> (las aristas del grafo) la inferimos nosotros a partir del orden del kill chain, conectando técnicas de tácticas consecutivas <em>dentro de la misma campaña</em>.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── MITIGATIONS -->
+<section id="mitigations">
+  <div class="section-label">08 · El peso de las aristas</div>
+  <h2><span class="accent-green">Mitigaciones</span> como proxy de peso</h2>
+
+  <p>El peso de cada arista representa <b>qué tan costoso es para el atacante usar esa técnica</b>. A más costo = más resistencia = camino menos atractivo para Dijkstra.</p>
+
+  <div class="analogy">
+    <div class="emoji">🛡️</div>
+    <div>
+      <h4>Analogía: carreteras con peajes</h4>
+      <p>Si hay muchas medidas de seguridad documentadas para una técnica, es una "carretera con muchos peajes" — cara para el atacante. Si hay pocas o ninguna mitigación, es una "autopista libre" — barata y peligrosa.</p>
+    </div>
+  </div>
+
+  <h3>¿Qué es una mitigación en ATT&CK?</h3>
+  <p>Una mitigación es un <b>course-of-action</b> (medida de seguridad) que MITRE documenta como efectivo contra una técnica específica. Ejemplos:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID Mitigación</th><th>Nombre</th><th>¿Qué hace?</th></tr></thead>
+      <tbody>
+        <tr><td class="td-id">M1032</td><td>Multi-factor Authentication</td><td>Requiere un segundo factor para autenticarse</td></tr>
+        <tr><td class="td-id">M1026</td><td>Privileged Account Management</td><td>Limita quién tiene cuentas privilegiadas</td></tr>
+        <tr><td class="td-id">M1018</td><td>User Account Management</td><td>Controla creación y permisos de cuentas</td></tr>
+        <tr><td class="td-id">M1027</td><td>Password Policies</td><td>Obliga contraseñas fuertes y rotación</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>La fórmula de peso</h3>
+  <p>El número de mitigaciones se convierte en peso con esta fórmula:</p>
+
+<pre><span class="c"># n_mitigaciones: cuántas mitigaciones tiene esta técnica en ATT&CK</span>
+<span class="c"># max_mitigaciones: máximo en la campaña SolarWinds (=8)</span>
+w = <span class="n">1.0</span> - (n_mitigaciones / max_mitigaciones)
+
+<span class="c"># Ejemplos:</span>
+<span class="c"># 0 mitigaciones → w = 1.0 - 0/8 = 1.0 → pero mínimo es 0.95</span>
+<span class="c"># 4 mitigaciones → w = 1.0 - 4/8 = 0.50</span>
+<span class="c"># 8 mitigaciones → w = 1.0 - 8/8 = 0.0 → pero mínimo es 0.05</span>
+
+w = max(<span class="n">0.05</span>, w)  <span class="c"># nunca llega a cero (siempre hay algo de riesgo)</span></pre>
+
+  <h3>Distribución real de mitigaciones en SolarWinds</h3>
+  <div style="margin:16px 0">
+    <div class="wbar-wrap"><div class="wbar-label">0 mitig. (14)</div><div class="wbar"><div class="wbar-fill" style="width:100%;background:var(--crit)"></div></div><div class="wbar-val" style="color:var(--crit)">w=0.95</div></div>
+    <div class="wbar-wrap"><div class="wbar-label">1 mitig. (12)</div><div class="wbar"><div class="wbar-fill" style="width:88%;background:var(--crit)"></div></div><div class="wbar-val" style="color:var(--crit)">w=0.875</div></div>
+    <div class="wbar-wrap"><div class="wbar-label">2 mitig.  (8)</div><div class="wbar"><div class="wbar-fill" style="width:75%;background:var(--high)"></div></div><div class="wbar-val" style="color:var(--high)">w=0.75</div></div>
+    <div class="wbar-wrap"><div class="wbar-label">3 mitig. (12)</div><div class="wbar"><div class="wbar-fill" style="width:63%;background:var(--high)"></div></div><div class="wbar-val" style="color:var(--high)">w=0.625</div></div>
+    <div class="wbar-wrap"><div class="wbar-label">4 mitig. (10)</div><div class="wbar"><div class="wbar-fill" style="width:50%;background:var(--amber)"></div></div><div class="wbar-val" style="color:var(--amber)">w=0.5</div></div>
+    <div class="wbar-wrap"><div class="wbar-label">5 mitig.  (7)</div><div class="wbar"><div class="wbar-fill" style="width:38%;background:var(--amber)"></div></div><div class="wbar-val" style="color:var(--amber)">w=0.375</div></div>
+    <div class="wbar-wrap"><div class="wbar-label">6 mitig.  (1)</div><div class="wbar"><div class="wbar-fill" style="width:25%;background:var(--green)"></div></div><div class="wbar-val" style="color:var(--green)">w=0.25</div></div>
+    <div class="wbar-wrap"><div class="wbar-label">7 mitig.  (4)</div><div class="wbar"><div class="wbar-fill" style="width:13%;background:var(--green)"></div></div><div class="wbar-val" style="color:var(--green)">w=0.125</div></div>
+    <div class="wbar-wrap"><div class="wbar-label">8 mitig.  (3)</div><div class="wbar"><div class="wbar-fill" style="width:5%;background:var(--cyan)"></div></div><div class="wbar-val" style="color:var(--cyan)">w=0.05</div></div>
+  </div>
+  <p style="font-size:14px">Entre paréntesis: número de técnicas con ese conteo. Barra: peso resultante (menor = más fácil para el atacante).</p>
+</section>
+
+<!-- ─────────────────────────────────────────────── CVES -->
+<section id="cves">
+  <div class="section-label">09 · Peso extra con CVEs</div>
+  <h2><span class="accent-red">CVEs y CVSS</span> — peso desde vulnerabilidades reales</h2>
+
+  <div class="analogy">
+    <div class="emoji">🔓</div>
+    <div>
+      <h4>¿Qué es un CVE?</h4>
+      <p><b>CVE</b> (Common Vulnerabilities and Exposures) es un identificador único para una vulnerabilidad específica. Lo gestiona MITRE y cada CVE está en la base de datos del NIST llamada <b>NVD</b> (National Vulnerability Database). Ejemplo: <b>CVE-2020-10148</b> = vulnerabilidad crítica en SolarWinds Orion que permitió el ataque de supply chain.</p>
+    </div>
+  </div>
+
+  <h3>¿Qué es CVSS?</h3>
+  <p><b>CVSS</b> (Common Vulnerability Scoring System) es una puntuación de 0 a 10 que indica qué tan grave es una vulnerabilidad:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Rango CVSS</th><th>Severidad</th><th>Interpretación</th></tr></thead>
+      <tbody>
+        <tr><td>0.1 – 3.9</td><td>Low</td><td>Poco peligrosa, difícil de explotar</td></tr>
+        <tr><td>4.0 – 6.9</td><td>Medium</td><td>Moderadamente peligrosa</td></tr>
+        <tr><td>7.0 – 8.9</td><td>High</td><td>Muy peligrosa</td></tr>
+        <tr><td><b>9.0 – 10.0</b></td><td style="color:var(--crit)"><b>Critical</b></td><td>Explotable remotamente, sin autenticación</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Cómo se convierte CVSS en peso</h3>
+
+<pre><span class="c"># CVSS 9.8 (crítico) → peso muy bajo → fácil para el atacante</span>
+w_cve = (<span class="n">10.0</span> - cvss) / <span class="n">10.0</span>
+<span class="c"># CVSS 9.8 → w = (10 - 9.8) / 10 = 0.02 → mínimo sube a 0.05</span>
+<span class="c"># CVSS 8.1 → w = (10 - 8.1) / 10 = 0.19</span>
+<span class="c"># CVSS 9.0 → w = (10 - 9.0) / 10 = 0.10</span>
+
+<span class="c"># Se toma el MÍNIMO entre peso por mitigaciones y peso por CVE</span>
+w_final = min(w_mit, w_cve)
+<span class="c"># Peor escenario para el defensor = mejor escenario para el atacante</span></pre>
+
+  <h3>CVEs documentados en SolarWinds usados en el proyecto</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>CVE</th><th>CVSS</th><th>Técnica ATT&CK</th><th>Descripción real</th></tr></thead>
+      <tbody>
+        <tr><td class="td-id">CVE-2020-10148</td><td class="td-w w-low">9.8</td><td>T1195.002, T1059.001, T1071.001, T1027</td><td>Bypass de autenticación en SolarWinds Orion — el núcleo del supply chain attack</td></tr>
+        <tr><td class="td-id">CVE-2021-21985</td><td class="td-w w-low">9.8</td><td>T1078 Valid Accounts</td><td>RCE en VMware vCenter — abusado post-compromiso para moverse lateralmente</td></tr>
+        <tr><td class="td-id">CVE-2021-26855</td><td class="td-w w-low">9.8</td><td>T1021.001 RDP</td><td>ProxyLogon en Exchange — permite ejecución remota sin credenciales</td></tr>
+        <tr><td class="td-id">CVE-2014-6324</td><td class="td-w w-mid">9.0</td><td>T1558.003 Kerberoasting</td><td>Escalada de privilegios en Kerberos (MS14-068) — clásico en campañas APT</td></tr>
+        <tr><td class="td-id">CVE-2018-13379</td><td class="td-w w-low">9.8</td><td>T1133 External Remote Services</td><td>Path traversal en FortiGate VPN — permite robar credenciales VPN sin autenticación</td></tr>
+        <tr><td class="td-id">CVE-2017-0144</td><td class="td-w w-mid">8.1</td><td>T1003.001 LSASS Dumping</td><td>EternalBlue (MS17-010) — la vulnerabilidad de WannaCry, también usada aquí</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── GRAPH -->
+<section id="graph">
+  <div class="section-label">10 · El grafo</div>
+  <h2>Cómo se <span class="accent">construye el grafo</span></h2>
+
+  <h3>Nodos: 73 en total</h3>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="fs-num">71 nodos</div>
+      <h4>Técnicas reales</h4>
+      <p>Cada técnica documentada de SolarWinds. Con ID ATT&CK, táctica, peso calculado.</p>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">+1 nodo</div>
+      <h4>ATTACKER</h4>
+      <p>Nodo conceptual: el atacante externo antes de entrar. Peso = 0.</p>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">+1 nodo</div>
+      <h4>IMPACT</h4>
+      <p>Nodo conceptual: objetivo final logrado. Permite cerrar el grafo matemáticamente.</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-title">¿Por qué ATTACKER e IMPACT si no son técnicas reales?</div>
+    <p>Dijkstra necesita un nodo origen y un nodo destino. ATTACKER representa al adversario externo antes de usar cualquier técnica, e IMPACT representa el objetivo final. Sin ellos, no habría forma de formular la pregunta "¿cuál es la ruta más corta desde el inicio hasta el impacto?".</p>
+  </div>
+
+  <h3>Aristas: 653 en total</h3>
+  <p>Las aristas representan la <b>progresión táctica del atacante</b> dentro del kill chain. La lógica: si en SolarWinds usaron técnicas de táctica A y técnicas de táctica B, y B viene después de A en el kill chain, entonces desde cualquier técnica de A se puede ir a cualquier técnica de B.</p>
+
+<pre><span class="c"># Para cada par de tácticas consecutivas [tac_i, tac_i+1]:</span>
+<span class="k">for</span> src_id <span class="k">in</span> tecnicas_de_tactica[tac_i]:
+    <span class="k">for</span> dst_id <span class="k">in</span> tecnicas_de_tactica[tac_i+1]:
+        G.add_edge(src_id, dst_id,
+                   weight=peso_del_destino,  <span class="c"># el costo es llegar al destino</span>
+                   rel_type=<span class="s">"tactical-progression"</span>)</pre>
+
+  <div class="callout warn">
+    <div class="callout-title">Importante: el peso va en el destino, no en el origen</div>
+    <p>El peso de una arista <code>A → B</code> es el peso del nodo destino B. Esto refleja el costo que le cuesta al atacante <em>ejecutar</em> la técnica B (llegar al estado B), no el costo de salir de A.</p>
+  </div>
+
+  <h3>Aristas especiales</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tipo</th><th>Origen → Destino</th><th>Peso</th></tr></thead>
+      <tbody>
+        <tr><td>entry</td><td>ATTACKER → técnicas de reconnaissance/resource-dev/initial-access</td><td>peso de la técnica destino</td></tr>
+        <tr><td>exit</td><td>técnicas de impact/exfiltration → IMPACT</td><td>0.01 (casi gratis, ya lograron el objetivo)</td></tr>
+        <tr><td>tactical-progression</td><td>técnica[i] → técnica[i+1] en kill chain</td><td>peso de la técnica destino</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── KILL CHAIN -->
+<section id="killchain">
+  <div class="section-label">11 · El kill chain</div>
+  <h2>Las <span class="accent">14 tácticas</span> del kill chain ATT&CK</h2>
+
+  <p>El "kill chain" de ATT&CK describe las <b>etapas de un ataque en orden cronológico</b>. Cada técnica pertenece a una o más tácticas. El orden determina la estructura del grafo.</p>
+
+  <div class="analogy">
+    <div class="emoji">⛓️</div>
+    <div>
+      <h4>Analogía: el plan de un robo</h4>
+      <p>1. Reconocer el banco → 2. Conseguir herramientas → 3. Entrar → 4. Neutralizar alarmas → 5. Abrir la caja fuerte → 6. Huir con el dinero. Cada fase habilita la siguiente. El kill chain de ATT&CK describe lo mismo pero en ciberataques.</p>
+    </div>
+  </div>
+
+  <div class="kc">
+    <div class="kc-item"><span class="kc-n">01</span><span class="kc-c few">reconnaissance</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">02</span><span class="kc-c few">resource-development</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item active"><span class="kc-n">03 · 8 técnicas</span><span class="kc-c">initial-access</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">04 · 5 técnicas</span><span class="kc-c mid">execution</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">05 · 11 técnicas</span><span class="kc-c many">persistence</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">06 · 11 técnicas</span><span class="kc-c many">privilege-escalation</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">07 · 5 técnicas</span><span class="kc-c mid">defense-impairment</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">08 · 12 técnicas</span><span class="kc-c many">stealth</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">09 · 8 técnicas</span><span class="kc-c mid">credential-access</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">10 · 10 técnicas</span><span class="kc-c many">discovery</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">11 · 6 técnicas</span><span class="kc-c mid">lateral-movement</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">12 · 6 técnicas</span><span class="kc-c mid">collection</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">13 · 5 técnicas</span><span class="kc-c mid">command-and-control</span></div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
+    <div class="kc-item"><span class="kc-n">14 · 1 técnica</span><span class="kc-c few">exfiltration</span></div>
+  </div>
+
+  <h3>¿Qué significa cada táctica en SolarWinds?</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Táctica</th><th>¿Qué hicieron en SolarWinds?</th></tr></thead>
+      <tbody>
+        <tr><td><b>Initial Access</b></td><td>Comprometieron el proceso de build de Orion e inyectaron SUNBURST. También usaron VPNs robadas y cuentas válidas.</td></tr>
+        <tr><td><b>Persistence</b></td><td>Crearon cuentas backdoor, modificaron tareas programadas, y se aseguraron de sobrevivir reinicios.</td></tr>
+        <tr><td><b>Privilege Escalation</b></td><td>Usaron Kerberoasting y otras técnicas para obtener tokens de administrador de dominio.</td></tr>
+        <tr><td><b>Stealth</b></td><td>Usaron servidores de staging intermedios, imitaron tráfico legítimo de Orion para no levantar alarmas.</td></tr>
+        <tr><td><b>Credential Access</b></td><td>Extrajeron hashes de contraseñas de la memoria (LSASS), usaron Kerberoasting para obtener tickets de servicio.</td></tr>
+        <tr><td><b>Discovery</b></td><td>Enumeraron usuarios, grupos, configuraciones de Active Directory para mapear el entorno.</td></tr>
+        <tr><td><b>Lateral Movement</b></td><td>Se movieron entre sistemas usando RDP, pass-the-hash, y cuentas comprometidas.</td></tr>
+        <tr><td><b>Collection</b></td><td>Accedieron a repositorios de código, emails y documentos internos.</td></tr>
+        <tr><td><b>Command & Control</b></td><td>SUNBURST se comunicaba mediante HTTP mimicando tráfico legítimo de Orion.</td></tr>
+        <tr><td><b>Exfiltration</b></td><td>Enviaron datos cifrados mediante protocolos asimétricos para evitar detección DLP.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── RESULTS -->
+<section id="results">
+  <div class="section-label">12 · Los resultados explicados</div>
+  <h2>Los <span class="accent">resultados</span> del análisis</h2>
+
+  <h3>Ruta crítica — Dijkstra</h3>
+  <p>Dijkstra encontró la ruta de <b>menor costo acumulado</b> desde ATTACKER hasta IMPACT. Costo total: <b style="color:var(--cyan)">1.635</b>. Cada paso suma el peso (resistencia) de la técnica destino:</p>
+
+  <div class="path">
+    <div class="path-node entry">
+      <div class="pn-id">ATTACKER</div>
+      <div class="pn-name">Inicio</div>
+      <div class="pn-w">d=0.000</div>
+    </div>
+    <div class="path-arr">→</div>
+    <div class="path-node">
+      <div class="pn-id">T1078</div>
+      <div class="pn-name">Valid Accounts</div>
+      <div class="pn-w">+0.05 → d=0.05</div>
+    </div>
+    <div class="path-arr">→</div>
+    <div class="path-node">
+      <div class="pn-id">T1558.003</div>
+      <div class="pn-name">Kerberoasting</div>
+      <div class="pn-w">+0.10 → d=0.15</div>
+    </div>
+    <div class="path-arr">→</div>
+    <div class="path-node">
+      <div class="pn-id">T1087</div>
+      <div class="pn-name">Account Discovery</div>
+      <div class="pn-w">+0.75 → d=0.90</div>
+    </div>
+    <div class="path-arr">→</div>
+    <div class="path-node">
+      <div class="pn-id">T1021.001</div>
+      <div class="pn-name">RDP</div>
+      <div class="pn-w">+0.05 → d=0.95</div>
+    </div>
+    <div class="path-arr">→</div>
+    <div class="path-node">
+      <div class="pn-id">T1213</div>
+      <div class="pn-name">Data from Repos</div>
+      <div class="pn-w">+0.125 → d=1.075</div>
+    </div>
+    <div class="path-arr">→</div>
+    <div class="path-node">
+      <div class="pn-id">T1071.001</div>
+      <div class="pn-name">Web Protocols C2</div>
+      <div class="pn-w">+0.05 → d=1.125</div>
+    </div>
+    <div class="path-arr">→</div>
+    <div class="path-node">
+      <div class="pn-id">T1048.002</div>
+      <div class="pn-name">Exfiltration enc.</div>
+      <div class="pn-w">+0.50 → d=1.625</div>
+    </div>
+    <div class="path-arr">→</div>
+    <div class="path-node exit">
+      <div class="pn-id">IMPACT</div>
+      <div class="pn-name">Objetivo logrado</div>
+      <div class="pn-w">d=1.635</div>
+    </div>
+  </div>
+
+  <h3>¿Por qué esta ruta y no otra?</h3>
+  <p>Dijkstra eligió esta ruta porque su <b>suma de pesos es la mínima posible</b>. Nótese que T1087 (Account Discovery) tiene peso 0.75 — es el paso más costoso. Pero las alternativas de discovery tienen pesos iguales o mayores, así que sigue siendo la ruta óptima.</p>
+
+  <div class="callout crit">
+    <div class="callout-title">Interpretación defensiva</div>
+    <p>Los nodos con peso más bajo (<b>T1078 w=0.05</b>, <b>T1021.001 w=0.05</b>, <b>T1071.001 w=0.05</b>) son los más fáciles para el atacante. Son los candidatos principales para fortalecer defensas: si subimos su peso (más mitigaciones), la ruta óptima sube de costo o cambia.</p>
+  </div>
+
+  <h3>FW-Betweenness — Floyd-Warshall</h3>
+  <p>Floyd-Warshall calcula las distancias <b>entre todos los pares de nodos</b> del grafo (73×73 = 5.329 pares). Luego para cada nodo k, contamos cuántos pares (i,j) tienen su camino óptimo <em>pasando por k</em>:</p>
+
+<pre><span class="c"># Un nodo k tiene betweenness alto si:</span>
+<span class="c"># d(i→k) + d(k→j) == d(i→j)   para muchos pares (i,j)</span>
+
+<span class="c"># Resultado para T1078:</span>
+<span class="c"># 1218 pares de nodos pasan por T1078 en su ruta óptima</span>
+<span class="c"># = el nodo "puente" más importante del grafo</span></pre>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Rank</th><th>ID</th><th>Nombre</th><th>FW-Betweenness</th><th>Interpretación</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="td-id">T1078</td><td><b>Valid Accounts</b></td><td class="td-w w-low">1218</td><td>Aparece en 1218 rutas óptimas. Bloquearlo interrumpe el mayor número de caminos de ataque.</td></tr>
+        <tr><td>2</td><td class="td-id">T1558.003</td><td><b>Kerberoasting</b></td><td class="td-w w-low">1044</td><td>Segunda técnica más crítica. Combinada con T1078 forma el "cuello de botella" principal.</td></tr>
+        <tr><td>3</td><td class="td-id">T1087</td><td><b>Account Discovery</b></td><td class="td-w w-mid">836</td><td>Punto de transición entre credential-access y lateral-movement.</td></tr>
+        <tr><td>4</td><td class="td-id">T1021.001</td><td><b>RDP</b></td><td class="td-w w-mid">702</td><td>Movimiento lateral más frecuente en la campaña.</td></tr>
+        <tr><td>5</td><td class="td-id">T1213</td><td><b>Data from Repos</b></td><td class="td-w w-hi">420</td><td>Punto de recolección de datos antes de exfiltración.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-title">Dijkstra vs Floyd-Warshall: resultados consistentes</div>
+    <p>Ambos algoritmos identifican <b>T1078 (Valid Accounts)</b> como la técnica más crítica. Dijkstra la encuentra en la ruta de menor costo; Floyd-Warshall confirma que es el nodo que más aparece en rutas óptimas de TODO el grafo. Esta concordancia valida el análisis.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────── GLOSSARY -->
+<section id="glossary">
+  <div class="section-label">13 · Referencia rápida</div>
+  <h2>Glosario <span class="accent">completo</span></h2>
+
+  <dl class="gloss">
+    <dt>ATT&CK</dt>
+    <dd>Adversarial Tactics, Techniques & Common Knowledge. Base de datos de MITRE con técnicas de ataque reales documentadas. Cada técnica tiene un ID tipo <b>T1078</b>.</dd>
+
+    <dt>STIX 2.1</dt>
+    <dd>Structured Threat Information eXpression. Formato JSON estándar para compartir información de ciberseguridad. El bundle de ATT&CK está en STIX 2.1.</dd>
+
+    <dt>Bundle STIX</dt>
+    <dd>El archivo JSON completo que contiene todos los objetos: técnicas, campañas, mitigaciones, relaciones. En este proyecto: <code>enterprise-attack.json</code> (~35 MB).</dd>
+
+    <dt>attack-pattern</dt>
+    <dd>Tipo de objeto STIX que representa una <b>técnica de ataque</b>. Cada técnica ATT&CK (T1078, T1195.002, etc.) es un objeto de este tipo.</dd>
+
+    <dt>campaign</dt>
+    <dd>Tipo de objeto STIX que representa una campaña de ataque. "SolarWinds Compromise" es una campaña con ID <code>campaign--808d6b30-...</code>.</dd>
+
+    <dt>course-of-action</dt>
+    <dd>Tipo de objeto STIX que representa una <b>mitigación</b>. Ejemplo: M1032 Multi-factor Authentication. Las relaciones "mitigates" conectan estos objetos con técnicas.</dd>
+
+    <dt>relationship_type: "uses"</dt>
+    <dd>Relación STIX que dice "este objeto usó/empleó este otro". Aquí: <b>campaign uses attack-pattern</b> = "SolarWinds usó esta técnica".</dd>
+
+    <dt>relationship_type: "mitigates"</dt>
+    <dd>Relación STIX: <b>course-of-action mitigates attack-pattern</b> = "esta medida defensiva contrarresta esta técnica". Se cuentan estas relaciones para calcular el peso de cada nodo.</dd>
+
+    <dt>Kill chain</dt>
+    <dd>Secuencia de fases en un ataque, del reconocimiento al impacto. ATT&CK define 14 tácticas en orden. Las aristas del grafo siguen este orden.</dd>
+
+    <dt>Táctica</dt>
+    <dd>Un objetivo del atacante en el kill chain (ej: "initial-access"). Una técnica puede pertenecer a múltiples tácticas.</dd>
+
+    <dt>Sub-técnica</dt>
+    <dd>Variante específica de una técnica padre. T1558 = Steal or Forge Kerberos Tickets. T1558.003 = Kerberoasting (una forma específica).</dd>
+
+    <dt>CVE</dt>
+    <dd>Common Vulnerabilities and Exposures. ID único para una vulnerabilidad concreta. Ejemplo: CVE-2020-10148 = fallo en SolarWinds Orion que permitió el supply chain attack.</dd>
+
+    <dt>CVSS</dt>
+    <dd>Common Vulnerability Scoring System. Puntuación 0-10 de severidad. 9.0+ = crítico. Se convierte en peso: <code>w = (10 - CVSS) / 10</code>.</dd>
+
+    <dt>NVD</dt>
+    <dd>National Vulnerability Database (NIST). Base de datos oficial de CVEs con puntuaciones CVSS. Fuente de los datos de vulnerabilidad usados en este proyecto.</dd>
+
+    <dt>DiGraph</dt>
+    <dd>Grafo dirigido (<em>Directed Graph</em>). Las aristas tienen dirección: A → B ≠ B → A. Usado porque el atacante progresa en una dirección (del inicio al impacto).</dd>
+
+    <dt>Peso de arista w</dt>
+    <dd>Costo de recorrer esa arista. En este grafo = costo para el atacante de ejecutar la técnica destino. Menor peso = más fácil para el atacante = más peligroso.</dd>
+
+    <dt>Dijkstra</dt>
+    <dd>Algoritmo para encontrar el camino de menor costo desde un nodo origen a todos los demás. Aquí: de ATTACKER a IMPACT. Implementado desde cero con heap binario.</dd>
+
+    <dt>Floyd-Warshall</dt>
+    <dd>Algoritmo de programación dinámica que calcula distancias mínimas entre <em>todos los pares</em> de nodos. Factible aquí porque el grafo es pequeño (73 nodos = O(73³) = trivial).</dd>
+
+    <dt>FW-Betweenness</dt>
+    <dd>Métrica derivada de Floyd-Warshall: para cada nodo k, cuenta cuántos pares (i,j) tienen su ruta óptima pasando por k. Alto betweenness = nodo "puente" crítico.</dd>
+
+    <dt>SUNBURST</dt>
+    <dd>El malware inyectado en el proceso de compilación de SolarWinds Orion. Se distribuía en actualizaciones legítimas. Técnicamente: DLL trojanizada con comunicación C2 por HTTP.</dd>
+
+    <dt>APT29 / Cozy Bear</dt>
+    <dd>Grupo de amenaza persistente avanzada (APT) atribuido al SVR ruso (Servicio de Inteligencia Exterior). Principal actor detrás del ataque SolarWinds.</dd>
+
+    <dt>Supply chain attack</dt>
+    <dd>Ataque a la cadena de suministro: comprometer el proceso de producción/distribución de software para infectar a todos los usuarios finales que actualicen.</dd>
+
+    <dt>ATTACKER / IMPACT</dt>
+    <dd>Nodos conceptuales del grafo (no son técnicas ATT&CK). ATTACKER = punto de entrada externo (peso=0). IMPACT = objetivo final logrado (peso=0). Necesarios para definir inicio y fin de la ruta.</dd>
+  </dl>
+</section>
+
+<!-- FOOTER -->
+<div class="page-footer">
+  <span>Universidad de Cuenca · DEET · Redes Complejas 2026</span>
+  <span>Dataset: MITRE ATT&CK Enterprise STIX 2.1 · github.com/mitre/cti</span>
+</div>
+
+</main>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.sidebar nav a');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar nav a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
