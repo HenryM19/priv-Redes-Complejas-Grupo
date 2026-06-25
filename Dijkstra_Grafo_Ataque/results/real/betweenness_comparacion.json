@@ -1,0 +1,1409 @@
+{
+  "correlacion_spearman_fw_vs_nx_weighted": 0.999698,
+  "interpretacion": "rho cercano a 1.0 indica que FW-betweenness propio y Brandes de NetworkX producen rankings equivalentes. Valida la implementacion propia.",
+  "top_15": [
+    {
+      "node": "T1078",
+      "name": "Valid Accounts",
+      "tactics": [
+        "stealth",
+        "persistence",
+        "privilege-escalation",
+        "initial-access"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 1218,
+      "fw_betweenness_norm": 1.0,
+      "nx_betweenness_weighted": 0.229411,
+      "nx_betweenness_unweighted": 0.048167,
+      "ranking_fw": 1,
+      "ranking_nx_weighted": 1,
+      "ranking_nx_unweighted": 1,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1558.003",
+      "name": "Kerberoasting",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.1,
+      "fw_betweenness_raw": 1044,
+      "fw_betweenness_norm": 0.857143,
+      "nx_betweenness_weighted": 0.204225,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 2,
+      "ranking_nx_weighted": 2,
+      "ranking_nx_unweighted": 5,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1087",
+      "name": "Account Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 0.75,
+      "fw_betweenness_raw": 836,
+      "fw_betweenness_norm": 0.686371,
+      "nx_betweenness_weighted": 0.081768,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 3,
+      "ranking_nx_weighted": 5,
+      "ranking_nx_unweighted": 19,
+      "rank_delta_fw_vs_nxw": -2
+    },
+    {
+      "node": "T1482",
+      "name": "Domain Trust Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 0.75,
+      "fw_betweenness_raw": 836,
+      "fw_betweenness_norm": 0.686371,
+      "nx_betweenness_weighted": 0.081768,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 4,
+      "ranking_nx_weighted": 6,
+      "ranking_nx_unweighted": 20,
+      "rank_delta_fw_vs_nxw": -2
+    },
+    {
+      "node": "T1021.001",
+      "name": "Remote Desktop Protocol",
+      "tactics": [
+        "lateral-movement"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 702,
+      "fw_betweenness_norm": 0.576355,
+      "nx_betweenness_weighted": 0.137324,
+      "nx_betweenness_unweighted": 0.022887,
+      "ranking_fw": 5,
+      "ranking_nx_weighted": 3,
+      "ranking_nx_unweighted": 13,
+      "rank_delta_fw_vs_nxw": 2
+    },
+    {
+      "node": "T1213",
+      "name": "Data from Information Repositories",
+      "tactics": [
+        "collection"
+      ],
+      "weight": 0.125,
+      "fw_betweenness_raw": 420,
+      "fw_betweenness_norm": 0.344828,
+      "nx_betweenness_weighted": 0.08216,
+      "nx_betweenness_unweighted": 0.013693,
+      "ranking_fw": 6,
+      "ranking_nx_weighted": 4,
+      "ranking_nx_unweighted": 31,
+      "rank_delta_fw_vs_nxw": 2
+    },
+    {
+      "node": "T1059.001",
+      "name": "PowerShell",
+      "tactics": [
+        "execution"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 194,
+      "fw_betweenness_norm": 0.159278,
+      "nx_betweenness_weighted": 0.03795,
+      "nx_betweenness_unweighted": 0.005869,
+      "ranking_fw": 7,
+      "ranking_nx_weighted": 7,
+      "ranking_nx_unweighted": 42,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1685",
+      "name": "Disable or Modify Tools",
+      "tactics": [
+        "defense-impairment"
+      ],
+      "weight": 0.125,
+      "fw_betweenness_raw": 184,
+      "fw_betweenness_norm": 0.151067,
+      "nx_betweenness_weighted": 0.035994,
+      "nx_betweenness_unweighted": 0.006787,
+      "ranking_fw": 8,
+      "ranking_nx_weighted": 8,
+      "ranking_nx_unweighted": 38,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1071.001",
+      "name": "Web Protocols",
+      "tactics": [
+        "command-and-control"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 132,
+      "fw_betweenness_norm": 0.108374,
+      "nx_betweenness_weighted": 0.025822,
+      "nx_betweenness_unweighted": 0.005164,
+      "ranking_fw": 9,
+      "ranking_nx_weighted": 9,
+      "ranking_nx_unweighted": 46,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1133",
+      "name": "External Remote Services",
+      "tactics": [
+        "persistence",
+        "initial-access"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 78,
+      "fw_betweenness_norm": 0.064039,
+      "nx_betweenness_weighted": 0.006406,
+      "nx_betweenness_unweighted": 0.002977,
+      "ranking_fw": 10,
+      "ranking_nx_weighted": 11,
+      "ranking_nx_unweighted": 62,
+      "rank_delta_fw_vs_nxw": -1
+    },
+    {
+      "node": "T1048.002",
+      "name": "Exfiltration Over Asymmetric Encrypted Non-C2 Protocol",
+      "tactics": [
+        "exfiltration"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 71,
+      "fw_betweenness_norm": 0.058292,
+      "nx_betweenness_weighted": 0.013889,
+      "nx_betweenness_unweighted": 0.013889,
+      "ranking_fw": 11,
+      "ranking_nx_weighted": 10,
+      "ranking_nx_unweighted": 30,
+      "rank_delta_fw_vs_nxw": 1
+    },
+    {
+      "node": "T1587.001",
+      "name": "Malware",
+      "tactics": [
+        "resource-development"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 68,
+      "fw_betweenness_norm": 0.055829,
+      "nx_betweenness_weighted": 0.004434,
+      "nx_betweenness_unweighted": 0.004434,
+      "ranking_fw": 12,
+      "ranking_nx_weighted": 12,
+      "ranking_nx_unweighted": 51,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1583.001",
+      "name": "Domains",
+      "tactics": [
+        "resource-development"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 68,
+      "fw_betweenness_norm": 0.055829,
+      "nx_betweenness_weighted": 0.004434,
+      "nx_betweenness_unweighted": 0.004434,
+      "ranking_fw": 13,
+      "ranking_nx_weighted": 13,
+      "ranking_nx_unweighted": 52,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1584.001",
+      "name": "Domains",
+      "tactics": [
+        "resource-development"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 68,
+      "fw_betweenness_norm": 0.055829,
+      "nx_betweenness_weighted": 0.004434,
+      "nx_betweenness_unweighted": 0.004434,
+      "ranking_fw": 14,
+      "ranking_nx_weighted": 14,
+      "ranking_nx_unweighted": 53,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1195.002",
+      "name": "Compromise Software Supply Chain",
+      "tactics": [
+        "initial-access"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 25,
+      "fw_betweenness_norm": 0.020525,
+      "nx_betweenness_weighted": 0.001223,
+      "nx_betweenness_unweighted": 0.000611,
+      "ranking_fw": 15,
+      "ranking_nx_weighted": 15,
+      "ranking_nx_unweighted": 68,
+      "rank_delta_fw_vs_nxw": 0
+    }
+  ],
+  "todos": [
+    {
+      "node": "T1078",
+      "name": "Valid Accounts",
+      "tactics": [
+        "stealth",
+        "persistence",
+        "privilege-escalation",
+        "initial-access"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 1218,
+      "fw_betweenness_norm": 1.0,
+      "nx_betweenness_weighted": 0.229411,
+      "nx_betweenness_unweighted": 0.048167,
+      "ranking_fw": 1,
+      "ranking_nx_weighted": 1,
+      "ranking_nx_unweighted": 1,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1558.003",
+      "name": "Kerberoasting",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.1,
+      "fw_betweenness_raw": 1044,
+      "fw_betweenness_norm": 0.857143,
+      "nx_betweenness_weighted": 0.204225,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 2,
+      "ranking_nx_weighted": 2,
+      "ranking_nx_unweighted": 5,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1087",
+      "name": "Account Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 0.75,
+      "fw_betweenness_raw": 836,
+      "fw_betweenness_norm": 0.686371,
+      "nx_betweenness_weighted": 0.081768,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 3,
+      "ranking_nx_weighted": 5,
+      "ranking_nx_unweighted": 19,
+      "rank_delta_fw_vs_nxw": -2
+    },
+    {
+      "node": "T1482",
+      "name": "Domain Trust Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 0.75,
+      "fw_betweenness_raw": 836,
+      "fw_betweenness_norm": 0.686371,
+      "nx_betweenness_weighted": 0.081768,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 4,
+      "ranking_nx_weighted": 6,
+      "ranking_nx_unweighted": 20,
+      "rank_delta_fw_vs_nxw": -2
+    },
+    {
+      "node": "T1021.001",
+      "name": "Remote Desktop Protocol",
+      "tactics": [
+        "lateral-movement"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 702,
+      "fw_betweenness_norm": 0.576355,
+      "nx_betweenness_weighted": 0.137324,
+      "nx_betweenness_unweighted": 0.022887,
+      "ranking_fw": 5,
+      "ranking_nx_weighted": 3,
+      "ranking_nx_unweighted": 13,
+      "rank_delta_fw_vs_nxw": 2
+    },
+    {
+      "node": "T1213",
+      "name": "Data from Information Repositories",
+      "tactics": [
+        "collection"
+      ],
+      "weight": 0.125,
+      "fw_betweenness_raw": 420,
+      "fw_betweenness_norm": 0.344828,
+      "nx_betweenness_weighted": 0.08216,
+      "nx_betweenness_unweighted": 0.013693,
+      "ranking_fw": 6,
+      "ranking_nx_weighted": 4,
+      "ranking_nx_unweighted": 31,
+      "rank_delta_fw_vs_nxw": 2
+    },
+    {
+      "node": "T1059.001",
+      "name": "PowerShell",
+      "tactics": [
+        "execution"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 194,
+      "fw_betweenness_norm": 0.159278,
+      "nx_betweenness_weighted": 0.03795,
+      "nx_betweenness_unweighted": 0.005869,
+      "ranking_fw": 7,
+      "ranking_nx_weighted": 7,
+      "ranking_nx_unweighted": 42,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1685",
+      "name": "Disable or Modify Tools",
+      "tactics": [
+        "defense-impairment"
+      ],
+      "weight": 0.125,
+      "fw_betweenness_raw": 184,
+      "fw_betweenness_norm": 0.151067,
+      "nx_betweenness_weighted": 0.035994,
+      "nx_betweenness_unweighted": 0.006787,
+      "ranking_fw": 8,
+      "ranking_nx_weighted": 8,
+      "ranking_nx_unweighted": 38,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1071.001",
+      "name": "Web Protocols",
+      "tactics": [
+        "command-and-control"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 132,
+      "fw_betweenness_norm": 0.108374,
+      "nx_betweenness_weighted": 0.025822,
+      "nx_betweenness_unweighted": 0.005164,
+      "ranking_fw": 9,
+      "ranking_nx_weighted": 9,
+      "ranking_nx_unweighted": 46,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1133",
+      "name": "External Remote Services",
+      "tactics": [
+        "persistence",
+        "initial-access"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 78,
+      "fw_betweenness_norm": 0.064039,
+      "nx_betweenness_weighted": 0.006406,
+      "nx_betweenness_unweighted": 0.002977,
+      "ranking_fw": 10,
+      "ranking_nx_weighted": 11,
+      "ranking_nx_unweighted": 62,
+      "rank_delta_fw_vs_nxw": -1
+    },
+    {
+      "node": "T1048.002",
+      "name": "Exfiltration Over Asymmetric Encrypted Non-C2 Protocol",
+      "tactics": [
+        "exfiltration"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 71,
+      "fw_betweenness_norm": 0.058292,
+      "nx_betweenness_weighted": 0.013889,
+      "nx_betweenness_unweighted": 0.013889,
+      "ranking_fw": 11,
+      "ranking_nx_weighted": 10,
+      "ranking_nx_unweighted": 30,
+      "rank_delta_fw_vs_nxw": 1
+    },
+    {
+      "node": "T1587.001",
+      "name": "Malware",
+      "tactics": [
+        "resource-development"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 68,
+      "fw_betweenness_norm": 0.055829,
+      "nx_betweenness_weighted": 0.004434,
+      "nx_betweenness_unweighted": 0.004434,
+      "ranking_fw": 12,
+      "ranking_nx_weighted": 12,
+      "ranking_nx_unweighted": 51,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1583.001",
+      "name": "Domains",
+      "tactics": [
+        "resource-development"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 68,
+      "fw_betweenness_norm": 0.055829,
+      "nx_betweenness_weighted": 0.004434,
+      "nx_betweenness_unweighted": 0.004434,
+      "ranking_fw": 13,
+      "ranking_nx_weighted": 13,
+      "ranking_nx_unweighted": 52,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1584.001",
+      "name": "Domains",
+      "tactics": [
+        "resource-development"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 68,
+      "fw_betweenness_norm": 0.055829,
+      "nx_betweenness_weighted": 0.004434,
+      "nx_betweenness_unweighted": 0.004434,
+      "ranking_fw": 14,
+      "ranking_nx_weighted": 14,
+      "ranking_nx_unweighted": 53,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1195.002",
+      "name": "Compromise Software Supply Chain",
+      "tactics": [
+        "initial-access"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 25,
+      "fw_betweenness_norm": 0.020525,
+      "nx_betweenness_weighted": 0.001223,
+      "nx_betweenness_unweighted": 0.000611,
+      "ranking_fw": 15,
+      "ranking_nx_weighted": 15,
+      "ranking_nx_unweighted": 68,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1190",
+      "name": "Exploit Public-Facing Application",
+      "tactics": [
+        "initial-access"
+      ],
+      "weight": 0.05,
+      "fw_betweenness_raw": 25,
+      "fw_betweenness_norm": 0.020525,
+      "nx_betweenness_weighted": 0.001223,
+      "nx_betweenness_unweighted": 0.000611,
+      "ranking_fw": 16,
+      "ranking_nx_weighted": 16,
+      "ranking_nx_unweighted": 69,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1087.002",
+      "name": "Domain Account",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 17,
+      "ranking_nx_weighted": 17,
+      "ranking_nx_unweighted": 21,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1070.006",
+      "name": "Timestomp",
+      "tactics": [
+        "stealth"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.003016,
+      "ranking_fw": 18,
+      "ranking_nx_weighted": 18,
+      "ranking_nx_unweighted": 54,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1021.006",
+      "name": "Windows Remote Management",
+      "tactics": [
+        "lateral-movement"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.022887,
+      "ranking_fw": 19,
+      "ranking_nx_weighted": 19,
+      "ranking_nx_unweighted": 14,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1074.002",
+      "name": "Remote Data Staging",
+      "tactics": [
+        "collection"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.013693,
+      "ranking_fw": 20,
+      "ranking_nx_weighted": 20,
+      "ranking_nx_unweighted": 32,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1098.003",
+      "name": "Additional Cloud Roles",
+      "tactics": [
+        "persistence",
+        "privilege-escalation"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.001069,
+      "ranking_fw": 21,
+      "ranking_nx_weighted": 21,
+      "ranking_nx_unweighted": 63,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1484.002",
+      "name": "Trust Modification",
+      "tactics": [
+        "defense-impairment",
+        "privilege-escalation"
+      ],
+      "weight": 0.75,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.008918,
+      "ranking_fw": 22,
+      "ranking_nx_weighted": 22,
+      "ranking_nx_unweighted": 37,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1021.002",
+      "name": "SMB/Windows Admin Shares",
+      "tactics": [
+        "lateral-movement"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.022887,
+      "ranking_fw": 23,
+      "ranking_nx_weighted": 23,
+      "ranking_nx_unweighted": 15,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1053.005",
+      "name": "Scheduled Task",
+      "tactics": [
+        "execution",
+        "persistence",
+        "privilege-escalation"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.015545,
+      "ranking_fw": 24,
+      "ranking_nx_weighted": 24,
+      "ranking_nx_unweighted": 29,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1552.004",
+      "name": "Private Keys",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 25,
+      "ranking_nx_weighted": 25,
+      "ranking_nx_unweighted": 6,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1098.002",
+      "name": "Additional Email Delegate Permissions",
+      "tactics": [
+        "persistence",
+        "privilege-escalation"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.001069,
+      "ranking_fw": 26,
+      "ranking_nx_weighted": 26,
+      "ranking_nx_unweighted": 64,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1105",
+      "name": "Ingress Tool Transfer",
+      "tactics": [
+        "command-and-control"
+      ],
+      "weight": 0.75,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.005164,
+      "ranking_fw": 27,
+      "ranking_nx_weighted": 27,
+      "ranking_nx_unweighted": 47,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1047",
+      "name": "Windows Management Instrumentation",
+      "tactics": [
+        "execution"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.005869,
+      "ranking_fw": 28,
+      "ranking_nx_weighted": 28,
+      "ranking_nx_unweighted": 43,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1665",
+      "name": "Hide Infrastructure",
+      "tactics": [
+        "command-and-control"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.005164,
+      "ranking_fw": 29,
+      "ranking_nx_weighted": 29,
+      "ranking_nx_unweighted": 48,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1005",
+      "name": "Data from Local System",
+      "tactics": [
+        "collection"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.013693,
+      "ranking_fw": 30,
+      "ranking_nx_weighted": 30,
+      "ranking_nx_unweighted": 33,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1114.002",
+      "name": "Remote Email Collection",
+      "tactics": [
+        "collection"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.013693,
+      "ranking_fw": 31,
+      "ranking_nx_weighted": 31,
+      "ranking_nx_unweighted": 34,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1069.002",
+      "name": "Domain Groups",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 32,
+      "ranking_nx_weighted": 32,
+      "ranking_nx_unweighted": 22,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1083",
+      "name": "File and Directory Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 33,
+      "ranking_nx_weighted": 33,
+      "ranking_nx_unweighted": 23,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1070",
+      "name": "Indicator Removal",
+      "tactics": [
+        "stealth"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.003016,
+      "ranking_fw": 34,
+      "ranking_nx_weighted": 34,
+      "ranking_nx_unweighted": 55,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1098.005",
+      "name": "Device Registration",
+      "tactics": [
+        "persistence",
+        "privilege-escalation"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.001069,
+      "ranking_fw": 35,
+      "ranking_nx_weighted": 35,
+      "ranking_nx_unweighted": 65,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1090.001",
+      "name": "Internal Proxy",
+      "tactics": [
+        "command-and-control"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.005164,
+      "ranking_fw": 36,
+      "ranking_nx_weighted": 36,
+      "ranking_nx_unweighted": 49,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1059.003",
+      "name": "Windows Command Shell",
+      "tactics": [
+        "execution"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.005869,
+      "ranking_fw": 37,
+      "ranking_nx_weighted": 37,
+      "ranking_nx_unweighted": 44,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1018",
+      "name": "Remote System Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 38,
+      "ranking_nx_weighted": 38,
+      "ranking_nx_unweighted": 24,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1057",
+      "name": "Process Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 39,
+      "ranking_nx_weighted": 39,
+      "ranking_nx_unweighted": 25,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1568",
+      "name": "Dynamic Resolution",
+      "tactics": [
+        "command-and-control"
+      ],
+      "weight": 0.75,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.005164,
+      "ranking_fw": 40,
+      "ranking_nx_weighted": 40,
+      "ranking_nx_unweighted": 50,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1078.003",
+      "name": "Local Accounts",
+      "tactics": [
+        "stealth",
+        "persistence",
+        "privilege-escalation",
+        "initial-access"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.048167,
+      "ranking_fw": 41,
+      "ranking_nx_weighted": 41,
+      "ranking_nx_unweighted": 2,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1589.001",
+      "name": "Credentials",
+      "tactics": [
+        "reconnaissance"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.0,
+      "ranking_fw": 42,
+      "ranking_nx_weighted": 42,
+      "ranking_nx_unweighted": 71,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1606.002",
+      "name": "SAML Tokens",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 43,
+      "ranking_nx_weighted": 43,
+      "ranking_nx_unweighted": 7,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1550.004",
+      "name": "Web Session Cookie",
+      "tactics": [
+        "lateral-movement"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.022887,
+      "ranking_fw": 44,
+      "ranking_nx_weighted": 44,
+      "ranking_nx_unweighted": 16,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1036.004",
+      "name": "Masquerade Task or Service",
+      "tactics": [
+        "stealth"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.003016,
+      "ranking_fw": 45,
+      "ranking_nx_weighted": 45,
+      "ranking_nx_unweighted": 56,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1539",
+      "name": "Steal Web Session Cookie",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.25,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 46,
+      "ranking_nx_weighted": 46,
+      "ranking_nx_unweighted": 8,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1140",
+      "name": "Deobfuscate/Decode Files or Information",
+      "tactics": [
+        "stealth"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.003016,
+      "ranking_fw": 47,
+      "ranking_nx_weighted": 47,
+      "ranking_nx_unweighted": 57,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1218.011",
+      "name": "Rundll32",
+      "tactics": [
+        "stealth"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.003016,
+      "ranking_fw": 48,
+      "ranking_nx_weighted": 48,
+      "ranking_nx_unweighted": 58,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1680",
+      "name": "Local Storage Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 49,
+      "ranking_nx_weighted": 49,
+      "ranking_nx_unweighted": 26,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1685.001",
+      "name": "Disable or Modify Windows Event Log",
+      "tactics": [
+        "defense-impairment"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.006787,
+      "ranking_fw": 50,
+      "ranking_nx_weighted": 50,
+      "ranking_nx_unweighted": 39,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1078.004",
+      "name": "Cloud Accounts",
+      "tactics": [
+        "stealth",
+        "persistence",
+        "privilege-escalation",
+        "initial-access"
+      ],
+      "weight": 0.125,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.048167,
+      "ranking_fw": 51,
+      "ranking_nx_weighted": 51,
+      "ranking_nx_unweighted": 3,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1003.006",
+      "name": "DCSync",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 52,
+      "ranking_nx_weighted": 52,
+      "ranking_nx_unweighted": 9,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1070.004",
+      "name": "File Deletion",
+      "tactics": [
+        "stealth"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.003016,
+      "ranking_fw": 53,
+      "ranking_nx_weighted": 53,
+      "ranking_nx_unweighted": 59,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1555",
+      "name": "Credentials from Password Stores",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 54,
+      "ranking_nx_weighted": 54,
+      "ranking_nx_unweighted": 10,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1555.003",
+      "name": "Credentials from Web Browsers",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.375,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 55,
+      "ranking_nx_weighted": 55,
+      "ranking_nx_unweighted": 11,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1098.001",
+      "name": "Additional Cloud Credentials",
+      "tactics": [
+        "persistence",
+        "privilege-escalation"
+      ],
+      "weight": 0.375,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.001069,
+      "ranking_fw": 56,
+      "ranking_nx_weighted": 56,
+      "ranking_nx_unweighted": 66,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1036.005",
+      "name": "Match Legitimate Resource Name or Location",
+      "tactics": [
+        "stealth"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.003016,
+      "ranking_fw": 57,
+      "ranking_nx_weighted": 57,
+      "ranking_nx_unweighted": 60,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1550",
+      "name": "Use Alternate Authentication Material",
+      "tactics": [
+        "lateral-movement"
+      ],
+      "weight": 0.125,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.022887,
+      "ranking_fw": 58,
+      "ranking_nx_weighted": 58,
+      "ranking_nx_unweighted": 17,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1550.001",
+      "name": "Application Access Token",
+      "tactics": [
+        "lateral-movement"
+      ],
+      "weight": 0.375,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.022887,
+      "ranking_fw": 59,
+      "ranking_nx_weighted": 59,
+      "ranking_nx_unweighted": 18,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1070.008",
+      "name": "Clear Mailbox Data",
+      "tactics": [
+        "stealth"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.003016,
+      "ranking_fw": 60,
+      "ranking_nx_weighted": 60,
+      "ranking_nx_unweighted": 61,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1213.003",
+      "name": "Code Repositories",
+      "tactics": [
+        "collection"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.013693,
+      "ranking_fw": 61,
+      "ranking_nx_weighted": 61,
+      "ranking_nx_unweighted": 35,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1199",
+      "name": "Trusted Relationship",
+      "tactics": [
+        "initial-access"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.000611,
+      "ranking_fw": 62,
+      "ranking_nx_weighted": 62,
+      "ranking_nx_unweighted": 70,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1606.001",
+      "name": "Web Cookies",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.75,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.025528,
+      "ranking_fw": 63,
+      "ranking_nx_weighted": 63,
+      "ranking_nx_unweighted": 12,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1069",
+      "name": "Permission Groups Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 64,
+      "ranking_nx_weighted": 64,
+      "ranking_nx_unweighted": 27,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1078.002",
+      "name": "Domain Accounts",
+      "tactics": [
+        "stealth",
+        "persistence",
+        "privilege-escalation",
+        "initial-access"
+      ],
+      "weight": 0.375,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.048167,
+      "ranking_fw": 65,
+      "ranking_nx_weighted": 65,
+      "ranking_nx_unweighted": 4,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1059.005",
+      "name": "Visual Basic",
+      "tactics": [
+        "execution"
+      ],
+      "weight": 0.375,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.005869,
+      "ranking_fw": 66,
+      "ranking_nx_weighted": 66,
+      "ranking_nx_unweighted": 45,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1546.003",
+      "name": "Windows Management Instrumentation Event Subscription",
+      "tactics": [
+        "privilege-escalation",
+        "persistence"
+      ],
+      "weight": 0.625,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.001069,
+      "ranking_fw": 67,
+      "ranking_nx_weighted": 67,
+      "ranking_nx_unweighted": 67,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1686",
+      "name": "Disable or Modify System Firewall",
+      "tactics": [
+        "defense-impairment"
+      ],
+      "weight": 0.5,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.006787,
+      "ranking_fw": 68,
+      "ranking_nx_weighted": 68,
+      "ranking_nx_unweighted": 40,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1560.001",
+      "name": "Archive via Utility",
+      "tactics": [
+        "collection"
+      ],
+      "weight": 0.875,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.013693,
+      "ranking_fw": 69,
+      "ranking_nx_weighted": 69,
+      "ranking_nx_unweighted": 36,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1016.001",
+      "name": "Internet Connection Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.016354,
+      "ranking_fw": 70,
+      "ranking_nx_weighted": 70,
+      "ranking_nx_unweighted": 28,
+      "rank_delta_fw_vs_nxw": 0
+    },
+    {
+      "node": "T1553.002",
+      "name": "Code Signing",
+      "tactics": [
+        "defense-impairment"
+      ],
+      "weight": 1.0,
+      "fw_betweenness_raw": 0,
+      "fw_betweenness_norm": 0.0,
+      "nx_betweenness_weighted": 0.0,
+      "nx_betweenness_unweighted": 0.006787,
+      "ranking_fw": 71,
+      "ranking_nx_weighted": 71,
+      "ranking_nx_unweighted": 41,
+      "rank_delta_fw_vs_nxw": 0
+    }
+  ]
+}

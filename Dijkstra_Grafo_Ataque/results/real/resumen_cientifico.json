@@ -1,0 +1,31 @@
+{
+  "dataset": "MITRE ATT&CK Enterprise STIX 2.1 — SolarWinds Compromise",
+  "grafo": {
+    "nodos": 73,
+    "aristas": 653,
+    "densidad": 0.124239
+  },
+  "dijkstra_validado": true,
+  "ruta_critica_costo": 1.635,
+  "ruta_critica_pasos": 9,
+  "ruta_critica_nodos": [
+    "ATTACKER",
+    "T1078",
+    "T1558.003",
+    "T1087",
+    "T1021.001",
+    "T1213",
+    "T1071.001",
+    "T1048.002",
+    "IMPACT"
+  ],
+  "sensibilidad_robusta": true,
+  "clustering_ratio_vs_random": 0.953,
+  "betweenness_spearman_vs_networkx": 0.999698,
+  "archivos_generados": [
+    "comparacion_algoritmos.json",
+    "sensibilidad_pesos.json",
+    "metricas_grafo.json",
+    "betweenness_comparacion.json"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "n_nodes": 73,
+  "n_edges": 653,
+  "density": 0.124239,
+  "is_dag": false,
+  "in_degree": {
+    "min": 0,
+    "max": 24,
+    "mean": 8.945,
+    "std": 5.171,
+    "distribution": {
+      "0": 1,
+      "1": 2,
+      "2": 3,
+      "4": 3,
+      "5": 9,
+      "6": 11,
+      "8": 14,
+      "9": 1,
+      "10": 6,
+      "11": 4,
+      "12": 9,
+      "15": 5,
+      "18": 1,
+      "24": 4
+    },
+    "power_law_r2": 0.0058
+  },
+  "out_degree": {
+    "min": 0,
+    "max": 27,
+    "mean": 8.945,
+    "std": 5.845,
+    "distribution": {
+      "0": 1,
+      "1": 6,
+      "3": 1,
+      "5": 9,
+      "6": 16,
+      "8": 11,
+      "10": 8,
+      "11": 4,
+      "12": 5,
+      "15": 6,
+      "16": 1,
+      "17": 1,
+      "27": 4
+    },
+    "power_law_r2": 0.036
+  },
+  "clustering": {
+    "average_attack_graph": 0.203224,
+    "average_erdos_renyi_equivalent": 0.213184,
+    "ratio_vs_random": 0.953,
+    "interpretation": "ratio > 1 indica mas clustering que grafo aleatorio"
+  },
+  "connectivity": {
+    "n_scc": 54,
+    "largest_scc_size": 20,
+    "n_wcc": 1,
+    "largest_wcc_size": 73,
+    "largest_wcc_fraction": 1.0
+  },
+  "path_metrics": {
+    "diameter_wcc": 9,
+    "avg_path_length_wcc": 2.8474
+  },
+  "assortativity": 0.308,
+  "erdos_renyi_comparison": {
+    "p": 0.124239,
+    "note": "ER equivalente: n=73, m=~632"
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "base": {
+    "descripcion": "Pesos originales (mitigaciones + CVE)",
+    "costo": 1.635,
+    "n_pasos": 9,
+    "ruta": [
+      "ATTACKER",
+      "T1078",
+      "T1558.003",
+      "T1087",
+      "T1021.001",
+      "T1213",
+      "T1071.001",
+      "T1048.002",
+      "IMPACT"
+    ],
+    "ruta_identica_al_base": true,
+    "nodos_criticos_identicos": true,
+    "jaccard_similarity": 1.0,
+    "nodos_compartidos_con_base": [
+      "T1021.001",
+      "T1048.002",
+      "T1071.001",
+      "T1078",
+      "T1087",
+      "T1213",
+      "T1558.003"
+    ],
+    "nodos_diferentes": []
+  },
+  "factor_0.8": {
+    "descripcion": "Pesos -20%",
+    "costo": 1.34,
+    "n_pasos": 9,
+    "ruta": [
+      "ATTACKER",
+      "T1078",
+      "T1558.003",
+      "T1087",
+      "T1021.001",
+      "T1213",
+      "T1071.001",
+      "T1048.002",
+      "IMPACT"
+    ],
+    "ruta_identica_al_base": true,
+    "nodos_criticos_identicos": true,
+    "jaccard_similarity": 1.0,
+    "nodos_compartidos_con_base": [
+      "T1021.001",
+      "T1048.002",
+      "T1071.001",
+      "T1078",
+      "T1087",
+      "T1213",
+      "T1558.003"
+    ],
+    "nodos_diferentes": []
+  },
+  "factor_1.2": {
+    "descripcion": "Pesos +20%",
+    "costo": 1.96,
+    "n_pasos": 9,
+    "ruta": [
+      "ATTACKER",
+      "T1078",
+      "T1558.003",
+      "T1087",
+      "T1021.001",
+      "T1213",
+      "T1071.001",
+      "T1048.002",
+      "IMPACT"
+    ],
+    "ruta_identica_al_base": true,
+    "nodos_criticos_identicos": true,
+    "jaccard_similarity": 1.0,
+    "nodos_compartidos_con_base": [
+      "T1021.001",
+      "T1048.002",
+      "T1071.001",
+      "T1078",
+      "T1087",
+      "T1213",
+      "T1558.003"
+    ],
+    "nodos_diferentes": []
+  },
+  "sin_cve": {
+    "descripcion": "Solo mitigaciones (sin CVE)",
+    "costo": 2.485,
+    "n_pasos": 9,
+    "ruta": [
+      "ATTACKER",
+      "T1078",
+      "T1539",
+      "T1087",
+      "T1021.001",
+      "T1213",
+      "T1071.001",
+      "T1048.002",
+      "IMPACT"
+    ],
+    "ruta_identica_al_base": false,
+    "nodos_criticos_identicos": false,
+    "jaccard_similarity": 0.75,
+    "nodos_compartidos_con_base": [
+      "T1021.001",
+      "T1048.002",
+      "T1071.001",
+      "T1078",
+      "T1087",
+      "T1213"
+    ],
+    "nodos_diferentes": [
+      "T1539",
+      "T1558.003"
+    ]
+  },
+  "conclusion": "Si Jaccard >= 0.8 en todos los escenarios, el modelo es robusto: la ruta critica no cambia significativamente ante variaciones del 20% en pesos."
+}
