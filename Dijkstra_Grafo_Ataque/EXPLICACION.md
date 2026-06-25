@@ -1,28 +1,41 @@
 # Dijkstra en Grafos de Ataque — Explicación del Proyecto
 
-## 1. Datos
+El proyecto modela ataques informáticos como un **problema de camino mínimo en grafos**.
+La idea central es: si representamos una red de computadoras como un grafo donde las
+aristas son vulnerabilidades reales, Dijkstra puede encontrar la **secuencia de ataque
+de menor resistencia** que un atacante usaría para llegar a un activo crítico.
 
-### ¿Qué es un CVE?
+El proyecto tiene **dos análisis**: uno con una red sintética (para demostrar el concepto)
+y uno con datos 100% reales del caso SolarWinds.
 
-Un **CVE** (Common Vulnerabilities and Exposures) es un identificador oficial y público de una vulnerabilidad de seguridad en software real. Cuando se descubre un fallo en un programa, se reporta al NIST/MITRE, que le asigna un ID único con el formato `CVE-AÑO-NÚMERO`.
+---
 
-Cada CVE tiene asociado un puntaje **CVSS** (Common Vulnerability Scoring System): un número del 0 al 10 que mide qué tan grave es el fallo, calculado en base a factores como:
+## 1. Análisis 1 — Red sintética con CVEs reales
 
-- Vector de acceso (¿desde internet o solo local?)
-- Complejidad de explotación
-- Privilegios requeridos
-- Impacto en confidencialidad, integridad y disponibilidad
+### Por qué esta red
+
+Se construyó una red corporativa ficticia pero **plausible**: tiene los mismos componentes
+que tiene cualquier empresa mediana (firewall, servidores web, correo, Active Directory,
+base de datos). Es sintética porque no existe una empresa real llamada `FW-VPN` o
+`DB-CRITICAL`, pero su estructura refleja topologías reales documentadas en literatura
+de seguridad. Se usó una red sintética para poder **controlar el experimento** y
+demostrar el concepto de forma clara.
+
+### Datos: los CVEs
+
+Un **CVE** (Common Vulnerabilities and Exposures) es un identificador oficial de una
+vulnerabilidad de seguridad en software real. Lo asigna el NIST/MITRE con el formato
+`CVE-AÑO-NÚMERO`. Cada CVE tiene un puntaje **CVSS** (del 0 al 10) que mide su gravedad:
 
 | Rango CVSS | Nivel |
 |---|---|
 | 9.0 – 10.0 | CRITICAL |
-| 7.0 – 8.9  | HIGH |
-| 4.0 – 6.9  | MEDIUM |
-| 0.1 – 3.9  | LOW |
+| 7.0 – 8.9 | HIGH |
+| 4.0 – 6.9 | MEDIUM |
+| 0.1 – 3.9 | LOW |
 
-### Dataset del proyecto
-
-El proyecto usa **20 CVEs reales** con sus puntajes CVSS oficiales del NVD. Están organizados por capa de red según el tipo de servicio que afectan:
+El proyecto usa **20 CVEs reales** con sus puntajes CVSS oficiales del NVD, organizados
+por capa de red según el tipo de servicio que afectan:
 
 | CVE | Nombre popular | CVSS | Capa | Qué hace |
 |---|---|---|---|---|
@@ -47,23 +60,18 @@ El proyecto usa **20 CVEs reales** con sus puntajes CVSS oficiales del NVD. Est�
 | CVE-2019-10149 | Exim MTA | 9.8 | data | RCE en servidor de correo → datos |
 | CVE-2020-2555 | Oracle Coherence (WebLogic) | 9.8 | data | Deserialización insegura → RCE |
 
-Los CVEs pueden obtenerse en tiempo real desde la API pública del NVD (`services.nvd.nist.gov`). Si no hay conexión, el pipeline usa el dataset embebido anterior.
+Los CVEs pueden obtenerse en tiempo real desde la API pública del NVD. Si no hay
+conexión, el pipeline usa el dataset embebido anterior.
 
----
+### Cómo se arma el grafo
 
-## 2. El Grafo de Ataque
-
-### ¿Qué modela?
-
-Una infraestructura corporativa real donde un atacante externo intenta llegar a la base de datos crítica. La red se organiza en **6 capas**, de afuera hacia adentro:
+La red está organizada en **6 capas**, de afuera hacia adentro:
 
 ```
 INTERNET → Perímetro → Web/App → Servicios → Hosts/SO → Datos
 ```
 
-### Nodos
-
-Cada nodo representa un host o servicio concreto de la red:
+**Nodos** — cada uno representa un host o servicio concreto:
 
 | Nodo | Capa | Qué representa |
 |---|---|---|
@@ -79,17 +87,34 @@ Cada nodo representa un host o servicio concreto de la red:
 | `WS-ADMIN` | host | Workstation del administrador de sistemas |
 | `DB-CRITICAL` | data | Base de datos crítica. Objetivo final |
 
-### Aristas y pesos
+**Aristas** — hay dos mecanismos que definen qué nodos se conectan:
 
-Cada arista entre dos nodos representa una **vulnerabilidad CVE explotable**: estando en el nodo origen, explotar ese CVE permite al atacante avanzar al nodo destino.
-
-El peso de cada arista es el **CVSS invertido**:
+*Regla de capas (automático)*: solo se conectan capas consecutivas. Para cada nodo
+destino se elige aleatoriamente un CVE del pool de su capa y se crea la arista:
 
 ```
-w = 10 - CVSS
+FW-VPN  ──(CVE-2021-44228, w=0.1)──► APP-02
+GW-EDGE ──(CVE-2022-22965, w=0.2)──► APP-02
+FW-VPN  ──(CVE-2017-5638,  w=0.1)──► WEB-01
 ```
 
-Esta inversión es necesaria porque Dijkstra minimiza costos, y queremos que las vulnerabilidades más críticas (CVSS alto) sean las más "baratas" para el atacante:
+*Atajos manuales (hardcodeados)*: conexiones adicionales basadas en rutas de ataque
+reales conocidas, para que existan caminos alternativos:
+
+```
+FW-VPN    → WEB-01        APP-02    → MAIL-EX
+WEB-01    → SMB-FILES     SMB-FILES → DC-01
+RDP-JUMP  → DC-01         MAIL-EX   → WS-ADMIN
+DC-01     → DB-CRITICAL   WS-ADMIN  → DB-CRITICAL
+```
+
+La aleatoriedad usa `seed=42` para garantizar reproducibilidad.
+
+### Los pesos
+
+Cada arista tiene peso `w = 10 - CVSS`. Esta inversión es necesaria porque Dijkstra
+minimiza costos: queremos que las vulnerabilidades más críticas (CVSS alto) tengan el
+**menor costo** para el atacante, representando el camino de menor resistencia.
 
 | CVSS | Peso w | Interpretación |
 |---|---|---|
@@ -99,44 +124,103 @@ Esta inversión es necesaria porque Dijkstra minimiza costos, y queremos que las
 | 7.5 | 2.5 | Moderado |
 | 5.9 | 4.1 | Requiere más trabajo |
 
-El mínimo es 0.1 (no 0) para que Dijkstra funcione correctamente con pesos estrictamente positivos.
+El mínimo es 0.1 (no 0) para que Dijkstra funcione con pesos estrictamente positivos.
 
-### ¿Quién define qué nodos se conectan?
+Los CVEs definen el **peso** de cada arista, no la topología. La topología es
+conocimiento experto hardcodeado; los CVEs solo ponen el precio a cada conexión.
 
-Hay dos mecanismos:
+---
 
-**1. Regla de capas (automático)**
+## 2. Análisis 2 — Caso real: SolarWinds Compromise
 
-Solo se conectan capas consecutivas. El código recorre la cadena en orden y conecta cada nodo destino con al menos un nodo origen de la capa anterior. El CVE asignado a cada arista se elige aleatoriamente del pool de CVEs de la capa destino:
+### Por qué SolarWinds
+
+SolarWinds Compromise (2019-2020) es uno de los ataques más documentados de la historia.
+El grupo APT29 comprometió la cadena de suministro de SolarWinds Orion, afectando a
+18,000 organizaciones incluyendo agencias del gobierno de EE.UU. MITRE ATT&CK lo
+documentó exhaustivamente como campaña G0118, registrando cada técnica que el atacante
+usó en el mundo real. Esto lo hace ideal para un análisis con datos 100% reales.
+
+### Datos: MITRE ATT&CK
+
+En lugar de CVEs, este análisis usa el framework **MITRE ATT&CK**: una base de
+conocimiento pública que cataloga técnicas de ataque reales observadas en campo. Cada
+técnica tiene un ID con el formato `TXXXX` o `TXXXX.XXX` (subtécnica).
+
+La fuente de datos es el bundle **STIX 2.1** de ATT&CK Enterprise (~40 MB de JSON),
+descargado directamente desde el repositorio oficial de MITRE en GitHub. Este bundle
+contiene todas las técnicas, grupos, campañas y sus relaciones documentadas.
+
+Del bundle se extraen solo las técnicas que ATT&CK documenta como usadas por SolarWinds,
+organizadas en 15 tácticas ordenadas según la kill chain del atacante:
 
 ```
-Perimeter → Web:  FW-VPN  ──(CVE-2021-44228, w=0.1)──► APP-02
-                  GW-EDGE ──(CVE-2022-22965, w=0.2)──► APP-02
-                  FW-VPN  ──(CVE-2017-5638,  w=0.1)──► WEB-01
+reconnaissance → resource-development → initial-access → execution →
+persistence → privilege-escalation → defense-impairment → stealth →
+credential-access → discovery → lateral-movement → collection →
+command-and-control → exfiltration → impact
 ```
 
-**2. Atajos manuales (hardcodeados)**
+### Cómo se arma el grafo
 
-Conexiones adicionales basadas en rutas de ataque reales conocidas, para que existan caminos alternativos y los cuellos de botella tengan sentido:
+**Nodos** — cada nodo es una técnica ATT&CK real usada por SolarWinds. Por ejemplo:
 
-```python
-("FW-VPN",    "WEB-01")       # firewall → servidor web
-("GW-EDGE",   "APP-02")       # gateway  → app server
-("WEB-01",    "SMB-FILES")    # web      → archivos compartidos
-("APP-02",    "MAIL-EX")      # app      → correo
-("SMB-FILES", "DC-01")        # archivos → controlador de dominio
-("RDP-JUMP",  "DC-01")        # RDP      → controlador de dominio
-("MAIL-EX",   "WS-ADMIN")     # correo   → workstation admin
-("DC-01",     "DB-CRITICAL")  # dominio  → base de datos
-("WS-ADMIN",  "DB-CRITICAL")  # admin    → base de datos
+| ID | Nombre | Táctica | Qué hizo SolarWinds |
+|---|---|---|---|
+| `T1195.002` | Supply Chain Compromise | initial-access | Insertó SUNBURST en el software de Orion |
+| `T1078` | Valid Accounts | initial-access / persistence | Usó credenciales legítimas robadas |
+| `T1027` | Obfuscated Files | defense-impairment | Ofuscó el malware SUNBURST para evadir detección |
+| `T1558.003` | Kerberoasting | credential-access | Robó tickets Kerberos para moverse lateralmente |
+| `T1021.001` | Remote Desktop Protocol | lateral-movement | Se movió entre sistemas vía RDP |
+| `T1071.001` | Web Protocols | command-and-control | Usó HTTP para comunicación C2 encubierta |
+
+Más dos nodos de frontera: `ATTACKER` (atacante externo) e `IMPACT` (objetivo logrado).
+
+**Aristas** — solo existen entre técnicas de tácticas consecutivas que SolarWinds
+**realmente usó**. Si la campaña usó técnicas A (en táctica i) y B (en táctica i+1),
+existe una arista A→B. Esto representa la progresión real del atacante: primero
+usaron initial-access, luego execution, luego persistence, etc.
+
+### Los pesos
+
+La fórmula de peso ya no es `10 - CVSS`. Ahora refleja **qué tan defendible es cada
+técnica** según los datos reales del bundle STIX:
+
+```
+w = 1 - (n_mitigaciones / max_mitigaciones_en_campaña)
 ```
 
-La aleatoriedad usa `seed=42` para garantizar reproducibilidad: el grafo resultante es siempre el mismo.
+Donde `n_mitigaciones` es el número de mitigaciones que ATT&CK documenta para esa
+técnica. La lógica es:
 
-### Resumen del rol de cada tabla
+- Más mitigaciones documentadas = técnica más conocida y defendible = **mayor costo** para el atacante
+- 0 mitigaciones = técnica sin contramedidas conocidas = **peso 0.95** (casi libre para el atacante)
 
-| Elemento | Define |
-|---|---|
-| Nodos / capas | La estructura de la red (fija, hardcodeada) |
-| Atajos manuales | Qué nodos específicos se conectan entre capas |
-| CVEs | El peso (dificultad) de cada arista, no la topología |
+Para técnicas con CVE real conocido asociado a SolarWinds, se toma el **mínimo** entre
+ambas fórmulas (el escenario más conservador para el atacante):
+
+```
+w = min(w_mitigaciones, max(0.05, (10 - CVSS) / 10))
+```
+
+Ejemplos de pesos reales calculados:
+
+| Técnica | Nombre | Peso w | Fuente |
+|---|---|---|---|
+| `T1078` | Valid Accounts | 0.05 | CVE-2021-21985 (CVSS 9.8) + 8 mitigaciones |
+| `T1558.003` | Kerberoasting | 0.10 | CVE-2014-6324 (CVSS 9.0) + 3 mitigaciones |
+| `T1021.001` | RDP | 0.05 | CVE-2021-26855 (CVSS 9.8) + 8 mitigaciones |
+| `T1071.001` | Web Protocols C2 | 0.05 | CVE-2020-10148 (CVSS 9.8) + 2 mitigaciones |
+| `T1087` | Account Discovery | 0.75 | Solo mitigaciones: 2/8 |
+| `T1048.002` | Exfiltración cifrada | 0.50 | Solo mitigaciones: 4/8 |
+
+### Resumen de diferencias entre los dos análisis
+
+| Aspecto | Análisis 1 (sintético) | Análisis 2 (SolarWinds) |
+|---|---|---|
+| **Red** | Ficticia pero plausible | Técnicas reales de ATT&CK |
+| **Nodos** | Hosts/servicios (`FW-VPN`, `APP-02`…) | Técnicas de ataque (`T1078`, `T1027`…) |
+| **Aristas** | Regla de capas + atajos manuales | Progresión táctica real documentada |
+| **Pesos** | `10 - CVSS` | `1 - (mitigaciones / max)` + CVSS si hay CVE |
+| **Datos** | CVEs del NVD | Bundle STIX de MITRE ATT&CK |
+| **Objetivo** | Demostrar el concepto | Responder pregunta de investigación real |

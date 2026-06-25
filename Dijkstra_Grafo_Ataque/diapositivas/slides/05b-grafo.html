@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Grafo de ataque completo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:52px 80px 48px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.22;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:20px;z-index:2}
+  h2{font-size:52px;font-weight:700;letter-spacing:-.02em;margin:22px 0 14px;z-index:2}
+  h2 .accent{color:var(--cyan)}
+  .body{display:grid;grid-template-columns:1fr 340px;gap:28px;z-index:2;flex:1;min-height:0}
+  .graph-wrap{border:1px solid var(--line);background:var(--panel);border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:0}
+  .graph-wrap img{width:100%;height:100%;object-fit:contain}
+  .sidebar{display:flex;flex-direction:column;gap:18px}
+  .stat{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:22px 24px}
+  .stat .label{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .stat .value{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700}
+  .legend{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:22px 24px;flex:1}
+  .legend h3{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+  .leg-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;font-size:18px}
+  .dot{width:16px;height:16px;border-radius:50%;flex-shrink:0}
+  .leg-row span{color:var(--muted);font-size:16px}
+  .leg-row b{color:var(--txt)}
+  .note{border:1px dashed var(--amber);background:rgba(255,210,63,.06);border-radius:10px;padding:18px 22px;font-size:17px;color:var(--muted);line-height:1.55}
+  .note b{color:var(--amber)}
+  .footer{position:absolute;bottom:28px;right:80px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>&#128202; Grafo de ataque <span class="accent">completo</span></h2>
+  <div class="body">
+    <div class="graph-wrap">
+      <img src="../assets/img/full_graph_solarwinds.png" alt="Grafo completo SolarWinds — 73 nodos, 653 aristas">
+    </div>
+    <div class="sidebar">
+      <div class="stat"><div class="label">Nodos (tecnicas)</div><div class="value" style="color:var(--cyan)">73</div></div>
+      <div class="stat"><div class="label">Aristas</div><div class="value" style="color:var(--high)">653</div></div>
+      <div class="stat"><div class="label">Tacticas ATT&CK</div><div class="value" style="color:var(--amber)">14</div></div>
+      <div class="legend">
+        <h3>Leyenda</h3>
+        <div class="leg-row"><div class="dot" style="background:var(--green)"></div><span><b>ATTACKER</b> · entrada</span></div>
+        <div class="leg-row"><div class="dot" style="background:var(--crit)"></div><span><b>Ruta critica</b> · Dijkstra</span></div>
+        <div class="leg-row"><div class="dot" style="background:#885530"></div><span><b>Resto</b> de tecnicas</span></div>
+        <div class="leg-row"><div style="width:28px;height:3px;background:var(--crit);border-radius:2px"></div><span><b>Arista</b> ruta critica</span></div>
+        <div class="leg-row"><div style="width:28px;height:1px;background:var(--muted);border-radius:2px"></div><span><b>Arista</b> alternativa</span></div>
+      </div>
+      <div class="note">Columnas = tacticas ATT&CK ordenadas por <b>kill chain</b>. Cada nodo es una tecnica real usada en SolarWinds. La <b style="color:var(--crit)">ruta roja</b> es el camino de menor resistencia hallado por Dijkstra.</div>
+    </div>
+  </div>
+  <div class="footer">5b / 10</div>
+</div>
+</body>
+</html>
