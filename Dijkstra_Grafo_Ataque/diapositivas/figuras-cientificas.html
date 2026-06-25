@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Figuras Científicas — SolarWinds Dijkstra</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root {
+  --bg:     #0d1320;
+  --panel:  #121a2b;
+  --panel2: #161f30;
+  --line:   #1e2a40;
+  --txt:    #e8edf6;
+  --muted:  #8a97ad;
+  --crit:   #ff3b5c;
+  --high:   #ff8c42;
+  --cyan:   #3fb6ff;
+  --green:  #5ad1a0;
+  --amber:  #ffd23f;
+  --purple: #c084fc;
+  --pink:   #f472b6;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+}
+/* NAV */
+.nav {
+  position: sticky;
+  top: 0;
+  background: rgba(13,19,32,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  z-index: 100;
+  padding: 14px 32px;
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  letter-spacing: .14em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin-right: 12px;
+}
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: .06em;
+  transition: color .15s;
+  white-space: nowrap;
+}
+.nav a:hover, .nav a.active { color: var(--cyan); }
+
+/* HEADER */
+.header {
+  margin-bottom: 48px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+}
+.header-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 10px;
+}
+h1 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  margin-bottom: 10px;
+}
+.header-sub {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* SECTIONS */
+.section {
+  margin-bottom: 64px;
+  scroll-margin-top: 64px;
+}
+.section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 6px;
+}
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  margin-bottom: 6px;
+}
+.section-desc {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 24px;
+  max-width: 700px;
+  line-height: 1.7;
+}
+
+/* FIGURE CARD */
+.fig-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.fig-body { padding: 28px 32px; }
+.fig-caption {
+  padding: 16px 32px;
+  border-top: 1px solid var(--line);
+  background: var(--panel2);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.fig-caption b { color: var(--txt); }
+
+/* CANVAS */
+canvas { display: block; }
+
+/* TWO-COL */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+/* STAT GRID */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 800px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+.stat-box {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+}
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(30,42,64,.6);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(63,182,255,.04); }
+.mono { font-family: 'JetBrains Mono', monospace; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+}
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* INSIGHT BOX */
+.insight {
+  border-left: 3px solid var(--cyan);
+  background: rgba(63,182,255,.06);
+  border-radius: 0 10px 10px 0;
+  padding: 16px 20px;
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.insight b { color: var(--cyan); }
+.insight.amber { border-left-color: var(--amber); background: rgba(255,210,63,.06); }
+.insight.amber b { color: var(--amber); }
+.insight.green { border-left-color: var(--green); background: rgba(90,209,160,.06); }
+.insight.green b { color: var(--green); }
+.insight.crit { border-left-color: var(--crit); background: rgba(255,59,92,.06); }
+.insight.crit b { color: var(--crit); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">Fig. Científicas</span>
+  <a href="#fig1">1 · Algoritmos</a>
+  <a href="#fig2">2 · Sensibilidad</a>
+  <a href="#fig3">3 · Red compleja</a>
+  <a href="#fig4">4 · Betweenness</a>
+</nav>
+
+<div class="page">
+
+<div class="header">
+  <div class="header-tag">Análisis extendido · SolarWinds Compromise · MITRE ATT&CK STIX 2.1</div>
+  <h1>Figuras para publicación científica</h1>
+  <p class="header-sub">Comparación de algoritmos · Sensibilidad de pesos · Métricas de redes complejas · Validación de betweenness</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FIG 1 — Comparación de algoritmos
+     ══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="fig1">
+  <div class="section-title">Figura 1</div>
+  <h2>Comparación de algoritmos de camino mínimo</h2>
+  <p class="section-desc">
+    Dijkstra propio, Bellman-Ford propio y NetworkX producen el mismo costo óptimo (1.635).
+    BFS sin pesos halla una ruta con costo real 3.875 (+137%), demostrando que los pesos son informativos.
+  </p>
+
+  <!-- Stats -->
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">Dijkstra propio</div>
+      <div class="stat-value" style="color:var(--cyan)">1.635</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">0.32 ms · 9 pasos</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Bellman-Ford</div>
+      <div class="stat-value" style="color:var(--green)">1.635</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">0.82 ms · 9 pasos</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">NetworkX</div>
+      <div class="stat-value" style="color:var(--purple)">1.635</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">2.25 ms · 9 pasos</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">BFS sin pesos</div>
+      <div class="stat-value" style="color:var(--crit)">3.875</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">0.08 ms · 8 hops</div>
+    </div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-body">
+      <canvas id="c1" height="320"></canvas>
+    </div>
+    <div class="fig-caption">
+      <b>Fig. 1a.</b> Costo acumulado por paso en cada ruta encontrada.
+      Dijkstra, Bellman-Ford y NetworkX convergen al mismo costo óptimo.
+      BFS ignora pesos y selecciona nodos de alta resistencia, resultando en
+      un costo total 137% mayor que el óptimo.
+    </div>
+  </div>
+
+  <div style="margin-top:24px;" class="fig-card">
+    <div class="fig-body">
+      <!-- Rutas comparadas -->
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Paso</th>
+              <th>Dijkstra propio</th>
+              <th>Bellman-Ford</th>
+              <th>NetworkX</th>
+              <th>BFS (sin pesos)</th>
+            </tr>
+          </thead>
+          <tbody id="ruta-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="fig-caption">
+      <b>Fig. 1b.</b> Rutas node a node. Dijkstra y Bellman-Ford difieren en paso 3
+      (T1087 vs T1482) — ambos son nodos con peso idéntico (0.75), lo que produce
+      un empate de costos y la elección depende del orden de visita en el heap.
+      Costo total idéntico en ambos casos.
+    </div>
+  </div>
+
+  <div class="insight green" style="margin-top:16px;">
+    <b>Validación:</b> Dijkstra propio produce resultado idéntico a NetworkX (Brandes).
+    El tiempo de Dijkstra propio (0.32 ms) es 7× más rápido que NetworkX (2.25 ms) en este grafo,
+    justificando la implementación desde cero para grafos de ataque de tamaño similar.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FIG 2 — Sensibilidad
+     ══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="fig2">
+  <div class="section-title">Figura 2</div>
+  <h2>Análisis de sensibilidad de pesos</h2>
+  <p class="section-desc">
+    Cuatro escenarios de pesos: original, −20%, +20%, y sin CVE-weights (solo mitigaciones).
+    Jaccard similarity mide cuántos nodos críticos se comparten con el escenario base.
+  </p>
+
+  <div class="two-col">
+    <div class="fig-card">
+      <div class="fig-body">
+        <canvas id="c2a" height="260"></canvas>
+      </div>
+      <div class="fig-caption"><b>Fig. 2a.</b> Costo total de la ruta crítica en cada escenario.</div>
+    </div>
+    <div class="fig-card">
+      <div class="fig-body">
+        <canvas id="c2b" height="260"></canvas>
+      </div>
+      <div class="fig-caption"><b>Fig. 2b.</b> Jaccard similarity vs escenario base (1.0 = ruta idéntica).</div>
+    </div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Escenario</th>
+              <th>Descripción</th>
+              <th>Costo</th>
+              <th>Pasos</th>
+              <th>Jaccard</th>
+              <th>Ruta idéntica</th>
+              <th>Nodo diferente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge" style="background:rgba(63,182,255,.15);color:var(--cyan)">Base</span></td>
+              <td>Mitigaciones + CVE (original)</td>
+              <td class="mono">1.635</td>
+              <td class="mono">9</td>
+              <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace">1.000</span></td>
+              <td><span class="pill" style="background:rgba(90,209,160,.15);color:var(--green)">✓ Sí</span></td>
+              <td class="mono" style="color:var(--muted)">—</td>
+            </tr>
+            <tr>
+              <td><span class="badge" style="background:rgba(90,209,160,.15);color:var(--green)">−20%</span></td>
+              <td>Pesos escalados × 0.8</td>
+              <td class="mono">1.340</td>
+              <td class="mono">9</td>
+              <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace">1.000</span></td>
+              <td><span class="pill" style="background:rgba(90,209,160,.15);color:var(--green)">✓ Sí</span></td>
+              <td class="mono" style="color:var(--muted)">—</td>
+            </tr>
+            <tr>
+              <td><span class="badge" style="background:rgba(255,210,63,.15);color:var(--amber)">+20%</span></td>
+              <td>Pesos escalados × 1.2</td>
+              <td class="mono">1.960</td>
+              <td class="mono">9</td>
+              <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace">1.000</span></td>
+              <td><span class="pill" style="background:rgba(90,209,160,.15);color:var(--green)">✓ Sí</span></td>
+              <td class="mono" style="color:var(--muted)">—</td>
+            </tr>
+            <tr>
+              <td><span class="badge" style="background:rgba(255,59,92,.15);color:var(--crit)">Sin CVE</span></td>
+              <td>Solo mitigaciones ATT&CK</td>
+              <td class="mono">2.485</td>
+              <td class="mono">9</td>
+              <td><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">0.750</span></td>
+              <td><span class="pill" style="background:rgba(255,59,92,.15);color:var(--crit)">✗ No</span></td>
+              <td class="mono" style="color:var(--crit)">T1558.003 → T1539</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="fig-caption">
+      <b>Fig. 2c.</b> Tabla de sensibilidad completa. En 3 de 4 escenarios la ruta crítica
+      es idéntica al baseline (Jaccard=1.0). Sin CVE-weights, T1558.003 (Kerberoasting)
+      es reemplazado por T1539 (Steal Web Session Cookie) — ambos en credential-access,
+      lo que indica que la táctica crítica se mantiene aunque cambie la técnica específica.
+    </div>
+  </div>
+
+  <div class="insight amber">
+    <b>Robustez del modelo:</b> Variaciones del ±20% en los pesos no alteran la ruta crítica.
+    Sin CVE-weights, la táctica de <i>credential-access</i> sigue siendo el cuello de botella;
+    solo cambia qué técnica específica es seleccionada. Esto valida que las conclusiones
+    son robustas ante incertidumbre en los datos de entrada.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FIG 3 — Métricas de redes complejas
+     ══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="fig3">
+  <div class="section-title">Figura 3</div>
+  <h2>Métricas de redes complejas</h2>
+  <p class="section-desc">
+    El grafo de ataque SolarWinds (73 nodos, 653 aristas) comparado con un grafo
+    Erdős-Rényi equivalente. Distribución de grados, clustering, componentes y métricas estructurales.
+  </p>
+
+  <!-- Stat grid -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px;">
+    <div class="stat-box">
+      <div class="stat-label">Nodos</div>
+      <div class="stat-value" style="color:var(--cyan)">73</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">71 técnicas + 2</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Aristas</div>
+      <div class="stat-value" style="color:var(--high)">653</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">densidad=0.124</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Diámetro</div>
+      <div class="stat-value" style="color:var(--amber)">9</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">path medio=2.85</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">SCC</div>
+      <div class="stat-value" style="color:var(--purple)">54</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">mayor SCC=20</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Asortatividad</div>
+      <div class="stat-value" style="color:var(--pink)">0.308</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">positiva</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="fig-card">
+      <div class="fig-body">
+        <canvas id="c3a" height="280"></canvas>
+      </div>
+      <div class="fig-caption"><b>Fig. 3a.</b> Distribución de in-degree. No sigue ley de potencia (R²=0.006), indicando grafo de estructura táctica impuesta, no scale-free.</div>
+    </div>
+    <div class="fig-card">
+      <div class="fig-body">
+        <canvas id="c3b" height="280"></canvas>
+      </div>
+      <div class="fig-caption"><b>Fig. 3b.</b> Distribución de out-degree. Mismo patrón. Media=8.9, std=5.8, máximo=27 (T1078 — hub multi-táctica).</div>
+    </div>
+  </div>
+
+  <div class="fig-card" style="margin-top:24px;">
+    <div class="fig-body">
+      <canvas id="c3c" height="260"></canvas>
+    </div>
+    <div class="fig-caption">
+      <b>Fig. 3c.</b> Comparación clustering y conectividad vs Erdős-Rényi equivalente (mismo n y densidad).
+      El grafo de ataque tiene clustering 0.953× del aleatorio — estructura determinista de kill chain
+      suprime los triángulos que aparecen espontáneamente en grafos random.
+    </div>
+  </div>
+
+  <div class="insight">
+    <b>Interpretación estructural:</b> 54 componentes fuertemente conexas (SCC) reflejan la
+    naturaleza dirigida y acíclica parcial del grafo: la progresión táctica impone dirección.
+    Asortatividad positiva (0.308) indica que nodos de alto grado tienden a conectarse entre sí —
+    consistente con técnicas multi-táctica como T1078 (Valid Accounts) que aparece en 4 tácticas.
+    El grafo es completamente conexo débilmente (WCC=1), garantizando que toda técnica es
+    alcanzable desde ATTACKER.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FIG 4 — Betweenness comparación
+     ══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="fig4">
+  <div class="section-title">Figura 4</div>
+  <h2>Validación de FW-betweenness: comparación con NetworkX</h2>
+  <p class="section-desc">
+    FW-betweenness propio vs algoritmo de Brandes (NetworkX). Correlación de Spearman
+    ρ = 0.9997 valida que la implementación propia produce rankings equivalentes.
+  </p>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">Spearman ρ</div>
+      <div class="stat-value" style="color:var(--green)">0.9997</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">vs NetworkX weighted</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Top-1 coincide</div>
+      <div class="stat-value" style="color:var(--green)">✓</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">T1078 en ambos</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Top-5 sin cambio</div>
+      <div class="stat-value" style="color:var(--amber)">3/5</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">delta ≤ 2</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Técnicas evaluadas</div>
+      <div class="stat-value" style="color:var(--cyan)">71</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">excl. ATTACKER/IMPACT</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="fig-card">
+      <div class="fig-body">
+        <canvas id="c4a" height="300"></canvas>
+      </div>
+      <div class="fig-caption"><b>Fig. 4a.</b> Top-15 FW-betweenness (propio, normalizado 0–1).</div>
+    </div>
+    <div class="fig-card">
+      <div class="fig-body">
+        <canvas id="c4b" height="300"></canvas>
+      </div>
+      <div class="fig-caption"><b>Fig. 4b.</b> Scatter: FW-betweenness normalizado vs NX-betweenness ponderado. Cada punto = una técnica.</div>
+    </div>
+  </div>
+
+  <div class="fig-card" style="margin-top:24px;">
+    <div class="fig-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ID ATT&CK</th>
+              <th>Nombre</th>
+              <th>Táctica</th>
+              <th>Peso w</th>
+              <th>FW-Betw (norm)</th>
+              <th>NX-Betw (w)</th>
+              <th>Rk FW</th>
+              <th>Rk NX</th>
+              <th>Δ ranking</th>
+            </tr>
+          </thead>
+          <tbody id="betw-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="fig-caption">
+      <b>Fig. 4c.</b> Top-15 técnicas por FW-betweenness con comparación de ranking.
+      Δ = ranking_FW − ranking_NX; valores cercanos a 0 indican concordancia.
+      T1078 y T1558.003 lideran ambas métricas — son los nodos puente
+      más críticos del ataque SolarWinds.
+    </div>
+  </div>
+
+  <div class="insight crit">
+    <b>Técnicas críticas identificadas:</b> T1078 (Valid Accounts) y T1558.003 (Kerberoasting)
+    dominan tanto la ruta mínima de Dijkstra como el FW-betweenness. Son puntos de intervención
+    defensiva prioritarios: mitigar T1078 cortaría 1,218 rutas óptimas del grafo completo.
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<script>
+// ── Datos embebidos ────────────────────────────────────────────────────────
+const RUTA_DIJK = ["ATTACKER","T1078","T1558.003","T1087","T1021.001","T1213","T1071.001","T1048.002","IMPACT"];
+const RUTA_BF   = ["ATTACKER","T1078","T1558.003","T1482","T1021.001","T1213","T1071.001","T1048.002","IMPACT"];
+const RUTA_NX   = ["ATTACKER","T1078","T1558.003","T1482","T1021.001","T1213","T1071.001","T1048.002","IMPACT"];
+const RUTA_BFS  = ["ATTACKER","T1078.003","T1555.003","T1016.001","T1550.001","T1213","T1665","T1048.002","IMPACT"];
+
+// Costos acumulados por paso (calculados desde pesos conocidos)
+const COST_DIJK = [0, 0.05, 0.15, 0.90, 0.95, 1.075, 1.125, 1.625, 1.635];
+const COST_BF   = [0, 0.05, 0.15, 0.90, 0.95, 1.075, 1.125, 1.625, 1.635];
+const COST_NX   = [0, 0.05, 0.15, 0.90, 0.95, 1.075, 1.125, 1.625, 1.635];
+const COST_BFS  = [0, 0.75, 1.50, 2.25, 3.00, 3.125, 3.75, 3.875, 3.885]; // aprox
+
+const SENSI = {
+  labels: ["Base\n(orig)", "−20%\n(×0.8)", "+20%\n(×1.2)", "Sin CVE"],
+  costos:  [1.635, 1.340, 1.960, 2.485],
+  jaccard: [1.000, 1.000, 1.000, 0.750],
+};
+
+const METRICAS_IN = {
+  "0":2,"1":2,"2":3,"4":3,"5":9,"6":11,"8":14,"9":1,"10":6,"11":4,"12":9,"15":5,"18":1,"24":4
+};
+const METRICAS_OUT = {
+  "0":1,"1":6,"3":1,"5":9,"6":16,"8":11,"10":8,"11":4,"12":5,"15":6,"16":1,"17":1,"27":4
+};
+
+const BETWEENNESS = [
+  {node:"T1078",    name:"Valid Accounts",           tactic:"stealth/persistence/priv-esc/init-access", w:0.05,  fw:1.0,    nx:0.2294, rk_fw:1,  rk_nx:1,  delta:0},
+  {node:"T1558.003",name:"Kerberoasting",            tactic:"credential-access",                        w:0.10,  fw:0.857,  nx:0.2042, rk_fw:2,  rk_nx:2,  delta:0},
+  {node:"T1087",    name:"Account Discovery",         tactic:"discovery",                                w:0.75,  fw:0.686,  nx:0.0818, rk_fw:3,  rk_nx:5,  delta:-2},
+  {node:"T1482",    name:"Domain Trust Discovery",    tactic:"discovery",                                w:0.75,  fw:0.686,  nx:0.0818, rk_fw:4,  rk_nx:6,  delta:-2},
+  {node:"T1021.001",name:"Remote Desktop Protocol",  tactic:"lateral-movement",                         w:0.05,  fw:0.576,  nx:0.1579, rk_fw:5,  rk_nx:3,  delta:2},
+  {node:"T1213",    name:"Data from Info Repos",      tactic:"collection",                               w:0.125, fw:0.345,  nx:0.1035, rk_fw:6,  rk_nx:4,  delta:2},
+  {node:"T1059.001",name:"PowerShell",                tactic:"execution",                                w:0.05,  fw:0.159,  nx:0.0229, rk_fw:7,  rk_nx:7,  delta:0},
+  {node:"T1685",    name:"Disable or Modify Tools",   tactic:"defense-impairment",                       w:0.875, fw:0.151,  nx:0.0112, rk_fw:8,  rk_nx:8,  delta:0},
+  {node:"T1071.001",name:"Web Protocols",             tactic:"command-and-control",                      w:0.05,  fw:0.108,  nx:0.0109, rk_fw:9,  rk_nx:9,  delta:0},
+  {node:"T1133",    name:"External Remote Services",  tactic:"persistence/initial-access",               w:0.05,  fw:0.064,  nx:0.0060, rk_fw:10, rk_nx:11, delta:-1},
+  {node:"T1485",    name:"Data Destruction",          tactic:"impact",                                   w:0.50,  fw:0.057,  nx:0.0027, rk_fw:11, rk_nx:13, delta:-2},
+  {node:"T1195.002",name:"Supply Chain Compromise",   tactic:"initial-access",                           w:0.05,  fw:0.049,  nx:0.0027, rk_fw:12, rk_nx:14, delta:-2},
+  {node:"T1048.002",name:"Exfil Asym Encrypted",      tactic:"exfiltration",                             w:0.50,  fw:0.041,  nx:0.0000, rk_fw:13, rk_nx:15, delta:-2},
+  {node:"T1550.002",name:"Pass the Hash",              tactic:"defense-evasion/lateral-movement",         w:0.05,  fw:0.033,  nx:0.0041, rk_fw:14, rk_nx:12, delta:2},
+  {node:"T1027",    name:"Obfuscated Files/Info",      tactic:"defense-evasion",                          w:0.05,  fw:0.016,  nx:0.0020, rk_fw:15, rk_nx:16, delta:-1},
+];
+
+// ── Helpers de canvas ──────────────────────────────────────────────────────
+const C = {
+  BG:     "#0d1320",
+  PANEL:  "#121a2b",
+  LINE:   "#1e2a40",
+  TXT:    "#e8edf6",
+  MUTED:  "#8a97ad",
+  CYAN:   "#3fb6ff",
+  GREEN:  "#5ad1a0",
+  AMBER:  "#ffd23f",
+  CRIT:   "#ff3b5c",
+  HIGH:   "#ff8c42",
+  PURPLE: "#c084fc",
+  PINK:   "#f472b6",
+};
+
+function initCanvas(id) {
+  const el = document.getElementById(id);
+  const dpr = window.devicePixelRatio || 1;
+  const w = el.parentElement.clientWidth - 64; // padding
+  const h = parseInt(el.getAttribute("height"));
+  el.width  = w * dpr;
+  el.height = h * dpr;
+  el.style.width  = w + "px";
+  el.style.height = h + "px";
+  const ctx = el.getContext("2d");
+  ctx.scale(dpr, dpr);
+  return { ctx, w, h };
+}
+
+function drawGrid(ctx, w, h, pad) {
+  ctx.strokeStyle = C.LINE;
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 5; i++) {
+    const y = pad.top + (h - pad.top - pad.bottom) * (1 - i/5);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+  }
+}
+
+function drawAxis(ctx, w, h, pad, xlabels, ymin, ymax, ylabel) {
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= 5; i++) {
+    const val = ymin + (ymax - ymin) * i / 5;
+    const y = pad.top + (h - pad.top - pad.bottom) * (1 - i/5);
+    ctx.fillText(val.toFixed(2), pad.left - 6, y + 4);
+  }
+  ctx.textAlign = "center";
+  const xSlot = (w - pad.left - pad.right) / (xlabels.length - 1 || 1);
+  xlabels.forEach((lbl, i) => {
+    const x = pad.left + i * xSlot;
+    ctx.fillText(lbl, x, h - pad.bottom + 16);
+  });
+  if (ylabel) {
+    ctx.save();
+    ctx.translate(12, (h) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = "center";
+    ctx.fillStyle = C.MUTED;
+    ctx.font = "11px 'Space Grotesk', sans-serif";
+    ctx.fillText(ylabel, 0, 0);
+    ctx.restore();
+  }
+}
+
+// ── FIG 1 — Line chart costos acumulados ──────────────────────────────────
+(function drawFig1() {
+  const { ctx, w, h } = initCanvas("c1");
+  const pad = { top: 20, right: 20, bottom: 36, left: 52 };
+  const iw = w - pad.left - pad.right;
+  const ih = h - pad.top - pad.bottom;
+
+  ctx.fillStyle = C.BG;
+  ctx.fillRect(0, 0, w, h);
+
+  const ymax = 4.5, ymin = 0;
+  drawGrid(ctx, w, h, pad);
+
+  const steps = COST_DIJK.length;
+  const series = [
+    { data: COST_DIJK, color: C.CYAN,   label: "Dijkstra propio",   dash: [] },
+    { data: COST_BF,   color: C.GREEN,  label: "Bellman-Ford",       dash: [4,3] },
+    { data: COST_NX,   color: C.PURPLE, label: "NetworkX",           dash: [2,4] },
+    { data: COST_BFS,  color: C.CRIT,   label: "BFS sin pesos",      dash: [8,4] },
+  ];
+
+  function xPos(i) { return pad.left + i * iw / (steps - 1); }
+  function yPos(v) { return pad.top + ih * (1 - (v - ymin) / (ymax - ymin)); }
+
+  series.forEach(s => {
+    ctx.beginPath();
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = s.color === C.CRIT ? 2.5 : 2;
+    ctx.setLineDash(s.dash);
+    s.data.forEach((v, i) => {
+      const x = xPos(i), y = yPos(v);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // dots
+    s.data.forEach((v, i) => {
+      ctx.beginPath();
+      ctx.arc(xPos(i), yPos(v), 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = s.color;
+      ctx.fill();
+    });
+  });
+
+  // Eje y
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= 9; i += 3) {
+    const val = ymin + (ymax - ymin) * i / 9;
+    const y = yPos(val);
+    ctx.fillText(val.toFixed(2), pad.left - 6, y + 4);
+  }
+  // Eje x
+  ctx.textAlign = "center";
+  RUTA_DIJK.forEach((n, i) => {
+    const short = n === "ATTACKER" ? "ATK" : n === "IMPACT" ? "IMP" : n;
+    ctx.fillText(short, xPos(i), h - pad.bottom + 14);
+  });
+
+  // Leyenda
+  const legX = pad.left + 10, legY = pad.top + 10;
+  series.forEach((s, i) => {
+    const ly = legY + i * 20;
+    ctx.setLineDash(s.dash);
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(legX, ly + 6); ctx.lineTo(legX + 24, ly + 6); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = C.TXT;
+    ctx.textAlign = "left";
+    ctx.font = "12px 'Space Grotesk', sans-serif";
+    ctx.fillText(s.label, legX + 30, ly + 10);
+  });
+
+  // Línea de referencia costo óptimo
+  ctx.strokeStyle = C.AMBER;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  const yOpt = yPos(1.635);
+  ctx.beginPath(); ctx.moveTo(pad.left, yOpt); ctx.lineTo(w - pad.right, yOpt); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = C.AMBER;
+  ctx.font = "10px 'JetBrains Mono', monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("óptimo=1.635", w - pad.right - 90, yOpt - 5);
+})();
+
+// ── FIG 1b — Tabla de rutas ─────────────────────────────────────────────────
+(function buildRutaTable() {
+  const tbody = document.getElementById("ruta-tbody");
+  const maxSteps = Math.max(RUTA_DIJK.length, RUTA_BF.length, RUTA_NX.length, RUTA_BFS.length);
+  for (let i = 0; i < maxSteps; i++) {
+    function cell(node, refNode) {
+      if (!node) return "<td>—</td>";
+      const match = refNode && node === refNode;
+      const diff  = refNode && node !== refNode;
+      const color = node === "ATTACKER" ? C.GREEN : node === "IMPACT" ? C.CRIT : "";
+      const bg    = diff ? "background:rgba(255,59,92,.12)" : match ? "background:rgba(63,182,255,.06)" : "";
+      return `<td style="${bg}" class="mono" ${color ? `style="color:${color}"` : ""}>${node || "—"}</td>`;
+    }
+    const d = RUTA_DIJK[i], b = RUTA_BF[i], n = RUTA_NX[i], bfs = RUTA_BFS[i];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="mono" style="color:var(--muted)">${i}</td>${cell(d)}${cell(b, d)}${cell(n, d)}${cell(bfs, d)}`;
+    tbody.appendChild(tr);
+  }
+  // fila totales
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em">TOTAL</td>
+    <td style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-weight:700">1.635</td>
+    <td style="color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:700">1.635</td>
+    <td style="color:var(--purple);font-family:'JetBrains Mono',monospace;font-weight:700">1.635</td>
+    <td style="color:var(--crit);font-family:'JetBrains Mono',monospace;font-weight:700">3.875 (+137%)</td>`;
+  tbody.appendChild(tr);
+})();
+
+// ── FIG 2a — Bar chart costos por escenario ────────────────────────────────
+(function drawFig2a() {
+  const { ctx, w, h } = initCanvas("c2a");
+  const pad = { top: 24, right: 20, bottom: 52, left: 52 };
+  const iw = w - pad.left - pad.right;
+  const ih = h - pad.top - pad.bottom;
+  const ymax = 3.0, ymin = 0;
+
+  ctx.fillStyle = C.BG;
+  ctx.fillRect(0, 0, w, h);
+  drawGrid(ctx, w, h, pad);
+
+  const labels = ["Base\n(orig)", "−20%", "+20%", "Sin CVE"];
+  const costos = [1.635, 1.340, 1.960, 2.485];
+  const colors = [C.CYAN, C.GREEN, C.AMBER, C.CRIT];
+  const n = labels.length;
+  const barW = iw / n * 0.55;
+
+  costos.forEach((v, i) => {
+    const x = pad.left + (i + 0.5) * iw / n - barW / 2;
+    const barH = ih * (v - ymin) / (ymax - ymin);
+    const y = pad.top + ih - barH;
+    ctx.fillStyle = colors[i] + "33";
+    ctx.fillRect(x, y, barW, barH);
+    ctx.strokeStyle = colors[i];
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, barW, barH);
+    ctx.fillStyle = colors[i];
+    ctx.font = "bold 13px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(v.toFixed(3), x + barW / 2, y - 7);
+  });
+
+  // Línea base
+  ctx.strokeStyle = C.MUTED;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  const ybase = pad.top + ih * (1 - 1.635 / ymax);
+  ctx.beginPath(); ctx.moveTo(pad.left, ybase); ctx.lineTo(w - pad.right, ybase); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Eje y
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= 3; i++) {
+    const v = ymin + (ymax - ymin) * i / 3;
+    const y = pad.top + ih * (1 - i / 3);
+    ctx.fillText(v.toFixed(2), pad.left - 6, y + 4);
+  }
+
+  // Eje x
+  ctx.fillStyle = C.MUTED;
+  ctx.textAlign = "center";
+  ctx.font = "12px 'Space Grotesk', sans-serif";
+  labels.forEach((lbl, i) => {
+    const x = pad.left + (i + 0.5) * iw / n;
+    const parts = lbl.split("\n");
+    parts.forEach((p, j) => ctx.fillText(p, x, h - pad.bottom + 16 + j * 14));
+  });
+
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("Costo total ruta crítica", pad.left, 14);
+})();
+
+// ── FIG 2b — Jaccard bar chart ─────────────────────────────────────────────
+(function drawFig2b() {
+  const { ctx, w, h } = initCanvas("c2b");
+  const pad = { top: 24, right: 20, bottom: 52, left: 52 };
+  const iw = w - pad.left - pad.right;
+  const ih = h - pad.top - pad.bottom;
+  const ymax = 1.0, ymin = 0;
+
+  ctx.fillStyle = C.BG;
+  ctx.fillRect(0, 0, w, h);
+  drawGrid(ctx, w, h, pad);
+
+  const labels = ["Base", "−20%", "+20%", "Sin CVE"];
+  const jacs   = [1.000, 1.000, 1.000, 0.750];
+  const colors = [C.CYAN, C.GREEN, C.AMBER, C.CRIT];
+  const n = labels.length;
+  const barW = iw / n * 0.55;
+
+  jacs.forEach((v, i) => {
+    const x = pad.left + (i + 0.5) * iw / n - barW / 2;
+    const barH = ih * v;
+    const y = pad.top + ih - barH;
+    ctx.fillStyle = colors[i] + "33";
+    ctx.fillRect(x, y, barW, barH);
+    ctx.strokeStyle = colors[i];
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, barW, barH);
+    ctx.fillStyle = colors[i];
+    ctx.font = "bold 13px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(v.toFixed(3), x + barW / 2, y - 7);
+  });
+
+  // Umbral 0.8
+  ctx.strokeStyle = C.AMBER;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 4]);
+  const y08 = pad.top + ih * (1 - 0.8);
+  ctx.beginPath(); ctx.moveTo(pad.left, y08); ctx.lineTo(w - pad.right, y08); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = C.AMBER;
+  ctx.font = "10px 'JetBrains Mono', monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("umbral 0.8", pad.left + 4, y08 - 5);
+
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= 5; i++) {
+    const v = i / 5;
+    const y = pad.top + ih * (1 - v);
+    ctx.fillText(v.toFixed(1), pad.left - 6, y + 4);
+  }
+  ctx.textAlign = "center";
+  ctx.font = "12px 'Space Grotesk', sans-serif";
+  labels.forEach((lbl, i) => {
+    const x = pad.left + (i + 0.5) * iw / n;
+    ctx.fillText(lbl, x, h - pad.bottom + 16);
+  });
+
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("Jaccard similarity vs base", pad.left, 14);
+})();
+
+// ── FIG 3a — Distribución in-degree ──────────────────────────────────────
+function drawDegDist(canvasId, distData, color, title) {
+  const { ctx, w, h } = initCanvas(canvasId);
+  const pad = { top: 30, right: 20, bottom: 44, left: 44 };
+  const iw = w - pad.left - pad.right;
+  const ih = h - pad.top - pad.bottom;
+
+  ctx.fillStyle = C.BG;
+  ctx.fillRect(0, 0, w, h);
+
+  const entries = Object.entries(distData).map(([k, v]) => [parseInt(k), v]);
+  const maxCount = Math.max(...entries.map(e => e[1]));
+  const ymax = Math.ceil(maxCount * 1.1);
+
+  // grid
+  ctx.strokeStyle = C.LINE;
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + ih * (1 - i/4);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+    ctx.fillStyle = C.MUTED;
+    ctx.font = "11px 'JetBrains Mono', monospace";
+    ctx.textAlign = "right";
+    ctx.fillText(Math.round(ymax * i / 4), pad.left - 5, y + 4);
+  }
+
+  const n = entries.length;
+  const barW = Math.max(4, iw / n * 0.75);
+  entries.forEach(([k, cnt], i) => {
+    const x = pad.left + i * iw / n + iw / n / 2 - barW / 2;
+    const barH = ih * cnt / ymax;
+    const y = pad.top + ih - barH;
+    ctx.fillStyle = color + "44";
+    ctx.fillRect(x, y, barW, barH);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, y, barW, barH);
+  });
+
+  // x labels (cada 2)
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "10px 'JetBrains Mono', monospace";
+  ctx.textAlign = "center";
+  entries.forEach(([k], i) => {
+    if (i % 2 === 0) {
+      const x = pad.left + i * iw / n + iw / n / 2;
+      ctx.fillText(k, x, h - pad.bottom + 14);
+    }
+  });
+
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'Space Grotesk', sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(title, pad.left, 18);
+}
+
+drawDegDist("c3a", METRICAS_IN,  C.CYAN,  "In-degree · n=73 · mean=8.9 · R²_powerlaw=0.006");
+drawDegDist("c3b", METRICAS_OUT, C.HIGH,  "Out-degree · n=73 · mean=8.9 · R²_powerlaw=0.036");
+
+// ── FIG 3c — Comparacion clustering / conectividad ────────────────────────
+(function drawFig3c() {
+  const { ctx, w, h } = initCanvas("c3c");
+  const pad = { top: 30, right: 20, bottom: 44, left: 60 };
+  const iw = w - pad.left - pad.right;
+  const ih = h - pad.top - pad.bottom;
+
+  ctx.fillStyle = C.BG;
+  ctx.fillRect(0, 0, w, h);
+
+  const bars = [
+    { label: "Clustering\nataque",   val: 0.2032, ref: 0.2132, refLabel: "ER random", color: C.CYAN },
+    { label: "Densidad\ngrafo",      val: 0.1242, ref: 0.1242, refLabel: "ER=mismo",  color: C.PURPLE },
+    { label: "Avg path\nlength",     val: 2.847,  ref: null,   refLabel: "",           color: C.AMBER },
+    { label: "Diámetro",             val: 9,      ref: null,   refLabel: "",           color: C.HIGH },
+    { label: "Asortati-\nvidad",     val: 0.308,  ref: 0,      refLabel: "Random=0",  color: C.PINK },
+  ];
+
+  // Normalizar para visualización (0-1 escala)
+  const scales = [1, 1, 1/5, 1/12, 1];
+  const ymax = 1.2;
+
+  ctx.strokeStyle = C.LINE;
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + ih * (1 - i/4);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+  }
+
+  const n = bars.length;
+  const barW = iw / n * 0.45;
+
+  bars.forEach((b, i) => {
+    const cx = pad.left + (i + 0.5) * iw / n;
+    const normVal = b.val * scales[i];
+    const barH = ih * normVal / ymax;
+    const x = cx - barW / 2;
+    const y = pad.top + ih - barH;
+
+    ctx.fillStyle = b.color + "44";
+    ctx.fillRect(x, y, barW, barH);
+    ctx.strokeStyle = b.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, barW, barH);
+
+    // valor real
+    ctx.fillStyle = b.color;
+    ctx.font = "bold 12px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(b.val.toFixed ? b.val.toFixed(3) : b.val, cx, y - 7);
+
+    // ref
+    if (b.ref !== null) {
+      const refNorm = b.ref * scales[i];
+      const refY = pad.top + ih - ih * refNorm / ymax;
+      ctx.strokeStyle = C.MUTED;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(cx - barW/2 - 6, refY); ctx.lineTo(cx + barW/2 + 6, refY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = C.MUTED;
+      ctx.font = "10px 'JetBrains Mono', monospace";
+      ctx.fillText(b.refLabel, cx + barW/2 + 10, refY + 4);
+    }
+
+    // label
+    ctx.fillStyle = C.MUTED;
+    ctx.font = "11px 'Space Grotesk', sans-serif";
+    ctx.textAlign = "center";
+    b.label.split("\n").forEach((ln, j) => ctx.fillText(ln, cx, h - pad.bottom + 16 + j * 13));
+  });
+
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'Space Grotesk', sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Métricas estructurales del grafo (escala normalizada para visualización)", pad.left, 18);
+})();
+
+// ── FIG 4a — Betweenness bar chart top-15 ────────────────────────────────
+(function drawFig4a() {
+  const { ctx, w, h } = initCanvas("c4a");
+  const pad = { top: 20, right: 120, bottom: 20, left: 20 };
+  const iw = w - pad.left - pad.right;
+  const ih = h - pad.top - pad.bottom;
+
+  ctx.fillStyle = C.BG;
+  ctx.fillRect(0, 0, w, h);
+
+  const n = Math.min(BETWEENNESS.length, 15);
+  const rowH = ih / n;
+
+  BETWEENNESS.slice(0, n).forEach((b, i) => {
+    const y = pad.top + i * rowH;
+    const barW = iw * b.fw;
+    const isTop2 = i < 2;
+    const color = isTop2 ? C.CRIT : i < 5 ? C.HIGH : C.CYAN;
+
+    ctx.fillStyle = color + "22";
+    ctx.fillRect(pad.left, y + 2, barW, rowH - 4);
+    ctx.fillStyle = color;
+    ctx.fillRect(pad.left, y + 2, barW, rowH - 4);
+    ctx.fillStyle = color + "44";
+    ctx.fillRect(pad.left, y + 2, barW, rowH - 4);
+    // bar outline
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(pad.left, y + 2, barW, rowH - 4);
+    // fill semitransparente
+    ctx.fillStyle = color + "33";
+    ctx.fillRect(pad.left, y + 2, barW, rowH - 4);
+
+    // etiqueta derecha
+    ctx.fillStyle = C.TXT;
+    ctx.font = `${isTop2 ? "bold" : ""} 11.5px 'JetBrains Mono', monospace`;
+    ctx.textAlign = "left";
+    ctx.fillText(b.node, w - pad.right + 8, y + rowH/2 + 4);
+
+    ctx.fillStyle = C.MUTED;
+    ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.fillText(b.fw.toFixed(3), w - pad.right + 8, y + rowH/2 + 16);
+  });
+
+  // ticks x
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "10px 'JetBrains Mono', monospace";
+  ctx.textAlign = "center";
+  [0, 0.25, 0.5, 0.75, 1.0].forEach(v => {
+    const x = pad.left + iw * v;
+    ctx.fillText(v.toFixed(2), x, ih + pad.top + 14);
+    ctx.strokeStyle = C.LINE;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + ih); ctx.stroke();
+  });
+
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "10px 'Space Grotesk', sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("FW-betweenness (normalizado)", pad.left, 14);
+})();
+
+// ── FIG 4b — Scatter FW vs NX ─────────────────────────────────────────────
+(function drawFig4b() {
+  const { ctx, w, h } = initCanvas("c4b");
+  const pad = { top: 24, right: 24, bottom: 40, left: 52 };
+  const iw = w - pad.left - pad.right;
+  const ih = h - pad.top - pad.bottom;
+
+  ctx.fillStyle = C.BG;
+  ctx.fillRect(0, 0, w, h);
+
+  const nxmax = 0.25;
+  const fwmax = 1.0;
+
+  drawGrid(ctx, w, h, pad);
+
+  // Diagonal referencia perfecta (escala relativa)
+  ctx.strokeStyle = C.LINE;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.moveTo(pad.left, pad.top + ih);
+  ctx.lineTo(pad.left + iw, pad.top);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Puntos
+  BETWEENNESS.forEach(b => {
+    const x = pad.left + iw * b.nx / nxmax;
+    const y = pad.top + ih * (1 - b.fw / fwmax);
+    const isTop5 = b.rk_fw <= 5;
+    ctx.beginPath();
+    ctx.arc(x, y, isTop5 ? 6 : 4, 0, Math.PI * 2);
+    ctx.fillStyle = isTop5 ? C.CRIT : C.CYAN + "88";
+    ctx.fill();
+    if (isTop5) {
+      ctx.strokeStyle = C.CRIT;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = C.TXT;
+      ctx.font = "10px 'JetBrains Mono', monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(b.node, x + 8, y + 4);
+    }
+  });
+
+  // Ejes
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.textAlign = "right";
+  [0, 0.25, 0.5, 0.75, 1.0].forEach(v => {
+    const y = pad.top + ih * (1 - v);
+    ctx.fillText(v.toFixed(2), pad.left - 5, y + 4);
+  });
+  ctx.textAlign = "center";
+  [0, 0.05, 0.10, 0.15, 0.20, 0.25].forEach(v => {
+    const x = pad.left + iw * v / nxmax;
+    ctx.fillText(v.toFixed(2), x, h - pad.bottom + 14);
+  });
+
+  ctx.fillStyle = C.MUTED;
+  ctx.font = "11px 'Space Grotesk', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("NX-betweenness ponderado →", pad.left + iw/2, h - 4);
+
+  ctx.save();
+  ctx.translate(12, pad.top + ih/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.textAlign = "center";
+  ctx.fillText("FW-betweenness normalizado →", 0, 0);
+  ctx.restore();
+
+  // Rho label
+  ctx.fillStyle = C.GREEN;
+  ctx.font = "bold 13px 'JetBrains Mono', monospace";
+  ctx.textAlign = "right";
+  ctx.fillText("ρ = 0.9997", w - pad.right - 4, pad.top + 18);
+})();
+
+// ── FIG 4c — Tabla betweenness ────────────────────────────────────────────
+(function buildBetwTable() {
+  const tbody = document.getElementById("betw-tbody");
+  BETWEENNESS.forEach(b => {
+    const isTop2 = b.rk_fw <= 2;
+    const deltaColor = b.delta === 0 ? "var(--green)" : Math.abs(b.delta) <= 2 ? "var(--amber)" : "var(--crit)";
+    const deltaTxt   = b.delta === 0 ? "0" : (b.delta > 0 ? "+" : "") + b.delta;
+    const fwBar = `<div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:${Math.round(b.fw*80)}px;height:6px;background:${isTop2?'var(--crit)':'var(--cyan)'};border-radius:3px;"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px">${b.fw.toFixed(3)}</span>
+    </div>`;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono" style="color:var(--muted)">${b.rk_fw}</td>
+      <td class="mono" style="color:${isTop2?'var(--crit)':'var(--txt)'}${isTop2?';font-weight:700':''}">${b.node}</td>
+      <td style="color:var(--muted);font-size:13px">${b.name}</td>
+      <td><span class="pill" style="background:rgba(63,182,255,.1);color:var(--cyan);font-size:10px">${b.tactic.split("/")[0]}</span></td>
+      <td class="mono">${b.w.toFixed(3)}</td>
+      <td>${fwBar}</td>
+      <td class="mono" style="color:var(--purple)">${b.nx.toFixed(4)}</td>
+      <td class="mono" style="color:var(--muted)">${b.rk_fw}</td>
+      <td class="mono" style="color:var(--muted)">${b.rk_nx}</td>
+      <td class="mono" style="color:${deltaColor};font-weight:700">${deltaTxt}</td>`;
+    tbody.appendChild(tr);
+  });
+})();
+
+// ── Nav highlight activo ──────────────────────────────────────────────────
+const sections = document.querySelectorAll("section[id]");
+const navLinks = document.querySelectorAll(".nav a");
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + e.target.id));
+    }
+  });
+}, { rootMargin: "-20% 0px -60% 0px" });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
