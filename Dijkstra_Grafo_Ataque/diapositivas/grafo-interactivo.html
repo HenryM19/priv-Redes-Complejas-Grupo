@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grafo Interactivo — SolarWinds Compromise</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root {
+    --bg:#0d1320; --panel:#121a2b; --panel2:#1a2438; --line:#1e2a40;
+    --txt:#e8edf6; --muted:#8a97ad; --crit:#ff3b5c; --high:#ff8c42;
+    --cyan:#3fb6ff; --green:#5ad1a0; --amber:#ffd23f; --purple:#c084fc;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); font-family:'Space Grotesk',sans-serif; color:var(--txt); }
+
+  /* ── Header ── */
+  #header {
+    position:fixed; top:0; left:0; right:0; height:56px; z-index:200;
+    background:var(--panel); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; padding:0 24px; gap:20px;
+  }
+  #header h1 { font-size:18px; font-weight:700; letter-spacing:-.01em; }
+  #header h1 .accent { color:var(--cyan); }
+  #header .badge {
+    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+    padding:3px 9px; border-radius:4px; border:1px solid;
+  }
+  #header .badge.red { border-color:var(--crit); color:var(--crit); background:rgba(255,59,92,.1); }
+  #header .badge.cyan { border-color:var(--cyan); color:var(--cyan); background:rgba(63,182,255,.1); }
+  #header .badge.green { border-color:var(--green); color:var(--green); background:rgba(90,209,160,.1); }
+  #header .spacer { flex:1; }
+  #header .hint { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); }
+
+  /* ── Controls ── */
+  #controls {
+    position:fixed; top:56px; left:0; right:0; height:40px; z-index:199;
+    background:rgba(13,19,32,.92); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; padding:0 20px; gap:12px;
+    backdrop-filter:blur(6px);
+  }
+  #controls button {
+    font-family:'JetBrains Mono',monospace; font-size:12px;
+    background:var(--panel2); border:1px solid var(--line);
+    color:var(--muted); padding:4px 12px; border-radius:5px;
+    cursor:pointer; transition:all .15s;
+  }
+  #controls button:hover { background:var(--line); color:var(--txt); }
+  #controls button.active { border-color:var(--cyan); color:var(--cyan); background:rgba(63,182,255,.1); }
+  #controls .sep { width:1px; height:20px; background:var(--line); }
+  #controls label { font-size:12px; color:var(--muted); }
+  #controls input[type=range] { width:100px; accent-color:var(--cyan); cursor:pointer; }
+
+  /* ── SVG canvas ── */
+  #canvas {
+    position:fixed; top:96px; left:0; right:320px; bottom:0;
+    overflow:hidden; cursor:grab;
+  }
+  #canvas:active { cursor:grabbing; }
+  #canvas svg { width:100%; height:100%; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    position:fixed; top:56px; right:0; bottom:0; width:320px;
+    background:var(--panel); border-left:1px solid var(--line);
+    overflow-y:auto; padding:20px;
+    display:flex; flex-direction:column; gap:16px;
+  }
+
+  /* ── Info panel ── */
+  #info { display:none; }
+  #info.visible { display:block; }
+  #info .info-id {
+    font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700;
+    color:var(--cyan); margin-bottom:4px;
+  }
+  #info .info-name { font-size:16px; font-weight:600; margin-bottom:12px; }
+  .info-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 0; border-bottom:1px solid var(--line); font-size:13px;
+  }
+  .info-row:last-child { border-bottom:none; }
+  .info-row .k { color:var(--muted); }
+  .info-row .v { font-family:'JetBrains Mono',monospace; color:var(--txt); font-weight:600; }
+  .info-row .v.red { color:var(--crit); }
+  .info-row .v.green { color:var(--green); }
+  .info-row .v.amber { color:var(--amber); }
+  .tac-badge {
+    display:inline-block; font-size:11px; padding:2px 7px; border-radius:4px;
+    background:rgba(63,182,255,.1); border:1px solid var(--line); color:var(--cyan);
+    font-family:'JetBrains Mono',monospace; margin:2px;
+  }
+
+  /* ── Path panel ── */
+  #path-panel h3 {
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:12px;
+  }
+  .path-step {
+    display:flex; align-items:center; gap:8px; padding:6px 0;
+    border-bottom:1px solid rgba(30,42,64,.6); font-size:13px;
+  }
+  .path-step .ps-id { font-family:'JetBrains Mono',monospace; color:var(--crit); font-weight:700; min-width:80px; }
+  .path-step .ps-name { color:var(--muted); font-size:12px; flex:1; }
+  .path-step .ps-w { font-family:'JetBrains Mono',monospace; color:var(--amber); font-size:12px; }
+
+  /* ── Legend ── */
+  #legend h3 {
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:10px;
+  }
+  .leg-item {
+    display:flex; align-items:center; gap:8px; font-size:12px;
+    color:var(--muted); margin-bottom:6px;
+  }
+  .dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position:fixed; z-index:500; pointer-events:none;
+    background:var(--panel2); border:1px solid var(--line);
+    border-radius:8px; padding:10px 14px;
+    font-size:13px; max-width:240px;
+    box-shadow:0 8px 32px rgba(0,0,0,.5);
+    display:none;
+  }
+  #tooltip .t-id { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:var(--cyan); }
+  #tooltip .t-name { color:var(--txt); font-size:13px; margin:3px 0 6px; }
+  #tooltip .t-row { display:flex; justify-content:space-between; gap:16px; font-size:12px; color:var(--muted); }
+  #tooltip .t-row span { font-family:'JetBrains Mono',monospace; color:var(--amber); }
+
+  /* ── Placeholder ── */
+  #info-placeholder { color:var(--muted); font-size:14px; text-align:center; padding:20px 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <h1>&#128202; Grafo <span class="accent">Interactivo</span> — SolarWinds Compromise</h1>
+  <span class="badge red">71 técnicas reales</span>
+  <span class="badge cyan">73 nodos</span>
+  <span class="badge green">MITRE ATT&CK</span>
+  <div class="spacer"></div>
+  <span class="hint">&#128269; Rueda = zoom &nbsp;|&nbsp; Drag = mover &nbsp;|&nbsp; Click nodo = info</span>
+</div>
+
+<!-- CONTROLS -->
+<div id="controls">
+  <button id="btn-reset">&#8635; Reset zoom</button>
+  <button id="btn-crit" class="active">Ruta crítica</button>
+  <button id="btn-all">Todas aristas</button>
+  <div class="sep"></div>
+  <label>Opacidad aristas <input type="range" id="edge-opacity" min="5" max="100" value="35"></label>
+  <div class="sep"></div>
+  <label>Tamaño nodos <input type="range" id="node-size" min="50" max="200" value="100"></label>
+</div>
+
+<!-- CANVAS -->
+<div id="canvas">
+  <svg id="svg">
+    <defs>
+      <marker id="arrow-crit" markerWidth="8" markerHeight="8" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#ff3b5c" opacity="0.9"/>
+      </marker>
+      <marker id="arrow-norm" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="#1e2a40" opacity="0.6"/>
+      </marker>
+    </defs>
+    <g id="graph-root">
+      <g id="layer-edges"></g>
+      <g id="layer-nodes"></g>
+      <g id="layer-labels"></g>
+      <g id="layer-tactic-labels"></g>
+    </g>
+  </svg>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+
+  <!-- Info del nodo seleccionado -->
+  <div id="info">
+    <div class="info-id" id="info-id">—</div>
+    <div class="info-name" id="info-name">—</div>
+    <div class="info-row"><span class="k">Peso (w)</span><span class="v amber" id="info-weight">—</span></div>
+    <div class="info-row"><span class="k">Fuente peso</span><span class="v" id="info-wsrc" style="font-size:11px;text-align:right;max-width:170px">—</span></div>
+    <div class="info-row"><span class="k">FW-Betweenness</span><span class="v" id="info-bw">—</span></div>
+    <div class="info-row"><span class="k">In-degree</span><span class="v" id="info-in">—</span></div>
+    <div class="info-row"><span class="k">Out-degree</span><span class="v" id="info-out">—</span></div>
+    <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <span class="k">Tácticas</span>
+      <div id="info-tacs"></div>
+    </div>
+  </div>
+  <div id="info-placeholder">&#128199; Click en un nodo para ver detalles</div>
+
+  <!-- Ruta crítica -->
+  <div id="path-panel">
+    <h3>&#128308; Ruta crítica — Dijkstra (costo=1.635)</h3>
+  </div>
+
+  <!-- Leyenda -->
+  <div id="legend">
+    <h3>&#127912; Leyenda por táctica</h3>
+    <div class="leg-item"><span class="dot" style="background:#6366f1"></span>Reconnaissance</div>
+<div class="leg-item"><span class="dot" style="background:#8b5cf6"></span>Resource Development</div>
+<div class="leg-item"><span class="dot" style="background:#ff8c42"></span>Initial Access</div>
+<div class="leg-item"><span class="dot" style="background:#ffd23f"></span>Execution</div>
+<div class="leg-item"><span class="dot" style="background:#ff3b5c"></span>Persistence</div>
+<div class="leg-item"><span class="dot" style="background:#c084fc"></span>Privilege Escalation</div>
+<div class="leg-item"><span class="dot" style="background:#22d3ee"></span>Defense Impairment</div>
+<div class="leg-item"><span class="dot" style="background:#5ad1a0"></span>Stealth</div>
+<div class="leg-item"><span class="dot" style="background:#f472b6"></span>Credential Access</div>
+<div class="leg-item"><span class="dot" style="background:#3fb6ff"></span>Discovery</div>
+<div class="leg-item"><span class="dot" style="background:#fb923c"></span>Lateral Movement</div>
+<div class="leg-item"><span class="dot" style="background:#a3e635"></span>Collection</div>
+<div class="leg-item"><span class="dot" style="background:#e879f9"></span>Command And Control</div>
+<div class="leg-item"><span class="dot" style="background:#f87171"></span>Exfiltration</div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
+      <div class="leg-item"><span style="width:28px;height:3px;background:#ff3b5c;border-radius:2px;display:inline-block"></span>&nbsp;Arista ruta crítica</div>
+      <div class="leg-item"><span style="width:28px;height:1px;background:#1e2a40;border-radius:2px;display:inline-block"></span>&nbsp;Arista alternativa</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOOLTIP -->
+<div id="tooltip">
+  <div class="t-id" id="tt-id"></div>
+  <div class="t-name" id="tt-name"></div>
+  <div class="t-row"><span>peso</span><span id="tt-w"></span></div>
+  <div class="t-row"><span>FW-betw.</span><span id="tt-bw"></span></div>
+</div>
+
+<script>
+const NODES = [{"id": "ATTACKER", "name": "Atacante externo", "label": "ATTACKER", "weight": 0.0, "weight_source": "", "tactics": ["entry"], "fw_betweenness": 0, "in_degree": 0, "out_degree": 0, "critical": true, "color": "#5ad1a0", "size": 22, "x": 0, "y": 0}, {"id": "T1078", "name": "Valid Accounts", "label": "T1078", "weight": 0.05, "weight_source": "CVE:CVE-2021-21985(CVSS=9.8)+mit=8", "tactics": ["stealth", "persistence", "privilege-escalation", "initial-access"], "fw_betweenness": 1218, "in_degree": 24, "out_degree": 27, "critical": true, "color": "#ff3b5c", "size": 18, "x": 1200, "y": -330.0}, {"id": "T1558.003", "name": "Kerberoasting", "label": "T1558.003", "weight": 0.1, "weight_source": "CVE:CVE-2014-6324(CVSS=9.0)+mit=3", "tactics": ["credential-access"], "fw_betweenness": 1044, "in_degree": 12, "out_degree": 10, "critical": true, "color": "#ff3b5c", "size": 18, "x": 1350, "y": -210.0}, {"id": "T1087", "name": "Account Discovery", "label": "T1087", "weight": 0.75, "weight_source": "mitigaciones=2/8", "tactics": ["discovery"], "fw_betweenness": 836, "in_degree": 8, "out_degree": 6, "critical": true, "color": "#ff3b5c", "size": 18, "x": 1500, "y": -270.0}, {"id": "T1482", "name": "Domain Trust Discovery", "label": "T1482", "weight": 0.75, "weight_source": "mitigaciones=2/8", "tactics": ["discovery"], "fw_betweenness": 836, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 12.016, "x": 1500, "y": -210.0}, {"id": "T1021.001", "name": "Remote Desktop Protocol", "label": "T1021.001", "weight": 0.05, "weight_source": "CVE:CVE-2021-26855(CVSS=9.8)+mit=8", "tactics": ["lateral-movement"], "fw_betweenness": 702, "in_degree": 10, "out_degree": 6, "critical": true, "color": "#ff3b5c", "size": 18, "x": 1650, "y": -150.0}, {"id": "T1213", "name": "Data from Information Repositories", "label": "T1213", "weight": 0.125, "weight_source": "mitigaciones=7/8", "tactics": ["collection"], "fw_betweenness": 420, "in_degree": 6, "out_degree": 5, "critical": true, "color": "#ff3b5c", "size": 18, "x": 1800, "y": -150.0}, {"id": "T1059.001", "name": "PowerShell", "label": "T1059.001", "weight": 0.05, "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=5", "tactics": ["execution"], "fw_betweenness": 194, "in_degree": 8, "out_degree": 11, "critical": false, "color": "#ffd23f", "size": 8.164, "x": 600, "y": -120.0}, {"id": "T1685", "name": "Disable or Modify Tools", "label": "T1685", "weight": 0.125, "weight_source": "mitigaciones=7/8", "tactics": ["defense-impairment"], "fw_betweenness": 184, "in_degree": 11, "out_degree": 12, "critical": false, "color": "#22d3ee", "size": 8.104, "x": 1050, "y": -120.0}, {"id": "T1071.001", "name": "Web Protocols", "label": "T1071.001", "weight": 0.05, "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=2", "tactics": ["command-and-control"], "fw_betweenness": 132, "in_degree": 6, "out_degree": 1, "critical": true, "color": "#ff3b5c", "size": 18, "x": 1950, "y": -120.0}, {"id": "T1133", "name": "External Remote Services", "label": "T1133", "weight": 0.05, "weight_source": "CVE:CVE-2018-13379(CVSS=9.8)+mit=5", "tactics": ["persistence", "initial-access"], "fw_betweenness": 78, "in_degree": 9, "out_degree": 15, "critical": false, "color": "#ff3b5c", "size": 7.468, "x": 750, "y": -120.0}, {"id": "T1048.002", "name": "Exfiltration Over Asymmetric Encrypted Non-C2 Protocol", "label": "T1048.002", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["exfiltration"], "fw_betweenness": 71, "in_degree": 5, "out_degree": 1, "critical": true, "color": "#ff3b5c", "size": 18, "x": 2100, "y": 0.0}, {"id": "T1587.001", "name": "Malware", "label": "T1587.001", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["resource-development"], "fw_betweenness": 68, "in_degree": 2, "out_degree": 8, "critical": false, "color": "#8b5cf6", "size": 7.408, "x": 300, "y": -60.0}, {"id": "T1583.001", "name": "Domains", "label": "T1583.001", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["resource-development"], "fw_betweenness": 68, "in_degree": 2, "out_degree": 8, "critical": false, "color": "#8b5cf6", "size": 7.408, "x": 300, "y": 0.0}, {"id": "T1584.001", "name": "Domains", "label": "T1584.001", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["resource-development"], "fw_betweenness": 68, "in_degree": 2, "out_degree": 8, "critical": false, "color": "#8b5cf6", "size": 7.408, "x": 300, "y": 60.0}, {"id": "T1195.002", "name": "Compromise Software Supply Chain", "label": "T1195.002", "weight": 0.05, "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=2", "tactics": ["initial-access"], "fw_betweenness": 25, "in_degree": 4, "out_degree": 5, "critical": false, "color": "#ff8c42", "size": 7.15, "x": 450, "y": -60.0}, {"id": "T1190", "name": "Exploit Public-Facing Application", "label": "T1190", "weight": 0.05, "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=8", "tactics": ["initial-access"], "fw_betweenness": 25, "in_degree": 4, "out_degree": 5, "critical": false, "color": "#ff8c42", "size": 7.15, "x": 450, "y": 0.0}, {"id": "T1087.002", "name": "Domain Account", "label": "T1087.002", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["discovery"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 7, "x": 1500, "y": -150.0}, {"id": "T1070.006", "name": "Timestomp", "label": "T1070.006", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["stealth"], "fw_betweenness": 0, "in_degree": 5, "out_degree": 8, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": -270.0}, {"id": "T1021.006", "name": "Windows Remote Management", "label": "T1021.006", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["lateral-movement"], "fw_betweenness": 0, "in_degree": 10, "out_degree": 6, "critical": false, "color": "#fb923c", "size": 7, "x": 1650, "y": -90.0}, {"id": "T1074.002", "name": "Remote Data Staging", "label": "T1074.002", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["collection"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 5, "critical": false, "color": "#a3e635", "size": 7, "x": 1800, "y": -90.0}, {"id": "T1098.003", "name": "Additional Cloud Roles", "label": "T1098.003", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["persistence", "privilege-escalation"], "fw_betweenness": 0, "in_degree": 15, "out_degree": 15, "critical": false, "color": "#ff3b5c", "size": 7, "x": 750, "y": -60.0}, {"id": "T1484.002", "name": "Trust Modification", "label": "T1484.002", "weight": 0.75, "weight_source": "mitigaciones=2/8", "tactics": ["defense-impairment", "privilege-escalation"], "fw_betweenness": 0, "in_degree": 12, "out_degree": 17, "critical": false, "color": "#22d3ee", "size": 7, "x": 1050, "y": -60.0}, {"id": "T1021.002", "name": "SMB/Windows Admin Shares", "label": "T1021.002", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["lateral-movement"], "fw_betweenness": 0, "in_degree": 10, "out_degree": 6, "critical": false, "color": "#fb923c", "size": 7, "x": 1650, "y": -30.0}, {"id": "T1053.005", "name": "Scheduled Task", "label": "T1053.005", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["execution", "persistence", "privilege-escalation"], "fw_betweenness": 0, "in_degree": 18, "out_degree": 16, "critical": false, "color": "#ffd23f", "size": 7, "x": 600, "y": -60.0}, {"id": "T1552.004", "name": "Private Keys", "label": "T1552.004", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["credential-access"], "fw_betweenness": 0, "in_degree": 12, "out_degree": 10, "critical": false, "color": "#f472b6", "size": 7, "x": 1350, "y": -150.0}, {"id": "T1098.002", "name": "Additional Email Delegate Permissions", "label": "T1098.002", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["persistence", "privilege-escalation"], "fw_betweenness": 0, "in_degree": 15, "out_degree": 15, "critical": false, "color": "#ff3b5c", "size": 7, "x": 750, "y": 0.0}, {"id": "T1105", "name": "Ingress Tool Transfer", "label": "T1105", "weight": 0.75, "weight_source": "mitigaciones=2/8", "tactics": ["command-and-control"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 1, "critical": false, "color": "#e879f9", "size": 7, "x": 1950, "y": -60.0}, {"id": "T1047", "name": "Windows Management Instrumentation", "label": "T1047", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["execution"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 11, "critical": false, "color": "#ffd23f", "size": 7, "x": 600, "y": 0.0}, {"id": "T1665", "name": "Hide Infrastructure", "label": "T1665", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["command-and-control"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 1, "critical": false, "color": "#e879f9", "size": 7, "x": 1950, "y": 0.0}, {"id": "T1005", "name": "Data from Local System", "label": "T1005", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["collection"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 5, "critical": false, "color": "#a3e635", "size": 7, "x": 1800, "y": -30.0}, {"id": "T1114.002", "name": "Remote Email Collection", "label": "T1114.002", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["collection"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 5, "critical": false, "color": "#a3e635", "size": 7, "x": 1800, "y": 30.0}, {"id": "T1069.002", "name": "Domain Groups", "label": "T1069.002", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["discovery"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 7, "x": 1500, "y": -90.0}, {"id": "T1083", "name": "File and Directory Discovery", "label": "T1083", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["discovery"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 7, "x": 1500, "y": -30.0}, {"id": "T1070", "name": "Indicator Removal", "label": "T1070", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["stealth"], "fw_betweenness": 0, "in_degree": 5, "out_degree": 8, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": -210.0}, {"id": "T1098.005", "name": "Device Registration", "label": "T1098.005", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["persistence", "privilege-escalation"], "fw_betweenness": 0, "in_degree": 15, "out_degree": 15, "critical": false, "color": "#ff3b5c", "size": 7, "x": 750, "y": 60.0}, {"id": "T1090.001", "name": "Internal Proxy", "label": "T1090.001", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["command-and-control"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 1, "critical": false, "color": "#e879f9", "size": 7, "x": 1950, "y": 60.0}, {"id": "T1059.003", "name": "Windows Command Shell", "label": "T1059.003", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["execution"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 11, "critical": false, "color": "#ffd23f", "size": 7, "x": 600, "y": 60.0}, {"id": "T1018", "name": "Remote System Discovery", "label": "T1018", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["discovery"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 7, "x": 1500, "y": 30.0}, {"id": "T1057", "name": "Process Discovery", "label": "T1057", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["discovery"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 7, "x": 1500, "y": 90.0}, {"id": "T1568", "name": "Dynamic Resolution", "label": "T1568", "weight": 0.75, "weight_source": "mitigaciones=2/8", "tactics": ["command-and-control"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 1, "critical": false, "color": "#e879f9", "size": 7, "x": 1950, "y": 120.0}, {"id": "T1078.003", "name": "Local Accounts", "label": "T1078.003", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["stealth", "persistence", "privilege-escalation", "initial-access"], "fw_betweenness": 0, "in_degree": 24, "out_degree": 27, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": -150.0}, {"id": "T1589.001", "name": "Credentials", "label": "T1589.001", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["reconnaissance"], "fw_betweenness": 0, "in_degree": 1, "out_degree": 3, "critical": false, "color": "#6366f1", "size": 7, "x": 150, "y": 0.0}, {"id": "T1606.002", "name": "SAML Tokens", "label": "T1606.002", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["credential-access"], "fw_betweenness": 0, "in_degree": 12, "out_degree": 10, "critical": false, "color": "#f472b6", "size": 7, "x": 1350, "y": -90.0}, {"id": "T1550.004", "name": "Web Session Cookie", "label": "T1550.004", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["lateral-movement"], "fw_betweenness": 0, "in_degree": 10, "out_degree": 6, "critical": false, "color": "#fb923c", "size": 7, "x": 1650, "y": 30.0}, {"id": "T1036.004", "name": "Masquerade Task or Service", "label": "T1036.004", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["stealth"], "fw_betweenness": 0, "in_degree": 5, "out_degree": 8, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": -90.0}, {"id": "T1539", "name": "Steal Web Session Cookie", "label": "T1539", "weight": 0.25, "weight_source": "mitigaciones=6/8", "tactics": ["credential-access"], "fw_betweenness": 0, "in_degree": 12, "out_degree": 10, "critical": false, "color": "#f472b6", "size": 7, "x": 1350, "y": -30.0}, {"id": "T1140", "name": "Deobfuscate/Decode Files or Information", "label": "T1140", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["stealth"], "fw_betweenness": 0, "in_degree": 5, "out_degree": 8, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": -30.0}, {"id": "T1218.011", "name": "Rundll32", "label": "T1218.011", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["stealth"], "fw_betweenness": 0, "in_degree": 5, "out_degree": 8, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": 30.0}, {"id": "T1680", "name": "Local Storage Discovery", "label": "T1680", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["discovery"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 7, "x": 1500, "y": 150.0}, {"id": "T1685.001", "name": "Disable or Modify Windows Event Log", "label": "T1685.001", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["defense-impairment"], "fw_betweenness": 0, "in_degree": 11, "out_degree": 12, "critical": false, "color": "#22d3ee", "size": 7, "x": 1050, "y": 0.0}, {"id": "T1078.004", "name": "Cloud Accounts", "label": "T1078.004", "weight": 0.125, "weight_source": "mitigaciones=7/8", "tactics": ["stealth", "persistence", "privilege-escalation", "initial-access"], "fw_betweenness": 0, "in_degree": 24, "out_degree": 27, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": 90.0}, {"id": "T1003.006", "name": "DCSync", "label": "T1003.006", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["credential-access"], "fw_betweenness": 0, "in_degree": 12, "out_degree": 10, "critical": false, "color": "#f472b6", "size": 7, "x": 1350, "y": 30.0}, {"id": "T1070.004", "name": "File Deletion", "label": "T1070.004", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["stealth"], "fw_betweenness": 0, "in_degree": 5, "out_degree": 8, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": 150.0}, {"id": "T1555", "name": "Credentials from Password Stores", "label": "T1555", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["credential-access"], "fw_betweenness": 0, "in_degree": 12, "out_degree": 10, "critical": false, "color": "#f472b6", "size": 7, "x": 1350, "y": 90.0}, {"id": "T1555.003", "name": "Credentials from Web Browsers", "label": "T1555.003", "weight": 0.375, "weight_source": "mitigaciones=5/8", "tactics": ["credential-access"], "fw_betweenness": 0, "in_degree": 12, "out_degree": 10, "critical": false, "color": "#f472b6", "size": 7, "x": 1350, "y": 150.0}, {"id": "T1098.001", "name": "Additional Cloud Credentials", "label": "T1098.001", "weight": 0.375, "weight_source": "mitigaciones=5/8", "tactics": ["persistence", "privilege-escalation"], "fw_betweenness": 0, "in_degree": 15, "out_degree": 15, "critical": false, "color": "#ff3b5c", "size": 7, "x": 750, "y": 120.0}, {"id": "T1036.005", "name": "Match Legitimate Resource Name or Location", "label": "T1036.005", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["stealth"], "fw_betweenness": 0, "in_degree": 5, "out_degree": 8, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": 210.0}, {"id": "T1550", "name": "Use Alternate Authentication Material", "label": "T1550", "weight": 0.125, "weight_source": "mitigaciones=7/8", "tactics": ["lateral-movement"], "fw_betweenness": 0, "in_degree": 10, "out_degree": 6, "critical": false, "color": "#fb923c", "size": 7, "x": 1650, "y": 90.0}, {"id": "T1550.001", "name": "Application Access Token", "label": "T1550.001", "weight": 0.375, "weight_source": "mitigaciones=5/8", "tactics": ["lateral-movement"], "fw_betweenness": 0, "in_degree": 10, "out_degree": 6, "critical": false, "color": "#fb923c", "size": 7, "x": 1650, "y": 150.0}, {"id": "T1070.008", "name": "Clear Mailbox Data", "label": "T1070.008", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["stealth"], "fw_betweenness": 0, "in_degree": 5, "out_degree": 8, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": 270.0}, {"id": "T1213.003", "name": "Code Repositories", "label": "T1213.003", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["collection"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 5, "critical": false, "color": "#a3e635", "size": 7, "x": 1800, "y": 90.0}, {"id": "T1199", "name": "Trusted Relationship", "label": "T1199", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["initial-access"], "fw_betweenness": 0, "in_degree": 4, "out_degree": 5, "critical": false, "color": "#ff8c42", "size": 7, "x": 450, "y": 60.0}, {"id": "T1606.001", "name": "Web Cookies", "label": "T1606.001", "weight": 0.75, "weight_source": "mitigaciones=2/8", "tactics": ["credential-access"], "fw_betweenness": 0, "in_degree": 12, "out_degree": 10, "critical": false, "color": "#f472b6", "size": 7, "x": 1350, "y": 210.0}, {"id": "T1069", "name": "Permission Groups Discovery", "label": "T1069", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["discovery"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 7, "x": 1500, "y": 210.0}, {"id": "T1078.002", "name": "Domain Accounts", "label": "T1078.002", "weight": 0.375, "weight_source": "mitigaciones=5/8", "tactics": ["stealth", "persistence", "privilege-escalation", "initial-access"], "fw_betweenness": 0, "in_degree": 24, "out_degree": 27, "critical": false, "color": "#5ad1a0", "size": 7, "x": 1200, "y": 330.0}, {"id": "T1059.005", "name": "Visual Basic", "label": "T1059.005", "weight": 0.375, "weight_source": "mitigaciones=5/8", "tactics": ["execution"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 11, "critical": false, "color": "#ffd23f", "size": 7, "x": 600, "y": 120.0}, {"id": "T1546.003", "name": "Windows Management Instrumentation Event Subscription", "label": "T1546.003", "weight": 0.625, "weight_source": "mitigaciones=3/8", "tactics": ["privilege-escalation", "persistence"], "fw_betweenness": 0, "in_degree": 15, "out_degree": 15, "critical": false, "color": "#c084fc", "size": 7, "x": 900, "y": 0.0}, {"id": "T1686", "name": "Disable or Modify System Firewall", "label": "T1686", "weight": 0.5, "weight_source": "mitigaciones=4/8", "tactics": ["defense-impairment"], "fw_betweenness": 0, "in_degree": 11, "out_degree": 12, "critical": false, "color": "#22d3ee", "size": 7, "x": 1050, "y": 60.0}, {"id": "T1560.001", "name": "Archive via Utility", "label": "T1560.001", "weight": 0.875, "weight_source": "mitigaciones=1/8", "tactics": ["collection"], "fw_betweenness": 0, "in_degree": 6, "out_degree": 5, "critical": false, "color": "#a3e635", "size": 7, "x": 1800, "y": 150.0}, {"id": "T1016.001", "name": "Internet Connection Discovery", "label": "T1016.001", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["discovery"], "fw_betweenness": 0, "in_degree": 8, "out_degree": 6, "critical": false, "color": "#3fb6ff", "size": 7, "x": 1500, "y": 270.0}, {"id": "T1553.002", "name": "Code Signing", "label": "T1553.002", "weight": 1.0, "weight_source": "mitigaciones=0/8", "tactics": ["defense-impairment"], "fw_betweenness": 0, "in_degree": 11, "out_degree": 12, "critical": false, "color": "#22d3ee", "size": 7, "x": 1050, "y": 120.0}, {"id": "IMPACT", "name": "Impacto logrado", "label": "IMPACT", "weight": 0.0, "weight_source": "", "tactics": ["target"], "fw_betweenness": 0, "in_degree": 0, "out_degree": 0, "critical": true, "color": "#ff3b5c", "size": 22, "x": 2250, "y": 0}];
+const EDGES = [{"source": "ATTACKER", "target": "T1589.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "ATTACKER", "target": "T1587.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "ATTACKER", "target": "T1583.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "ATTACKER", "target": "T1584.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "ATTACKER", "target": "T1195.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "ATTACKER", "target": "T1190", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "ATTACKER", "target": "T1199", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1048.002", "target": "IMPACT", "critical": true, "color": "#ff3b5c", "width": 3, "opacity": 0.95}, {"source": "T1589.001", "target": "T1587.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1589.001", "target": "T1583.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1589.001", "target": "T1584.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1587.001", "target": "T1195.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1587.001", "target": "T1190", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1587.001", "target": "T1199", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1583.001", "target": "T1195.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1583.001", "target": "T1190", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1583.001", "target": "T1199", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1584.001", "target": "T1195.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1584.001", "target": "T1190", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1584.001", "target": "T1199", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1195.002", "target": "T1059.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1195.002", "target": "T1053.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1195.002", "target": "T1047", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1195.002", "target": "T1059.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1195.002", "target": "T1059.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1190", "target": "T1059.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1190", "target": "T1053.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1190", "target": "T1047", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1190", "target": "T1059.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1190", "target": "T1059.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1199", "target": "T1059.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1199", "target": "T1053.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1199", "target": "T1047", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1199", "target": "T1059.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1199", "target": "T1059.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.001", "target": "T1133", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.001", "target": "T1098.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.001", "target": "T1098.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.001", "target": "T1098.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.001", "target": "T1098.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1053.005", "target": "T1133", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1053.005", "target": "T1098.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1053.005", "target": "T1098.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1053.005", "target": "T1098.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1053.005", "target": "T1098.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1047", "target": "T1133", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1047", "target": "T1098.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1047", "target": "T1098.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1047", "target": "T1098.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1047", "target": "T1098.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.003", "target": "T1133", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.003", "target": "T1098.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.003", "target": "T1098.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.003", "target": "T1098.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.003", "target": "T1098.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.005", "target": "T1133", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.005", "target": "T1098.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.005", "target": "T1098.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.005", "target": "T1098.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1059.005", "target": "T1098.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1133", "target": "T1546.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1098.003", "target": "T1546.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1098.002", "target": "T1546.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1098.005", "target": "T1546.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1098.001", "target": "T1546.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1546.003", "target": "T1685", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1546.003", "target": "T1484.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1546.003", "target": "T1685.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1546.003", "target": "T1686", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1546.003", "target": "T1553.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1078", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1070.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1070", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1078.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1036.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1140", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1218.011", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1078.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1070.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1036.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1070.008", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685", "target": "T1078.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1078", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1070.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1070", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1078.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1036.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1140", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1218.011", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1078.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1070.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1036.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1070.008", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1484.002", "target": "T1078.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1078", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1070.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1070", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1078.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1036.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1140", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1218.011", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1078.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1070.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1036.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1070.008", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1685.001", "target": "T1078.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1078", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1070.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1070", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1078.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1036.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1140", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1218.011", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1078.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1070.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1036.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1070.008", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1686", "target": "T1078.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1078", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1070.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1070", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1078.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1036.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1140", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1218.011", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1078.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1070.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1036.005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1070.008", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1553.002", "target": "T1078.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078", "target": "T1558.003", "critical": true, "color": "#ff3b5c", "width": 3, "opacity": 0.95}, {"source": "T1078", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.006", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.006", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.006", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.006", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.006", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.006", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.006", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.006", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.003", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.003", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.003", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.003", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.003", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.003", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.003", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.003", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.004", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.004", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.004", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.004", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.004", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.004", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.004", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.004", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1140", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1140", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1140", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1140", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1140", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1140", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1140", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1140", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1218.011", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1218.011", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1218.011", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1218.011", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1218.011", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1218.011", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1218.011", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1218.011", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.004", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.004", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.004", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.004", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.004", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.004", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.004", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.004", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.004", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.004", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.004", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.004", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.004", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.004", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.004", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.004", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.005", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.005", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.005", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.005", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.005", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.005", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.005", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1036.005", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.008", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.008", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.008", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.008", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.008", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.008", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.008", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1070.008", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.002", "target": "T1558.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.002", "target": "T1552.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.002", "target": "T1606.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.002", "target": "T1539", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.002", "target": "T1003.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.002", "target": "T1555", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.002", "target": "T1555.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1078.002", "target": "T1606.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1087", "critical": true, "color": "#ff3b5c", "width": 3, "opacity": 0.95}, {"source": "T1558.003", "target": "T1482", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1087.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1069.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1083", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1018", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1057", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1680", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1069", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1558.003", "target": "T1016.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1087", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1482", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1087.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1069.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1083", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1018", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1057", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1680", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1069", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1552.004", "target": "T1016.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1087", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1482", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1087.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1069.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1083", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1018", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1057", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1680", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1069", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.002", "target": "T1016.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1087", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1482", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1087.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1069.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1083", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1018", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1057", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1680", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1069", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1539", "target": "T1016.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1087", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1482", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1087.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1069.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1083", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1018", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1057", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1680", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1069", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1003.006", "target": "T1016.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1087", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1482", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1087.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1069.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1083", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1018", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1057", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1680", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1069", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555", "target": "T1016.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1087", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1482", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1087.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1069.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1083", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1018", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1057", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1680", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1069", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1555.003", "target": "T1016.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1087", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1482", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1087.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1069.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1083", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1018", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1057", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1680", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1069", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1606.001", "target": "T1016.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087", "target": "T1021.001", "critical": true, "color": "#ff3b5c", "width": 3, "opacity": 0.95}, {"source": "T1087", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1482", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1482", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1482", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1482", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1482", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1482", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087.002", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087.002", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087.002", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087.002", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087.002", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1087.002", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069.002", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069.002", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069.002", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069.002", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069.002", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069.002", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1083", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1083", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1083", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1083", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1083", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1083", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1018", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1018", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1018", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1018", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1018", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1018", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1057", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1057", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1057", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1057", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1057", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1057", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1680", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1680", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1680", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1680", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1680", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1680", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1069", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1016.001", "target": "T1021.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1016.001", "target": "T1021.006", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1016.001", "target": "T1021.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1016.001", "target": "T1550.004", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1016.001", "target": "T1550", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1016.001", "target": "T1550.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.001", "target": "T1213", "critical": true, "color": "#ff3b5c", "width": 3, "opacity": 0.95}, {"source": "T1021.001", "target": "T1074.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.001", "target": "T1005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.001", "target": "T1114.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.001", "target": "T1213.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.001", "target": "T1560.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.006", "target": "T1213", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.006", "target": "T1074.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.006", "target": "T1005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.006", "target": "T1114.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.006", "target": "T1213.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.006", "target": "T1560.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.002", "target": "T1213", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.002", "target": "T1074.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.002", "target": "T1005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.002", "target": "T1114.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.002", "target": "T1213.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1021.002", "target": "T1560.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.004", "target": "T1213", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.004", "target": "T1074.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.004", "target": "T1005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.004", "target": "T1114.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.004", "target": "T1213.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.004", "target": "T1560.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550", "target": "T1213", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550", "target": "T1074.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550", "target": "T1005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550", "target": "T1114.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550", "target": "T1213.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550", "target": "T1560.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.001", "target": "T1213", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.001", "target": "T1074.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.001", "target": "T1005", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.001", "target": "T1114.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.001", "target": "T1213.003", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1550.001", "target": "T1560.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213", "target": "T1071.001", "critical": true, "color": "#ff3b5c", "width": 3, "opacity": 0.95}, {"source": "T1213", "target": "T1105", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213", "target": "T1665", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213", "target": "T1090.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213", "target": "T1568", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1074.002", "target": "T1071.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1074.002", "target": "T1105", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1074.002", "target": "T1665", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1074.002", "target": "T1090.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1074.002", "target": "T1568", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1005", "target": "T1071.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1005", "target": "T1105", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1005", "target": "T1665", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1005", "target": "T1090.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1005", "target": "T1568", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1114.002", "target": "T1071.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1114.002", "target": "T1105", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1114.002", "target": "T1665", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1114.002", "target": "T1090.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1114.002", "target": "T1568", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213.003", "target": "T1071.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213.003", "target": "T1105", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213.003", "target": "T1665", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213.003", "target": "T1090.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1213.003", "target": "T1568", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1560.001", "target": "T1071.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1560.001", "target": "T1105", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1560.001", "target": "T1665", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1560.001", "target": "T1090.001", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1560.001", "target": "T1568", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1071.001", "target": "T1048.002", "critical": true, "color": "#ff3b5c", "width": 3, "opacity": 0.95}, {"source": "T1105", "target": "T1048.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1665", "target": "T1048.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1090.001", "target": "T1048.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}, {"source": "T1568", "target": "T1048.002", "critical": false, "color": "#1e2a40", "width": 0.8, "opacity": 0.35}];
+const CRITICAL_PATH = ["ATTACKER", "T1078", "T1558.003", "T1087", "T1021.001", "T1213", "T1071.001", "T1048.002", "IMPACT"];
+
+// ── Ruta crítica en sidebar ──────────────────────────────────────────────────
+const pathPanel = document.getElementById('path-panel');
+// Buscar datos de ruta de nodes
+const nodeIndex = {};
+NODES.forEach(n => nodeIndex[n.id] = n);
+
+CRITICAL_PATH.forEach((nid, i) => {
+  const nd = nodeIndex[nid];
+  if (!nd) return;
+  const div = document.createElement('div');
+  div.className = 'path-step';
+  const distAcum = nd.id === 'ATTACKER' ? '0.000' :
+                   nd.id === 'IMPACT'   ? '1.635' : '';
+  div.innerHTML = `
+    <span class="ps-id">${nd.label || nd.id}</span>
+    <span class="ps-name">${nd.name}</span>
+    <span class="ps-w">w=${nd.weight.toFixed(3)}</span>
+  `;
+  pathPanel.appendChild(div);
+});
+
+// ── D3 Setup ─────────────────────────────────────────────────────────────────
+const svg    = d3.select('#svg');
+const root   = d3.select('#graph-root');
+const eLayer = d3.select('#layer-edges');
+const nLayer = d3.select('#layer-nodes');
+const lLayer = d3.select('#layer-labels');
+const tLayer = d3.select('#layer-tactic-labels');
+
+// Zoom
+const zoom = d3.zoom()
+  .scaleExtent([0.05, 6])
+  .on('zoom', (e) => root.attr('transform', e.transform));
+svg.call(zoom);
+
+// ── Dibujar aristas ───────────────────────────────────────────────────────────
+let showAllEdges = false;
+
+function getEdges() {
+  return showAllEdges ? EDGES : EDGES.filter(e => e.critical);
+}
+
+// Líneas
+const line = eLayer.selectAll('line')
+  .data(EDGES)
+  .join('line')
+  .attr('x1', e => nodeIndex[e.source]?.x ?? 0)
+  .attr('y1', e => nodeIndex[e.source]?.y ?? 0)
+  .attr('x2', d => {
+    const src = nodeIndex[d.source];
+    const tgt = nodeIndex[d.target];
+    if (!src || !tgt) return 0;
+    const dx = tgt.x - src.x, dy = tgt.y - src.y;
+    const len = Math.sqrt(dx*dx + dy*dy) || 1;
+    const r = (tgt.size || 10) + 3;
+    return tgt.x - dx/len*r;
+  })
+  .attr('y2', d => {
+    const src = nodeIndex[d.source];
+    const tgt = nodeIndex[d.target];
+    if (!src || !tgt) return 0;
+    const dx = tgt.x - src.x, dy = tgt.y - src.y;
+    const len = Math.sqrt(dx*dx + dy*dy) || 1;
+    const r = (tgt.size || 10) + 3;
+    return tgt.y - dy/len*r;
+  })
+  .attr('stroke', e => e.color)
+  .attr('stroke-width', e => e.width)
+  .attr('stroke-opacity', e => e.critical ? e.opacity : 0.35)
+  .attr('marker-end', e => e.critical ? 'url(#arrow-crit)' : 'url(#arrow-norm)')
+  .style('display', e => (showAllEdges || e.critical) ? null : 'none');
+
+// ── Dibujar nodos ─────────────────────────────────────────────────────────────
+let sizeMultiplier = 1.0;
+
+const circle = nLayer.selectAll('circle')
+  .data(NODES)
+  .join('circle')
+  .attr('cx', d => d.x)
+  .attr('cy', d => d.y)
+  .attr('r', d => d.size * sizeMultiplier)
+  .attr('fill', d => d.color)
+  .attr('fill-opacity', d => d.critical ? 0.95 : 0.7)
+  .attr('stroke', d => d.critical ? '#ffffff' : 'none')
+  .attr('stroke-width', d => d.critical ? 1.5 : 0)
+  .style('cursor', 'pointer')
+  .on('mouseover', showTooltip)
+  .on('mousemove', moveTooltip)
+  .on('mouseout', hideTooltip)
+  .on('click', selectNode);
+
+// ── Labels ────────────────────────────────────────────────────────────────────
+const critSet = new Set(CRITICAL_PATH);
+
+const label = lLayer.selectAll('text')
+  .data(NODES.filter(n => critSet.has(n.id) || n.id === 'ATTACKER' || n.id === 'IMPACT'))
+  .join('text')
+  .attr('x', d => d.x)
+  .attr('y', d => d.y - d.size * sizeMultiplier - 4)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'JetBrains Mono, monospace')
+  .attr('font-size', 11)
+  .attr('font-weight', 'bold')
+  .attr('fill', '#e8edf6')
+  .text(d => d.label);
+
+// ── Etiquetas de táctica (fila superior) ─────────────────────────────────────
+const TACTIC_ORDER = ["reconnaissance", "resource-development", "initial-access", "execution", "persistence", "privilege-escalation", "defense-impairment", "stealth", "credential-access", "discovery", "lateral-movement", "collection", "command-and-control", "exfiltration"];
+const TACTIC_COLORS_JS = {"reconnaissance": "#6366f1", "resource-development": "#8b5cf6", "initial-access": "#ff8c42", "execution": "#ffd23f", "persistence": "#ff3b5c", "privilege-escalation": "#c084fc", "defense-impairment": "#22d3ee", "stealth": "#5ad1a0", "credential-access": "#f472b6", "discovery": "#3fb6ff", "lateral-movement": "#fb923c", "collection": "#a3e635", "command-and-control": "#e879f9", "exfiltration": "#f87171", "_entry": "#5ad1a0", "_exit": "#ff3b5c"};
+const COL_W = 150;
+
+// Calcular y_min para posicionar labels arriba
+const yVals = NODES.map(n => n.y);
+const yMin = Math.min(...yVals) - 60;
+
+TACTIC_ORDER.forEach((tac, i) => {
+  const x = (i + 1) * COL_W;
+  const color = TACTIC_COLORS_JS[tac] || '#8a97ad';
+  const short = tac.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+  // Línea vertical de columna
+  tLayer.append('line')
+    .attr('x1', x - COL_W/2 + 8).attr('y1', yMin)
+    .attr('x2', x - COL_W/2 + 8).attr('y2', -yMin)
+    .attr('stroke', color).attr('stroke-width', 0.3)
+    .attr('stroke-opacity', 0.3).attr('stroke-dasharray', '4,6');
+
+  // Label táctica
+  tLayer.append('text')
+    .attr('x', x).attr('y', yMin)
+    .attr('text-anchor', 'middle')
+    .attr('font-family', 'JetBrains Mono, monospace')
+    .attr('font-size', 10)
+    .attr('fill', color)
+    .text(short);
+});
+
+// ── Fit inicial ───────────────────────────────────────────────────────────────
+function fitGraph() {
+  const canvas = document.getElementById('canvas');
+  const cw = canvas.clientWidth;
+  const ch = canvas.clientHeight;
+
+  const xs = NODES.map(n => n.x);
+  const ys = NODES.map(n => n.y);
+  const x0 = Math.min(...xs) - 60;
+  const y0 = Math.min(...ys) - 80;
+  const x1 = Math.max(...xs) + 60;
+  const y1 = Math.max(...ys) + 60;
+  const gw = x1 - x0, gh = y1 - y0;
+
+  const scale = Math.min(cw / gw, ch / gh) * 0.92;
+  const tx = (cw - gw * scale) / 2 - x0 * scale;
+  const ty = (ch - gh * scale) / 2 - y0 * scale;
+
+  svg.call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+fitGraph();
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(event, d) {
+  document.getElementById('tt-id').textContent = d.label;
+  document.getElementById('tt-name').textContent = d.name;
+  document.getElementById('tt-w').textContent = d.weight.toFixed(3);
+  document.getElementById('tt-bw').textContent = d.fw_betweenness;
+  tooltip.style.display = 'block';
+  moveTooltip(event);
+}
+function moveTooltip(event) {
+  tooltip.style.left = (event.clientX + 16) + 'px';
+  tooltip.style.top  = (event.clientY - 10) + 'px';
+}
+function hideTooltip() {
+  tooltip.style.display = 'none';
+}
+
+// ── Seleccionar nodo → sidebar ─────────────────────────────────────────────────
+let selectedId = null;
+
+function selectNode(event, d) {
+  event.stopPropagation();
+  selectedId = d.id;
+
+  // Highlight
+  circle.attr('stroke', n => n.id === d.id ? '#ffffff' : (n.critical ? '#ffffff' : 'none'))
+        .attr('stroke-width', n => n.id === d.id ? 2.5 : (n.critical ? 1.5 : 0))
+        .attr('fill-opacity', n => n.id === d.id ? 1.0 : (n.critical ? 0.95 : 0.5));
+
+  // Sidebar info
+  document.getElementById('info').classList.add('visible');
+  document.getElementById('info-placeholder').style.display = 'none';
+  document.getElementById('info-id').textContent = d.label;
+  document.getElementById('info-name').textContent = d.name;
+  document.getElementById('info-weight').textContent = d.weight.toFixed(3);
+  document.getElementById('info-wsrc').textContent = d.weight_source || '—';
+  document.getElementById('info-bw').textContent = d.fw_betweenness;
+  document.getElementById('info-in').textContent = d.in_degree;
+  document.getElementById('info-out').textContent = d.out_degree;
+
+  const tacsDiv = document.getElementById('info-tacs');
+  tacsDiv.innerHTML = d.tactics.map(t =>
+    `<span class="tac-badge">${t}</span>`
+  ).join('');
+}
+
+svg.on('click', () => {
+  selectedId = null;
+  circle.attr('stroke', d => d.critical ? '#ffffff' : 'none')
+        .attr('stroke-width', d => d.critical ? 1.5 : 0)
+        .attr('fill-opacity', d => d.critical ? 0.95 : 0.7);
+  document.getElementById('info').classList.remove('visible');
+  document.getElementById('info-placeholder').style.display = 'block';
+});
+
+// ── Controles ─────────────────────────────────────────────────────────────────
+document.getElementById('btn-reset').addEventListener('click', () => fitGraph());
+
+document.getElementById('btn-crit').addEventListener('click', function() {
+  showAllEdges = false;
+  line.style('display', e => e.critical ? null : 'none');
+  this.classList.add('active');
+  document.getElementById('btn-all').classList.remove('active');
+});
+
+document.getElementById('btn-all').addEventListener('click', function() {
+  showAllEdges = true;
+  line.style('display', null);
+  this.classList.add('active');
+  document.getElementById('btn-crit').classList.remove('active');
+});
+
+document.getElementById('edge-opacity').addEventListener('input', function() {
+  const val = this.value / 100;
+  line.attr('stroke-opacity', e => e.critical ? Math.max(0.8, val) : val);
+});
+
+document.getElementById('node-size').addEventListener('input', function() {
+  sizeMultiplier = this.value / 100;
+  circle.attr('r', d => d.size * sizeMultiplier);
+  label.attr('y', d => d.y - d.size * sizeMultiplier - 4);
+});
+
+// Resize
+window.addEventListener('resize', fitGraph);
+</script>
+</body>
+</html>
