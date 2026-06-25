@@ -400,6 +400,7 @@
     <a href="#graph">Cómo se construye el grafo</a>
     <a href="#killchain">Kill chain — tácticas</a>
     <a href="#results">Los resultados explicados</a>
+    <a href="#limitaciones">Limitaciones del modelo</a>
     <a href="#glossary">Glosario completo</a>
   </nav>
 </aside>
@@ -1054,6 +1055,64 @@ w_final = min(w_mit, w_cve)
   <div class="callout good">
     <div class="callout-title">Dijkstra vs Floyd-Warshall: resultados consistentes</div>
     <p>Ambos algoritmos identifican <b>T1078 (Valid Accounts)</b> como la técnica más crítica. Dijkstra la encuentra en la ruta de menor costo; Floyd-Warshall confirma que es el nodo que más aparece en rutas óptimas de TODO el grafo. Esta concordancia valida el análisis.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────── LIMITACIONES -->
+<section id="limitaciones">
+  <div class="sec-tag">Sección 14</div>
+  <h2>Limitaciones <span class="accent">del modelo</span></h2>
+  <p>Todo modelo es una simplificación de la realidad. Reconocer explícitamente las limitaciones es requisito científico: permite al lector interpretar correctamente los resultados y saber cuándo el modelo puede no aplicar.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:28px 0">
+
+    <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--crit)">
+      <h3 style="color:var(--crit);font-size:18px;margin-bottom:14px">L1 · Aristas inferidas, no observadas</h3>
+      <p>Las aristas del grafo conectan técnicas de tácticas <em>consecutivas</em> de la kill chain, pero no son secuencias de ataque directamente observadas en logs reales. Representan que el atacante <em>podría</em> haber transitado de táctica i a táctica i+1, no que lo hizo en ese orden exacto en cada intrusión documentada.</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> el número de aristas (653) sobreestima las transiciones reales. Un modelo basado en datos de tráfico de red o SIEM reduciría esta incertidumbre.</p>
+    </div>
+
+    <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--high)">
+      <h3 style="color:var(--high);font-size:18px;margin-bottom:14px">L2 · El atacante no siempre elige el óptimo</h3>
+      <p>Dijkstra asume que el atacante <em>racional</em> elige siempre el camino de menor resistencia. En la realidad, los actores de amenaza pueden elegir rutas subóptimas por preferencia de herramientas, falta de información, o para evadir detección (caminos más costosos pero más silenciosos).</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> la ruta crítica es el <em>peor escenario razonable</em> para el defensor, no una predicción exacta del comportamiento del atacante.</p>
+    </div>
+
+    <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--amber)">
+      <h3 style="color:var(--amber);font-size:18px;margin-bottom:14px">L3 · ATT&CK es conocimiento histórico</h3>
+      <p>El bundle MITRE ATT&CK Enterprise documenta técnicas <em>ya observadas en campo</em>. Técnicas nuevas o variantes no documentadas (zero-days, TTPs emergentes) no aparecen en el grafo. El modelo tiene un sesgo hacia amenazas conocidas.</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> el análisis es válido para el threat model de SolarWinds (2019-2020). Un actor que use técnicas post-2023 podría encontrar rutas no modeladas.</p>
+    </div>
+
+    <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--purple)">
+      <h3 style="color:var(--purple);font-size:18px;margin-bottom:14px">L4 · Granularidad de los pesos</h3>
+      <p>Con max_mitigaciones=8, la fórmula <code style="background:var(--line);padding:2px 6px;border-radius:4px">w = 1 − (n_mit / 8)</code> produce solo 9 valores posibles (0.05, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 0.95). Esto crea empates frecuentes (ej. T1087 y T1482 con w=0.75), donde Dijkstra elige según orden de visita en el heap, no por una diferencia real de dificultad.</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> rutas con costos idénticos son equivalentes. El análisis de sensibilidad (Jaccard=0.75 en escenario sin CVE) confirma que la táctica crítica es robusta aunque el nodo específico varíe.</p>
+    </div>
+
+    <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--cyan)">
+      <h3 style="color:var(--cyan);font-size:18px;margin-bottom:14px">L5 · Una sola campaña analizada</h3>
+      <p>Los resultados son específicos de SolarWinds Compromise (2019-2020). No se puede afirmar que la metodología produce los mismos patrones en otras campañas sin haberlo verificado. T1078 puede <em>no</em> ser el nodo de mayor betweenness en un ataque de ransomware o en una campaña de espionaje diferente.</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> la generalización del método requiere validación en múltiples campañas (APT28, FIN7, Lazarus Group). Es trabajo futuro documentado.</p>
+    </div>
+
+    <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--green)">
+      <h3 style="color:var(--green);font-size:18px;margin-bottom:14px">L6 · CVE-weights: asociación manual</h3>
+      <p>La tabla <code style="background:var(--line);padding:2px 6px;border-radius:4px">KNOWN_CVE_WEIGHTS</code> asigna CVEs a técnicas ATT&CK manualmente, basada en reportes públicos (CISA, FireEye, Microsoft). Esta asociación es una decisión del analista: otros investigadores podrían asignar CVEs diferentes a las mismas técnicas.</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> el análisis de sensibilidad "sin CVE" (Jaccard=0.75) acota el efecto: con o sin CVE-weights, la ruta crítica cambia en 1 nodo de 7, y la táctica principal (credential-access) permanece.</p>
+    </div>
+
+  </div>
+
+  <div style="background:rgba(63,182,255,.06);border:1px solid rgba(63,182,255,.2);border-radius:12px;padding:24px;margin-top:8px">
+    <h3 style="color:var(--cyan);font-size:17px;margin-bottom:10px">Trabajo futuro sugerido</h3>
+    <ul style="color:var(--muted);line-height:2;padding-left:20px">
+      <li>Comparar resultados en 3-5 campañas ATT&CK adicionales para verificar generalización</li>
+      <li>Reemplazar aristas inferidas por datos de co-ocurrencia de técnicas en incidentes reales (datasets VERIS, MITRE ATT&CK Evaluations)</li>
+      <li>Modelar comportamiento no-óptimo del atacante con cadenas de Markov o simulación Monte Carlo</li>
+      <li>Automatizar asignación CVE-técnica desde NVD API en lugar de tabla manual</li>
+      <li>Incorporar temporalidad: el grafo asume el ataque como estático; un modelo dinámico reflejaría mejor la evolución de la campaña</li>
+    </ul>
   </div>
 </section>
 
