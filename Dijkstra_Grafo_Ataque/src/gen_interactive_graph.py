@@ -186,10 +186,11 @@ def build_graph_data(nodes_data, ruta_data):
     return nodes, edges, critical_path
 
 
-def generate_html(nodes, edges, critical_path):
+def generate_html(nodes, edges, critical_path, total_cost):
     nodes_json = json.dumps(nodes, ensure_ascii=False)
     edges_json = json.dumps(edges, ensure_ascii=False)
     critical_json = json.dumps(critical_path, ensure_ascii=False)
+    cost_str = f"{total_cost:.3f}"
 
     tactic_legend = []
     for tac in TACTIC_ORDER:
@@ -398,7 +399,7 @@ def generate_html(nodes, edges, critical_path):
 
   <!-- Ruta crítica -->
   <div id="path-panel">
-    <h3>&#128308; Ruta crítica — Dijkstra (costo=1.635)</h3>
+    <h3>&#128308; Ruta crítica — Dijkstra (costo={cost_str})</h3>
   </div>
 
   <!-- Leyenda -->
@@ -438,7 +439,7 @@ CRITICAL_PATH.forEach((nid, i) => {{
   const div = document.createElement('div');
   div.className = 'path-step';
   const distAcum = nd.id === 'ATTACKER' ? '0.000' :
-                   nd.id === 'IMPACT'   ? '1.635' : '';
+                   nd.id === 'IMPACT'   ? '{cost_str}' : '';
   div.innerHTML = `
     <span class="ps-id">${{nd.label || nd.id}}</span>
     <span class="ps-name">${{nd.name}}</span>
@@ -688,12 +689,14 @@ if __name__ == "__main__":
 
     print("Construyendo datos del grafo...")
     nodes, edges, critical_path = build_graph_data(nodes_data, ruta_data)
+    total_cost = round(sum(step.get("weight", 0) for step in ruta_data), 3)
     print(f"  Nodos: {len(nodes)}")
     print(f"  Aristas: {len(edges)}")
     print(f"  Aristas críticas: {sum(1 for e in edges if e['critical'])}")
+    print(f"  Costo ruta crítica: {total_cost}")
 
     print("Generando HTML interactivo...")
-    html = generate_html(nodes, edges, critical_path)
+    html = generate_html(nodes, edges, critical_path, total_cost)
 
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_FILE, "w", encoding="utf-8") as f:

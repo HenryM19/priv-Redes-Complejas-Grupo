@@ -45,21 +45,20 @@
       <div class="def"><span class="var">E</span> <span class="eq">=</span> progresión táctica dentro de la campaña</div>
       <div class="def"><span class="var">w(e)</span> <span class="eq">=</span> resistencia ∈ [0, 1]</div>
       <div class="formula">
-        <div class="l">Peso de arista</div>
-        <div class="f">sin CVE:&nbsp; w = 1 − ( <i>n_mit</i> / <b>max_mit</b> )<br>
-        con CVE:&nbsp; w = min( w_mit , (10 − <i>CVSS</i>) / 10 )</div>
+        <div class="l">Peso de arista (resistencia defensiva)</div>
+        <div class="f">w = max( 0.05 , <i>n_mit</i> / <b>max_mit</b> )</div>
       </div>
-      <div style="margin-top:18px;font-size:20px;color:var(--muted)">max_mit = <b style="color:var(--amber);font-family:'JetBrains Mono'">8</b> mitigaciones (máximo en la campaña). Menor w ⇒ <b style="color:var(--crit)">menor resistencia</b> ⇒ más peligrosa.</div>
+      <div style="margin-top:18px;font-size:20px;color:var(--muted)">max_mit = <b style="color:var(--amber);font-family:'JetBrains Mono'">8</b> mitigaciones (máximo en la campaña). <b>Más</b> mitigaciones ⇒ <b style="color:var(--cyan)">w alto</b> ⇒ más controles ⇒ más costosa para el atacante. 100% derivado del bundle STIX.</div>
     </div>
     <div class="panel">
       <h3>Escala de pesos · ejemplos reales</h3>
-      <div class="scale-row"><span class="tid" style="color:var(--crit)">T1078</span><div class="bar"><div class="fill" style="width:5%;background:var(--crit);min-width:8px"></div></div><span class="meta"><b>w=0.05</b> · CVSS 9.8 · 8 mit · <span style="color:var(--crit)">MUY PELIGROSA</span></span></div>
-      <div class="scale-row"><span class="tid" style="color:var(--high)">T1087</span><div class="bar"><div class="fill" style="width:75%;background:var(--high);animation-delay:.2s"></div></div><span class="meta"><b>w=0.75</b> · 2 mit · <span style="color:var(--high)">moderada</span></span></div>
-      <div class="scale-row"><span class="tid" style="color:var(--amber)">T1199</span><div class="bar"><div class="fill" style="width:95%;background:var(--amber);animation-delay:.4s"></div></div><span class="meta"><b>w=0.95</b> · 0 mit · <span style="color:var(--amber)">INVISIBLE</span></span></div>
-      <div class="lab"><span>0.0 — fácil para el atacante</span><span>1.0 — bien mitigada →</span></div>
+      <div class="scale-row"><span class="tid" style="color:var(--crit)">T1016.001</span><div class="bar"><div class="fill" style="width:5%;background:var(--crit);min-width:8px"></div></div><span class="meta"><b>w=0.05</b> · 0/8 mit · <span style="color:var(--crit)">SIN DEFENSAS</span></span></div>
+      <div class="scale-row"><span class="tid" style="color:var(--high)">T1606.001</span><div class="bar"><div class="fill" style="width:25%;background:var(--high);animation-delay:.2s"></div></div><span class="meta"><b>w=0.25</b> · 2/8 mit · <span style="color:var(--high)">poco defendida</span></span></div>
+      <div class="scale-row"><span class="tid" style="color:var(--amber)">T1048.002</span><div class="bar"><div class="fill" style="width:50%;background:var(--amber);animation-delay:.4s"></div></div><span class="meta"><b>w=0.50</b> · 4/8 mit · <span style="color:var(--amber)">más defendida</span></span></div>
+      <div class="lab"><span>← 0.05 sin defensas (el atacante la prefiere)</span><span>1.0 bien mitigada →</span></div>
       <div class="formula" style="border-color:var(--cyan);background:rgba(63,182,255,.08)">
         <div class="l" style="color:var(--cyan)">Lectura</div>
-        <div class="f" style="font-size:22px">Una barra <b style="color:var(--crit)">corta</b> = poca resistencia = el atacante la prefiere.<br>Dijkstra suma estos pesos para hallar la ruta total mínima.</div>
+        <div class="f" style="font-size:22px">Una barra <b style="color:var(--crit)">corta</b> = pocas mitigaciones = poca resistencia = el atacante la prefiere.<br>Dijkstra suma estos pesos para hallar la ruta de menor resistencia total.</div>
       </div>
     </div>
   </div>

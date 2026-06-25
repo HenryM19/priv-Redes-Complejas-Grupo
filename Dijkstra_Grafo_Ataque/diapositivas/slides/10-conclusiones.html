@@ -44,13 +44,13 @@
   <h2>✅ Respuesta y <span class="accent">conclusiones</span></h2>
   <div class="qre">¿Cuál es la secuencia de menor resistencia de acceso a impacto y qué técnicas son cuellos de botella críticos según Dijkstra y Floyd-Warshall?</div>
   <div class="answers">
-    <div class="ans a"><div class="l">🔴 Dijkstra · ruta de menor resistencia</div><div class="big">ATTACKER → <b>T1078 → T1558.003 → T1087 → T1021.001 → T1213 → T1071.001 → T1048.002</b> → IMPACT — costo total <b>1.635</b>.</div></div>
-    <div class="ans b"><div class="l">🔵 Floyd-Warshall · pivote universal</div><div class="big"><b>T1078 Valid Accounts</b> aparece en <b>1218</b> rutas óptimas: el cuello de botella central de toda la campaña.</div></div>
+    <div class="ans a"><div class="l">🔴 Dijkstra · ruta de menor resistencia</div><div class="big">ATTACKER → <b>T1078.003 → T1606.001 → T1016.001 → T1550.004 → T1074.002 → T1665 → T1048.002</b> → IMPACT — costo total <b>1.535</b>.</div></div>
+    <div class="ans b"><div class="l">🔵 Floyd-Warshall · pivote universal</div><div class="big"><b>T1606.001 Web Cookies</b> aparece en <b>1044</b> rutas óptimas: el pivote central; la capa <b>discovery</b> es el cuello estructural.</div></div>
   </div>
   <div class="ccls">
-    <div class="cc"><span class="em">🔑</span><span class="n">01</span><p>Las <b>técnicas de credenciales</b> (T1078, T1558.003) confirman la hipótesis: son el puente crítico del ataque.</p></div>
-    <div class="cc"><span class="em">⚖️</span><span class="n">02</span><p>El peso por <b>mitigaciones + CVSS</b> hace que Dijkstra prefiera técnicas con CVEs 9.8 reales y bien explotables.</p></div>
-    <div class="cc"><span class="em">🛡️</span><span class="n">03</span><p>Cortar <b>3 nodos</b> (MFA, anti-Kerberoasting, RDP) rompe la ruta óptima y dispara su costo.</p></div>
+    <div class="cc"><span class="em">🍪</span><span class="n">01</span><p>El <b>robo y reuso de cookies</b> (T1606.001, T1550.004) es el puente crítico: une credential-access con el movimiento lateral.</p></div>
+    <div class="cc"><span class="em">⚖️</span><span class="n">02</span><p>El peso por <b>proporción de mitigaciones</b> (100% del bundle STIX) hace que Dijkstra prefiera las técnicas menos defendidas.</p></div>
+    <div class="cc"><span class="em">🛡️</span><span class="n">03</span><p>Cortar <b>T1048.002</b> (exfiltración) es bloqueo total; <b>T1550.004 + T1606.001</b> suman +24% de costo extra.</p></div>
   </div>
   <div class="cta">🗺️ <b>Los grafos de ataque son mapas para defensores, no solo para atacantes.</b></div>
   <div class="finals">

@@ -62,19 +62,19 @@
     <div>
       <div class="path">
         <div class="node atk" style="animation-delay:.1s"><span class="tid">ATTACKER</span><span class="nm">Acceso inicial vía supply chain</span><span class="tac">start</span><span class="w" style="color:var(--green)">0.00</span><span class="src">—</span></div>
-        <div class="node" style="animation-delay:.25s"><span class="tid" style="color:var(--crit)">T1078</span><span class="nm">Valid Accounts</span><span class="tac">stealth</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">CVSS 9.8 · 8 mit</span></div>
-        <div class="node" style="animation-delay:.4s"><span class="tid" style="color:var(--high)">T1558.003</span><span class="nm">Kerberoasting</span><span class="tac">credential-acc</span><span class="w" style="color:var(--high)">0.10</span><span class="src">CVSS 9.0 · 3 mit</span></div>
-        <div class="node" style="animation-delay:.55s"><span class="tid" style="color:var(--cyan)">T1087</span><span class="nm">Account Discovery</span><span class="tac">discovery</span><span class="w" style="color:var(--amber)">0.75</span><span class="src">2 mit</span></div>
-        <div class="node" style="animation-delay:.7s"><span class="tid" style="color:var(--amber)">T1021.001</span><span class="nm">Remote Desktop Protocol</span><span class="tac">lateral-mov</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">CVSS 9.8 · 8 mit</span></div>
-        <div class="node" style="animation-delay:.85s"><span class="tid" style="color:var(--green)">T1213</span><span class="nm">Data from Info Repositories</span><span class="tac">collection</span><span class="w" style="color:var(--green)">0.125</span><span class="src">7 mit</span></div>
-        <div class="node" style="animation-delay:1s"><span class="tid" style="color:var(--purple)">T1071.001</span><span class="nm">Web Protocols (C2)</span><span class="tac">command-ctrl</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">CVSS 9.8 · 2 mit</span></div>
-        <div class="node" style="animation-delay:1.15s"><span class="tid" style="color:var(--high)">T1048.002</span><span class="nm">Exfil. Asymmetric Encrypted</span><span class="tac">exfiltration</span><span class="w" style="color:var(--high)">0.50</span><span class="src">4 mit</span></div>
+        <div class="node" style="animation-delay:.25s"><span class="tid" style="color:var(--crit)">T1078.003</span><span class="nm">Local Accounts</span><span class="tac">stealth</span><span class="w" style="color:var(--high)">0.50</span><span class="src">4/8 mit</span></div>
+        <div class="node" style="animation-delay:.4s"><span class="tid" style="color:var(--high)">T1606.001</span><span class="nm">Web Cookies</span><span class="tac">credential-acc</span><span class="w" style="color:var(--amber)">0.25</span><span class="src">2/8 mit</span></div>
+        <div class="node" style="animation-delay:.55s"><span class="tid" style="color:var(--cyan)">T1016.001</span><span class="nm">Internet Connection Discovery</span><span class="tac">discovery</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">0/8 mit</span></div>
+        <div class="node" style="animation-delay:.7s"><span class="tid" style="color:var(--amber)">T1550.004</span><span class="nm">Web Session Cookie</span><span class="tac">lateral-mov</span><span class="w" style="color:var(--green)">0.125</span><span class="src">1/8 mit</span></div>
+        <div class="node" style="animation-delay:.85s"><span class="tid" style="color:var(--green)">T1074.002</span><span class="nm">Remote Data Staging</span><span class="tac">collection</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">0/8 mit</span></div>
+        <div class="node" style="animation-delay:1s"><span class="tid" style="color:var(--purple)">T1665</span><span class="nm">Hide Infrastructure</span><span class="tac">command-ctrl</span><span class="w" style="color:var(--crit)">0.05</span><span class="src">0/8 mit</span></div>
+        <div class="node" style="animation-delay:1.15s"><span class="tid" style="color:var(--high)">T1048.002</span><span class="nm">Exfil. Asymmetric Encrypted</span><span class="tac">exfiltration</span><span class="w" style="color:var(--high)">0.50</span><span class="src">4/8 mit</span></div>
         <div class="node imp" style="animation-delay:1.3s"><span class="tid">IMPACT</span><span class="nm">Datos exfiltrados · objetivo logrado</span><span class="tac">end</span><span class="w" style="color:var(--crit)">—</span><span class="src">—</span></div>
       </div>
-      <div class="total"><span class="l">Costo total de la ruta de menor resistencia:</span><span class="v">1.635 <small>(7 técnicas)</small></span></div>
+      <div class="total"><span class="l">Costo total de la ruta de menor resistencia:</span><span class="v">1.535 <small>(7 técnicas)</small></span></div>
     </div>
   </div>
-  <div class="insight">💡 <span>La ruta arranca con <b>Valid Accounts (T1078, w=0.05)</b> — credenciales comprometidas desde la propia cadena de suministro de SolarWinds.</span></div>
+  <div class="insight">💡 <span>La ruta concentra su costo en los extremos mejor mitigados (<b>T1078.003</b> entrada, <b>T1048.002</b> exfiltración) y atraviesa las capas menos defendidas (discovery, staging, C2: 0/8 mitigaciones).</span></div>
   <div class="footer">7 / 10</div>
 </div>
 </body>
