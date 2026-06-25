@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Recomendaciones Defensivas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:52px 90px 48px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.22;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:20px;z-index:2}
+  h2{font-size:50px;font-weight:700;letter-spacing:-.02em;margin:20px 0 6px;z-index:2}
+  h2 .accent{color:var(--green)}
+  .sub{color:var(--muted);font-size:20px;margin-bottom:22px;z-index:2}
+  .body{display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:2;flex:1;min-height:0}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 28px;display:flex;flex-direction:column}
+  .panel-title{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px}
+
+  /* Ranking table */
+  .def-table{width:100%;border-collapse:collapse}
+  .def-table th{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+  .def-table td{padding:9px 10px;border-bottom:1px solid rgba(30,42,64,.5);vertical-align:middle}
+  .def-table tr:last-child td{border-bottom:none}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+  .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;white-space:nowrap}
+
+  /* Impact bar */
+  .impact-wrap{display:flex;align-items:center;gap:8px}
+  .impact-bar-bg{width:120px;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;flex-shrink:0}
+  .impact-bar{height:100%;border-radius:4px}
+  .impact-val{font-family:'JetBrains Mono',monospace;font-size:13px;white-space:nowrap}
+
+  /* Right panel rows */
+  .insight-row{display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid rgba(30,42,64,.6)}
+  .insight-row:last-child{border-bottom:none}
+  .rk-num{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;width:44px;flex-shrink:0;line-height:1}
+  .insight-content{}
+  .insight-title{font-size:17px;font-weight:600;margin-bottom:4px}
+  .insight-desc{font-size:15px;color:var(--muted);line-height:1.45}
+  .insight-desc b{color:var(--txt)}
+
+  /* CTA final */
+  .cta{margin-top:auto;background:rgba(90,209,160,.06);border:1px dashed var(--green);border-radius:12px;padding:18px 22px;font-size:18px;color:var(--muted);line-height:1.5;z-index:2}
+  .cta b{color:var(--green)}
+
+  /* Multi campaign mini */
+  .camp-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(30,42,64,.5)}
+  .camp-row:last-child{border-bottom:none}
+  .camp-name{font-size:14px;font-weight:600;width:230px;flex-shrink:0}
+  .camp-cost{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;width:60px;flex-shrink:0}
+  .camp-top1{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);width:130px;flex-shrink:0}
+  .camp-jac{font-family:'JetBrains Mono',monospace;font-size:13px;width:70px;flex-shrink:0}
+
+  .footer{position:absolute;bottom:28px;right:90px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>🛡️ Recomendaciones <span class="accent">defensivas</span> priorizadas</h2>
+  <p class="sub">Impacto real de mitigar cada técnica — simulación de bloqueo sobre el grafo de ataque</p>
+
+  <div class="body">
+
+    <!-- LEFT: tabla ranking -->
+    <div class="panel">
+      <div class="panel-title" style="color:var(--green)">Ranking por impacto: delta en costo del atacante tras bloquear la técnica</div>
+      <table class="def-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Técnica</th>
+            <th>Prioridad</th>
+            <th>Impacto (delta costo)</th>
+            <th>¿En ruta crítica?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono" style="color:var(--muted)">1</td>
+            <td><span class="mono" style="color:var(--crit);font-weight:700">T1048.002</span><br><span style="color:var(--muted);font-size:12px">Exfiltration Asym. Encrypted</span></td>
+            <td><span class="badge" style="background:rgba(255,59,92,.18);color:var(--crit)">CRITICA</span></td>
+            <td>
+              <div class="impact-wrap">
+                <div class="impact-bar-bg"><div class="impact-bar" style="width:100%;background:var(--crit)"></div></div>
+                <span class="impact-val" style="color:var(--crit)">BLOQUEO TOTAL</span>
+              </div>
+            </td>
+            <td><span class="badge" style="background:rgba(90,209,160,.12);color:var(--green)">✓ Sí</span></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--muted)">2</td>
+            <td><span class="mono" style="color:var(--high);font-weight:700">T1071.001</span><br><span style="color:var(--muted);font-size:12px">Web Protocols (C2)</span></td>
+            <td><span class="badge" style="background:rgba(255,140,66,.18);color:var(--high)">ALTA</span></td>
+            <td>
+              <div class="impact-wrap">
+                <div class="impact-bar-bg"><div class="impact-bar" style="width:85%;background:var(--high)"></div></div>
+                <span class="impact-val" style="color:var(--high)">+0.700 (+42.8%)</span>
+              </div>
+            </td>
+            <td><span class="badge" style="background:rgba(90,209,160,.12);color:var(--green)">✓ Sí</span></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--muted)">3</td>
+            <td><span class="mono" style="color:var(--amber);font-weight:700">T1213</span><br><span style="color:var(--muted);font-size:12px">Data from Info Repositories</span></td>
+            <td><span class="badge" style="background:rgba(255,210,63,.18);color:var(--amber)">ALTA</span></td>
+            <td>
+              <div class="impact-wrap">
+                <div class="impact-bar-bg"><div class="impact-bar" style="width:55%;background:var(--amber)"></div></div>
+                <span class="impact-val" style="color:var(--amber)">+0.375 (+22.9%)</span>
+              </div>
+            </td>
+            <td><span class="badge" style="background:rgba(90,209,160,.12);color:var(--green)">✓ Sí</span></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--muted)">4</td>
+            <td><span class="mono" style="color:var(--cyan)">T1558.003</span><br><span style="color:var(--muted);font-size:12px">Kerberoasting</span></td>
+            <td><span class="badge" style="background:rgba(63,182,255,.12);color:var(--cyan)">MEDIA</span></td>
+            <td>
+              <div class="impact-wrap">
+                <div class="impact-bar-bg"><div class="impact-bar" style="width:22%;background:var(--cyan)"></div></div>
+                <span class="impact-val" style="color:var(--cyan)">+0.150 (+9.2%)</span>
+              </div>
+            </td>
+            <td><span class="badge" style="background:rgba(90,209,160,.12);color:var(--green)">✓ Sí</span></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--muted)">5</td>
+            <td><span class="mono" style="color:var(--cyan)">T1021.001</span><br><span style="color:var(--muted);font-size:12px">Remote Desktop Protocol</span></td>
+            <td><span class="badge" style="background:rgba(63,182,255,.12);color:var(--cyan)">MEDIA</span></td>
+            <td>
+              <div class="impact-wrap">
+                <div class="impact-bar-bg"><div class="impact-bar" style="width:11%;background:var(--cyan)"></div></div>
+                <span class="impact-val" style="color:var(--cyan)">+0.075 (+4.6%)</span>
+              </div>
+            </td>
+            <td><span class="badge" style="background:rgba(90,209,160,.12);color:var(--green)">✓ Sí</span></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--muted)">6</td>
+            <td><span class="mono" style="color:var(--muted)">T1078</span><br><span style="color:var(--muted);font-size:12px">Valid Accounts (top-1 FW-betw)</span></td>
+            <td><span class="badge" style="background:rgba(138,151,173,.12);color:var(--muted)">MEDIA</span></td>
+            <td>
+              <div class="impact-wrap">
+                <div class="impact-bar-bg"><div class="impact-bar" style="width:11%;background:var(--muted)"></div></div>
+                <span class="impact-val" style="color:var(--muted)">+0.075 (+4.6%)</span>
+              </div>
+            </td>
+            <td><span class="badge" style="background:rgba(90,209,160,.12);color:var(--green)">✓ Sí</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:14px;padding:14px 16px;background:var(--bg);border-radius:8px;border-left:3px solid var(--amber);font-size:14px;color:var(--muted);line-height:1.5">
+        ⚠️ <b style="color:var(--txt)">T1078 (Valid Accounts)</b> tiene FW-betweenness=1,218 (mayor del grafo) pero impacto individual bajo (+4.6%): el atacante tiene <b style="color:var(--txt)">múltiples técnicas alternativas</b> en initial-access con pesos similares. El método distingue entre nodo puente universal y nodo crítico para la ruta óptima específica.
+      </div>
+    </div>
+
+    <!-- RIGHT: top-3 acciones + multi-campaign -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- Top 3 insights -->
+      <div class="panel" style="flex:1">
+        <div class="panel-title" style="color:var(--crit)">Top-3 controles recomendados</div>
+        <div class="insight-row">
+          <div class="rk-num" style="color:var(--crit)">01</div>
+          <div class="insight-content">
+            <div class="insight-title">Bloquear exfiltración cifrada asimétrica (T1048.002)</div>
+            <div class="insight-desc">Inspección DPI en gateway de salida + bloqueo de protocolos de exfiltración no autorizados. <b>Único control que elimina toda ruta ATTACKER→IMPACT.</b> Sin canal de exfiltración, el atacante no puede completar su misión aunque haya comprometido la red.</div>
+          </div>
+        </div>
+        <div class="insight-row">
+          <div class="rk-num" style="color:var(--high)">02</div>
+          <div class="insight-content">
+            <div class="insight-title">Controlar tráfico C2 HTTP saliente (T1071.001)</div>
+            <div class="insight-desc">Proxy web con inspección TLS + listas de destino permitidos. Fuerza al atacante a una ruta alternativa con <b>costo +42.8% mayor.</b> SUNBURST usó HTTP standard para C2; su detección hubiera cortado el canal de mando.</div>
+          </div>
+        </div>
+        <div class="insight-row">
+          <div class="rk-num" style="color:var(--amber)">03</div>
+          <div class="insight-content">
+            <div class="insight-title">Acceso a repositorios internos con MFA + logs (T1213)</div>
+            <div class="insight-desc">PAM (Privileged Access Management) + logging de accesos a SharePoint/OneDrive/sistemas internos. Sube el costo en <b>+22.9%</b> y fuerza al atacante a exponer más actividad a los sistemas de detección.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multi-campaign mini -->
+      <div class="panel" style="flex:0 0 auto">
+        <div class="panel-title" style="color:var(--purple)">Generalización: 3 campañas ATT&CK — mismo método</div>
+        <div class="camp-row">
+          <div class="camp-name" style="color:var(--cyan)">SolarWinds (APT29)</div>
+          <div class="camp-cost" style="color:var(--cyan)">1.635</div>
+          <div class="camp-top1" style="color:var(--cyan)">top-1: T1078</div>
+          <div style="font-size:13px;color:var(--muted)">73 nodos · 653 aristas</div>
+        </div>
+        <div class="camp-row">
+          <div class="camp-name" style="color:var(--high)">Operation Wocao (APT20)</div>
+          <div class="camp-cost" style="color:var(--high)">1.860</div>
+          <div class="camp-top1" style="color:var(--high)">top-1: T1078</div>
+          <div style="font-size:13px;color:var(--muted)">72 nodos · 494 aristas</div>
+        </div>
+        <div class="camp-row">
+          <div class="camp-name" style="color:var(--purple)">Dream Job (Lazarus)</div>
+          <div class="camp-cost" style="color:var(--purple)">5.110</div>
+          <div class="camp-top1" style="color:var(--purple)">top-1: T1553.002</div>
+          <div style="font-size:13px;color:var(--muted)">57 nodos · 217 aristas</div>
+        </div>
+        <div style="margin-top:12px;font-size:13px;color:var(--muted);border-left:3px solid var(--purple);padding-left:12px">
+          Jaccard entre campañas: 0.07–0.22 — el método <b style="color:var(--txt)">discrimina correctamente</b> entre actores distintos. Táctica común en todas las rutas críticas: <b style="color:var(--txt)">stealth</b>.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="cta">
+    🗺️ <b>Los grafos de ataque son mapas para defensores.</b> Dijkstra revela el camino que el atacante prefiere; bloquear T1048.002 + T1071.001 + T1213 eleva el costo de SolarWinds en <b>+66%</b> con solo 3 controles priorizados.
+  </div>
+
+  <div class="footer">13 / 13</div>
+</div>
+</body>
+</html>
