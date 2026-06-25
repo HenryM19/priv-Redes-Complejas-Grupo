@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Validación de Algoritmos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:52px 90px 48px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.22;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:20px;z-index:2}
+  h2{font-size:50px;font-weight:700;letter-spacing:-.02em;margin:20px 0 6px;z-index:2}
+  h2 .accent{color:var(--green)}
+  .sub{color:var(--muted);font-size:20px;margin-bottom:22px;z-index:2}
+
+  /* layout */
+  .body{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:20px;z-index:2;flex:1;min-height:0}
+
+  /* panel */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
+  .panel-title{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px}
+
+  /* algoritmos comparación */
+  .algo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .algo-card{background:var(--bg);border-radius:10px;padding:18px 16px;text-align:center;border:1px solid var(--line)}
+  .algo-name{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+  .algo-cost{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;line-height:1}
+  .algo-detail{font-size:13px;color:var(--muted);margin-top:6px}
+  .algo-time{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:4px}
+  .check{font-size:20px;margin-top:8px}
+
+  /* ruta comparada */
+  .ruta-table{width:100%;border-collapse:collapse;font-size:14px}
+  .ruta-table th{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+  .ruta-table td{padding:7px 10px;border-bottom:1px solid rgba(30,42,64,.5);font-family:'JetBrains Mono',monospace;font-size:13px}
+  .ruta-table tr:last-child td{border-bottom:none}
+  .match{color:var(--green)} .diff{color:var(--amber)} .special{color:var(--crit)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}
+
+  /* insight bfs */
+  .bfs-insight{background:rgba(255,59,92,.06);border:1px solid rgba(255,59,92,.25);border-radius:12px;padding:20px 24px;display:flex;gap:20px;align-items:center}
+  .bfs-big{font-family:'JetBrains Mono',monospace;font-size:64px;font-weight:700;color:var(--crit);line-height:1;white-space:nowrap}
+  .bfs-txt{font-size:18px;color:var(--muted);line-height:1.5}
+  .bfs-txt b{color:var(--txt)}
+
+  /* canvas chart */
+  canvas{display:block}
+
+  /* validacion badge */
+  .val-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:17px}
+  .val-row:last-child{margin-bottom:0}
+  .tick{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700}
+  .tick.ok{background:rgba(90,209,160,.18);color:var(--green)}
+  .tick.warn{background:rgba(255,210,63,.18);color:var(--amber)}
+  .val-desc{color:var(--muted)} .val-desc b{color:var(--txt)}
+
+  .footer{position:absolute;bottom:28px;right:90px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>✓ Validación de <span class="accent">algoritmos</span></h2>
+  <p class="sub">Implementación propia vs. referencia NetworkX · BFS sin pesos como baseline</p>
+
+  <div class="body">
+
+    <!-- TOP LEFT: 4 algoritmos -->
+    <div class="panel" style="grid-column:1/3">
+      <div class="panel-title" style="color:var(--cyan)">Comparación de costos y tiempos · grafo SolarWinds (73 nodos, 653 aristas)</div>
+      <div class="algo-grid">
+        <div class="algo-card" style="border-color:rgba(63,182,255,.35)">
+          <div class="algo-name" style="color:var(--cyan)">Dijkstra propio</div>
+          <div class="algo-cost" style="color:var(--cyan)">1.635</div>
+          <div class="algo-detail">9 pasos · heap binario</div>
+          <div class="algo-time">0.32 ms</div>
+          <div class="check">✅</div>
+        </div>
+        <div class="algo-card" style="border-color:rgba(90,209,160,.35)">
+          <div class="algo-name" style="color:var(--green)">Bellman-Ford</div>
+          <div class="algo-cost" style="color:var(--green)">1.635</div>
+          <div class="algo-detail">9 pasos · relajación O(VE)</div>
+          <div class="algo-time">0.82 ms</div>
+          <div class="check">✅</div>
+        </div>
+        <div class="algo-card" style="border-color:rgba(192,132,252,.35)">
+          <div class="algo-name" style="color:var(--purple)">NetworkX</div>
+          <div class="algo-cost" style="color:var(--purple)">1.635</div>
+          <div class="algo-detail">9 pasos · Brandes impl.</div>
+          <div class="algo-time">2.25 ms</div>
+          <div class="check">✅</div>
+        </div>
+        <div class="algo-card" style="border-color:rgba(255,59,92,.35)">
+          <div class="algo-name" style="color:var(--crit)">BFS sin pesos</div>
+          <div class="algo-cost" style="color:var(--crit)">3.875</div>
+          <div class="algo-detail">8 hops · ignora pesos</div>
+          <div class="algo-time">0.08 ms</div>
+          <div class="check">⚠️</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM LEFT: tabla de rutas -->
+    <div class="panel">
+      <div class="panel-title" style="color:var(--amber)">Rutas encontradas — paso a paso</div>
+      <table class="ruta-table">
+        <thead><tr><th>#</th><th>Dijkstra (propio)</th><th>Bellman-Ford</th><th>NetworkX</th><th>BFS sin pesos</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--muted)">0</td><td class="match">ATTACKER</td><td class="match">ATTACKER</td><td class="match">ATTACKER</td><td class="match">ATTACKER</td></tr>
+          <tr><td style="color:var(--muted)">1</td><td class="match">T1078</td><td class="match">T1078</td><td class="match">T1078</td><td class="diff">T1078.003</td></tr>
+          <tr><td style="color:var(--muted)">2</td><td class="match">T1558.003</td><td class="match">T1558.003</td><td class="match">T1558.003</td><td class="diff">T1555.003</td></tr>
+          <tr><td style="color:var(--muted)">3</td><td class="match">T1087</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:13px">T1482 <span style="font-size:10px;color:var(--muted)">(empate)</span></td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:13px">T1482 <span style="font-size:10px;color:var(--muted)">(empate)</span></td><td class="diff">T1016.001</td></tr>
+          <tr><td style="color:var(--muted)">4</td><td class="match">T1021.001</td><td class="match">T1021.001</td><td class="match">T1021.001</td><td class="diff">T1550.001</td></tr>
+          <tr><td style="color:var(--muted)">5</td><td class="match">T1213</td><td class="match">T1213</td><td class="match">T1213</td><td class="match">T1213</td></tr>
+          <tr><td style="color:var(--muted)">6</td><td class="match">T1071.001</td><td class="match">T1071.001</td><td class="match">T1071.001</td><td class="diff">T1665</td></tr>
+          <tr><td style="color:var(--muted)">7</td><td class="match">T1048.002</td><td class="match">T1048.002</td><td class="match">T1048.002</td><td class="match">T1048.002</td></tr>
+          <tr><td style="color:var(--muted)">8</td><td class="match">IMPACT</td><td class="match">IMPACT</td><td class="match">IMPACT</td><td class="match">IMPACT</td></tr>
+          <tr>
+            <td style="color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase">COSTO</td>
+            <td style="color:var(--cyan);font-weight:700">1.635</td>
+            <td style="color:var(--green);font-weight:700">1.635</td>
+            <td style="color:var(--purple);font-weight:700">1.635</td>
+            <td style="color:var(--crit);font-weight:700">3.875</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="color:var(--muted);font-size:13px;margin-top:10px">⚠️ Paso 3: T1087 y T1482 tienen <b style="color:var(--txt)">peso idéntico (0.75)</b> — empate válido, costo total igual.</p>
+    </div>
+
+    <!-- BOTTOM RIGHT: BFS insight + validación checklist -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <div class="bfs-insight">
+        <div class="bfs-big">+137%</div>
+        <div class="bfs-txt">
+          BFS sin pesos elige nodos por <b>número de saltos</b>, ignorando resistencia.<br>
+          Ruta BFS: costo real <b>3.875</b> vs óptimo <b>1.635</b>.<br>
+          Prueba directa: <b>los pesos son informativos</b>, no decorativos.
+        </div>
+      </div>
+
+      <div class="panel" style="flex:1">
+        <div class="panel-title" style="color:var(--green)">Checklist de validación científica</div>
+        <div class="val-row"><div class="tick ok">✓</div><div class="val-desc"><b>Dijkstra propio = Bellman-Ford:</b> costo idéntico 1.635, ruta equivalente</div></div>
+        <div class="val-row"><div class="tick ok">✓</div><div class="val-desc"><b>Dijkstra propio = NetworkX:</b> validado contra implementación de referencia</div></div>
+        <div class="val-row"><div class="tick ok">✓</div><div class="val-desc"><b>Sin ciclos negativos:</b> Bellman-Ford confirma grafo con pesos ≥ 0.05</div></div>
+        <div class="val-row"><div class="tick ok">✓</div><div class="val-desc"><b>Dijkstra 7× más rápido que NetworkX</b> en este grafo (0.32 ms vs 2.25 ms)</div></div>
+        <div class="val-row"><div class="tick warn">△</div><div class="val-desc"><b>BFS ruta distinta:</b> modelo ponderado necesario — baseline sin pesos es subóptimo</div></div>
+        <div class="val-row"><div class="tick ok">✓</div><div class="val-desc"><b>Reproducible:</b> seed=42, bundle STIX oficial MITRE, pesos deterministas</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">11 / 13</div>
+</div>
+</body>
+</html>
