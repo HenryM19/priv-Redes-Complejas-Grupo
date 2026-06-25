@@ -263,25 +263,25 @@ tr:hover td { background: rgba(63,182,255,.04); }
   <div class="section-title">Figura 1</div>
   <h2>Comparación de algoritmos de camino mínimo</h2>
   <p class="section-desc">
-    Dijkstra propio, Bellman-Ford propio y NetworkX producen el mismo costo óptimo (1.635).
-    BFS sin pesos halla una ruta con costo real 3.875 (+137%), demostrando que los pesos son informativos.
+    Dijkstra propio, Bellman-Ford propio y NetworkX producen el mismo costo óptimo (1.535).
+    BFS sin pesos halla una ruta con costo real 3.875 (+149%), demostrando que los pesos son informativos.
   </p>
 
   <!-- Stats -->
   <div class="stat-grid">
     <div class="stat-box">
       <div class="stat-label">Dijkstra propio</div>
-      <div class="stat-value" style="color:var(--cyan)">1.635</div>
+      <div class="stat-value" style="color:var(--cyan)">1.535</div>
       <div style="color:var(--muted);font-size:12px;margin-top:4px">0.32 ms · 9 pasos</div>
     </div>
     <div class="stat-box">
       <div class="stat-label">Bellman-Ford</div>
-      <div class="stat-value" style="color:var(--green)">1.635</div>
+      <div class="stat-value" style="color:var(--green)">1.535</div>
       <div style="color:var(--muted);font-size:12px;margin-top:4px">0.82 ms · 9 pasos</div>
     </div>
     <div class="stat-box">
       <div class="stat-label">NetworkX</div>
-      <div class="stat-value" style="color:var(--purple)">1.635</div>
+      <div class="stat-value" style="color:var(--purple)">1.535</div>
       <div style="color:var(--muted);font-size:12px;margin-top:4px">2.25 ms · 9 pasos</div>
     </div>
     <div class="stat-box">
@@ -322,10 +322,9 @@ tr:hover td { background: rgba(63,182,255,.04); }
       </div>
     </div>
     <div class="fig-caption">
-      <b>Fig. 1b.</b> Rutas node a node. Dijkstra y Bellman-Ford difieren en paso 3
-      (T1087 vs T1482) — ambos son nodos con peso idéntico (0.75), lo que produce
-      un empate de costos y la elección depende del orden de visita en el heap.
-      Costo total idéntico en ambos casos.
+      <b>Fig. 1b.</b> Rutas nodo a nodo. Dijkstra, Bellman-Ford y NetworkX producen
+      la misma ruta óptima: T1078.003 → T1606.001 → T1016.001 → T1550.004 → T1074.002 → T1665 → T1048.002.
+      Los tres algoritmos convergen al mismo costo total (1.535), validando la implementación.
     </div>
   </div>
 
@@ -380,8 +379,8 @@ tr:hover td { background: rgba(63,182,255,.04); }
           <tbody>
             <tr>
               <td><span class="badge" style="background:rgba(63,182,255,.15);color:var(--cyan)">Base</span></td>
-              <td>Mitigaciones + CVE (original)</td>
-              <td class="mono">1.635</td>
+              <td>Proporción de mitigaciones (lineal)</td>
+              <td class="mono">1.535</td>
               <td class="mono">9</td>
               <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace">1.000</span></td>
               <td><span class="pill" style="background:rgba(90,209,160,.15);color:var(--green)">✓ Sí</span></td>
@@ -390,7 +389,7 @@ tr:hover td { background: rgba(63,182,255,.04); }
             <tr>
               <td><span class="badge" style="background:rgba(90,209,160,.15);color:var(--green)">−20%</span></td>
               <td>Pesos escalados × 0.8</td>
-              <td class="mono">1.340</td>
+              <td class="mono">1.260</td>
               <td class="mono">9</td>
               <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace">1.000</span></td>
               <td><span class="pill" style="background:rgba(90,209,160,.15);color:var(--green)">✓ Sí</span></td>
@@ -399,20 +398,20 @@ tr:hover td { background: rgba(63,182,255,.04); }
             <tr>
               <td><span class="badge" style="background:rgba(255,210,63,.15);color:var(--amber)">+20%</span></td>
               <td>Pesos escalados × 1.2</td>
-              <td class="mono">1.960</td>
+              <td class="mono">1.840</td>
               <td class="mono">9</td>
               <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace">1.000</span></td>
               <td><span class="pill" style="background:rgba(90,209,160,.15);color:var(--green)">✓ Sí</span></td>
               <td class="mono" style="color:var(--muted)">—</td>
             </tr>
             <tr>
-              <td><span class="badge" style="background:rgba(255,59,92,.15);color:var(--crit)">Sin CVE</span></td>
-              <td>Solo mitigaciones ATT&CK</td>
-              <td class="mono">2.485</td>
-              <td class="mono">9</td>
-              <td><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">0.750</span></td>
+              <td><span class="badge" style="background:rgba(255,59,92,.15);color:var(--crit)">Binario</span></td>
+              <td>0.9/0.1 por umbral (mediana)</td>
+              <td class="mono">1.910</td>
+              <td class="mono">11</td>
+              <td><span style="color:var(--crit);font-family:'JetBrains Mono',monospace">baja</span></td>
               <td><span class="pill" style="background:rgba(255,59,92,.15);color:var(--crit)">✗ No</span></td>
-              <td class="mono" style="color:var(--crit)">T1558.003 → T1539</td>
+              <td class="mono" style="color:var(--crit)">ruta cambia (11 técnicas)</td>
             </tr>
           </tbody>
         </table>
@@ -420,17 +419,17 @@ tr:hover td { background: rgba(63,182,255,.04); }
     </div>
     <div class="fig-caption">
       <b>Fig. 2c.</b> Tabla de sensibilidad completa. En 3 de 4 escenarios la ruta crítica
-      es idéntica al baseline (Jaccard=1.0). Sin CVE-weights, T1558.003 (Kerberoasting)
-      es reemplazado por T1539 (Steal Web Session Cookie) — ambos en credential-access,
-      lo que indica que la táctica crítica se mantiene aunque cambie la técnica específica.
+      es idéntica al baseline (Jaccard=1.0). Con pesos binarios (0.9/0.1), la ruta cambia
+      completamente (11 técnicas vía T1195.002) — la discretización gruesa colapsa las
+      distinciones finas (0/8 vs 1/8 vs 2/8 mitigaciones) que determinan la ruta óptima.
     </div>
   </div>
 
   <div class="insight amber">
-    <b>Robustez del modelo:</b> Variaciones del ±20% en los pesos no alteran la ruta crítica.
-    Sin CVE-weights, la táctica de <i>credential-access</i> sigue siendo el cuello de botella;
-    solo cambia qué técnica específica es seleccionada. Esto valida que las conclusiones
-    son robustas ante incertidumbre en los datos de entrada.
+    <b>Robustez del modelo:</b> Variaciones del ±20% en los pesos no alteran la ruta crítica (Jaccard=1.0).
+    Solo el esquema binario grueso cambia la ruta, perdiendo las distinciones finas entre
+    0/8, 1/8 y 2/8 mitigaciones. Las conclusiones son robustas ante incertidumbre proporcional,
+    pero sensibles a la resolución del esquema de pesos.
   </div>
 </section>
 
@@ -485,7 +484,7 @@ tr:hover td { background: rgba(63,182,255,.04); }
       <div class="fig-body">
         <canvas id="c3b" height="280"></canvas>
       </div>
-      <div class="fig-caption"><b>Fig. 3b.</b> Distribución de out-degree. Mismo patrón. Media=8.9, std=5.8, máximo=27 (T1078 — hub multi-táctica).</div>
+      <div class="fig-caption"><b>Fig. 3b.</b> Distribución de out-degree. Mismo patrón. Media=8.9, std=5.8, máximo=27 (T1606.001 — hub credential-access con mayor betweenness).</div>
     </div>
   </div>
 
@@ -504,7 +503,8 @@ tr:hover td { background: rgba(63,182,255,.04); }
     <b>Interpretación estructural:</b> 54 componentes fuertemente conexas (SCC) reflejan la
     naturaleza dirigida y acíclica parcial del grafo: la progresión táctica impone dirección.
     Asortatividad positiva (0.308) indica que nodos de alto grado tienden a conectarse entre sí —
-    consistente con técnicas multi-táctica como T1078 (Valid Accounts) que aparece en 4 tácticas.
+    consistente con técnicas de alto betweenness como T1606.001 (Web Cookies) que conecta
+    credential-access con múltiples tácticas posteriores.
     El grafo es completamente conexo débilmente (WCC=1), garantizando que toda técnica es
     alcanzable desde ATTACKER.
   </div>
@@ -518,19 +518,19 @@ tr:hover td { background: rgba(63,182,255,.04); }
   <h2>Validación de FW-betweenness: comparación con NetworkX</h2>
   <p class="section-desc">
     FW-betweenness propio vs algoritmo de Brandes (NetworkX). Correlación de Spearman
-    ρ = 0.9997 valida que la implementación propia produce rankings equivalentes.
+    ρ = 0.9727 valida que la implementación propia produce rankings equivalentes.
   </p>
 
   <div class="stat-grid">
     <div class="stat-box">
       <div class="stat-label">Spearman ρ</div>
-      <div class="stat-value" style="color:var(--green)">0.9997</div>
+      <div class="stat-value" style="color:var(--green)">0.9727</div>
       <div style="color:var(--muted);font-size:12px;margin-top:4px">vs NetworkX weighted</div>
     </div>
     <div class="stat-box">
       <div class="stat-label">Top-1 coincide</div>
       <div class="stat-value" style="color:var(--green)">✓</div>
-      <div style="color:var(--muted);font-size:12px;margin-top:4px">T1078 en ambos</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">T1606.001 en ambos</div>
     </div>
     <div class="stat-box">
       <div class="stat-label">Top-5 sin cambio</div>
@@ -584,15 +584,15 @@ tr:hover td { background: rgba(63,182,255,.04); }
     <div class="fig-caption">
       <b>Fig. 4c.</b> Top-15 técnicas por FW-betweenness con comparación de ranking.
       Δ = ranking_FW − ranking_NX; valores cercanos a 0 indican concordancia.
-      T1078 y T1558.003 lideran ambas métricas — son los nodos puente
-      más críticos del ataque SolarWinds.
+      T1606.001 y T1018 lideran ambas métricas — son los nodos puente
+      más críticos del ataque SolarWinds según el modelo de mitigaciones.
     </div>
   </div>
 
   <div class="insight crit">
-    <b>Técnicas críticas identificadas:</b> T1078 (Valid Accounts) y T1558.003 (Kerberoasting)
-    dominan tanto la ruta mínima de Dijkstra como el FW-betweenness. Son puntos de intervención
-    defensiva prioritarios: mitigar T1078 cortaría 1,218 rutas óptimas del grafo completo.
+    <b>Técnicas críticas identificadas:</b> T1606.001 (Web Cookies) lidera el FW-betweenness (1,044 rutas óptimas)
+    y aparece en la ruta mínima de Dijkstra. T1018 y el clúster de técnicas de discovery (836 cada uno)
+    son puntos de intervención defensiva prioritarios: mitigar T1606.001 cortaría 1,044 rutas óptimas del grafo completo.
   </div>
 </section>
 
@@ -600,21 +600,21 @@ tr:hover td { background: rgba(63,182,255,.04); }
 
 <script>
 // ── Datos embebidos ────────────────────────────────────────────────────────
-const RUTA_DIJK = ["ATTACKER","T1078","T1558.003","T1087","T1021.001","T1213","T1071.001","T1048.002","IMPACT"];
-const RUTA_BF   = ["ATTACKER","T1078","T1558.003","T1482","T1021.001","T1213","T1071.001","T1048.002","IMPACT"];
-const RUTA_NX   = ["ATTACKER","T1078","T1558.003","T1482","T1021.001","T1213","T1071.001","T1048.002","IMPACT"];
+const RUTA_DIJK = ["ATTACKER","T1078.003","T1606.001","T1016.001","T1550.004","T1074.002","T1665","T1048.002","IMPACT"];
+const RUTA_BF   = ["ATTACKER","T1078.003","T1606.001","T1016.001","T1550.004","T1074.002","T1665","T1048.002","IMPACT"];
+const RUTA_NX   = ["ATTACKER","T1078.003","T1606.001","T1016.001","T1550.004","T1074.002","T1665","T1048.002","IMPACT"];
 const RUTA_BFS  = ["ATTACKER","T1078.003","T1555.003","T1016.001","T1550.001","T1213","T1665","T1048.002","IMPACT"];
 
 // Costos acumulados por paso (calculados desde pesos conocidos)
-const COST_DIJK = [0, 0.05, 0.15, 0.90, 0.95, 1.075, 1.125, 1.625, 1.635];
-const COST_BF   = [0, 0.05, 0.15, 0.90, 0.95, 1.075, 1.125, 1.625, 1.635];
-const COST_NX   = [0, 0.05, 0.15, 0.90, 0.95, 1.075, 1.125, 1.625, 1.635];
+const COST_DIJK = [0, 0.50, 0.75, 0.80, 0.925, 0.975, 1.025, 1.525, 1.535];
+const COST_BF   = [0, 0.50, 0.75, 0.80, 0.925, 0.975, 1.025, 1.525, 1.535];
+const COST_NX   = [0, 0.50, 0.75, 0.80, 0.925, 0.975, 1.025, 1.525, 1.535];
 const COST_BFS  = [0, 0.75, 1.50, 2.25, 3.00, 3.125, 3.75, 3.875, 3.885]; // aprox
 
 const SENSI = {
-  labels: ["Base\n(orig)", "−20%\n(×0.8)", "+20%\n(×1.2)", "Sin CVE"],
-  costos:  [1.635, 1.340, 1.960, 2.485],
-  jaccard: [1.000, 1.000, 1.000, 0.750],
+  labels: ["Base\n(lineal)", "−20%\n(×0.8)", "+20%\n(×1.2)", "Binario"],
+  costos:  [1.535, 1.260, 1.840, 1.910],
+  jaccard: [1.000, 1.000, 1.000, 0.000],
 };
 
 const METRICAS_IN = {
@@ -625,21 +625,21 @@ const METRICAS_OUT = {
 };
 
 const BETWEENNESS = [
-  {node:"T1078",    name:"Valid Accounts",           tactic:"stealth/persistence/priv-esc/init-access", w:0.05,  fw:1.0,    nx:0.2294, rk_fw:1,  rk_nx:1,  delta:0},
-  {node:"T1558.003",name:"Kerberoasting",            tactic:"credential-access",                        w:0.10,  fw:0.857,  nx:0.2042, rk_fw:2,  rk_nx:2,  delta:0},
-  {node:"T1087",    name:"Account Discovery",         tactic:"discovery",                                w:0.75,  fw:0.686,  nx:0.0818, rk_fw:3,  rk_nx:5,  delta:-2},
-  {node:"T1482",    name:"Domain Trust Discovery",    tactic:"discovery",                                w:0.75,  fw:0.686,  nx:0.0818, rk_fw:4,  rk_nx:6,  delta:-2},
-  {node:"T1021.001",name:"Remote Desktop Protocol",  tactic:"lateral-movement",                         w:0.05,  fw:0.576,  nx:0.1579, rk_fw:5,  rk_nx:3,  delta:2},
-  {node:"T1213",    name:"Data from Info Repos",      tactic:"collection",                               w:0.125, fw:0.345,  nx:0.1035, rk_fw:6,  rk_nx:4,  delta:2},
-  {node:"T1059.001",name:"PowerShell",                tactic:"execution",                                w:0.05,  fw:0.159,  nx:0.0229, rk_fw:7,  rk_nx:7,  delta:0},
-  {node:"T1685",    name:"Disable or Modify Tools",   tactic:"defense-impairment",                       w:0.875, fw:0.151,  nx:0.0112, rk_fw:8,  rk_nx:8,  delta:0},
-  {node:"T1071.001",name:"Web Protocols",             tactic:"command-and-control",                      w:0.05,  fw:0.108,  nx:0.0109, rk_fw:9,  rk_nx:9,  delta:0},
-  {node:"T1133",    name:"External Remote Services",  tactic:"persistence/initial-access",               w:0.05,  fw:0.064,  nx:0.0060, rk_fw:10, rk_nx:11, delta:-1},
-  {node:"T1485",    name:"Data Destruction",          tactic:"impact",                                   w:0.50,  fw:0.057,  nx:0.0027, rk_fw:11, rk_nx:13, delta:-2},
-  {node:"T1195.002",name:"Supply Chain Compromise",   tactic:"initial-access",                           w:0.05,  fw:0.049,  nx:0.0027, rk_fw:12, rk_nx:14, delta:-2},
-  {node:"T1048.002",name:"Exfil Asym Encrypted",      tactic:"exfiltration",                             w:0.50,  fw:0.041,  nx:0.0000, rk_fw:13, rk_nx:15, delta:-2},
-  {node:"T1550.002",name:"Pass the Hash",              tactic:"defense-evasion/lateral-movement",         w:0.05,  fw:0.033,  nx:0.0041, rk_fw:14, rk_nx:12, delta:2},
-  {node:"T1027",    name:"Obfuscated Files/Info",      tactic:"defense-evasion",                          w:0.05,  fw:0.016,  nx:0.0020, rk_fw:15, rk_nx:16, delta:-1},
+  {node:"T1606.001",name:"Web Cookies",              tactic:"credential-access",             w:0.25,  fw:1.000, nx:0.2051, rk_fw:1,  rk_nx:1,  delta:0},
+  {node:"T1018",    name:"Remote Sys. Discovery",    tactic:"discovery",                     w:0.05,  fw:0.801, nx:0.1624, rk_fw:2,  rk_nx:2,  delta:0},
+  {node:"T1069.002",name:"Domain Groups",            tactic:"discovery",                     w:0.05,  fw:0.801, nx:0.1512, rk_fw:3,  rk_nx:3,  delta:0},
+  {node:"T1069",    name:"Permission Groups Disc.",  tactic:"discovery",                     w:0.05,  fw:0.801, nx:0.1488, rk_fw:4,  rk_nx:4,  delta:0},
+  {node:"T1680",    name:"Local Storage Discovery",  tactic:"discovery",                     w:0.05,  fw:0.801, nx:0.1312, rk_fw:5,  rk_nx:5,  delta:0},
+  {node:"T1083",    name:"File & Dir. Discovery",    tactic:"discovery",                     w:0.05,  fw:0.801, nx:0.1287, rk_fw:6,  rk_nx:6,  delta:0},
+  {node:"T1016.001",name:"Internet Conn. Discov.",   tactic:"discovery",                     w:0.05,  fw:0.801, nx:0.1105, rk_fw:7,  rk_nx:8,  delta:-1},
+  {node:"T1057",    name:"Process Discovery",        tactic:"discovery",                     w:0.05,  fw:0.801, nx:0.1120, rk_fw:8,  rk_nx:7,  delta:1},
+  {node:"T1070.006",name:"Timestomp",                tactic:"stealth",                       w:0.05,  fw:0.673, nx:0.0892, rk_fw:9,  rk_nx:9,  delta:0},
+  {node:"T1070.004",name:"File Deletion",            tactic:"stealth",                       w:0.05,  fw:0.673, nx:0.0875, rk_fw:10, rk_nx:10, delta:0},
+  {node:"T1036.004",name:"Masquerade Task/Svc",      tactic:"stealth",                       w:0.05,  fw:0.673, nx:0.0761, rk_fw:11, rk_nx:11, delta:0},
+  {node:"T1140",    name:"Deobfuscate/Decode",       tactic:"stealth",                       w:0.05,  fw:0.673, nx:0.0742, rk_fw:12, rk_nx:12, delta:0},
+  {node:"T1550.004",name:"Web Session Cookie",       tactic:"lateral-movement",              w:0.125, fw:0.673, nx:0.0620, rk_fw:13, rk_nx:14, delta:-1},
+  {node:"T1553.002",name:"Code Signing",             tactic:"defense-impairment",            w:0.05,  fw:0.673, nx:0.0648, rk_fw:14, rk_nx:13, delta:1},
+  {node:"T1098.005",name:"Device Registration",      tactic:"persistence/priv-esc",          w:0.125, fw:0.445, nx:0.0384, rk_fw:15, rk_nx:15, delta:0},
 ];
 
 // ── Helpers de canvas ──────────────────────────────────────────────────────
@@ -787,13 +787,13 @@ function drawAxis(ctx, w, h, pad, xlabels, ymin, ymax, ylabel) {
   ctx.strokeStyle = C.AMBER;
   ctx.lineWidth = 1;
   ctx.setLineDash([4, 4]);
-  const yOpt = yPos(1.635);
+  const yOpt = yPos(1.535);
   ctx.beginPath(); ctx.moveTo(pad.left, yOpt); ctx.lineTo(w - pad.right, yOpt); ctx.stroke();
   ctx.setLineDash([]);
   ctx.fillStyle = C.AMBER;
   ctx.font = "10px 'JetBrains Mono', monospace";
   ctx.textAlign = "left";
-  ctx.fillText("óptimo=1.635", w - pad.right - 90, yOpt - 5);
+  ctx.fillText("óptimo=1.535", w - pad.right - 90, yOpt - 5);
 })();
 
 // ── FIG 1b — Tabla de rutas ─────────────────────────────────────────────────
@@ -818,10 +818,10 @@ function drawAxis(ctx, w, h, pad, xlabels, ymin, ymax, ylabel) {
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em">TOTAL</td>
-    <td style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-weight:700">1.635</td>
-    <td style="color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:700">1.635</td>
-    <td style="color:var(--purple);font-family:'JetBrains Mono',monospace;font-weight:700">1.635</td>
-    <td style="color:var(--crit);font-family:'JetBrains Mono',monospace;font-weight:700">3.875 (+137%)</td>`;
+    <td style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-weight:700">1.535</td>
+    <td style="color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:700">1.535</td>
+    <td style="color:var(--purple);font-family:'JetBrains Mono',monospace;font-weight:700">1.535</td>
+    <td style="color:var(--crit);font-family:'JetBrains Mono',monospace;font-weight:700">3.875 (+152%)</td>`;
   tbody.appendChild(tr);
 })();
 
@@ -837,8 +837,8 @@ function drawAxis(ctx, w, h, pad, xlabels, ymin, ymax, ylabel) {
   ctx.fillRect(0, 0, w, h);
   drawGrid(ctx, w, h, pad);
 
-  const labels = ["Base\n(orig)", "−20%", "+20%", "Sin CVE"];
-  const costos = [1.635, 1.340, 1.960, 2.485];
+  const labels = ["Base\n(lineal)", "−20%", "+20%", "Binario"];
+  const costos = [1.535, 1.260, 1.840, 1.910];
   const colors = [C.CYAN, C.GREEN, C.AMBER, C.CRIT];
   const n = labels.length;
   const barW = iw / n * 0.55;
@@ -862,7 +862,7 @@ function drawAxis(ctx, w, h, pad, xlabels, ymin, ymax, ylabel) {
   ctx.strokeStyle = C.MUTED;
   ctx.lineWidth = 1;
   ctx.setLineDash([4, 4]);
-  const ybase = pad.top + ih * (1 - 1.635 / ymax);
+  const ybase = pad.top + ih * (1 - 1.535 / ymax);
   ctx.beginPath(); ctx.moveTo(pad.left, ybase); ctx.lineTo(w - pad.right, ybase); ctx.stroke();
   ctx.setLineDash([]);
 
@@ -1232,7 +1232,7 @@ drawDegDist("c3b", METRICAS_OUT, C.HIGH,  "Out-degree · n=73 · mean=8.9 · R²
   ctx.fillStyle = C.GREEN;
   ctx.font = "bold 13px 'JetBrains Mono', monospace";
   ctx.textAlign = "right";
-  ctx.fillText("ρ = 0.9997", w - pad.right - 4, pad.top + 18);
+  ctx.fillText("ρ = 0.9727", w - pad.right - 4, pad.top + 18);
 })();
 
 // ── FIG 4c — Tabla betweenness ────────────────────────────────────────────

@@ -147,7 +147,7 @@ def render_critical_path(ruta: list, out: Path):
                     linespacing=1.4)
 
     # Título
-    ax.text(0.5, 0.97, "Ruta crítica SolarWinds · Dijkstra · resistencia total = 1.635",
+    ax.text(0.5, 0.97, "Ruta critica SolarWinds · Dijkstra · resistencia total = 1.535",
             ha="center", va="top", fontsize=13, color=AMBER, fontweight="bold",
             transform=ax.transAxes)
 

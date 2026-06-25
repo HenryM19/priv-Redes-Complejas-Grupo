@@ -253,7 +253,7 @@ def render_full_graph(G, pos, by_tactic, critical_ids, out: Path):
     ax.set_title(
         f"Grafo de ataque SolarWinds Compromise · ATT&CK Enterprise · "
         f"{G.number_of_nodes()} nodos · {G.number_of_edges()} aristas · "
-        f"Ruta critica Dijkstra resaltada (resistencia = 1.635)",
+        f"Ruta critica Dijkstra resaltada (resistencia = 1.535)",
         color=AMBER, fontsize=14, fontweight="bold", pad=18
     )
 
