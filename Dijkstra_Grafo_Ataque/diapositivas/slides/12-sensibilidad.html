@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Sensibilidad y Métricas de Red</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc;--pink:#f472b6}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:52px 90px 48px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.22;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:20px;z-index:2}
+  h2{font-size:50px;font-weight:700;letter-spacing:-.02em;margin:20px 0 6px;z-index:2}
+  h2 .accent{color:var(--amber)}
+  .sub{color:var(--muted);font-size:20px;margin-bottom:22px;z-index:2}
+  .body{display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:2;flex:1;min-height:0}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 28px;display:flex;flex-direction:column}
+  .panel-title{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px}
+
+  /* Sensibilidad */
+  .scen-row{display:grid;grid-template-columns:160px 1fr 90px 100px 80px;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid rgba(30,42,64,.7)}
+  .scen-row:last-child{border-bottom:none}
+  .scen-label{font-family:'JetBrains Mono',monospace;font-size:14px}
+  .scen-desc{color:var(--muted);font-size:14px}
+  .scen-cost{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;text-align:right}
+  .bar-wrap{height:10px;background:var(--bg);border-radius:5px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:5px}
+  .jaccard{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;text-align:center}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:700}
+
+  /* Conclusión sensibilidad */
+  .sensi-conclusion{margin-top:auto;background:rgba(255,210,63,.06);border:1px solid rgba(255,210,63,.25);border-radius:10px;padding:16px 20px;font-size:16px;color:var(--muted);line-height:1.5}
+  .sensi-conclusion b{color:var(--amber)}
+
+  /* Métricas */
+  .met-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+  .met-box{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .met-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .met-val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;line-height:1}
+  .met-note{font-size:12px;color:var(--muted);margin-top:3px}
+
+  /* Betweenness mini chart */
+  .betw-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(30,42,64,.5)}
+  .betw-row:last-child{border-bottom:none}
+  .betw-id{font-family:'JetBrains Mono',monospace;font-size:13px;width:96px;flex-shrink:0}
+  .betw-bar-wrap{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+  .betw-bar{height:100%;border-radius:4px}
+  .betw-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);width:46px;text-align:right;flex-shrink:0}
+  .betw-rho{font-size:12px;color:var(--muted);margin-top:8px;text-align:right}
+  .betw-rho b{color:var(--green)}
+
+  .footer{position:absolute;bottom:28px;right:90px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2>📐 Sensibilidad de pesos y <span class="accent">métricas de red</span></h2>
+  <p class="sub">¿La ruta crítica cambia si los pesos cambian? · Estructura del grafo vs. grafo aleatorio equivalente</p>
+
+  <div class="body">
+
+    <!-- LEFT: Sensibilidad -->
+    <div class="panel">
+      <div class="panel-title" style="color:var(--amber)">Análisis de sensibilidad — 4 escenarios de pesos</div>
+
+      <!-- header -->
+      <div style="display:grid;grid-template-columns:160px 1fr 90px 100px 80px;gap:16px;padding:0 0 8px;border-bottom:1px solid var(--line)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Escenario</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Descripción</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right">Costo</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center">Jaccard</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center">Ruta</span>
+      </div>
+
+      <div class="scen-row">
+        <span class="scen-label" style="color:var(--cyan)">Base (orig.)</span>
+        <div><div class="bar-wrap"><div class="bar-fill" style="width:66%;background:var(--cyan)"></div></div><span class="scen-desc" style="font-size:12px">Mitigaciones + CVE</span></div>
+        <span class="scen-cost" style="color:var(--cyan)">1.635</span>
+        <span class="jaccard" style="color:var(--green)">1.000</span>
+        <span class="badge" style="background:rgba(90,209,160,.15);color:var(--green)">✓ idéntica</span>
+      </div>
+      <div class="scen-row">
+        <span class="scen-label" style="color:var(--green)">Pesos −20%</span>
+        <div><div class="bar-wrap"><div class="bar-fill" style="width:54%;background:var(--green)"></div></div><span class="scen-desc" style="font-size:12px">Todos los pesos × 0.8</span></div>
+        <span class="scen-cost" style="color:var(--green)">1.340</span>
+        <span class="jaccard" style="color:var(--green)">1.000</span>
+        <span class="badge" style="background:rgba(90,209,160,.15);color:var(--green)">✓ idéntica</span>
+      </div>
+      <div class="scen-row">
+        <span class="scen-label" style="color:var(--high)">Pesos +20%</span>
+        <div><div class="bar-wrap"><div class="bar-fill" style="width:79%;background:var(--high)"></div></div><span class="scen-desc" style="font-size:12px">Todos los pesos × 1.2</span></div>
+        <span class="scen-cost" style="color:var(--high)">1.960</span>
+        <span class="jaccard" style="color:var(--green)">1.000</span>
+        <span class="badge" style="background:rgba(90,209,160,.15);color:var(--green)">✓ idéntica</span>
+      </div>
+      <div class="scen-row">
+        <span class="scen-label" style="color:var(--crit)">Sin CVE</span>
+        <div><div class="bar-wrap"><div class="bar-fill" style="width:100%;background:var(--crit)"></div></div><span class="scen-desc" style="font-size:12px">Solo mitigaciones ATT&CK</span></div>
+        <span class="scen-cost" style="color:var(--crit)">2.485</span>
+        <span class="jaccard" style="color:var(--amber)">0.750</span>
+        <span class="badge" style="background:rgba(255,210,63,.15);color:var(--amber)">△ 1 nodo</span>
+      </div>
+
+      <div style="margin-top:14px;padding:12px 16px;background:var(--bg);border-radius:8px;border:1px solid var(--line)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">Sin CVE: T1558.003 (Kerberoasting) → T1539 (Steal Web Session Cookie)</span><br>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">Táctica <b style="color:var(--txt)">credential-access</b> sigue siendo el cuello de botella en todos los escenarios.</span>
+      </div>
+
+      <div class="sensi-conclusion">
+        <b>Conclusión de robustez:</b> Variaciones del ±20% en pesos no alteran la ruta crítica (Jaccard=1.0). Sin CVE-weights, la táctica crítica se mantiene; solo cambia la técnica específica. El modelo es robusto ante incertidumbre en los datos.
+      </div>
+    </div>
+
+    <!-- RIGHT: Métricas + Betweenness -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- Métricas de red -->
+      <div class="panel" style="flex:0 0 auto">
+        <div class="panel-title" style="color:var(--purple)">Métricas de redes complejas · grafo SolarWinds vs. Erdős-Rényi equivalente</div>
+        <div class="met-grid">
+          <div class="met-box">
+            <div class="met-label">Densidad</div>
+            <div class="met-val" style="color:var(--cyan)">0.124</div>
+            <div class="met-note">ER equiv.: 0.124</div>
+          </div>
+          <div class="met-box">
+            <div class="met-label">Clustering medio</div>
+            <div class="met-val" style="color:var(--purple)">0.203</div>
+            <div class="met-note">ER: 0.213 · ratio 0.953×</div>
+          </div>
+          <div class="met-box">
+            <div class="met-label">Diámetro (WCC)</div>
+            <div class="met-val" style="color:var(--amber)">9</div>
+            <div class="met-note">path medio: 2.85</div>
+          </div>
+          <div class="met-box">
+            <div class="met-label">Asortatividad</div>
+            <div class="met-val" style="color:var(--pink)">+0.308</div>
+            <div class="met-note">hubs conectan entre sí</div>
+          </div>
+          <div class="met-box">
+            <div class="met-label">SCC (compon. fuertes)</div>
+            <div class="met-val" style="color:var(--green)">54</div>
+            <div class="met-note">mayor SCC: 20 nodos</div>
+          </div>
+          <div class="met-box">
+            <div class="met-label">WCC (débil)</div>
+            <div class="met-val" style="color:var(--green)">1</div>
+            <div class="met-note">grafo completamente conexo</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);border-left:3px solid var(--purple);padding-left:12px;line-height:1.5">
+          In-degree power-law R²=<b style="color:var(--txt)">0.006</b> — distribución de grados no sigue ley de potencia: estructura táctica impuesta (kill chain), no red scale-free emergente.
+        </div>
+      </div>
+
+      <!-- FW-Betweenness top-7 -->
+      <div class="panel" style="flex:1">
+        <div class="panel-title" style="color:var(--crit)">FW-betweenness top-7 · validado vs NetworkX (Spearman ρ = 0.9997)</div>
+        <div class="betw-row">
+          <span class="betw-id" style="color:var(--crit);font-weight:700">T1078</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:100%;background:var(--crit)"></div></div>
+          <span class="betw-val">1218</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Valid Accounts · 4 tácticas</span>
+        </div>
+        <div class="betw-row">
+          <span class="betw-id" style="color:var(--high);font-weight:700">T1558.003</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:86%;background:var(--high)"></div></div>
+          <span class="betw-val">1044</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Kerberoasting</span>
+        </div>
+        <div class="betw-row">
+          <span class="betw-id" style="color:var(--amber)">T1087</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:69%;background:var(--amber)"></div></div>
+          <span class="betw-val">836</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Account Discovery</span>
+        </div>
+        <div class="betw-row">
+          <span class="betw-id" style="color:var(--amber)">T1482</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:69%;background:var(--amber)"></div></div>
+          <span class="betw-val">836</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Domain Trust Discovery</span>
+        </div>
+        <div class="betw-row">
+          <span class="betw-id" style="color:var(--cyan)">T1021.001</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:58%;background:var(--cyan)"></div></div>
+          <span class="betw-val">702</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Remote Desktop Protocol</span>
+        </div>
+        <div class="betw-row">
+          <span class="betw-id" style="color:var(--cyan)">T1213</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:34%;background:var(--cyan)"></div></div>
+          <span class="betw-val">420</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Data from Info Repos</span>
+        </div>
+        <div class="betw-row">
+          <span class="betw-id" style="color:var(--purple)">T1059.001</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:16%;background:var(--purple)"></div></div>
+          <span class="betw-val">194</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">PowerShell</span>
+        </div>
+        <p class="betw-rho">Spearman ρ (FW vs NetworkX Brandes): <b>0.9997</b> — implementación propia validada</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">12 / 13</div>
+</div>
+</body>
+</html>
