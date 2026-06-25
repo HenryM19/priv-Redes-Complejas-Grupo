@@ -35,7 +35,6 @@ from dataset_real import (
     TARGET_NODE,
     TARGET_CAMPAIGN_NAME,
     TACTIC_ORDER,
-    KNOWN_CVE_WEIGHTS,
 )
 from analisis_real import dijkstra, reconstruct_path, floyd_warshall, fw_betweenness
 
@@ -107,8 +106,8 @@ def bellman_ford(G: nx.DiGraph, source: str) -> tuple[dict, dict]:
 def build_graph_with_factor(bundle: dict, techniques: list, factor: float) -> nx.DiGraph:
     """
     Reconstruye el grafo con pesos multiplicados por `factor`.
-    Solo afecta pesos base (mitigaciones); CVE-weights tambien escalados.
-    Usado para analisis de sensibilidad.
+    Escala los pesos por mitigaciones. Usado para analisis de sensibilidad
+    (perturbacion +/-20%).
     """
     from dataset_real import _get_attack_id, _get_tactics
 
@@ -163,15 +162,21 @@ def build_graph_with_factor(bundle: dict, techniques: list, factor: float) -> nx
     return G
 
 
-def build_graph_no_cve(bundle: dict, techniques: list) -> nx.DiGraph:
-    """Grafo identico pero sin CVE-weights — solo mitigaciones."""
+def build_graph_binary(bundle: dict, techniques: list) -> nx.DiGraph:
+    """
+    Esquema de peso alternativo (robustez de la funcion de costo):
+    peso binario por umbral de mitigaciones en vez de proporcion lineal.
+      w = 0.9 si la tecnica tiene mitigaciones por encima de la mediana
+      w = 0.1 en caso contrario.
+    Verifica que la ruta critica no dependa de la forma exacta (lineal) de
+    la funcion de peso, solo del orden relativo (mas/menos defendida).
+    """
     from dataset_real import _get_attack_id, _get_tactics
+    import statistics
 
     mitig_index = build_mitigation_index(bundle)
-    max_mit = max(
-        (mitig_index.get(t["id"], 0) for t in techniques),
-        default=1
-    )
+    counts = [mitig_index.get(t["id"], 0) for t in techniques]
+    median_mit = statistics.median(counts) if counts else 0
 
     G = nx.DiGraph()
     tech_by_id = {}
@@ -184,11 +189,8 @@ def build_graph_no_cve(bundle: dict, techniques: list) -> nx.DiGraph:
         if not tactics:
             continue
         n_mit = mitig_index.get(t["id"], 0)
-        if max_mit > 0:
-            w = round(max(0.05, 1.0 - n_mit / max_mit), 3)
-        else:
-            w = 0.95
-        w_src = f"solo_mitigaciones={n_mit}/{max_mit}"
+        w = 0.9 if n_mit > median_mit else 0.1
+        w_src = f"binario(mit={n_mit},mediana={median_mit})"
         tech_by_id[atk_id] = (t, w, w_src)
         G.add_node(atk_id, name=t.get("name", ""), tactics=tactics,
                    weight=w, weight_source=w_src)
@@ -508,13 +510,13 @@ def run():
     print(f"  Guardado: comparacion_algoritmos.json")
 
     # ── 2. Sensibilidad de pesos ──────────────────────────────────────────────
-    print("\n[2/5] Analisis de sensibilidad: variacion de pesos +/-20% y sin CVEs...")
+    print("\n[2/5] Analisis de sensibilidad: variacion de pesos +/-20% y esquema binario...")
 
     scenarios = {
-        "base":       (G, "Pesos originales (mitigaciones + CVE)"),
+        "base":       (G, "Pesos por mitigaciones (lineal)"),
         "factor_0.8": (build_graph_with_factor(bundle, techniques, 0.8), "Pesos -20%"),
         "factor_1.2": (build_graph_with_factor(bundle, techniques, 1.2), "Pesos +20%"),
-        "sin_cve":    (build_graph_no_cve(bundle, techniques), "Solo mitigaciones (sin CVE)"),
+        "binario":    (build_graph_binary(bundle, techniques), "Esquema binario (umbral mediana)"),
     }
 
     sensibilidad = {}

@@ -19,15 +19,23 @@ Modelo de grafo (100% datos reales):
             DENTRO de la misma campana (no toda ATT&CK).
             Solo existen aristas entre tecnicas que SolarWinds realmente uso.
 
-  PESO   = costo real calculado desde datos ATT&CK:
-           w = 1 - (n_mitigaciones / max_mitigaciones_campana)
+  PESO   = costo (resistencia defensiva) calculado desde datos ATT&CK:
+           w = max(0.05, n_mitigaciones / max_mitigaciones_campana)
            donde n_mitigaciones = numero de mitigaciones documentadas en ATT&CK
            para esa tecnica (relaciones 'mitigates' en bundle STIX).
-           - Mas mitigaciones = tecnica mas conocida/defendible = mayor costo atacante
-           - 0 mitigaciones = tecnica sin contramedidas conocidas = w=0.95 (peligrosa)
+           - Mas mitigaciones documentadas = mas controles de defensa disponibles
+             = tecnica mas costosa de ejecutar para el atacante = w ALTO.
+           - 0 mitigaciones = sin contramedidas documentadas = camino barato
+             = w=0.05 (minimo, tecnica de baja resistencia).
 
-           Para tecnicas con CVE conocido asociado a SolarWinds (NVD):
-           w = max(0.05, (10 - CVSS) / 10)  — complementario, no reemplaza
+           Interpretacion: el peso es la resistencia defensiva de la tecnica.
+           Dijkstra encuentra la ruta de MENOR resistencia: la secuencia de
+           tecnicas con menos controles documentados, es decir, el camino que
+           un atacante racional preferiria por enfrentar menos defensas.
+
+           Pesos derivados 100% del bundle STIX 2.1. No se usan CVE/CVSS:
+           la asociacion CVE<->tecnica para una campana no esta en ATT&CK y
+           requiere juicio manual no reproducible (ver Limitacion L6).
 
 Kill chain (orden tactico ATT&CK):
   reconnaissance -> resource-development -> initial-access -> execution ->
@@ -70,22 +78,12 @@ TACTIC_ORDER = [
 ENTRY_NODE = "ATTACKER"
 TARGET_NODE = "IMPACT"
 
-# CVEs reales asociados a tecnicas usadas en SolarWinds (fuente: NVD + reportes publicos)
-# Estos pesos reemplazan la heuristica cuando hay CVE conocido
-KNOWN_CVE_WEIGHTS = {
-    # Tecnica ATT&CK -> (CVE-ID, CVSS, fuente)
-    "T1195.002": ("CVE-2020-10148",  9.8, "SolarWinds Orion supply chain"),
-    "T1059.001": ("CVE-2020-10148",  9.8, "PowerShell en SUNBURST"),
-    "T1071.001": ("CVE-2020-10148",  9.8, "C2 HTTP SUNBURST"),
-    "T1027":     ("CVE-2020-10148",  9.8, "Obfuscation SUNBURST"),
-    "T1078":     ("CVE-2021-21985",  9.8, "Valid accounts post-compromise"),
-    "T1021.001": ("CVE-2021-26855",  9.8, "RDP lateral movement"),
-    "T1550.002": ("CVE-2020-10148",  9.8, "Pass-the-hash SUNBURST"),
-    "T1003.001": ("CVE-2017-0144",   8.1, "Credential dumping (LSASS)"),
-    "T1558.003": ("CVE-2014-6324",   9.0, "Kerberoasting"),
-    "T1190":     ("CVE-2020-10148",  9.8, "Exploit public-facing app"),
-    "T1133":     ("CVE-2018-13379",  9.8, "External Remote Services VPN"),
-}
+# NOTA: el modelo NO usa pesos basados en CVE/CVSS. La version previa mapeaba
+# CVEs a tecnicas manualmente, pero ese mapeo (a) no es reproducible desde el
+# bundle STIX y (b) contenia asociaciones CVE<->tecnica incorrectas
+# (p.ej. CVE-2020-10148 es un auth-bypass del API de Orion -> T1190/T1195.002,
+# no PowerShell ni C2). Todos los pesos derivan ahora solo de mitigaciones
+# documentadas en ATT&CK (relaciones 'mitigates'). Ver Limitacion L6.
 
 
 # ── Descarga ─────────────────────────────────────────────────────────────────
@@ -177,41 +175,27 @@ def build_mitigation_index(bundle: dict) -> dict:
 
 def compute_weight(technique: dict, n_mitigations: int, max_mitigations: int) -> tuple[float, str]:
     """
-    Peso de arista = resistencia que opone la tecnica al atacante.
+    Peso de arista = resistencia defensiva de la tecnica de destino.
 
-    Formula principal (datos ATT&CK reales):
-      w = 1 - (n_mitigaciones / max_mitigaciones_en_campana)
-      - Mas mitigaciones documentadas = tecnica mas conocida/defendible
-        = mayor costo para el atacante = w alto
-      - 0 mitigaciones = tecnica sin contramedidas conocidas = w=0.95
+    Formula (datos ATT&CK reales, derivados 100% del bundle STIX):
+      w = max(0.05, n_mitigaciones / max_mitigaciones_en_campana)
+      - Mas mitigaciones documentadas = mas controles de defensa = w ALTO
+        = tecnica mas costosa/dificil para el atacante.
+      - 0 mitigaciones = sin contramedidas = w=0.05 (camino de minima resistencia).
 
-    Para tecnicas con CVE real asociado a SolarWinds:
-      w = min(w_mitigaciones, max(0.05, (10 - CVSS) / 10))
-      Toma el minimo: si el CVE es critico Y la tecnica tiene pocas
-      mitigaciones, el costo es el mas bajo posible (peor escenario).
+    Dijkstra sobre estos pesos encuentra la ruta de MENOR resistencia
+    defensiva: las tecnicas que un atacante racional preferiria por enfrentar
+    menos controles documentados.
+
+    El minimo 0.05 evita aristas de peso 0 (que romperian la nocion de costo
+    y permitirian rutas degeneradas de longitud arbitraria sin penalizacion).
     """
-    ext = technique.get("external_references", [])
-    attack_id = next(
-        (r["external_id"] for r in ext if r.get("source_name") == "mitre-attack"),
-        None,
-    )
-
-    # Peso base desde mitigaciones ATT&CK (dato real)
     if max_mitigations > 0:
-        w_mit = round(max(0.05, 1.0 - n_mitigations / max_mitigations), 3)
+        w = round(max(0.05, n_mitigations / max_mitigations), 3)
     else:
-        w_mit = 0.95
+        w = 0.05
     source = f"mitigaciones={n_mitigations}/{max_mitigations}"
-
-    # Si hay CVE real conocido, toma el minimo (mas conservador para el atacante)
-    if attack_id and attack_id in KNOWN_CVE_WEIGHTS:
-        cve_id, cvss, cve_src = KNOWN_CVE_WEIGHTS[attack_id]
-        w_cve = round(max(0.05, (10.0 - cvss) / 10.0), 3)
-        w_final = round(min(w_mit, w_cve), 3)
-        source = f"CVE:{cve_id}(CVSS={cvss})+mit={n_mitigations}"
-        return w_final, source
-
-    return w_mit, source
+    return w, source
 
 
 # ── Construccion del grafo ────────────────────────────────────────────────────
@@ -245,7 +229,7 @@ def build_attack_graph(bundle: dict, campaign_techniques: list) -> object:
     Nodos ATTACKER/IMPACT son necesarios como frontera del modelo
     (el atacante externo y el objetivo final) y se justifican metodologicamente.
 
-    Pesos: 100% reales desde bundle STIX (mitigaciones) + CVEs reales NVD.
+    Pesos: 100% derivados del bundle STIX (mitigaciones documentadas).
     """
     import networkx as nx
 

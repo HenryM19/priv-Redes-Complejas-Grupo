@@ -1,18 +1,18 @@
 {
   "campana": "SolarWinds Compromise",
-  "costo_base": 1.635,
+  "costo_base": 1.535,
   "ruta_critica_base": [
     "ATTACKER",
-    "T1078",
-    "T1558.003",
-    "T1087",
-    "T1021.001",
-    "T1213",
-    "T1071.001",
+    "T1078.003",
+    "T1606.001",
+    "T1016.001",
+    "T1550.004",
+    "T1074.002",
+    "T1665",
     "T1048.002",
     "IMPACT"
   ],
-  "n_candidatos_evaluados": 11,
+  "n_candidatos_evaluados": 15,
   "recomendaciones": [
     {
       "ranking": 1,
@@ -24,7 +24,7 @@
       ],
       "accion_recomendada": "Bloquear T1048.002 elimina toda ruta ATTACKER->IMPACT. Impacto maxximo.",
       "metricas": {
-        "costo_original": 1.635,
+        "costo_original": 1.535,
         "costo_tras_bloqueo": null,
         "delta_costo": null,
         "delta_porcentaje": null,
@@ -39,33 +39,33 @@
     },
     {
       "ranking": 2,
-      "prioridad": "ALTA",
-      "node": "T1071.001",
-      "name": "Web Protocols",
+      "prioridad": "MEDIA",
+      "node": "T1550.004",
+      "name": "Web Session Cookie",
       "tactics": [
-        "command-and-control"
+        "lateral-movement"
       ],
-      "accion_recomendada": "Mitigar T1071.001 sube el costo en +0.700 (42.8%). Ruta alternativa pasa por: T1105.",
+      "accion_recomendada": "Mitigar T1550.004 incrementa resistencia en +0.250 (16.3%).",
       "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 2.335,
-        "delta_costo": 0.7,
-        "delta_porcentaje": 42.81,
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.785,
+        "delta_costo": 0.25,
+        "delta_porcentaje": 16.29,
         "bloqueo_total": false,
         "en_ruta_critica": true,
-        "in_degree": 6,
-        "out_degree": 1,
-        "weight": 0.05,
-        "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=2"
+        "in_degree": 10,
+        "out_degree": 6,
+        "weight": 0.125,
+        "weight_source": "mitigaciones=1/8"
       },
       "ruta_alternativa_tras_bloqueo": [
         "ATTACKER",
-        "T1078",
-        "T1558.003",
-        "T1087",
-        "T1021.001",
-        "T1213",
-        "T1105",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1021.006",
+        "T1074.002",
+        "T1665",
         "T1048.002",
         "IMPACT"
       ]
@@ -73,107 +73,41 @@
     {
       "ranking": 3,
       "prioridad": "MEDIA",
-      "node": "T1213",
-      "name": "Data from Information Repositories",
+      "node": "T1606.001",
+      "name": "Web Cookies",
       "tactics": [
-        "collection"
+        "credential-access"
       ],
-      "accion_recomendada": "Mitigar T1213 incrementa resistencia en +0.375 (22.9%).",
+      "accion_recomendada": "Mitigar T1606.001 incrementa resistencia en +0.125 (8.1%).",
       "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 2.01,
-        "delta_costo": 0.375,
-        "delta_porcentaje": 22.94,
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.66,
+        "delta_costo": 0.125,
+        "delta_porcentaje": 8.14,
         "bloqueo_total": false,
         "en_ruta_critica": true,
-        "in_degree": 6,
-        "out_degree": 5,
-        "weight": 0.125,
-        "weight_source": "mitigaciones=7/8"
+        "in_degree": 12,
+        "out_degree": 10,
+        "weight": 0.25,
+        "weight_source": "mitigaciones=2/8"
       },
       "ruta_alternativa_tras_bloqueo": [
         "ATTACKER",
-        "T1078",
-        "T1558.003",
-        "T1087",
-        "T1021.001",
-        "T1213.003",
-        "T1071.001",
+        "T1078.003",
+        "T1003.006",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
         "T1048.002",
         "IMPACT"
       ]
     },
     {
       "ranking": 4,
-      "prioridad": "MEDIA",
-      "node": "T1558.003",
-      "name": "Kerberoasting",
-      "tactics": [
-        "credential-access"
-      ],
-      "accion_recomendada": "Mitigar T1558.003 incrementa resistencia en +0.150 (9.2%).",
-      "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 1.785,
-        "delta_costo": 0.15,
-        "delta_porcentaje": 9.17,
-        "bloqueo_total": false,
-        "en_ruta_critica": true,
-        "in_degree": 12,
-        "out_degree": 10,
-        "weight": 0.1,
-        "weight_source": "CVE:CVE-2014-6324(CVSS=9.0)+mit=3"
-      },
-      "ruta_alternativa_tras_bloqueo": [
-        "ATTACKER",
-        "T1078",
-        "T1539",
-        "T1087",
-        "T1021.001",
-        "T1213",
-        "T1071.001",
-        "T1048.002",
-        "IMPACT"
-      ]
-    },
-    {
-      "ranking": 5,
       "prioridad": "BAJA",
-      "node": "T1021.001",
-      "name": "Remote Desktop Protocol",
-      "tactics": [
-        "lateral-movement"
-      ],
-      "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
-      "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 1.71,
-        "delta_costo": 0.075,
-        "delta_porcentaje": 4.59,
-        "bloqueo_total": false,
-        "en_ruta_critica": true,
-        "in_degree": 10,
-        "out_degree": 6,
-        "weight": 0.05,
-        "weight_source": "CVE:CVE-2021-26855(CVSS=9.8)+mit=8"
-      },
-      "ruta_alternativa_tras_bloqueo": [
-        "ATTACKER",
-        "T1078",
-        "T1558.003",
-        "T1087",
-        "T1550",
-        "T1213",
-        "T1071.001",
-        "T1048.002",
-        "IMPACT"
-      ]
-    },
-    {
-      "ranking": 6,
-      "prioridad": "BAJA",
-      "node": "T1078",
-      "name": "Valid Accounts",
+      "node": "T1078.003",
+      "name": "Local Accounts",
       "tactics": [
         "stealth",
         "persistence",
@@ -182,25 +116,95 @@
       ],
       "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
       "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 1.71,
-        "delta_costo": 0.075,
-        "delta_porcentaje": 4.59,
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.635,
+        "delta_costo": 0.1,
+        "delta_porcentaje": 6.51,
         "bloqueo_total": false,
         "en_ruta_critica": true,
         "in_degree": 24,
         "out_degree": 27,
-        "weight": 0.05,
-        "weight_source": "CVE:CVE-2021-21985(CVSS=9.8)+mit=8"
+        "weight": 0.5,
+        "weight_source": "mitigaciones=4/8"
       },
       "ruta_alternativa_tras_bloqueo": [
         "ATTACKER",
-        "T1078.004",
-        "T1558.003",
-        "T1087",
-        "T1021.001",
-        "T1213",
-        "T1071.001",
+        "T1195.002",
+        "T1059.003",
+        "T1098.005",
+        "T1553.002",
+        "T1036.004",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
+        "T1048.002",
+        "IMPACT"
+      ]
+    },
+    {
+      "ranking": 5,
+      "prioridad": "BAJA",
+      "node": "T1074.002",
+      "name": "Remote Data Staging",
+      "tactics": [
+        "collection"
+      ],
+      "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
+      "metricas": {
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.61,
+        "delta_costo": 0.075,
+        "delta_porcentaje": 4.89,
+        "bloqueo_total": false,
+        "en_ruta_critica": true,
+        "in_degree": 6,
+        "out_degree": 5,
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
+      },
+      "ruta_alternativa_tras_bloqueo": [
+        "ATTACKER",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1005",
+        "T1665",
+        "T1048.002",
+        "IMPACT"
+      ]
+    },
+    {
+      "ranking": 6,
+      "prioridad": "BAJA",
+      "node": "T1665",
+      "name": "Hide Infrastructure",
+      "tactics": [
+        "command-and-control"
+      ],
+      "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
+      "metricas": {
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.61,
+        "delta_costo": 0.075,
+        "delta_porcentaje": 4.89,
+        "bloqueo_total": false,
+        "en_ruta_critica": true,
+        "in_degree": 6,
+        "out_degree": 1,
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
+      },
+      "ruta_alternativa_tras_bloqueo": [
+        "ATTACKER",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1090.001",
         "T1048.002",
         "IMPACT"
       ]
@@ -208,32 +212,32 @@
     {
       "ranking": 7,
       "prioridad": "BAJA",
-      "node": "T1059.001",
-      "name": "PowerShell",
+      "node": "T1016.001",
+      "name": "Internet Connection Discovery",
       "tactics": [
-        "execution"
+        "discovery"
       ],
       "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
       "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 1.635,
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
         "delta_costo": 0.0,
         "delta_porcentaje": 0.0,
         "bloqueo_total": false,
-        "en_ruta_critica": false,
+        "en_ruta_critica": true,
         "in_degree": 8,
-        "out_degree": 11,
+        "out_degree": 6,
         "weight": 0.05,
-        "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=5"
+        "weight_source": "mitigaciones=0/8"
       },
       "ruta_alternativa_tras_bloqueo": [
         "ATTACKER",
-        "T1078",
-        "T1558.003",
-        "T1087",
-        "T1021.001",
-        "T1213",
-        "T1071.001",
+        "T1078.003",
+        "T1606.001",
+        "T1018",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
         "T1048.002",
         "IMPACT"
       ]
@@ -241,32 +245,32 @@
     {
       "ranking": 8,
       "prioridad": "BAJA",
-      "node": "T1087",
-      "name": "Account Discovery",
+      "node": "T1018",
+      "name": "Remote System Discovery",
       "tactics": [
         "discovery"
       ],
       "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
       "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 1.635,
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
         "delta_costo": 0.0,
         "delta_porcentaje": 0.0,
         "bloqueo_total": false,
-        "en_ruta_critica": true,
+        "en_ruta_critica": false,
         "in_degree": 8,
         "out_degree": 6,
-        "weight": 0.75,
-        "weight_source": "mitigaciones=2/8"
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
       },
       "ruta_alternativa_tras_bloqueo": [
         "ATTACKER",
-        "T1078",
-        "T1558.003",
-        "T1482",
-        "T1021.001",
-        "T1213",
-        "T1071.001",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
         "T1048.002",
         "IMPACT"
       ]
@@ -274,33 +278,32 @@
     {
       "ranking": 9,
       "prioridad": "BAJA",
-      "node": "T1133",
-      "name": "External Remote Services",
+      "node": "T1057",
+      "name": "Process Discovery",
       "tactics": [
-        "persistence",
-        "initial-access"
+        "discovery"
       ],
       "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
       "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 1.635,
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
         "delta_costo": 0.0,
         "delta_porcentaje": 0.0,
         "bloqueo_total": false,
         "en_ruta_critica": false,
-        "in_degree": 9,
-        "out_degree": 15,
+        "in_degree": 8,
+        "out_degree": 6,
         "weight": 0.05,
-        "weight_source": "CVE:CVE-2018-13379(CVSS=9.8)+mit=5"
+        "weight_source": "mitigaciones=0/8"
       },
       "ruta_alternativa_tras_bloqueo": [
         "ATTACKER",
-        "T1078",
-        "T1558.003",
-        "T1087",
-        "T1021.001",
-        "T1213",
-        "T1071.001",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
         "T1048.002",
         "IMPACT"
       ]
@@ -308,32 +311,32 @@
     {
       "ranking": 10,
       "prioridad": "BAJA",
-      "node": "T1482",
-      "name": "Domain Trust Discovery",
+      "node": "T1069",
+      "name": "Permission Groups Discovery",
       "tactics": [
         "discovery"
       ],
       "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
       "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 1.635,
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
         "delta_costo": 0.0,
         "delta_porcentaje": 0.0,
         "bloqueo_total": false,
         "en_ruta_critica": false,
         "in_degree": 8,
         "out_degree": 6,
-        "weight": 0.75,
-        "weight_source": "mitigaciones=2/8"
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
       },
       "ruta_alternativa_tras_bloqueo": [
         "ATTACKER",
-        "T1078",
-        "T1558.003",
-        "T1087",
-        "T1021.001",
-        "T1213",
-        "T1071.001",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
         "T1048.002",
         "IMPACT"
       ]
@@ -341,32 +344,164 @@
     {
       "ranking": 11,
       "prioridad": "BAJA",
-      "node": "T1685",
-      "name": "Disable or Modify Tools",
+      "node": "T1069.002",
+      "name": "Domain Groups",
       "tactics": [
-        "defense-impairment"
+        "discovery"
       ],
       "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
       "metricas": {
-        "costo_original": 1.635,
-        "costo_tras_bloqueo": 1.635,
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
         "delta_costo": 0.0,
         "delta_porcentaje": 0.0,
         "bloqueo_total": false,
         "en_ruta_critica": false,
-        "in_degree": 11,
-        "out_degree": 12,
-        "weight": 0.125,
-        "weight_source": "mitigaciones=7/8"
+        "in_degree": 8,
+        "out_degree": 6,
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
       },
       "ruta_alternativa_tras_bloqueo": [
         "ATTACKER",
-        "T1078",
-        "T1558.003",
-        "T1087",
-        "T1021.001",
-        "T1213",
-        "T1071.001",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
+        "T1048.002",
+        "IMPACT"
+      ]
+    },
+    {
+      "ranking": 12,
+      "prioridad": "BAJA",
+      "node": "T1070.004",
+      "name": "File Deletion",
+      "tactics": [
+        "stealth"
+      ],
+      "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
+      "metricas": {
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
+        "delta_costo": 0.0,
+        "delta_porcentaje": 0.0,
+        "bloqueo_total": false,
+        "en_ruta_critica": false,
+        "in_degree": 5,
+        "out_degree": 8,
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
+      },
+      "ruta_alternativa_tras_bloqueo": [
+        "ATTACKER",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
+        "T1048.002",
+        "IMPACT"
+      ]
+    },
+    {
+      "ranking": 13,
+      "prioridad": "BAJA",
+      "node": "T1070.006",
+      "name": "Timestomp",
+      "tactics": [
+        "stealth"
+      ],
+      "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
+      "metricas": {
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
+        "delta_costo": 0.0,
+        "delta_porcentaje": 0.0,
+        "bloqueo_total": false,
+        "en_ruta_critica": false,
+        "in_degree": 5,
+        "out_degree": 8,
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
+      },
+      "ruta_alternativa_tras_bloqueo": [
+        "ATTACKER",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
+        "T1048.002",
+        "IMPACT"
+      ]
+    },
+    {
+      "ranking": 14,
+      "prioridad": "BAJA",
+      "node": "T1083",
+      "name": "File and Directory Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
+      "metricas": {
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
+        "delta_costo": 0.0,
+        "delta_porcentaje": 0.0,
+        "bloqueo_total": false,
+        "en_ruta_critica": false,
+        "in_degree": 8,
+        "out_degree": 6,
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
+      },
+      "ruta_alternativa_tras_bloqueo": [
+        "ATTACKER",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
+        "T1048.002",
+        "IMPACT"
+      ]
+    },
+    {
+      "ranking": 15,
+      "prioridad": "BAJA",
+      "node": "T1680",
+      "name": "Local Storage Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "accion_recomendada": "Impacto bajo: el atacante re-enruta con costo similar.",
+      "metricas": {
+        "costo_original": 1.535,
+        "costo_tras_bloqueo": 1.535,
+        "delta_costo": 0.0,
+        "delta_porcentaje": 0.0,
+        "bloqueo_total": false,
+        "en_ruta_critica": false,
+        "in_degree": 8,
+        "out_degree": 6,
+        "weight": 0.05,
+        "weight_source": "mitigaciones=0/8"
+      },
+      "ruta_alternativa_tras_bloqueo": [
+        "ATTACKER",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
         "T1048.002",
         "IMPACT"
       ]
@@ -374,12 +509,12 @@
   ],
   "resumen_ejecutivo": {
     "bloqueos_totales": 1,
-    "impacto_alto": 1,
+    "impacto_alto": 0,
     "impacto_medio": 2,
     "top3_recomendados": [
       "T1048.002",
-      "T1071.001",
-      "T1213"
+      "T1550.004",
+      "T1606.001"
     ],
     "metodologia": "Para cada tecnica candidata, se elimina del grafo y se recalcula Dijkstra. El delta de costo mide cuanto mas caro se vuelve el ataque para el adversario. Bloqueo total = no existe ruta ATTACKER->IMPACT."
   }

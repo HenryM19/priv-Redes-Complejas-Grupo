@@ -1,75 +1,75 @@
 {
   "dijkstra_propio": {
-    "costo": 1.635,
+    "costo": 1.535,
     "n_pasos": 9,
-    "ruta": [
-      "ATTACKER",
-      "T1078",
-      "T1558.003",
-      "T1087",
-      "T1021.001",
-      "T1213",
-      "T1071.001",
-      "T1048.002",
-      "IMPACT"
-    ],
-    "tiempo_ms": 0.3204
-  },
-  "bellman_ford_propio": {
-    "costo": 1.635,
-    "n_pasos": 9,
-    "ruta": [
-      "ATTACKER",
-      "T1078",
-      "T1558.003",
-      "T1482",
-      "T1021.001",
-      "T1213",
-      "T1071.001",
-      "T1048.002",
-      "IMPACT"
-    ],
-    "tiempo_ms": 0.8238
-  },
-  "networkx_dijkstra": {
-    "costo": 1.635,
-    "n_pasos": 9,
-    "ruta": [
-      "ATTACKER",
-      "T1078",
-      "T1558.003",
-      "T1482",
-      "T1021.001",
-      "T1213",
-      "T1071.001",
-      "T1048.002",
-      "IMPACT"
-    ],
-    "tiempo_ms": 2.2517
-  },
-  "bfs_sin_pesos": {
-    "costo_real_acumulado": 3.875,
-    "n_hops": 8,
     "ruta": [
       "ATTACKER",
       "T1078.003",
-      "T1555.003",
+      "T1606.001",
       "T1016.001",
-      "T1550.001",
-      "T1213",
+      "T1550.004",
+      "T1074.002",
       "T1665",
       "T1048.002",
       "IMPACT"
     ],
-    "tiempo_ms": 0.0785
+    "tiempo_ms": 0.2165
+  },
+  "bellman_ford_propio": {
+    "costo": 1.535,
+    "n_pasos": 9,
+    "ruta": [
+      "ATTACKER",
+      "T1078.003",
+      "T1606.001",
+      "T1057",
+      "T1550.004",
+      "T1074.002",
+      "T1665",
+      "T1048.002",
+      "IMPACT"
+    ],
+    "tiempo_ms": 0.6266
+  },
+  "networkx_dijkstra": {
+    "costo": 1.535,
+    "n_pasos": 9,
+    "ruta": [
+      "ATTACKER",
+      "T1078.003",
+      "T1606.001",
+      "T1016.001",
+      "T1550.004",
+      "T1074.002",
+      "T1665",
+      "T1048.002",
+      "IMPACT"
+    ],
+    "tiempo_ms": 0.8993
+  },
+  "bfs_sin_pesos": {
+    "costo_real_acumulado": 2.925,
+    "n_hops": 8,
+    "ruta": [
+      "ATTACKER",
+      "T1078.002",
+      "T1552.004",
+      "T1016.001",
+      "T1021.002",
+      "T1213.003",
+      "T1105",
+      "T1048.002",
+      "IMPACT"
+    ],
+    "tiempo_ms": 0.0437
   },
   "validacion": {
     "dijkstra_igual_bellman_ford": true,
     "dijkstra_igual_networkx": true,
     "ruta_identica_tres_algoritmos": false,
     "bfs_ruta_igual_dijkstra": false,
-    "bfs_sobrecoste_vs_dijkstra": 2.24,
-    "bfs_sobrecoste_porcentaje": 137.0,
+    "bfs_sobrecoste_vs_dijkstra": 1.39,
+    "bfs_sobrecoste_porcentaje": 90.55,
     "conclusion": "Implementaciones propias (Dijkstra, Bellman-Ford) producen resultado identico a NetworkX. BFS sin pesos halla ruta suboptima, demostrando que los pesos son informativos para el modelo de amenaza."
   }
 }

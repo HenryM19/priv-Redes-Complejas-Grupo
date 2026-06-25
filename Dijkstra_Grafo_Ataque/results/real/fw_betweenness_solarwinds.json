@@ -1,127 +1,247 @@
 [
   {
-    "node": "T1078",
-    "name": "Valid Accounts",
-    "fw_betweenness": 1218,
+    "node": "T1606.001",
+    "name": "Web Cookies",
+    "fw_betweenness": 1044,
+    "tactics": [
+      "credential-access"
+    ],
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
+    "in_degree": 12,
+    "out_degree": 10
+  },
+  {
+    "node": "T1018",
+    "name": "Remote System Discovery",
+    "fw_betweenness": 836,
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 8,
+    "out_degree": 6
+  },
+  {
+    "node": "T1069.002",
+    "name": "Domain Groups",
+    "fw_betweenness": 836,
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 8,
+    "out_degree": 6
+  },
+  {
+    "node": "T1069",
+    "name": "Permission Groups Discovery",
+    "fw_betweenness": 836,
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 8,
+    "out_degree": 6
+  },
+  {
+    "node": "T1680",
+    "name": "Local Storage Discovery",
+    "fw_betweenness": 836,
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 8,
+    "out_degree": 6
+  },
+  {
+    "node": "T1083",
+    "name": "File and Directory Discovery",
+    "fw_betweenness": 836,
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 8,
+    "out_degree": 6
+  },
+  {
+    "node": "T1016.001",
+    "name": "Internet Connection Discovery",
+    "fw_betweenness": 836,
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 8,
+    "out_degree": 6
+  },
+  {
+    "node": "T1057",
+    "name": "Process Discovery",
+    "fw_betweenness": 836,
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 8,
+    "out_degree": 6
+  },
+  {
+    "node": "T1070.006",
+    "name": "Timestomp",
+    "fw_betweenness": 703,
+    "tactics": [
+      "stealth"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 5,
+    "out_degree": 8
+  },
+  {
+    "node": "T1070.004",
+    "name": "File Deletion",
+    "fw_betweenness": 703,
+    "tactics": [
+      "stealth"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 5,
+    "out_degree": 8
+  },
+  {
+    "node": "T1036.004",
+    "name": "Masquerade Task or Service",
+    "fw_betweenness": 703,
+    "tactics": [
+      "stealth"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 5,
+    "out_degree": 8
+  },
+  {
+    "node": "T1140",
+    "name": "Deobfuscate/Decode Files or Information",
+    "fw_betweenness": 703,
+    "tactics": [
+      "stealth"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 5,
+    "out_degree": 8
+  },
+  {
+    "node": "T1550.004",
+    "name": "Web Session Cookie",
+    "fw_betweenness": 702,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
+    "in_degree": 10,
+    "out_degree": 6
+  },
+  {
+    "node": "T1553.002",
+    "name": "Code Signing",
+    "fw_betweenness": 702,
+    "tactics": [
+      "defense-impairment"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 11,
+    "out_degree": 12
+  },
+  {
+    "node": "T1098.005",
+    "name": "Device Registration",
+    "fw_betweenness": 464,
+    "tactics": [
+      "persistence",
+      "privilege-escalation"
+    ],
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
+    "in_degree": 15,
+    "out_degree": 15
+  },
+  {
+    "node": "T1074.002",
+    "name": "Remote Data Staging",
+    "fw_betweenness": 420,
+    "tactics": [
+      "collection"
+    ],
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
+    "in_degree": 6,
+    "out_degree": 5
+  },
+  {
+    "node": "T1078.003",
+    "name": "Local Accounts",
+    "fw_betweenness": 357,
     "tactics": [
       "stealth",
       "persistence",
       "privilege-escalation",
       "initial-access"
     ],
-    "weight": 0.05,
-    "weight_source": "CVE:CVE-2021-21985(CVSS=9.8)+mit=8",
+    "weight": 0.5,
+    "weight_source": "mitigaciones=4/8",
     "in_degree": 24,
     "out_degree": 27
   },
   {
-    "node": "T1558.003",
-    "name": "Kerberoasting",
-    "fw_betweenness": 1044,
-    "tactics": [
-      "credential-access"
-    ],
-    "weight": 0.1,
-    "weight_source": "CVE:CVE-2014-6324(CVSS=9.0)+mit=3",
-    "in_degree": 12,
-    "out_degree": 10
-  },
-  {
-    "node": "T1087",
-    "name": "Account Discovery",
-    "fw_betweenness": 836,
-    "tactics": [
-      "discovery"
-    ],
-    "weight": 0.75,
-    "weight_source": "mitigaciones=2/8",
-    "in_degree": 8,
-    "out_degree": 6
-  },
-  {
-    "node": "T1482",
-    "name": "Domain Trust Discovery",
-    "fw_betweenness": 836,
-    "tactics": [
-      "discovery"
-    ],
-    "weight": 0.75,
-    "weight_source": "mitigaciones=2/8",
-    "in_degree": 8,
-    "out_degree": 6
-  },
-  {
-    "node": "T1021.001",
-    "name": "Remote Desktop Protocol",
-    "fw_betweenness": 702,
-    "tactics": [
-      "lateral-movement"
-    ],
-    "weight": 0.05,
-    "weight_source": "CVE:CVE-2021-26855(CVSS=9.8)+mit=8",
-    "in_degree": 10,
-    "out_degree": 6
-  },
-  {
-    "node": "T1213",
-    "name": "Data from Information Repositories",
-    "fw_betweenness": 420,
-    "tactics": [
-      "collection"
-    ],
-    "weight": 0.125,
-    "weight_source": "mitigaciones=7/8",
-    "in_degree": 6,
-    "out_degree": 5
-  },
-  {
-    "node": "T1059.001",
-    "name": "PowerShell",
-    "fw_betweenness": 194,
+    "node": "T1059.003",
+    "name": "Windows Command Shell",
+    "fw_betweenness": 279,
     "tactics": [
       "execution"
     ],
-    "weight": 0.05,
-    "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=5",
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
     "in_degree": 8,
     "out_degree": 11
   },
   {
-    "node": "T1685",
-    "name": "Disable or Modify Tools",
-    "fw_betweenness": 184,
-    "tactics": [
-      "defense-impairment"
-    ],
-    "weight": 0.125,
-    "weight_source": "mitigaciones=7/8",
-    "in_degree": 11,
-    "out_degree": 12
-  },
-  {
-    "node": "T1071.001",
-    "name": "Web Protocols",
+    "node": "T1665",
+    "name": "Hide Infrastructure",
     "fw_betweenness": 132,
     "tactics": [
       "command-and-control"
     ],
     "weight": 0.05,
-    "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=2",
+    "weight_source": "mitigaciones=0/8",
     "in_degree": 6,
     "out_degree": 1
   },
   {
-    "node": "T1133",
-    "name": "External Remote Services",
-    "fw_betweenness": 78,
+    "node": "T1195.002",
+    "name": "Compromise Software Supply Chain",
+    "fw_betweenness": 115,
     "tactics": [
-      "persistence",
       "initial-access"
     ],
-    "weight": 0.05,
-    "weight_source": "CVE:CVE-2018-13379(CVSS=9.8)+mit=5",
-    "in_degree": 9,
-    "out_degree": 15
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
+    "in_degree": 4,
+    "out_degree": 5
   },
   {
     "node": "T1048.002",
@@ -136,25 +256,13 @@
     "out_degree": 1
   },
   {
-    "node": "T1587.001",
-    "name": "Malware",
-    "fw_betweenness": 68,
-    "tactics": [
-      "resource-development"
-    ],
-    "weight": 0.875,
-    "weight_source": "mitigaciones=1/8",
-    "in_degree": 2,
-    "out_degree": 8
-  },
-  {
     "node": "T1583.001",
     "name": "Domains",
     "fw_betweenness": 68,
     "tactics": [
       "resource-development"
     ],
-    "weight": 0.875,
+    "weight": 0.125,
     "weight_source": "mitigaciones=1/8",
     "in_degree": 2,
     "out_degree": 8
@@ -166,125 +274,27 @@
     "tactics": [
       "resource-development"
     ],
-    "weight": 0.875,
+    "weight": 0.125,
     "weight_source": "mitigaciones=1/8",
     "in_degree": 2,
     "out_degree": 8
   },
   {
-    "node": "T1195.002",
-    "name": "Compromise Software Supply Chain",
-    "fw_betweenness": 25,
+    "node": "T1587.001",
+    "name": "Malware",
+    "fw_betweenness": 68,
     "tactics": [
-      "initial-access"
+      "resource-development"
     ],
-    "weight": 0.05,
-    "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=2",
-    "in_degree": 4,
-    "out_degree": 5
-  },
-  {
-    "node": "T1190",
-    "name": "Exploit Public-Facing Application",
-    "fw_betweenness": 25,
-    "tactics": [
-      "initial-access"
-    ],
-    "weight": 0.05,
-    "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=8",
-    "in_degree": 4,
-    "out_degree": 5
-  },
-  {
-    "node": "T1087.002",
-    "name": "Domain Account",
-    "fw_betweenness": 0,
-    "tactics": [
-      "discovery"
-    ],
-    "weight": 0.875,
+    "weight": 0.125,
     "weight_source": "mitigaciones=1/8",
-    "in_degree": 8,
-    "out_degree": 6
-  },
-  {
-    "node": "T1070.006",
-    "name": "Timestomp",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 5,
+    "in_degree": 2,
     "out_degree": 8
-  },
-  {
-    "node": "T1021.006",
-    "name": "Windows Remote Management",
-    "fw_betweenness": 0,
-    "tactics": [
-      "lateral-movement"
-    ],
-    "weight": 0.625,
-    "weight_source": "mitigaciones=3/8",
-    "in_degree": 10,
-    "out_degree": 6
-  },
-  {
-    "node": "T1074.002",
-    "name": "Remote Data Staging",
-    "fw_betweenness": 0,
-    "tactics": [
-      "collection"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 6,
-    "out_degree": 5
-  },
-  {
-    "node": "T1098.003",
-    "name": "Additional Cloud Roles",
-    "fw_betweenness": 0,
-    "tactics": [
-      "persistence",
-      "privilege-escalation"
-    ],
-    "weight": 0.625,
-    "weight_source": "mitigaciones=3/8",
-    "in_degree": 15,
-    "out_degree": 15
-  },
-  {
-    "node": "T1484.002",
-    "name": "Trust Modification",
-    "fw_betweenness": 0,
-    "tactics": [
-      "defense-impairment",
-      "privilege-escalation"
-    ],
-    "weight": 0.75,
-    "weight_source": "mitigaciones=2/8",
-    "in_degree": 12,
-    "out_degree": 17
-  },
-  {
-    "node": "T1021.002",
-    "name": "SMB/Windows Admin Shares",
-    "fw_betweenness": 0,
-    "tactics": [
-      "lateral-movement"
-    ],
-    "weight": 0.5,
-    "weight_source": "mitigaciones=4/8",
-    "in_degree": 10,
-    "out_degree": 6
   },
   {
     "node": "T1053.005",
     "name": "Scheduled Task",
-    "fw_betweenness": 0,
+    "fw_betweenness": 5,
     "tactics": [
       "execution",
       "persistence",
@@ -296,421 +306,16 @@
     "out_degree": 16
   },
   {
-    "node": "T1552.004",
-    "name": "Private Keys",
-    "fw_betweenness": 0,
-    "tactics": [
-      "credential-access"
-    ],
-    "weight": 0.5,
-    "weight_source": "mitigaciones=4/8",
-    "in_degree": 12,
-    "out_degree": 10
-  },
-  {
-    "node": "T1098.002",
-    "name": "Additional Email Delegate Permissions",
-    "fw_betweenness": 0,
-    "tactics": [
-      "persistence",
-      "privilege-escalation"
-    ],
-    "weight": 0.625,
-    "weight_source": "mitigaciones=3/8",
-    "in_degree": 15,
-    "out_degree": 15
-  },
-  {
-    "node": "T1105",
-    "name": "Ingress Tool Transfer",
-    "fw_betweenness": 0,
-    "tactics": [
-      "command-and-control"
-    ],
-    "weight": 0.75,
-    "weight_source": "mitigaciones=2/8",
-    "in_degree": 6,
-    "out_degree": 1
-  },
-  {
-    "node": "T1047",
-    "name": "Windows Management Instrumentation",
-    "fw_betweenness": 0,
-    "tactics": [
-      "execution"
-    ],
-    "weight": 0.5,
-    "weight_source": "mitigaciones=4/8",
-    "in_degree": 8,
-    "out_degree": 11
-  },
-  {
-    "node": "T1665",
-    "name": "Hide Infrastructure",
-    "fw_betweenness": 0,
-    "tactics": [
-      "command-and-control"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 6,
-    "out_degree": 1
-  },
-  {
-    "node": "T1005",
-    "name": "Data from Local System",
-    "fw_betweenness": 0,
-    "tactics": [
-      "collection"
-    ],
-    "weight": 0.875,
-    "weight_source": "mitigaciones=1/8",
-    "in_degree": 6,
-    "out_degree": 5
-  },
-  {
-    "node": "T1114.002",
-    "name": "Remote Email Collection",
-    "fw_betweenness": 0,
-    "tactics": [
-      "collection"
-    ],
-    "weight": 0.625,
-    "weight_source": "mitigaciones=3/8",
-    "in_degree": 6,
-    "out_degree": 5
-  },
-  {
-    "node": "T1069.002",
-    "name": "Domain Groups",
-    "fw_betweenness": 0,
-    "tactics": [
-      "discovery"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 8,
-    "out_degree": 6
-  },
-  {
-    "node": "T1083",
-    "name": "File and Directory Discovery",
-    "fw_betweenness": 0,
-    "tactics": [
-      "discovery"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 8,
-    "out_degree": 6
-  },
-  {
     "node": "T1070",
     "name": "Indicator Removal",
     "fw_betweenness": 0,
     "tactics": [
       "stealth"
     ],
-    "weight": 0.625,
-    "weight_source": "mitigaciones=3/8",
-    "in_degree": 5,
-    "out_degree": 8
-  },
-  {
-    "node": "T1098.005",
-    "name": "Device Registration",
-    "fw_betweenness": 0,
-    "tactics": [
-      "persistence",
-      "privilege-escalation"
-    ],
-    "weight": 0.875,
-    "weight_source": "mitigaciones=1/8",
-    "in_degree": 15,
-    "out_degree": 15
-  },
-  {
-    "node": "T1090.001",
-    "name": "Internal Proxy",
-    "fw_betweenness": 0,
-    "tactics": [
-      "command-and-control"
-    ],
-    "weight": 0.875,
-    "weight_source": "mitigaciones=1/8",
-    "in_degree": 6,
-    "out_degree": 1
-  },
-  {
-    "node": "T1059.003",
-    "name": "Windows Command Shell",
-    "fw_betweenness": 0,
-    "tactics": [
-      "execution"
-    ],
-    "weight": 0.875,
-    "weight_source": "mitigaciones=1/8",
-    "in_degree": 8,
-    "out_degree": 11
-  },
-  {
-    "node": "T1018",
-    "name": "Remote System Discovery",
-    "fw_betweenness": 0,
-    "tactics": [
-      "discovery"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 8,
-    "out_degree": 6
-  },
-  {
-    "node": "T1057",
-    "name": "Process Discovery",
-    "fw_betweenness": 0,
-    "tactics": [
-      "discovery"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 8,
-    "out_degree": 6
-  },
-  {
-    "node": "T1568",
-    "name": "Dynamic Resolution",
-    "fw_betweenness": 0,
-    "tactics": [
-      "command-and-control"
-    ],
-    "weight": 0.75,
-    "weight_source": "mitigaciones=2/8",
-    "in_degree": 6,
-    "out_degree": 1
-  },
-  {
-    "node": "T1078.003",
-    "name": "Local Accounts",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth",
-      "persistence",
-      "privilege-escalation",
-      "initial-access"
-    ],
-    "weight": 0.5,
-    "weight_source": "mitigaciones=4/8",
-    "in_degree": 24,
-    "out_degree": 27
-  },
-  {
-    "node": "T1589.001",
-    "name": "Credentials",
-    "fw_betweenness": 0,
-    "tactics": [
-      "reconnaissance"
-    ],
-    "weight": 0.875,
-    "weight_source": "mitigaciones=1/8",
-    "in_degree": 1,
-    "out_degree": 3
-  },
-  {
-    "node": "T1606.002",
-    "name": "SAML Tokens",
-    "fw_betweenness": 0,
-    "tactics": [
-      "credential-access"
-    ],
-    "weight": 0.5,
-    "weight_source": "mitigaciones=4/8",
-    "in_degree": 12,
-    "out_degree": 10
-  },
-  {
-    "node": "T1550.004",
-    "name": "Web Session Cookie",
-    "fw_betweenness": 0,
-    "tactics": [
-      "lateral-movement"
-    ],
-    "weight": 0.875,
-    "weight_source": "mitigaciones=1/8",
-    "in_degree": 10,
-    "out_degree": 6
-  },
-  {
-    "node": "T1036.004",
-    "name": "Masquerade Task or Service",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 5,
-    "out_degree": 8
-  },
-  {
-    "node": "T1539",
-    "name": "Steal Web Session Cookie",
-    "fw_betweenness": 0,
-    "tactics": [
-      "credential-access"
-    ],
-    "weight": 0.25,
-    "weight_source": "mitigaciones=6/8",
-    "in_degree": 12,
-    "out_degree": 10
-  },
-  {
-    "node": "T1140",
-    "name": "Deobfuscate/Decode Files or Information",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 5,
-    "out_degree": 8
-  },
-  {
-    "node": "T1218.011",
-    "name": "Rundll32",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth"
-    ],
-    "weight": 0.875,
-    "weight_source": "mitigaciones=1/8",
-    "in_degree": 5,
-    "out_degree": 8
-  },
-  {
-    "node": "T1680",
-    "name": "Local Storage Discovery",
-    "fw_betweenness": 0,
-    "tactics": [
-      "discovery"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 8,
-    "out_degree": 6
-  },
-  {
-    "node": "T1685.001",
-    "name": "Disable or Modify Windows Event Log",
-    "fw_betweenness": 0,
-    "tactics": [
-      "defense-impairment"
-    ],
-    "weight": 0.5,
-    "weight_source": "mitigaciones=4/8",
-    "in_degree": 11,
-    "out_degree": 12
-  },
-  {
-    "node": "T1078.004",
-    "name": "Cloud Accounts",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth",
-      "persistence",
-      "privilege-escalation",
-      "initial-access"
-    ],
-    "weight": 0.125,
-    "weight_source": "mitigaciones=7/8",
-    "in_degree": 24,
-    "out_degree": 27
-  },
-  {
-    "node": "T1003.006",
-    "name": "DCSync",
-    "fw_betweenness": 0,
-    "tactics": [
-      "credential-access"
-    ],
-    "weight": 0.625,
-    "weight_source": "mitigaciones=3/8",
-    "in_degree": 12,
-    "out_degree": 10
-  },
-  {
-    "node": "T1070.004",
-    "name": "File Deletion",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth"
-    ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 5,
-    "out_degree": 8
-  },
-  {
-    "node": "T1555",
-    "name": "Credentials from Password Stores",
-    "fw_betweenness": 0,
-    "tactics": [
-      "credential-access"
-    ],
-    "weight": 0.625,
-    "weight_source": "mitigaciones=3/8",
-    "in_degree": 12,
-    "out_degree": 10
-  },
-  {
-    "node": "T1555.003",
-    "name": "Credentials from Web Browsers",
-    "fw_betweenness": 0,
-    "tactics": [
-      "credential-access"
-    ],
     "weight": 0.375,
-    "weight_source": "mitigaciones=5/8",
-    "in_degree": 12,
-    "out_degree": 10
-  },
-  {
-    "node": "T1098.001",
-    "name": "Additional Cloud Credentials",
-    "fw_betweenness": 0,
-    "tactics": [
-      "persistence",
-      "privilege-escalation"
-    ],
-    "weight": 0.375,
-    "weight_source": "mitigaciones=5/8",
-    "in_degree": 15,
-    "out_degree": 15
-  },
-  {
-    "node": "T1036.005",
-    "name": "Match Legitimate Resource Name or Location",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth"
-    ],
-    "weight": 0.625,
     "weight_source": "mitigaciones=3/8",
     "in_degree": 5,
     "out_degree": 8
-  },
-  {
-    "node": "T1550",
-    "name": "Use Alternate Authentication Material",
-    "fw_betweenness": 0,
-    "tactics": [
-      "lateral-movement"
-    ],
-    "weight": 0.125,
-    "weight_source": "mitigaciones=7/8",
-    "in_degree": 10,
-    "out_degree": 6
   },
   {
     "node": "T1550.001",
@@ -719,22 +324,10 @@
     "tactics": [
       "lateral-movement"
     ],
-    "weight": 0.375,
+    "weight": 0.625,
     "weight_source": "mitigaciones=5/8",
     "in_degree": 10,
     "out_degree": 6
-  },
-  {
-    "node": "T1070.008",
-    "name": "Clear Mailbox Data",
-    "fw_betweenness": 0,
-    "tactics": [
-      "stealth"
-    ],
-    "weight": 0.625,
-    "weight_source": "mitigaciones=3/8",
-    "in_degree": 5,
-    "out_degree": 8
   },
   {
     "node": "T1213.003",
@@ -749,40 +342,173 @@
     "out_degree": 5
   },
   {
+    "node": "T1568",
+    "name": "Dynamic Resolution",
+    "fw_betweenness": 0,
+    "tactics": [
+      "command-and-control"
+    ],
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
+    "in_degree": 6,
+    "out_degree": 1
+  },
+  {
+    "node": "T1071.001",
+    "name": "Web Protocols",
+    "fw_betweenness": 0,
+    "tactics": [
+      "command-and-control"
+    ],
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
+    "in_degree": 6,
+    "out_degree": 1
+  },
+  {
     "node": "T1199",
     "name": "Trusted Relationship",
     "fw_betweenness": 0,
     "tactics": [
       "initial-access"
     ],
-    "weight": 0.625,
+    "weight": 0.375,
     "weight_source": "mitigaciones=3/8",
     "in_degree": 4,
     "out_degree": 5
   },
   {
-    "node": "T1606.001",
-    "name": "Web Cookies",
+    "node": "T1098.001",
+    "name": "Additional Cloud Credentials",
+    "fw_betweenness": 0,
+    "tactics": [
+      "persistence",
+      "privilege-escalation"
+    ],
+    "weight": 0.625,
+    "weight_source": "mitigaciones=5/8",
+    "in_degree": 15,
+    "out_degree": 15
+  },
+  {
+    "node": "T1087",
+    "name": "Account Discovery",
+    "fw_betweenness": 0,
+    "tactics": [
+      "discovery"
+    ],
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
+    "in_degree": 8,
+    "out_degree": 6
+  },
+  {
+    "node": "T1539",
+    "name": "Steal Web Session Cookie",
     "fw_betweenness": 0,
     "tactics": [
       "credential-access"
     ],
     "weight": 0.75,
-    "weight_source": "mitigaciones=2/8",
+    "weight_source": "mitigaciones=6/8",
     "in_degree": 12,
     "out_degree": 10
   },
   {
-    "node": "T1069",
-    "name": "Permission Groups Discovery",
+    "node": "T1482",
+    "name": "Domain Trust Discovery",
     "fw_betweenness": 0,
     "tactics": [
       "discovery"
     ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
     "in_degree": 8,
     "out_degree": 6
+  },
+  {
+    "node": "T1021.002",
+    "name": "SMB/Windows Admin Shares",
+    "fw_betweenness": 0,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "weight": 0.5,
+    "weight_source": "mitigaciones=4/8",
+    "in_degree": 10,
+    "out_degree": 6
+  },
+  {
+    "node": "T1190",
+    "name": "Exploit Public-Facing Application",
+    "fw_betweenness": 0,
+    "tactics": [
+      "initial-access"
+    ],
+    "weight": 1.0,
+    "weight_source": "mitigaciones=8/8",
+    "in_degree": 4,
+    "out_degree": 5
+  },
+  {
+    "node": "T1005",
+    "name": "Data from Local System",
+    "fw_betweenness": 0,
+    "tactics": [
+      "collection"
+    ],
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
+    "in_degree": 6,
+    "out_degree": 5
+  },
+  {
+    "node": "T1555",
+    "name": "Credentials from Password Stores",
+    "fw_betweenness": 0,
+    "tactics": [
+      "credential-access"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 12,
+    "out_degree": 10
+  },
+  {
+    "node": "T1552.004",
+    "name": "Private Keys",
+    "fw_betweenness": 0,
+    "tactics": [
+      "credential-access"
+    ],
+    "weight": 0.5,
+    "weight_source": "mitigaciones=4/8",
+    "in_degree": 12,
+    "out_degree": 10
+  },
+  {
+    "node": "T1685",
+    "name": "Disable or Modify Tools",
+    "fw_betweenness": 0,
+    "tactics": [
+      "defense-impairment"
+    ],
+    "weight": 0.875,
+    "weight_source": "mitigaciones=7/8",
+    "in_degree": 11,
+    "out_degree": 12
+  },
+  {
+    "node": "T1606.002",
+    "name": "SAML Tokens",
+    "fw_betweenness": 0,
+    "tactics": [
+      "credential-access"
+    ],
+    "weight": 0.5,
+    "weight_source": "mitigaciones=4/8",
+    "in_degree": 12,
+    "out_degree": 10
   },
   {
     "node": "T1078.002",
@@ -794,35 +520,47 @@
       "privilege-escalation",
       "initial-access"
     ],
-    "weight": 0.375,
+    "weight": 0.625,
     "weight_source": "mitigaciones=5/8",
     "in_degree": 24,
     "out_degree": 27
   },
   {
-    "node": "T1059.005",
-    "name": "Visual Basic",
+    "node": "T1098.002",
+    "name": "Additional Email Delegate Permissions",
     "fw_betweenness": 0,
     "tactics": [
-      "execution"
+      "persistence",
+      "privilege-escalation"
     ],
     "weight": 0.375,
-    "weight_source": "mitigaciones=5/8",
-    "in_degree": 8,
-    "out_degree": 11
-  },
-  {
-    "node": "T1546.003",
-    "name": "Windows Management Instrumentation Event Subscription",
-    "fw_betweenness": 0,
-    "tactics": [
-      "privilege-escalation",
-      "persistence"
-    ],
-    "weight": 0.625,
     "weight_source": "mitigaciones=3/8",
     "in_degree": 15,
     "out_degree": 15
+  },
+  {
+    "node": "T1685.001",
+    "name": "Disable or Modify Windows Event Log",
+    "fw_betweenness": 0,
+    "tactics": [
+      "defense-impairment"
+    ],
+    "weight": 0.5,
+    "weight_source": "mitigaciones=4/8",
+    "in_degree": 11,
+    "out_degree": 12
+  },
+  {
+    "node": "T1114.002",
+    "name": "Remote Email Collection",
+    "fw_betweenness": 0,
+    "tactics": [
+      "collection"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 6,
+    "out_degree": 5
   },
   {
     "node": "T1686",
@@ -837,39 +575,301 @@
     "out_degree": 12
   },
   {
+    "node": "T1558.003",
+    "name": "Kerberoasting",
+    "fw_betweenness": 0,
+    "tactics": [
+      "credential-access"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 12,
+    "out_degree": 10
+  },
+  {
+    "node": "T1555.003",
+    "name": "Credentials from Web Browsers",
+    "fw_betweenness": 0,
+    "tactics": [
+      "credential-access"
+    ],
+    "weight": 0.625,
+    "weight_source": "mitigaciones=5/8",
+    "in_degree": 12,
+    "out_degree": 10
+  },
+  {
+    "node": "T1546.003",
+    "name": "Windows Management Instrumentation Event Subscription",
+    "fw_betweenness": 0,
+    "tactics": [
+      "privilege-escalation",
+      "persistence"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 15,
+    "out_degree": 15
+  },
+  {
     "node": "T1560.001",
     "name": "Archive via Utility",
     "fw_betweenness": 0,
     "tactics": [
       "collection"
     ],
-    "weight": 0.875,
+    "weight": 0.125,
     "weight_source": "mitigaciones=1/8",
     "in_degree": 6,
     "out_degree": 5
   },
   {
-    "node": "T1016.001",
-    "name": "Internet Connection Discovery",
+    "node": "T1021.001",
+    "name": "Remote Desktop Protocol",
+    "fw_betweenness": 0,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "weight": 1.0,
+    "weight_source": "mitigaciones=8/8",
+    "in_degree": 10,
+    "out_degree": 6
+  },
+  {
+    "node": "T1550",
+    "name": "Use Alternate Authentication Material",
+    "fw_betweenness": 0,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "weight": 0.875,
+    "weight_source": "mitigaciones=7/8",
+    "in_degree": 10,
+    "out_degree": 6
+  },
+  {
+    "node": "T1047",
+    "name": "Windows Management Instrumentation",
+    "fw_betweenness": 0,
+    "tactics": [
+      "execution"
+    ],
+    "weight": 0.5,
+    "weight_source": "mitigaciones=4/8",
+    "in_degree": 8,
+    "out_degree": 11
+  },
+  {
+    "node": "T1021.006",
+    "name": "Windows Remote Management",
+    "fw_betweenness": 0,
+    "tactics": [
+      "lateral-movement"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 10,
+    "out_degree": 6
+  },
+  {
+    "node": "T1078",
+    "name": "Valid Accounts",
+    "fw_betweenness": 0,
+    "tactics": [
+      "stealth",
+      "persistence",
+      "privilege-escalation",
+      "initial-access"
+    ],
+    "weight": 1.0,
+    "weight_source": "mitigaciones=8/8",
+    "in_degree": 24,
+    "out_degree": 27
+  },
+  {
+    "node": "T1036.005",
+    "name": "Match Legitimate Resource Name or Location",
+    "fw_betweenness": 0,
+    "tactics": [
+      "stealth"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 5,
+    "out_degree": 8
+  },
+  {
+    "node": "T1059.005",
+    "name": "Visual Basic",
+    "fw_betweenness": 0,
+    "tactics": [
+      "execution"
+    ],
+    "weight": 0.625,
+    "weight_source": "mitigaciones=5/8",
+    "in_degree": 8,
+    "out_degree": 11
+  },
+  {
+    "node": "T1105",
+    "name": "Ingress Tool Transfer",
+    "fw_betweenness": 0,
+    "tactics": [
+      "command-and-control"
+    ],
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
+    "in_degree": 6,
+    "out_degree": 1
+  },
+  {
+    "node": "T1213",
+    "name": "Data from Information Repositories",
+    "fw_betweenness": 0,
+    "tactics": [
+      "collection"
+    ],
+    "weight": 0.875,
+    "weight_source": "mitigaciones=7/8",
+    "in_degree": 6,
+    "out_degree": 5
+  },
+  {
+    "node": "T1589.001",
+    "name": "Credentials",
+    "fw_betweenness": 0,
+    "tactics": [
+      "reconnaissance"
+    ],
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
+    "in_degree": 1,
+    "out_degree": 3
+  },
+  {
+    "node": "T1059.001",
+    "name": "PowerShell",
+    "fw_betweenness": 0,
+    "tactics": [
+      "execution"
+    ],
+    "weight": 0.625,
+    "weight_source": "mitigaciones=5/8",
+    "in_degree": 8,
+    "out_degree": 11
+  },
+  {
+    "node": "T1218.011",
+    "name": "Rundll32",
+    "fw_betweenness": 0,
+    "tactics": [
+      "stealth"
+    ],
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
+    "in_degree": 5,
+    "out_degree": 8
+  },
+  {
+    "node": "T1090.001",
+    "name": "Internal Proxy",
+    "fw_betweenness": 0,
+    "tactics": [
+      "command-and-control"
+    ],
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
+    "in_degree": 6,
+    "out_degree": 1
+  },
+  {
+    "node": "T1070.008",
+    "name": "Clear Mailbox Data",
+    "fw_betweenness": 0,
+    "tactics": [
+      "stealth"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 5,
+    "out_degree": 8
+  },
+  {
+    "node": "T1087.002",
+    "name": "Domain Account",
     "fw_betweenness": 0,
     "tactics": [
       "discovery"
     ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
     "in_degree": 8,
     "out_degree": 6
   },
   {
-    "node": "T1553.002",
-    "name": "Code Signing",
+    "node": "T1078.004",
+    "name": "Cloud Accounts",
     "fw_betweenness": 0,
     "tactics": [
-      "defense-impairment"
+      "stealth",
+      "persistence",
+      "privilege-escalation",
+      "initial-access"
     ],
-    "weight": 1.0,
-    "weight_source": "mitigaciones=0/8",
-    "in_degree": 11,
-    "out_degree": 12
+    "weight": 0.875,
+    "weight_source": "mitigaciones=7/8",
+    "in_degree": 24,
+    "out_degree": 27
+  },
+  {
+    "node": "T1003.006",
+    "name": "DCSync",
+    "fw_betweenness": 0,
+    "tactics": [
+      "credential-access"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 12,
+    "out_degree": 10
+  },
+  {
+    "node": "T1133",
+    "name": "External Remote Services",
+    "fw_betweenness": 0,
+    "tactics": [
+      "persistence",
+      "initial-access"
+    ],
+    "weight": 0.625,
+    "weight_source": "mitigaciones=5/8",
+    "in_degree": 9,
+    "out_degree": 15
+  },
+  {
+    "node": "T1098.003",
+    "name": "Additional Cloud Roles",
+    "fw_betweenness": 0,
+    "tactics": [
+      "persistence",
+      "privilege-escalation"
+    ],
+    "weight": 0.375,
+    "weight_source": "mitigaciones=3/8",
+    "in_degree": 15,
+    "out_degree": 15
+  },
+  {
+    "node": "T1484.002",
+    "name": "Trust Modification",
+    "fw_betweenness": 0,
+    "tactics": [
+      "defense-impairment",
+      "privilege-escalation"
+    ],
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
+    "in_degree": 12,
+    "out_degree": 17
   }
 ]

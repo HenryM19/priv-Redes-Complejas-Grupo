@@ -76,41 +76,41 @@
       </div>
 
       <div class="scen-row">
-        <span class="scen-label" style="color:var(--cyan)">Base (orig.)</span>
-        <div><div class="bar-wrap"><div class="bar-fill" style="width:66%;background:var(--cyan)"></div></div><span class="scen-desc" style="font-size:12px">Mitigaciones + CVE</span></div>
-        <span class="scen-cost" style="color:var(--cyan)">1.635</span>
+        <span class="scen-label" style="color:var(--cyan)">Base</span>
+        <div><div class="bar-wrap"><div class="bar-fill" style="width:80%;background:var(--cyan)"></div></div><span class="scen-desc" style="font-size:12px">Proporción de mitigaciones (lineal)</span></div>
+        <span class="scen-cost" style="color:var(--cyan)">1.535</span>
         <span class="jaccard" style="color:var(--green)">1.000</span>
         <span class="badge" style="background:rgba(90,209,160,.15);color:var(--green)">✓ idéntica</span>
       </div>
       <div class="scen-row">
         <span class="scen-label" style="color:var(--green)">Pesos −20%</span>
-        <div><div class="bar-wrap"><div class="bar-fill" style="width:54%;background:var(--green)"></div></div><span class="scen-desc" style="font-size:12px">Todos los pesos × 0.8</span></div>
-        <span class="scen-cost" style="color:var(--green)">1.340</span>
+        <div><div class="bar-wrap"><div class="bar-fill" style="width:66%;background:var(--green)"></div></div><span class="scen-desc" style="font-size:12px">Todos los pesos × 0.8</span></div>
+        <span class="scen-cost" style="color:var(--green)">1.260</span>
         <span class="jaccard" style="color:var(--green)">1.000</span>
         <span class="badge" style="background:rgba(90,209,160,.15);color:var(--green)">✓ idéntica</span>
       </div>
       <div class="scen-row">
         <span class="scen-label" style="color:var(--high)">Pesos +20%</span>
-        <div><div class="bar-wrap"><div class="bar-fill" style="width:79%;background:var(--high)"></div></div><span class="scen-desc" style="font-size:12px">Todos los pesos × 1.2</span></div>
-        <span class="scen-cost" style="color:var(--high)">1.960</span>
+        <div><div class="bar-wrap"><div class="bar-fill" style="width:96%;background:var(--high)"></div></div><span class="scen-desc" style="font-size:12px">Todos los pesos × 1.2</span></div>
+        <span class="scen-cost" style="color:var(--high)">1.840</span>
         <span class="jaccard" style="color:var(--green)">1.000</span>
         <span class="badge" style="background:rgba(90,209,160,.15);color:var(--green)">✓ idéntica</span>
       </div>
       <div class="scen-row">
-        <span class="scen-label" style="color:var(--crit)">Sin CVE</span>
-        <div><div class="bar-wrap"><div class="bar-fill" style="width:100%;background:var(--crit)"></div></div><span class="scen-desc" style="font-size:12px">Solo mitigaciones ATT&CK</span></div>
-        <span class="scen-cost" style="color:var(--crit)">2.485</span>
-        <span class="jaccard" style="color:var(--amber)">0.750</span>
-        <span class="badge" style="background:rgba(255,210,63,.15);color:var(--amber)">△ 1 nodo</span>
+        <span class="scen-label" style="color:var(--crit)">Binario</span>
+        <div><div class="bar-wrap"><div class="bar-fill" style="width:100%;background:var(--crit)"></div></div><span class="scen-desc" style="font-size:12px">0.9/0.1 por umbral (mediana)</span></div>
+        <span class="scen-cost" style="color:var(--crit)">1.910</span>
+        <span class="jaccard" style="color:var(--crit)">baja</span>
+        <span class="badge" style="background:rgba(255,59,92,.15);color:var(--crit)">✗ ruta cambia</span>
       </div>
 
       <div style="margin-top:14px;padding:12px 16px;background:var(--bg);border-radius:8px;border:1px solid var(--line)">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">Sin CVE: T1558.003 (Kerberoasting) → T1539 (Steal Web Session Cookie)</span><br>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">Táctica <b style="color:var(--txt)">credential-access</b> sigue siendo el cuello de botella en todos los escenarios.</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">Esquema binario: ruta cambia por completo (11 técnicas vía T1195.002 → ... → T1071.001).</span><br>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">Discretizar el peso colapsa las distinciones finas (0/8 vs 1/8 vs 2/8 mitigaciones) que ordenan la ruta.</span>
       </div>
 
       <div class="sensi-conclusion">
-        <b>Conclusión de robustez:</b> Variaciones del ±20% en pesos no alteran la ruta crítica (Jaccard=1.0). Sin CVE-weights, la táctica crítica se mantiene; solo cambia la técnica específica. El modelo es robusto ante incertidumbre en los datos.
+        <b>Conclusión de robustez (honesta):</b> La ruta crítica es invariante al escalado proporcional ±20% (Jaccard=1.0), pero <b>sensible a la resolución del peso</b>: un esquema binario grueso la altera. Límite reportado abiertamente — las conclusiones firmes se dan a nivel de <b>táctica</b>, no de técnica exacta.
       </div>
     </div>
 
@@ -153,56 +153,56 @@
           </div>
         </div>
         <div style="font-size:13px;color:var(--muted);border-left:3px solid var(--purple);padding-left:12px;line-height:1.5">
-          In-degree power-law R²=<b style="color:var(--txt)">0.006</b> — distribución de grados no sigue ley de potencia: estructura táctica impuesta (kill chain), no red scale-free emergente.
+          Clustering ≈ aleatorio (ratio 0.953×) y estructura en capas impuesta (kill chain): el grafo se aproxima a un grafo aleatorio por capas, no a una red scale-free emergente. (Con n=73 no se aplica test formal de ley de potencia.)
         </div>
       </div>
 
       <!-- FW-Betweenness top-7 -->
       <div class="panel" style="flex:1">
-        <div class="panel-title" style="color:var(--crit)">FW-betweenness top-7 · validado vs NetworkX (Spearman ρ = 0.9997)</div>
+        <div class="panel-title" style="color:var(--crit)">FW-betweenness top-7 · validado vs NetworkX (Spearman ρ = 0.973)</div>
         <div class="betw-row">
-          <span class="betw-id" style="color:var(--crit);font-weight:700">T1078</span>
+          <span class="betw-id" style="color:var(--crit);font-weight:700">T1606.001</span>
           <div class="betw-bar-wrap"><div class="betw-bar" style="width:100%;background:var(--crit)"></div></div>
-          <span class="betw-val">1218</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:8px">Valid Accounts · 4 tácticas</span>
-        </div>
-        <div class="betw-row">
-          <span class="betw-id" style="color:var(--high);font-weight:700">T1558.003</span>
-          <div class="betw-bar-wrap"><div class="betw-bar" style="width:86%;background:var(--high)"></div></div>
           <span class="betw-val">1044</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:8px">Kerberoasting</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Web Cookies · credential-access</span>
         </div>
         <div class="betw-row">
-          <span class="betw-id" style="color:var(--amber)">T1087</span>
-          <div class="betw-bar-wrap"><div class="betw-bar" style="width:69%;background:var(--amber)"></div></div>
+          <span class="betw-id" style="color:var(--high);font-weight:700">T1018</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:80%;background:var(--high)"></div></div>
           <span class="betw-val">836</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:8px">Account Discovery</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Remote System Discovery</span>
         </div>
         <div class="betw-row">
-          <span class="betw-id" style="color:var(--amber)">T1482</span>
-          <div class="betw-bar-wrap"><div class="betw-bar" style="width:69%;background:var(--amber)"></div></div>
+          <span class="betw-id" style="color:var(--amber)">T1069.002</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:80%;background:var(--amber)"></div></div>
           <span class="betw-val">836</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:8px">Domain Trust Discovery</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Domain Groups</span>
         </div>
         <div class="betw-row">
-          <span class="betw-id" style="color:var(--cyan)">T1021.001</span>
-          <div class="betw-bar-wrap"><div class="betw-bar" style="width:58%;background:var(--cyan)"></div></div>
-          <span class="betw-val">702</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:8px">Remote Desktop Protocol</span>
+          <span class="betw-id" style="color:var(--amber)">T1083</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:80%;background:var(--amber)"></div></div>
+          <span class="betw-val">836</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">File &amp; Directory Discovery</span>
         </div>
         <div class="betw-row">
-          <span class="betw-id" style="color:var(--cyan)">T1213</span>
-          <div class="betw-bar-wrap"><div class="betw-bar" style="width:34%;background:var(--cyan)"></div></div>
-          <span class="betw-val">420</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:8px">Data from Info Repos</span>
+          <span class="betw-id" style="color:var(--cyan)">T1016.001</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:80%;background:var(--cyan)"></div></div>
+          <span class="betw-val">836</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Internet Connection Discovery</span>
         </div>
         <div class="betw-row">
-          <span class="betw-id" style="color:var(--purple)">T1059.001</span>
-          <div class="betw-bar-wrap"><div class="betw-bar" style="width:16%;background:var(--purple)"></div></div>
-          <span class="betw-val">194</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:8px">PowerShell</span>
+          <span class="betw-id" style="color:var(--cyan)">T1057</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:80%;background:var(--cyan)"></div></div>
+          <span class="betw-val">836</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Process Discovery</span>
         </div>
-        <p class="betw-rho">Spearman ρ (FW vs NetworkX Brandes): <b>0.9997</b> — implementación propia validada</p>
+        <div class="betw-row">
+          <span class="betw-id" style="color:var(--purple)">T1070.006</span>
+          <div class="betw-bar-wrap"><div class="betw-bar" style="width:67%;background:var(--purple)"></div></div>
+          <span class="betw-val">703</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px">Timestomp</span>
+        </div>
+        <p class="betw-rho">Spearman ρ (FW vs NetworkX Brandes): <b>0.973</b> — implementación propia validada. La <b>capa discovery</b> (6 técnicas empatadas en 836) es el cuello estructural, no un solo nodo.</p>
       </div>
 
     </div>

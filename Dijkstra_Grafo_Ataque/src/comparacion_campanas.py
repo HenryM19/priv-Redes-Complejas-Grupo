@@ -182,7 +182,7 @@ def run():
         "comparacion_cruzada": cross,
         "metodologia": (
             "Mismo pipeline en todas las campañas: bundle STIX 2.1 → extracción de "
-            "técnicas por campaña → DiGraph con pesos (mitigaciones + CVE) → Dijkstra "
+            "técnicas por campaña → DiGraph con pesos (mitigaciones documentadas) → Dijkstra "
             "→ Floyd-Warshall betweenness. Los parámetros son idénticos; solo cambia "
             "la campaña de entrada."
         )

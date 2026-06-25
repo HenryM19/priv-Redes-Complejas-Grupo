@@ -7,7 +7,7 @@
       "density": 0.124239,
       "is_dag": false,
       "n_techniques": 71,
-      "avg_weight": 0.619,
+      "avg_weight": 0.3567,
       "by_tactic_counts": {
         "reconnaissance": 1,
         "resource-development": 3,
@@ -25,66 +25,66 @@
         "exfiltration": 1
       },
       "dijkstra": {
-        "costo_minimo": 1.635,
+        "costo_minimo": 1.535,
         "n_pasos": 9,
         "ruta": [
           "ATTACKER",
-          "T1078",
-          "T1558.003",
-          "T1087",
-          "T1021.001",
-          "T1213",
-          "T1071.001",
+          "T1078.003",
+          "T1606.001",
+          "T1016.001",
+          "T1550.004",
+          "T1074.002",
+          "T1665",
           "T1048.002",
           "IMPACT"
         ],
         "ruta_detalle": [
           {
-            "node": "T1078",
-            "name": "Valid Accounts",
+            "node": "T1078.003",
+            "name": "Local Accounts",
             "tactics": [
               "stealth",
               "persistence",
               "privilege-escalation",
               "initial-access"
             ],
-            "weight": 0.05
+            "weight": 0.5
           },
           {
-            "node": "T1558.003",
-            "name": "Kerberoasting",
+            "node": "T1606.001",
+            "name": "Web Cookies",
             "tactics": [
               "credential-access"
             ],
-            "weight": 0.1
+            "weight": 0.25
           },
           {
-            "node": "T1087",
-            "name": "Account Discovery",
+            "node": "T1016.001",
+            "name": "Internet Connection Discovery",
             "tactics": [
               "discovery"
-            ],
-            "weight": 0.75
-          },
-          {
-            "node": "T1021.001",
-            "name": "Remote Desktop Protocol",
-            "tactics": [
-              "lateral-movement"
             ],
             "weight": 0.05
           },
           {
-            "node": "T1213",
-            "name": "Data from Information Repositories",
+            "node": "T1550.004",
+            "name": "Web Session Cookie",
             "tactics": [
-              "collection"
+              "lateral-movement"
             ],
             "weight": 0.125
           },
           {
-            "node": "T1071.001",
-            "name": "Web Protocols",
+            "node": "T1074.002",
+            "name": "Remote Data Staging",
+            "tactics": [
+              "collection"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1665",
+            "name": "Hide Infrastructure",
             "tactics": [
               "command-and-control"
             ],
@@ -102,70 +102,67 @@
       },
       "fw_betweenness_top5": [
         {
-          "node": "T1078",
-          "name": "Valid Accounts",
-          "fw_betweenness": 1218,
-          "tactics": [
-            "stealth",
-            "persistence",
-            "privilege-escalation",
-            "initial-access"
-          ],
-          "weight": 0.05,
-          "weight_source": "CVE:CVE-2021-21985(CVSS=9.8)+mit=8",
-          "in_degree": 24,
-          "out_degree": 27
-        },
-        {
-          "node": "T1558.003",
-          "name": "Kerberoasting",
+          "node": "T1606.001",
+          "name": "Web Cookies",
           "fw_betweenness": 1044,
           "tactics": [
             "credential-access"
           ],
-          "weight": 0.1,
-          "weight_source": "CVE:CVE-2014-6324(CVSS=9.0)+mit=3",
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
           "in_degree": 12,
           "out_degree": 10
         },
         {
-          "node": "T1087",
-          "name": "Account Discovery",
+          "node": "T1057",
+          "name": "Process Discovery",
           "fw_betweenness": 836,
           "tactics": [
             "discovery"
-          ],
-          "weight": 0.75,
-          "weight_source": "mitigaciones=2/8",
-          "in_degree": 8,
-          "out_degree": 6
-        },
-        {
-          "node": "T1482",
-          "name": "Domain Trust Discovery",
-          "fw_betweenness": 836,
-          "tactics": [
-            "discovery"
-          ],
-          "weight": 0.75,
-          "weight_source": "mitigaciones=2/8",
-          "in_degree": 8,
-          "out_degree": 6
-        },
-        {
-          "node": "T1021.001",
-          "name": "Remote Desktop Protocol",
-          "fw_betweenness": 702,
-          "tactics": [
-            "lateral-movement"
           ],
           "weight": 0.05,
-          "weight_source": "CVE:CVE-2021-26855(CVSS=9.8)+mit=8",
-          "in_degree": 10,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 8,
+          "out_degree": 6
+        },
+        {
+          "node": "T1680",
+          "name": "Local Storage Discovery",
+          "fw_betweenness": 836,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 8,
+          "out_degree": 6
+        },
+        {
+          "node": "T1083",
+          "name": "File and Directory Discovery",
+          "fw_betweenness": 836,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 8,
+          "out_degree": 6
+        },
+        {
+          "node": "T1069.002",
+          "name": "Domain Groups",
+          "fw_betweenness": 836,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 8,
           "out_degree": 6
         }
       ],
-      "tiempo_ms": 23.73,
+      "tiempo_ms": 16.79,
       "actor": "APT29",
       "context": "Espionaje EEUU — cadena suministro"
     },
@@ -176,7 +173,7 @@
       "density": 0.096635,
       "is_dag": false,
       "n_techniques": 70,
-      "avg_weight": 0.7282,
+      "avg_weight": 0.2614,
       "by_tactic_counts": {
         "reconnaissance": 1,
         "resource-development": 4,
@@ -194,27 +191,27 @@
         "exfiltration": 1
       },
       "dijkstra": {
-        "costo_minimo": 1.86,
+        "costo_minimo": 0.935,
         "n_pasos": 6,
         "ruta": [
           "ATTACKER",
-          "T1078",
+          "T1078.003",
           "T1056.001",
-          "T1071.001",
+          "T1001",
           "T1041",
           "IMPACT"
         ],
         "ruta_detalle": [
           {
-            "node": "T1078",
-            "name": "Valid Accounts",
+            "node": "T1078.003",
+            "name": "Local Accounts",
             "tactics": [
               "stealth",
               "persistence",
               "privilege-escalation",
               "initial-access"
             ],
-            "weight": 0.05
+            "weight": 0.5
           },
           {
             "node": "T1056.001",
@@ -223,15 +220,15 @@
               "collection",
               "credential-access"
             ],
-            "weight": 1.0
+            "weight": 0.05
           },
           {
-            "node": "T1071.001",
-            "name": "Web Protocols",
+            "node": "T1001",
+            "name": "Data Obfuscation",
             "tactics": [
               "command-and-control"
             ],
-            "weight": 0.05
+            "weight": 0.125
           },
           {
             "node": "T1041",
@@ -239,77 +236,75 @@
             "tactics": [
               "exfiltration"
             ],
-            "weight": 0.75
+            "weight": 0.25
           }
         ]
       },
       "fw_betweenness_top5": [
         {
-          "node": "T1078",
-          "name": "Valid Accounts",
-          "fw_betweenness": 1154,
-          "tactics": [
-            "stealth",
-            "persistence",
-            "privilege-escalation",
-            "initial-access"
-          ],
-          "weight": 0.05,
-          "weight_source": "CVE:CVE-2021-21985(CVSS=9.8)+mit=8",
-          "in_degree": 21,
-          "out_degree": 22
-        },
-        {
-          "node": "T1021.002",
-          "name": "SMB/Windows Admin Shares",
-          "fw_betweenness": 912,
-          "tactics": [
-            "lateral-movement"
-          ],
-          "weight": 0.5,
-          "weight_source": "mitigaciones=4/8",
-          "in_degree": 19,
-          "out_degree": 6
-        },
-        {
-          "node": "T1558.003",
-          "name": "Kerberoasting",
-          "fw_betweenness": 728,
-          "tactics": [
-            "credential-access"
-          ],
-          "weight": 0.1,
-          "weight_source": "CVE:CVE-2014-6324(CVSS=9.0)+mit=3",
-          "in_degree": 8,
-          "out_degree": 19
-        },
-        {
           "node": "T1056.001",
           "name": "Keylogging",
-          "fw_betweenness": 690,
+          "fw_betweenness": 1715,
           "tactics": [
             "collection",
             "credential-access"
           ],
-          "weight": 1.0,
+          "weight": 0.05,
           "weight_source": "mitigaciones=0/8",
           "in_degree": 10,
           "out_degree": 28
         },
         {
-          "node": "T1046",
-          "name": "Network Service Discovery",
-          "fw_betweenness": 319,
+          "node": "T1570",
+          "name": "Lateral Tool Transfer",
+          "fw_betweenness": 912,
           "tactics": [
-            "discovery"
+            "lateral-movement"
           ],
-          "weight": 0.625,
-          "weight_source": "mitigaciones=3/8",
-          "in_degree": 7,
-          "out_degree": 2
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
+          "in_degree": 19,
+          "out_degree": 6
+        },
+        {
+          "node": "T1027.005",
+          "name": "Indicator Removal from Tools",
+          "fw_betweenness": 528,
+          "tactics": [
+            "stealth"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 3,
+          "out_degree": 7
+        },
+        {
+          "node": "T1070.004",
+          "name": "File Deletion",
+          "fw_betweenness": 528,
+          "tactics": [
+            "stealth"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 3,
+          "out_degree": 7
+        },
+        {
+          "node": "T1112",
+          "name": "Modify Registry",
+          "fw_betweenness": 519,
+          "tactics": [
+            "defense-impairment",
+            "persistence"
+          ],
+          "weight": 0.125,
+          "weight_source": "mitigaciones=1/8",
+          "in_degree": 12,
+          "out_degree": 9
         }
       ],
-      "tiempo_ms": 25.43,
+      "tiempo_ms": 16.05,
       "actor": "APT20",
       "context": "Espionaje Europa/Asia — sectores estratégicos"
     },
@@ -320,7 +315,7 @@
       "density": 0.067982,
       "is_dag": false,
       "n_techniques": 55,
-      "avg_weight": 0.7377,
+      "avg_weight": 0.255,
       "by_tactic_counts": {
         "reconnaissance": 4,
         "resource-development": 13,
@@ -338,38 +333,46 @@
         "exfiltration": 2
       },
       "dijkstra": {
-        "costo_minimo": 5.11,
-        "n_pasos": 10,
+        "costo_minimo": 1.496,
+        "n_pasos": 11,
         "ruta": [
           "ATTACKER",
-          "T1566.001",
-          "T1053.005",
+          "T1566.002",
+          "T1059.003",
+          "T1547.001",
           "T1553.002",
           "T1497.001",
           "T1534",
           "T1005",
-          "T1071.001",
-          "T1041",
+          "T1573.001",
+          "T1567.002",
           "IMPACT"
         ],
         "ruta_detalle": [
           {
-            "node": "T1566.001",
-            "name": "Spearphishing Attachment",
+            "node": "T1566.002",
+            "name": "Spearphishing Link",
             "tactics": [
               "initial-access"
             ],
-            "weight": 0.05
+            "weight": 0.714
           },
           {
-            "node": "T1053.005",
-            "name": "Scheduled Task",
+            "node": "T1059.003",
+            "name": "Windows Command Shell",
             "tactics": [
-              "execution",
+              "execution"
+            ],
+            "weight": 0.143
+          },
+          {
+            "node": "T1547.001",
+            "name": "Registry Run Keys / Startup Folder",
+            "tactics": [
               "persistence",
               "privilege-escalation"
             ],
-            "weight": 0.429
+            "weight": 0.05
           },
           {
             "node": "T1553.002",
@@ -377,7 +380,7 @@
             "tactics": [
               "defense-impairment"
             ],
-            "weight": 1.0
+            "weight": 0.05
           },
           {
             "node": "T1497.001",
@@ -386,7 +389,7 @@
               "stealth",
               "discovery"
             ],
-            "weight": 1.0
+            "weight": 0.05
           },
           {
             "node": "T1534",
@@ -394,7 +397,7 @@
             "tactics": [
               "lateral-movement"
             ],
-            "weight": 1.0
+            "weight": 0.05
           },
           {
             "node": "T1005",
@@ -402,23 +405,23 @@
             "tactics": [
               "collection"
             ],
-            "weight": 0.857
+            "weight": 0.143
           },
           {
-            "node": "T1071.001",
-            "name": "Web Protocols",
+            "node": "T1573.001",
+            "name": "Symmetric Cryptography",
             "tactics": [
               "command-and-control"
             ],
-            "weight": 0.05
+            "weight": 0.143
           },
           {
-            "node": "T1041",
-            "name": "Exfiltration Over C2 Channel",
+            "node": "T1567.002",
+            "name": "Exfiltration to Cloud Storage",
             "tactics": [
               "exfiltration"
             ],
-            "weight": 0.714
+            "weight": 0.143
           }
         ]
       },
@@ -430,63 +433,62 @@
           "tactics": [
             "defense-impairment"
           ],
-          "weight": 1.0,
+          "weight": 0.05,
           "weight_source": "mitigaciones=0/7",
           "in_degree": 2,
           "out_degree": 12
         },
         {
-          "node": "T1053.005",
-          "name": "Scheduled Task",
-          "fw_betweenness": 755,
+          "node": "T1547.001",
+          "name": "Registry Run Keys / Startup Folder",
+          "fw_betweenness": 754,
           "tactics": [
-            "execution",
             "persistence",
             "privilege-escalation"
           ],
-          "weight": 0.429,
-          "weight_source": "mitigaciones=4/7",
-          "in_degree": 13,
-          "out_degree": 4
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/7",
+          "in_degree": 10,
+          "out_degree": 3
         },
         {
-          "node": "T1566.001",
-          "name": "Spearphishing Attachment",
+          "node": "T1566.003",
+          "name": "Spearphishing via Service",
           "fw_betweenness": 648,
           "tactics": [
             "initial-access"
           ],
-          "weight": 0.05,
-          "weight_source": "mitigaciones=7/7",
+          "weight": 0.714,
+          "weight_source": "mitigaciones=5/7",
           "in_degree": 14,
           "out_degree": 8
         },
         {
-          "node": "T1534",
-          "name": "Internal Spearphishing",
-          "fw_betweenness": 384,
+          "node": "T1566.002",
+          "name": "Spearphishing Link",
+          "fw_betweenness": 648,
           "tactics": [
-            "lateral-movement"
+            "initial-access"
           ],
-          "weight": 1.0,
-          "weight_source": "mitigaciones=0/7",
-          "in_degree": 6,
-          "out_degree": 2
+          "weight": 0.714,
+          "weight_source": "mitigaciones=5/7",
+          "in_degree": 14,
+          "out_degree": 8
         },
         {
-          "node": "T1005",
-          "name": "Data from Local System",
-          "fw_betweenness": 294,
+          "node": "T1059.003",
+          "name": "Windows Command Shell",
+          "fw_betweenness": 588,
           "tactics": [
-            "collection"
+            "execution"
           ],
-          "weight": 0.857,
+          "weight": 0.143,
           "weight_source": "mitigaciones=1/7",
-          "in_degree": 1,
+          "in_degree": 3,
           "out_degree": 3
         }
       ],
-      "tiempo_ms": 23.98,
+      "tiempo_ms": 14.43,
       "actor": "Lazarus",
       "context": "Espionaje/cibercrimen — sector aeroespacial/defensa"
     }
@@ -495,15 +497,15 @@
     "top1_betweenness_por_campana": [
       {
         "campaign": "SolarWinds Compromise",
-        "node": "T1078",
-        "name": "Valid Accounts",
-        "fw_betweenness": 1218
+        "node": "T1606.001",
+        "name": "Web Cookies",
+        "fw_betweenness": 1044
       },
       {
         "campaign": "Operation Wocao",
-        "node": "T1078",
-        "name": "Valid Accounts",
-        "fw_betweenness": 1154
+        "node": "T1056.001",
+        "name": "Keylogging",
+        "fw_betweenness": 1715
       },
       {
         "campaign": "Operation Dream Job",
@@ -514,24 +516,18 @@
     ],
     "jaccard_rutas_criticas": {
       "SolarWinds Compromis vs Operation Wocao": {
-        "jaccard": 0.2222,
+        "jaccard": 0.1,
         "nodos_comunes": [
-          "T1071.001",
-          "T1078"
+          "T1078.003"
         ]
       },
       "SolarWinds Compromis vs Operation Dream Job": {
-        "jaccard": 0.0714,
-        "nodos_comunes": [
-          "T1071.001"
-        ]
+        "jaccard": 0.0,
+        "nodos_comunes": []
       },
       "Operation Wocao vs Operation Dream Job": {
-        "jaccard": 0.2,
-        "nodos_comunes": [
-          "T1041",
-          "T1071.001"
-        ]
+        "jaccard": 0.0,
+        "nodos_comunes": []
       }
     },
     "tacticas_en_rutas_criticas": [
@@ -584,10 +580,10 @@
         "apariciones": 1
       }
     ],
-    "costo_promedio": 2.8683,
-    "costo_min": 1.635,
-    "costo_max": 5.11,
+    "costo_promedio": 1.322,
+    "costo_min": 0.935,
+    "costo_max": 1.535,
     "conclusion": "Jaccard bajo entre campañas indica que el método discrimina correctamente entre actores y campañas distintas. Tácticas con alta frecuencia en rutas críticas son candidatos a controles de seguridad universales."
   },
-  "metodologia": "Mismo pipeline en todas las campañas: bundle STIX 2.1 → extracción de técnicas por campaña → DiGraph con pesos (mitigaciones + CVE) → Dijkstra → Floyd-Warshall betweenness. Los parámetros son idénticos; solo cambia la campaña de entrada."
+  "metodologia": "Mismo pipeline en todas las campañas: bundle STIX 2.1 → extracción de técnicas por campaña → DiGraph con pesos (mitigaciones documentadas) → Dijkstra → Floyd-Warshall betweenness. Los parámetros son idénticos; solo cambia la campaña de entrada."
 }

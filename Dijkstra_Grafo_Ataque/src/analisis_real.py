@@ -8,7 +8,7 @@ Pregunta de investigacion:
   ¿Y que tecnicas son cuellos de botella universales segun Floyd-Warshall?
 
 Datos: 100% MITRE ATT&CK Enterprise STIX 2.1 (enterprise-attack.json)
-       Pesos: n_mitigaciones reales del bundle + CVSS real de CVEs NVD
+       Pesos: n_mitigaciones documentadas en el bundle (resistencia defensiva)
 """
 
 import json

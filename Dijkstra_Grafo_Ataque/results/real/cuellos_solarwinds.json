@@ -1,83 +1,83 @@
 [
   {
-    "node": "T1078",
-    "name": "Valid Accounts",
+    "node": "T1078.003",
+    "name": "Local Accounts",
     "in_degree": 24,
     "out_degree": 27,
-    "weight": 0.05,
-    "weight_source": "CVE:CVE-2021-21985(CVSS=9.8)+mit=8",
+    "weight": 0.5,
+    "weight_source": "mitigaciones=4/8",
     "tactics": [
       "stealth",
       "persistence",
       "privilege-escalation",
       "initial-access"
     ],
-    "dist_acumulada": 0.05,
-    "fw_betweenness": 1218
+    "dist_acumulada": 0.5,
+    "fw_betweenness": 357
   },
   {
-    "node": "T1558.003",
-    "name": "Kerberoasting",
+    "node": "T1606.001",
+    "name": "Web Cookies",
     "in_degree": 12,
     "out_degree": 10,
-    "weight": 0.1,
-    "weight_source": "CVE:CVE-2014-6324(CVSS=9.0)+mit=3",
+    "weight": 0.25,
+    "weight_source": "mitigaciones=2/8",
     "tactics": [
       "credential-access"
     ],
-    "dist_acumulada": 0.15,
+    "dist_acumulada": 0.75,
     "fw_betweenness": 1044
   },
   {
-    "node": "T1021.001",
-    "name": "Remote Desktop Protocol",
+    "node": "T1550.004",
+    "name": "Web Session Cookie",
     "in_degree": 10,
     "out_degree": 6,
-    "weight": 0.05,
-    "weight_source": "CVE:CVE-2021-26855(CVSS=9.8)+mit=8",
+    "weight": 0.125,
+    "weight_source": "mitigaciones=1/8",
     "tactics": [
       "lateral-movement"
     ],
-    "dist_acumulada": 0.95,
+    "dist_acumulada": 0.925,
     "fw_betweenness": 702
   },
   {
-    "node": "T1087",
-    "name": "Account Discovery",
+    "node": "T1016.001",
+    "name": "Internet Connection Discovery",
     "in_degree": 8,
     "out_degree": 6,
-    "weight": 0.75,
-    "weight_source": "mitigaciones=2/8",
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
     "tactics": [
       "discovery"
     ],
-    "dist_acumulada": 0.9,
+    "dist_acumulada": 0.8,
     "fw_betweenness": 836
   },
   {
-    "node": "T1213",
-    "name": "Data from Information Repositories",
+    "node": "T1074.002",
+    "name": "Remote Data Staging",
     "in_degree": 6,
     "out_degree": 5,
-    "weight": 0.125,
-    "weight_source": "mitigaciones=7/8",
+    "weight": 0.05,
+    "weight_source": "mitigaciones=0/8",
     "tactics": [
       "collection"
     ],
-    "dist_acumulada": 1.075,
+    "dist_acumulada": 0.975,
     "fw_betweenness": 420
   },
   {
-    "node": "T1071.001",
-    "name": "Web Protocols",
+    "node": "T1665",
+    "name": "Hide Infrastructure",
     "in_degree": 6,
     "out_degree": 1,
     "weight": 0.05,
-    "weight_source": "CVE:CVE-2020-10148(CVSS=9.8)+mit=2",
+    "weight_source": "mitigaciones=0/8",
     "tactics": [
       "command-and-control"
     ],
-    "dist_acumulada": 1.125,
+    "dist_acumulada": 1.025,
     "fw_betweenness": 132
   },
   {
@@ -90,7 +90,7 @@
     "tactics": [
       "exfiltration"
     ],
-    "dist_acumulada": 1.625,
+    "dist_acumulada": 1.525,
     "fw_betweenness": 71
   }
 ]
