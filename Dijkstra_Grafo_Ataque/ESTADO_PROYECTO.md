@@ -1,6 +1,6 @@
 # Estado del Proyecto — Dijkstra en Grafos de Ataque (SolarWinds / MITRE ATT&CK)
 
-> **Última actualización:** 2026-06-30
+> **Última actualización:** 2026-06-30 (post-merge con Henry Maldonado — `6c01246`)
 > **Autores:** Jean Carlo Aucapina · Henry Maldonado — DEET, Universidad de Cuenca
 > **Repositorio:** `priv-Redes-Complejas-Grupo/Dijkstra_Grafo_Ataque`
 
@@ -90,7 +90,7 @@ python -X utf8 src/gen_interactive_graph.py    # regenerar grafo HTML
 ## 5. Estado por componente
 
 | Componente | Estado | Nota |
-|---|---|---|
+| --- | --- | --- |
 | Pipeline core (Dijkstra/FW) | ✅ Completo | Validado vs NetworkX |
 | Validación científica | ✅ Completo | BFS/BF/NX, sensibilidad, métricas de red |
 | Multi-campaña | ✅ Completo | 3 campañas, discriminación confirmada |
@@ -119,7 +119,21 @@ python -X utf8 src/gen_interactive_graph.py    # regenerar grafo HTML
 
 ---
 
-## 7. Decisiones de diseño importantes (registro)
+## 7. Historial de correcciones (revisión por pares interna)
+
+| Commit | Autor | Cambio |
+| --- | --- | --- |
+| `aba4cb5` | Jean Carlo | Eliminación de pesos CVE/CVSS (mapeos incorrectos); inversión semántica `w = n_mit/max_mit`; re-run pipeline completo → nuevos JSON |
+| `fe5e12c` | Jean Carlo | Borrador paper IEEE completo con números corregidos |
+| `35053e5` | Jean Carlo | Slides 4–13, grafo interactivo y figuras sincronizados con datos del pipeline |
+| `6c01246` | **Henry Maldonado** | Corrección independiente de figuras-cientificas y guia-dataset (1.635→1.535, betweenness, sensibilidad binaria); corrección títulos gen_graph_img/gen_full_graph |
+| `161ab7a` | Jean Carlo | Merge de ambas correcciones vía rebase; EXPLICACION.md + ESTADO_PROYECTO.md; conflicto resuelto a favor de `+90.6%` BFS (verificado con JSON: BFS=2.925, óptimo=1.535) |
+
+**Nota de conflicto resuelto:** Henry calculó `+149%` BFS (basado en costo 3.875 de versión anterior). El JSON del pipeline corregido registra BFS=2.925 → sobrecoste=90.55 %. Se conservó el valor verificado.
+
+---
+
+## 8. Decisiones de diseño importantes (registro)
 
 1. **Eliminación de pesos CVE/CVSS** (revisión por pares): el mapeo CVE↔técnica era
    no reproducible y técnicamente incorrecto (p.ej. CVE-2020-10148 = auth-bypass del API
