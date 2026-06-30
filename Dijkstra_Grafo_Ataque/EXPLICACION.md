@@ -187,32 +187,30 @@ La fórmula de peso ya no es `10 - CVSS`. Ahora refleja **qué tan defendible es
 técnica** según los datos reales del bundle STIX:
 
 ```
-w = 1 - (n_mitigaciones / max_mitigaciones_en_campaña)
+w = max(0.05, n_mitigaciones / max_mitigaciones_en_campaña)
 ```
 
 Donde `n_mitigaciones` es el número de mitigaciones que ATT&CK documenta para esa
 técnica. La lógica es:
 
-- Más mitigaciones documentadas = técnica más conocida y defendible = **mayor costo** para el atacante
-- 0 mitigaciones = técnica sin contramedidas conocidas = **peso 0.95** (casi libre para el atacante)
+- Más mitigaciones documentadas = más controles de defensa = **mayor costo** para el atacante (w alto)
+- 0 mitigaciones = técnica sin contramedidas documentadas = **peso 0.05** (camino de mínima resistencia)
 
-Para técnicas con CVE real conocido asociado a SolarWinds, se toma el **mínimo** entre
-ambas fórmulas (el escenario más conservador para el atacante):
-
-```
-w = min(w_mitigaciones, max(0.05, (10 - CVSS) / 10))
-```
+Dijkstra sobre estos pesos halla la ruta de **menor resistencia defensiva**: la secuencia
+de técnicas con menos controles documentados. **No se usan pesos por CVE/CVSS** — la
+asociación CVE↔técnica para una campaña no está en el bundle STIX y requería juicio manual
+no reproducible (además contenía mapeos incorrectos). Todos los pesos derivan solo de
+mitigaciones documentadas en ATT&CK.
 
 Ejemplos de pesos reales calculados:
 
 | Técnica | Nombre | Peso w | Fuente |
 |---|---|---|---|
-| `T1078` | Valid Accounts | 0.05 | CVE-2021-21985 (CVSS 9.8) + 8 mitigaciones |
-| `T1558.003` | Kerberoasting | 0.10 | CVE-2014-6324 (CVSS 9.0) + 3 mitigaciones |
-| `T1021.001` | RDP | 0.05 | CVE-2021-26855 (CVSS 9.8) + 8 mitigaciones |
-| `T1071.001` | Web Protocols C2 | 0.05 | CVE-2020-10148 (CVSS 9.8) + 2 mitigaciones |
-| `T1087` | Account Discovery | 0.75 | Solo mitigaciones: 2/8 |
-| `T1048.002` | Exfiltración cifrada | 0.50 | Solo mitigaciones: 4/8 |
+| `T1078.003` | Local Accounts | 0.50 | Mitigaciones: 4/8 |
+| `T1606.001` | Web Cookies | 0.25 | Mitigaciones: 2/8 |
+| `T1550.004` | Web Session Cookie | 0.125 | Mitigaciones: 1/8 |
+| `T1016.001` | Internet Conn. Discovery | 0.05 | Mitigaciones: 0/8 |
+| `T1048.002` | Exfiltración cifrada | 0.50 | Mitigaciones: 4/8 |
 
 ### Resumen de diferencias entre los dos análisis
 
@@ -221,6 +219,6 @@ Ejemplos de pesos reales calculados:
 | **Red** | Ficticia pero plausible | Técnicas reales de ATT&CK |
 | **Nodos** | Hosts/servicios (`FW-VPN`, `APP-02`…) | Técnicas de ataque (`T1078`, `T1027`…) |
 | **Aristas** | Regla de capas + atajos manuales | Progresión táctica real documentada |
-| **Pesos** | `10 - CVSS` | `1 - (mitigaciones / max)` + CVSS si hay CVE |
+| **Pesos** | `10 - CVSS` | `max(0.05, mitigaciones / max)` (solo mitigaciones STIX) |
 | **Datos** | CVEs del NVD | Bundle STIX de MITRE ATT&CK |
 | **Objetivo** | Demostrar el concepto | Responder pregunta de investigación real |

@@ -444,7 +444,7 @@
   <ol style="color:var(--muted);padding-left:24px;line-height:2">
     <li><b style="color:var(--txt)">Un ataque documentado</b> → SolarWinds Compromise</li>
     <li><b style="color:var(--txt)">Las técnicas que usaron</b> → Base de datos MITRE ATT&CK</li>
-    <li><b style="color:var(--txt)">Pesos reales</b> → Mitigaciones + CVEs del NIST/NVD</li>
+    <li><b style="color:var(--txt)">Pesos reales</b> → Proporción de mitigaciones documentadas en ATT&CK</li>
     <li><b style="color:var(--txt)">Un grafo modelado</b> → DiGraph con Dijkstra y Floyd-Warshall</li>
   </ol>
 </section>
@@ -807,31 +807,14 @@ w = max(<span class="n">0.05</span>, w)  <span class="c"># nunca llega a cero (s
     </table>
   </div>
 
-  <h3>Cómo se convierte CVSS en peso</h3>
-
-<pre><span class="c"># CVSS 9.8 (crítico) → peso muy bajo → fácil para el atacante</span>
-w_cve = (<span class="n">10.0</span> - cvss) / <span class="n">10.0</span>
-<span class="c"># CVSS 9.8 → w = (10 - 9.8) / 10 = 0.02 → mínimo sube a 0.05</span>
-<span class="c"># CVSS 8.1 → w = (10 - 8.1) / 10 = 0.19</span>
-<span class="c"># CVSS 9.0 → w = (10 - 9.0) / 10 = 0.10</span>
-
-<span class="c"># Se toma el MÍNIMO entre peso por mitigaciones y peso por CVE</span>
-w_final = min(w_mit, w_cve)
-<span class="c"># Peor escenario para el defensor = mejor escenario para el atacante</span></pre>
-
-  <h3>CVEs documentados en SolarWinds (referencia contextual)</h3>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>CVE</th><th>CVSS</th><th>Técnica ATT&CK</th><th>Descripción real</th></tr></thead>
-      <tbody>
-        <tr><td class="td-id">CVE-2020-10148</td><td class="td-w w-low">9.8</td><td>T1195.002, T1059.001, T1071.001, T1027</td><td>Bypass de autenticación en SolarWinds Orion — el núcleo del supply chain attack</td></tr>
-        <tr><td class="td-id">CVE-2021-21985</td><td class="td-w w-low">9.8</td><td>T1078 Valid Accounts</td><td>RCE en VMware vCenter — abusado post-compromiso para moverse lateralmente</td></tr>
-        <tr><td class="td-id">CVE-2021-26855</td><td class="td-w w-low">9.8</td><td>T1021.001 RDP</td><td>ProxyLogon en Exchange — permite ejecución remota sin credenciales</td></tr>
-        <tr><td class="td-id">CVE-2014-6324</td><td class="td-w w-mid">9.0</td><td>T1558.003 Kerberoasting</td><td>Escalada de privilegios en Kerberos (MS14-068) — clásico en campañas APT</td></tr>
-        <tr><td class="td-id">CVE-2018-13379</td><td class="td-w w-low">9.8</td><td>T1133 External Remote Services</td><td>Path traversal en FortiGate VPN — permite robar credenciales VPN sin autenticación</td></tr>
-        <tr><td class="td-id">CVE-2017-0144</td><td class="td-w w-mid">8.1</td><td>T1003.001 LSASS Dumping</td><td>EternalBlue (MS17-010) — la vulnerabilidad de WannaCry, también usada aquí</td></tr>
-      </tbody>
-    </table>
+  <div class="callout crit">
+    <div class="callout-title">⚠️ Por qué el modelo NO usa pesos por CVE/CVSS</div>
+    <p>Una versión previa convertía CVSS en peso (<code style="background:var(--line);padding:2px 6px;border-radius:4px">w = (10 − CVSS)/10</code>) y asignaba CVEs a técnicas a mano. Se eliminó por dos razones detectadas en revisión por pares:</p>
+    <ul style="color:var(--muted);line-height:1.9;margin-top:8px">
+      <li><b style="color:var(--txt)">No reproducible:</b> la asociación CVE↔técnica para una campaña no está en el bundle STIX; era juicio manual del analista.</li>
+      <li><b style="color:var(--txt)">Técnicamente incorrecta:</b> p.ej. CVE-2020-10148 es un <em>auth-bypass del API de Orion</em> (mapea a T1190/T1195.002), no a PowerShell ni a C2 como se había escrito.</li>
+    </ul>
+    <p style="margin-top:10px">El peso final deriva <b>solo de mitigaciones documentadas en ATT&CK</b> (<code style="background:var(--line);padding:2px 6px;border-radius:4px">w = max(0.05, n_mit/max_mit)</code>) — 100% reproducible desde el bundle. CVE/CVSS se explican aquí como contexto de seguridad, no como entrada del modelo.</p>
   </div>
 </section>
 
@@ -963,7 +946,7 @@ w_final = min(w_mit, w_cve)
   <h2>Los <span class="accent">resultados</span> del análisis</h2>
 
   <h3>Ruta crítica — Dijkstra</h3>
-  <p>Dijkstra encontró la ruta de <b>menor costo acumulado</b> desde ATTACKER hasta IMPACT. Costo total: <b style="color:var(--cyan)">1.535</b>. Cada paso suma el peso (resistencia) de la técnica destino:</p>
+  <p>Dijkstra encontró la ruta de <b>menor resistencia defensiva</b> desde ATTACKER hasta IMPACT. Costo total: <b style="color:var(--cyan)">1.535</b>. Cada paso suma el peso (resistencia = proporción de mitigaciones) de la técnica destino:</p>
 
   <div class="path">
     <div class="path-node entry">
@@ -975,19 +958,19 @@ w_final = min(w_mit, w_cve)
     <div class="path-node">
       <div class="pn-id">T1078.003</div>
       <div class="pn-name">Local Accounts</div>
-      <div class="pn-w">+0.50 → d=0.500</div>
+      <div class="pn-w">+0.50 → d=0.50</div>
     </div>
     <div class="path-arr">→</div>
     <div class="path-node">
       <div class="pn-id">T1606.001</div>
       <div class="pn-name">Web Cookies</div>
-      <div class="pn-w">+0.25 → d=0.750</div>
+      <div class="pn-w">+0.25 → d=0.75</div>
     </div>
     <div class="path-arr">→</div>
     <div class="path-node">
       <div class="pn-id">T1016.001</div>
-      <div class="pn-name">Internet Conn. Disc.</div>
-      <div class="pn-w">+0.05 → d=0.800</div>
+      <div class="pn-name">Internet Conn. Discovery</div>
+      <div class="pn-w">+0.05 → d=0.80</div>
     </div>
     <div class="path-arr">→</div>
     <div class="path-node">
@@ -1022,11 +1005,11 @@ w_final = min(w_mit, w_cve)
   </div>
 
   <h3>¿Por qué esta ruta y no otra?</h3>
-  <p>Dijkstra eligió esta ruta porque su <b>suma de pesos es la mínima posible</b>. Nótese que T1078.003 (Local Accounts, w=0.50) y T1048.002 (Exfiltración, w=0.50) son los pasos más costosos. Las técnicas de discovery, staging y C2 tienen peso mínimo (0.05, sin mitigaciones), lo que hace esta ruta óptima.</p>
+  <p>Dijkstra eligió esta ruta porque su <b>suma de pesos es la mínima posible</b>. Los extremos (T1078.003 y T1048.002, ambos 4/8 mitigaciones, w=0.50) son los pasos más costosos; el medio atraviesa las capas menos defendidas (discovery, staging, C2: 0/8 mitigaciones, w=0.05).</p>
 
   <div class="callout crit">
     <div class="callout-title">Interpretación defensiva</div>
-    <p>Los nodos con peso más bajo (<b>T1016.001 w=0.05</b>, <b>T1074.002 w=0.05</b>, <b>T1665 w=0.05</b>) son los más fáciles para el atacante (sin mitigaciones documentadas). Son los candidatos principales para fortalecer defensas: agregar mitigaciones sube su peso y encarece la ruta óptima.</p>
+    <p>Los nodos con peso más bajo (<b>T1016.001 w=0.05</b>, <b>T1074.002 w=0.05</b>, <b>T1665 w=0.05</b>) son los menos defendidos — el atacante los prefiere. Subir su resistencia (más mitigaciones) encarece o desvía la ruta óptima; bloquear T1048.002 la elimina por completo.</p>
   </div>
 
   <h3>FW-Betweenness — Floyd-Warshall</h3>
@@ -1043,18 +1026,18 @@ w_final = min(w_mit, w_cve)
     <table>
       <thead><tr><th>Rank</th><th>ID</th><th>Nombre</th><th>FW-Betweenness</th><th>Interpretación</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td class="td-id">T1606.001</td><td><b>Web Cookies</b></td><td class="td-w w-low">1044</td><td>Aparece en 1044 rutas óptimas. Puente entre credential-access y lateral-movement.</td></tr>
-        <tr><td>2</td><td class="td-id">T1018</td><td><b>Remote Sys. Discovery</b></td><td class="td-w w-low">836</td><td>Técnica de discovery sin mitigaciones — punto de paso obligatorio del kill chain.</td></tr>
-        <tr><td>3</td><td class="td-id">T1069.002</td><td><b>Domain Groups</b></td><td class="td-w w-mid">836</td><td>Clúster de discovery: 7 técnicas con betweenness=836 (sin mitigaciones, w=0.05).</td></tr>
-        <tr><td>4</td><td class="td-id">T1550.004</td><td><b>Web Session Cookie</b></td><td class="td-w w-mid">702</td><td>Movimiento lateral usando cookies — en la ruta crítica de Dijkstra.</td></tr>
-        <tr><td>5</td><td class="td-id">T1098.005</td><td><b>Device Registration</b></td><td class="td-w w-hi">464</td><td>Punto de persistencia/escalada de privilegios.</td></tr>
+        <tr><td>1</td><td class="td-id">T1606.001</td><td><b>Web Cookies</b></td><td class="td-w w-low">1044</td><td>Aparece en 1044 rutas óptimas. Pivote #1: une credential-access con el robo/reuso de sesiones.</td></tr>
+        <tr><td>2</td><td class="td-id">T1018</td><td><b>Remote System Discovery</b></td><td class="td-w w-mid">836</td><td>Parte de la capa discovery — 6 técnicas empatadas en 836 forman el cuello estructural.</td></tr>
+        <tr><td>3</td><td class="td-id">T1016.001</td><td><b>Internet Conn. Discovery</b></td><td class="td-w w-mid">836</td><td>Capa discovery: nodos mutuamente sustituibles, se defienden como capa completa.</td></tr>
+        <tr><td>4</td><td class="td-id">T1057</td><td><b>Process Discovery</b></td><td class="td-w w-mid">836</td><td>Capa discovery: bloquear uno fuerza re-enrutado de costo cero por un nodo hermano.</td></tr>
+        <tr><td>5</td><td class="td-id">T1070.006</td><td><b>Timestomp</b></td><td class="td-w w-hi">703</td><td>Capa stealth: alta presencia en rutas óptimas tras la fase de discovery.</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="callout good">
     <div class="callout-title">Dijkstra vs Floyd-Warshall: resultados consistentes</div>
-    <p>Ambos algoritmos identifican <b>T1606.001 (Web Cookies)</b> como la técnica más crítica. Dijkstra la encuentra en la ruta de menor costo; Floyd-Warshall confirma que es el nodo que más aparece en rutas óptimas de TODO el grafo (1044 pares). Esta concordancia valida el análisis.</p>
+    <p>Floyd-Warshall identifica <b>T1606.001 (Web Cookies)</b> como el pivote #1 (1044 rutas óptimas) y, además, es top-3 en impacto defensivo (+8.1%): centralidad estructural y palanca defensiva coinciden. La capa <b>discovery</b> (6 técnicas empatadas) es un cuello de capa que debe defenderse completo.</p>
   </div>
 </section>
 
@@ -1086,20 +1069,20 @@ w_final = min(w_mit, w_cve)
 
     <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--purple)">
       <h3 style="color:var(--purple);font-size:18px;margin-bottom:14px">L4 · Granularidad de los pesos</h3>
-      <p>Con max_mitigaciones=8, la fórmula <code style="background:var(--line);padding:2px 6px;border-radius:4px">w = max(0.05, n_mit / 8)</code> produce solo 9 valores posibles (0.05, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0). Esto crea empates frecuentes (ej. múltiples técnicas de discovery con w=0.05), donde Dijkstra elige según orden de visita en el heap, no por una diferencia real de dificultad.</p>
-      <p style="margin-top:10px"><strong>Implicación:</strong> rutas con costos idénticos son equivalentes. El análisis de sensibilidad (Jaccard=1.0 en ±20%, ruta cambia con esquema binario) confirma que la táctica crítica es robusta ante variaciones proporcionales.</p>
+      <p>Con max_mitigaciones=8, la fórmula <code style="background:var(--line);padding:2px 6px;border-radius:4px">w = max(0.05, n_mit / 8)</code> produce solo 9 valores posibles. Esto crea empates frecuentes (ej. T1016.001 y T1057 con w=0.05), donde Dijkstra elige según orden de visita en el heap, no por una diferencia real de dificultad.</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> rutas con costos idénticos son equivalentes. El análisis de sensibilidad lo cuantifica: la ruta es invariante al escalado ±20% (Jaccard=1.0) pero <em>cambia</em> bajo un esquema binario grueso — límite reportado abiertamente.</p>
     </div>
 
     <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--cyan)">
       <h3 style="color:var(--cyan);font-size:18px;margin-bottom:14px">L5 · Una sola campaña analizada</h3>
-      <p>Los resultados son específicos de SolarWinds Compromise (2019-2020). No se puede afirmar que la metodología produce los mismos patrones en otras campañas sin haberlo verificado. T1606.001 puede <em>no</em> ser el nodo de mayor betweenness en un ataque de ransomware o en una campaña de espionaje diferente.</p>
-      <p style="margin-top:10px"><strong>Implicación:</strong> la generalización del método requiere validación en múltiples campañas (APT28, FIN7, Lazarus Group). Es trabajo futuro documentado.</p>
+      <p>El análisis principal es específico de SolarWinds Compromise (2019-2020). T1606.001 puede <em>no</em> ser el nodo de mayor betweenness en otra campaña. La generalización se demuestra sobre 3 campañas (APT29, APT20, Lazarus) con Jaccard 0.0–0.1 entre rutas críticas, pero no de forma exhaustiva.</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> validación a 10+ campañas de distintos sectores y actores es trabajo futuro documentado.</p>
     </div>
 
     <div style="border:1px solid var(--line);border-radius:12px;padding:24px;background:rgba(255,59,92,.04);border-top:3px solid var(--green)">
-      <h3 style="color:var(--green);font-size:18px;margin-bottom:14px">L6 · CVE-weights: asociación manual</h3>
-      <p>La tabla <code style="background:var(--line);padding:2px 6px;border-radius:4px">KNOWN_CVE_WEIGHTS</code> asigna CVEs a técnicas ATT&CK manualmente, basada en reportes públicos (CISA, FireEye, Microsoft). Esta asociación es una decisión del analista: otros investigadores podrían asignar CVEs diferentes a las mismas técnicas.</p>
-      <p style="margin-top:10px"><strong>Implicación:</strong> el análisis de sensibilidad "sin CVE" (Jaccard=0.75) acota el efecto: con o sin CVE-weights, la ruta crítica cambia en 1 nodo de 7, y la táctica principal (credential-access) permanece.</p>
+      <h3 style="color:var(--green);font-size:18px;margin-bottom:14px">L6 · Sin pesos por CVE/CVSS</h3>
+      <p>Una versión previa asignaba CVEs a técnicas ATT&CK manualmente. Ese mapeo era (a) no reproducible desde el bundle STIX y (b) técnicamente incorrecto — p.ej. CVE-2020-10148 es un auth-bypass del API de Orion (mapea a T1190/T1195.002), no a PowerShell ni C2. Se eliminó.</p>
+      <p style="margin-top:10px"><strong>Implicación:</strong> todos los pesos derivan ahora solo de mitigaciones documentadas en ATT&CK — 100% reproducible. Eliminar la asociación CVE manual cierra una fuente de error subjetivo.</p>
     </div>
 
   </div>
