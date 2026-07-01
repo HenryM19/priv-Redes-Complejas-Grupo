@@ -1,0 +1,463 @@
+{
+  "campanas_evaluadas": [
+    {
+      "campaign": "SolarWinds Compromise",
+      "n_edges_cartesian": 653,
+      "n_edges_cooccurrence": 472,
+      "edge_reduction_pct": 27.72,
+      "cooccurrence_stats": {
+        "n_pairs_connected": 459,
+        "n_pairs_possible_cartesian": 665,
+        "coverage_ratio": 0.6902,
+        "n_techniques_isolated": 29,
+        "isolated_techniques": [
+          "T1003.006",
+          "T1048.002",
+          "T1069",
+          "T1070.008",
+          "T1074.002",
+          "T1087",
+          "T1098.001",
+          "T1098.003",
+          "T1213",
+          "T1213.003",
+          "T1482",
+          "T1484.002",
+          "T1539",
+          "T1550",
+          "T1550.001",
+          "T1550.004",
+          "T1552.004",
+          "T1555",
+          "T1555.003",
+          "T1558.003",
+          "T1560.001",
+          "T1583.001",
+          "T1584.001",
+          "T1589.001",
+          "T1606.001",
+          "T1606.002",
+          "T1680",
+          "T1685.001",
+          "T1686"
+        ]
+      },
+      "reachable_in_cooccurrence": false,
+      "costo_cartesian": 1.535,
+      "ruta_cartesian": [
+        "ATTACKER",
+        "T1078.003",
+        "T1606.001",
+        "T1016.001",
+        "T1550.004",
+        "T1074.002",
+        "T1665",
+        "T1048.002",
+        "IMPACT"
+      ],
+      "diagnostico_desconexion": {
+        "n_techniques_isolated": 29,
+        "isolated_techniques_detail": [
+          {
+            "node": "T1003.006",
+            "tactics": [
+              "credential-access"
+            ]
+          },
+          {
+            "node": "T1048.002",
+            "tactics": [
+              "exfiltration"
+            ]
+          },
+          {
+            "node": "T1069",
+            "tactics": [
+              "discovery"
+            ]
+          },
+          {
+            "node": "T1070.008",
+            "tactics": [
+              "stealth"
+            ]
+          },
+          {
+            "node": "T1074.002",
+            "tactics": [
+              "collection"
+            ]
+          },
+          {
+            "node": "T1087",
+            "tactics": [
+              "discovery"
+            ]
+          },
+          {
+            "node": "T1098.001",
+            "tactics": [
+              "persistence",
+              "privilege-escalation"
+            ]
+          },
+          {
+            "node": "T1098.003",
+            "tactics": [
+              "persistence",
+              "privilege-escalation"
+            ]
+          },
+          {
+            "node": "T1213",
+            "tactics": [
+              "collection"
+            ]
+          },
+          {
+            "node": "T1213.003",
+            "tactics": [
+              "collection"
+            ]
+          },
+          {
+            "node": "T1482",
+            "tactics": [
+              "discovery"
+            ]
+          },
+          {
+            "node": "T1484.002",
+            "tactics": [
+              "defense-impairment",
+              "privilege-escalation"
+            ]
+          },
+          {
+            "node": "T1539",
+            "tactics": [
+              "credential-access"
+            ]
+          },
+          {
+            "node": "T1550",
+            "tactics": [
+              "lateral-movement"
+            ]
+          },
+          {
+            "node": "T1550.001",
+            "tactics": [
+              "lateral-movement"
+            ]
+          },
+          {
+            "node": "T1550.004",
+            "tactics": [
+              "lateral-movement"
+            ]
+          },
+          {
+            "node": "T1552.004",
+            "tactics": [
+              "credential-access"
+            ]
+          },
+          {
+            "node": "T1555",
+            "tactics": [
+              "credential-access"
+            ]
+          },
+          {
+            "node": "T1555.003",
+            "tactics": [
+              "credential-access"
+            ]
+          },
+          {
+            "node": "T1558.003",
+            "tactics": [
+              "credential-access"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "campaign": "Operation Wocao",
+      "n_edges_cartesian": 494,
+      "n_edges_cooccurrence": 74,
+      "edge_reduction_pct": 85.02,
+      "cooccurrence_stats": {
+        "n_pairs_connected": 63,
+        "n_pairs_possible_cartesian": 496,
+        "coverage_ratio": 0.127,
+        "n_techniques_isolated": 50,
+        "isolated_techniques": [
+          "T1001",
+          "T1003.006",
+          "T1007",
+          "T1016",
+          "T1016.001",
+          "T1036.005",
+          "T1041",
+          "T1046",
+          "T1049",
+          "T1055",
+          "T1059.003",
+          "T1059.005",
+          "T1059.006",
+          "T1070.004",
+          "T1071.001",
+          "T1074.001",
+          "T1078",
+          "T1078.002",
+          "T1078.003",
+          "T1082",
+          "T1083",
+          "T1090",
+          "T1090.001",
+          "T1090.003",
+          "T1095",
+          "T1105",
+          "T1111",
+          "T1112",
+          "T1115",
+          "T1119",
+          "T1120",
+          "T1124",
+          "T1133",
+          "T1135",
+          "T1190",
+          "T1505.003",
+          "T1518",
+          "T1518.001",
+          "T1552.004",
+          "T1555.005",
+          "T1560.001",
+          "T1571",
+          "T1573.002",
+          "T1583.004",
+          "T1585.002",
+          "T1587.001",
+          "T1588.002",
+          "T1589",
+          "T1680",
+          "T1686.003"
+        ]
+      },
+      "reachable_in_cooccurrence": false,
+      "costo_cartesian": 0.935,
+      "ruta_cartesian": [
+        "ATTACKER",
+        "T1078.003",
+        "T1056.001",
+        "T1001",
+        "T1041",
+        "IMPACT"
+      ],
+      "diagnostico_desconexion": {
+        "n_techniques_isolated": 50,
+        "isolated_techniques_detail": [
+          {
+            "node": "T1001",
+            "tactics": [
+              "command-and-control"
+            ]
+          },
+          {
+            "node": "T1003.006",
+            "tactics": [
+              "credential-access"
+            ]
+          },
+          {
+            "node": "T1007",
+            "tactics": [
+              "discovery"
+            ]
+          },
+          {
+            "node": "T1016",
+            "tactics": [
+              "discovery"
+            ]
+          },
+          {
+            "node": "T1016.001",
+            "tactics": [
+              "discovery"
+            ]
+          },
+          {
+            "node": "T1036.005",
+            "tactics": [
+              "stealth"
+            ]
+          },
+          {
+            "node": "T1041",
+            "tactics": [
+              "exfiltration"
+            ]
+          },
+          {
+            "node": "T1046",
+            "tactics": [
+              "discovery"
+            ]
+          },
+          {
+            "node": "T1049",
+            "tactics": [
+              "discovery"
+            ]
+          },
+          {
+            "node": "T1055",
+            "tactics": [
+              "stealth",
+              "privilege-escalation"
+            ]
+          },
+          {
+            "node": "T1059.003",
+            "tactics": [
+              "execution"
+            ]
+          },
+          {
+            "node": "T1059.005",
+            "tactics": [
+              "execution"
+            ]
+          },
+          {
+            "node": "T1059.006",
+            "tactics": [
+              "execution"
+            ]
+          },
+          {
+            "node": "T1070.004",
+            "tactics": [
+              "stealth"
+            ]
+          },
+          {
+            "node": "T1071.001",
+            "tactics": [
+              "command-and-control"
+            ]
+          },
+          {
+            "node": "T1074.001",
+            "tactics": [
+              "collection"
+            ]
+          },
+          {
+            "node": "T1078",
+            "tactics": [
+              "stealth",
+              "persistence",
+              "privilege-escalation",
+              "initial-access"
+            ]
+          },
+          {
+            "node": "T1078.002",
+            "tactics": [
+              "stealth",
+              "persistence",
+              "privilege-escalation",
+              "initial-access"
+            ]
+          },
+          {
+            "node": "T1078.003",
+            "tactics": [
+              "stealth",
+              "persistence",
+              "privilege-escalation",
+              "initial-access"
+            ]
+          },
+          {
+            "node": "T1082",
+            "tactics": [
+              "discovery"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "campaign": "Operation Dream Job",
+      "n_edges_cartesian": 217,
+      "n_edges_cooccurrence": 391,
+      "edge_reduction_pct": -80.18,
+      "cooccurrence_stats": {
+        "n_pairs_connected": 369,
+        "n_pairs_possible_cartesian": 197,
+        "coverage_ratio": 1.8731,
+        "n_techniques_isolated": 23,
+        "isolated_techniques": [
+          "T1036.008",
+          "T1087.002",
+          "T1110",
+          "T1204.001",
+          "T1218.010",
+          "T1220",
+          "T1221",
+          "T1497.001",
+          "T1505.004",
+          "T1534",
+          "T1560.001",
+          "T1567.002",
+          "T1583.004",
+          "T1584.001",
+          "T1587.002",
+          "T1588.003",
+          "T1589",
+          "T1591.004",
+          "T1593.001",
+          "T1608.001",
+          "T1608.002",
+          "T1614.001",
+          "T1684.001"
+        ]
+      },
+      "reachable_in_cooccurrence": true,
+      "costo_cartesian": 1.496,
+      "costo_cooccurrence": 0.439,
+      "ruta_cartesian": [
+        "ATTACKER",
+        "T1566.002",
+        "T1059.003",
+        "T1547.001",
+        "T1553.002",
+        "T1497.001",
+        "T1534",
+        "T1005",
+        "T1573.001",
+        "T1567.002",
+        "IMPACT"
+      ],
+      "ruta_cooccurrence": [
+        "ATTACKER",
+        "T1583.001",
+        "T1041",
+        "IMPACT"
+      ],
+      "jaccard_rutas": 0.0
+    }
+  ],
+  "resumen": {
+    "n_campanas": 3,
+    "n_alcanzables_en_cooccurrence": 1,
+    "tasa_alcanzabilidad": 0.3333,
+    "conclusion": "El modo co-ocurrencia usa solo aristas respaldadas por un actor real documentado (malware/tool/intrusion-set) que uso ambas tecnicas, en vez del cross-product completo entre tacticas consecutivas. Esto reduce sustancialmente el numero de aristas pero puede dejar la campana desconectada si ningun actor documentado conecta ciertas tecnicas -- un hallazgo honesto sobre los limites de granularidad del dataset STIX, no un defecto del metodo."
+  }
+}

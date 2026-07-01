@@ -401,7 +401,7 @@ def compare_betweenness(G: nx.DiGraph, fw_results: list) -> list[dict]:
 
 # ── Pipeline principal ────────────────────────────────────────────────────────
 
-def run():
+def run(edge_mode: str = "cartesian", weight_mode: str = "mitigations"):
     print("\n" + "="*70)
     print("  ANALISIS CIENTIFICO EXTENDIDO — SolarWinds Compromise")
     print("  Para publicacion en revista: validacion + metricas + sensibilidad")
@@ -411,9 +411,12 @@ def run():
     print("\n[0/5] Cargando dataset MITRE ATT&CK...")
     bundle = download_mitre()
     campaign_obj, techniques = extract_campaign(bundle, TARGET_CAMPAIGN_NAME)
-    G, tech_by_id, by_tactic = build_attack_graph(bundle, techniques)
+    G, tech_by_id, by_tactic = build_attack_graph(
+        bundle, techniques, campaign=campaign_obj,
+        edge_mode=edge_mode, weight_mode=weight_mode,
+    )
     n, m = G.number_of_nodes(), G.number_of_edges()
-    print(f"      Grafo base: {n} nodos, {m} aristas")
+    print(f"      Grafo base: {n} nodos, {m} aristas (edge_mode={edge_mode}, weight_mode={weight_mode})")
 
     # ── 1. Comparacion de algoritmos ─────────────────────────────────────────
     print("\n[1/5] Comparacion de algoritmos: Dijkstra vs BFS vs NetworkX vs Bellman-Ford...")
@@ -650,4 +653,9 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--edge-mode", choices=["cartesian", "cooccurrence"], default="cartesian")
+    parser.add_argument("--weight-mode", choices=["mitigations", "combined"], default="mitigations")
+    args = parser.parse_args()
+    run(edge_mode=args.edge_mode, weight_mode=args.weight_mode)

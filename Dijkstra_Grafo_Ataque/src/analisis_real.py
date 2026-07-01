@@ -144,16 +144,23 @@ def fw_betweenness(dist: np.ndarray, nodes: list, idx: dict, G: nx.DiGraph) -> l
 
 # ── Pipeline ─────────────────────────────────────────────────────────────────
 
-def run(force_download: bool = False, campaign_name: str = TARGET_CAMPAIGN_NAME):
+def run(force_download: bool = False, campaign_name: str = TARGET_CAMPAIGN_NAME,
+        edge_mode: str = "cartesian", weight_mode: str = "mitigations"):
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    suffix = "" if (edge_mode == "cartesian" and weight_mode == "mitigations") \
+        else f"_{edge_mode}_{weight_mode}"
 
     # 1. Dataset real
     print(f"\n[1/4] Cargando dataset MITRE ATT&CK Enterprise...")
     bundle = download_mitre(force=force_download)
     campaign_obj, techniques = extract_campaign(bundle, campaign_name)
-    G, tech_by_id, by_tactic = build_attack_graph(bundle, techniques)
+    G, tech_by_id, by_tactic = build_attack_graph(
+        bundle, techniques, campaign=campaign_obj,
+        edge_mode=edge_mode, weight_mode=weight_mode,
+    )
     s = graph_summary(G, campaign_name)
-    print(f"      Grafo: {s['n_nodes']} nodos, {s['n_edges']} aristas, densidad={s['density']}")
+    print(f"      Grafo: {s['n_nodes']} nodos, {s['n_edges']} aristas, densidad={s['density']} "
+          f"(edge_mode={edge_mode}, weight_mode={weight_mode})")
 
     # 2. Dijkstra
     print(f"\n[2/4] Dijkstra: ruta de menor resistencia ATTACKER -> IMPACT...")
@@ -194,7 +201,7 @@ def run(force_download: bool = False, campaign_name: str = TARGET_CAMPAIGN_NAME)
         }
         for i, node in enumerate(ruta)
     ]
-    with open(RESULTS_DIR / "ruta_critica_solarwinds.json", "w", encoding="utf-8") as f:
+    with open(RESULTS_DIR / f"ruta_critica_solarwinds{suffix}.json", "w", encoding="utf-8") as f:
         json.dump(ruta_data, f, indent=2, ensure_ascii=False)
 
     # 3. Floyd-Warshall
@@ -209,7 +216,7 @@ def run(force_download: bool = False, campaign_name: str = TARGET_CAMPAIGN_NAME)
         tac = b["tactics"][0] if b["tactics"] else "-"
         print(f"  {i+1:<4} {b['node']:<14} {b['fw_betweenness']:<10} {b['weight']:<7} {tac:<25} {b['weight_source']:<30} {b['name'][:30]}")
 
-    with open(RESULTS_DIR / "fw_betweenness_solarwinds.json", "w", encoding="utf-8") as f:
+    with open(RESULTS_DIR / f"fw_betweenness_solarwinds{suffix}.json", "w", encoding="utf-8") as f:
         json.dump(betweenness, f, indent=2, ensure_ascii=False)
 
     # 4. Cuellos de botella
@@ -238,7 +245,7 @@ def run(force_download: bool = False, campaign_name: str = TARGET_CAMPAIGN_NAME)
     for c in cuellos:
         print(f"  {c['node']:<14} {c['in_degree']:<8} {c['fw_betweenness']:<10} {c['weight']:<7} {c['weight_source']:<35} {c['name'][:30]}")
 
-    with open(RESULTS_DIR / "cuellos_solarwinds.json", "w", encoding="utf-8") as f:
+    with open(RESULTS_DIR / f"cuellos_solarwinds{suffix}.json", "w", encoding="utf-8") as f:
         json.dump(cuellos, f, indent=2, ensure_ascii=False)
 
     # Resumen tecnicas por tactica
@@ -263,5 +270,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--campaign", default=TARGET_CAMPAIGN_NAME)
+    parser.add_argument("--edge-mode", choices=["cartesian", "cooccurrence"], default="cartesian")
+    parser.add_argument("--weight-mode", choices=["mitigations", "combined"], default="mitigations")
     args = parser.parse_args()
-    run(force_download=args.force, campaign_name=args.campaign)
+    run(force_download=args.force, campaign_name=args.campaign,
+        edge_mode=args.edge_mode, weight_mode=args.weight_mode)

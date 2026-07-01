@@ -97,7 +97,10 @@ def mitigation_priority(G: nx.DiGraph, candidates: list[str], base_cost: float, 
     return results
 
 
-def run():
+def run(edge_mode: str = "cartesian", weight_mode: str = "mitigations"):
+    suffix = "" if (edge_mode == "cartesian" and weight_mode == "mitigations") \
+        else f"_{edge_mode}_{weight_mode}"
+
     print("\n" + "="*65)
     print("  RECOMENDACIONES DEFENSIVAS — SolarWinds Compromise")
     print("  Priorizacion por impacto en costo del atacante")
@@ -106,15 +109,18 @@ def run():
     print("\n[1/3] Cargando dataset y construyendo grafo...")
     bundle = download_mitre()
     campaign_obj, techniques = extract_campaign(bundle, TARGET_CAMPAIGN_NAME)
-    G, tech_by_id, by_tactic = build_attack_graph(bundle, techniques)
+    G, tech_by_id, by_tactic = build_attack_graph(
+        bundle, techniques, campaign=campaign_obj,
+        edge_mode=edge_mode, weight_mode=weight_mode,
+    )
 
     print("\n[2/3] Dijkstra base y FW-betweenness...")
     dist, prev = dijkstra(G, ENTRY_NODE)
     base_path = reconstruct_path(prev, ENTRY_NODE, TARGET_NODE)
     base_cost = round(dist.get(TARGET_NODE, float("inf")), 4)
 
-    # Cargar betweenness pre-calculado
-    with open(RESULTS_DIR / "fw_betweenness_solarwinds.json", encoding="utf-8") as f:
+    # Cargar betweenness pre-calculado (mismo modo, debe existir de un run previo de analisis_real.py)
+    with open(RESULTS_DIR / f"fw_betweenness_solarwinds{suffix}.json", encoding="utf-8") as f:
         betw_data = json.load(f)
     top_betw = [b["node"] for b in betw_data[:10]]
 
@@ -192,7 +198,7 @@ def run():
         }
     }
 
-    out_path = RESULTS_DIR / "recomendaciones_defensivas.json"
+    out_path = RESULTS_DIR / f"recomendaciones_defensivas{suffix}.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
@@ -206,4 +212,9 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--edge-mode", choices=["cartesian", "cooccurrence"], default="cartesian")
+    parser.add_argument("--weight-mode", choices=["mitigations", "combined"], default="mitigations")
+    args = parser.parse_args()
+    run(edge_mode=args.edge_mode, weight_mode=args.weight_mode)

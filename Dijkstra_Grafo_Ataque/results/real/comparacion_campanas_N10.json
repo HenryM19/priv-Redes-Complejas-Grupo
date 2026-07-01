@@ -1,0 +1,1537 @@
+{
+  "campanas": [
+    {
+      "campaign": "SolarWinds Compromise",
+      "n_nodes": 73,
+      "n_edges": 653,
+      "density": 0.124239,
+      "is_dag": false,
+      "n_techniques": 71,
+      "avg_weight": 0.3567,
+      "by_tactic_counts": {
+        "reconnaissance": 1,
+        "resource-development": 3,
+        "initial-access": 8,
+        "execution": 5,
+        "persistence": 11,
+        "privilege-escalation": 11,
+        "defense-impairment": 5,
+        "stealth": 12,
+        "credential-access": 8,
+        "discovery": 10,
+        "lateral-movement": 6,
+        "collection": 6,
+        "command-and-control": 5,
+        "exfiltration": 1
+      },
+      "reachable": true,
+      "empty_tactics": [
+        "impact"
+      ],
+      "dijkstra": {
+        "costo_minimo": 1.535,
+        "n_pasos": 9,
+        "ruta": [
+          "ATTACKER",
+          "T1078.003",
+          "T1606.001",
+          "T1016.001",
+          "T1550.004",
+          "T1074.002",
+          "T1665",
+          "T1048.002",
+          "IMPACT"
+        ],
+        "ruta_detalle": [
+          {
+            "node": "T1078.003",
+            "name": "Local Accounts",
+            "tactics": [
+              "stealth",
+              "persistence",
+              "privilege-escalation",
+              "initial-access"
+            ],
+            "weight": 0.5
+          },
+          {
+            "node": "T1606.001",
+            "name": "Web Cookies",
+            "tactics": [
+              "credential-access"
+            ],
+            "weight": 0.25
+          },
+          {
+            "node": "T1016.001",
+            "name": "Internet Connection Discovery",
+            "tactics": [
+              "discovery"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1550.004",
+            "name": "Web Session Cookie",
+            "tactics": [
+              "lateral-movement"
+            ],
+            "weight": 0.125
+          },
+          {
+            "node": "T1074.002",
+            "name": "Remote Data Staging",
+            "tactics": [
+              "collection"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1665",
+            "name": "Hide Infrastructure",
+            "tactics": [
+              "command-and-control"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1048.002",
+            "name": "Exfiltration Over Asymmetric Encrypted Non-C2 Protocol",
+            "tactics": [
+              "exfiltration"
+            ],
+            "weight": 0.5
+          }
+        ]
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1606.001",
+          "name": "Web Cookies",
+          "fw_betweenness": 1044,
+          "tactics": [
+            "credential-access"
+          ],
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
+          "in_degree": 12,
+          "out_degree": 10
+        },
+        {
+          "node": "T1680",
+          "name": "Local Storage Discovery",
+          "fw_betweenness": 836,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 8,
+          "out_degree": 6
+        },
+        {
+          "node": "T1069.002",
+          "name": "Domain Groups",
+          "fw_betweenness": 836,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 8,
+          "out_degree": 6
+        },
+        {
+          "node": "T1016.001",
+          "name": "Internet Connection Discovery",
+          "fw_betweenness": 836,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 8,
+          "out_degree": 6
+        },
+        {
+          "node": "T1069",
+          "name": "Permission Groups Discovery",
+          "fw_betweenness": 836,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 8,
+          "out_degree": 6
+        }
+      ],
+      "tiempo_ms": 16.41,
+      "actor": "APT29",
+      "context": "The [SolarWinds Compromise](https://attack.mitre.org/campaigns/C0024) was a sophisticated supply chain cyber operation c"
+    },
+    {
+      "campaign": "Operation Wocao",
+      "n_nodes": 72,
+      "n_edges": 494,
+      "density": 0.096635,
+      "is_dag": false,
+      "n_techniques": 70,
+      "avg_weight": 0.2614,
+      "by_tactic_counts": {
+        "reconnaissance": 1,
+        "resource-development": 4,
+        "initial-access": 5,
+        "execution": 8,
+        "persistence": 7,
+        "privilege-escalation": 5,
+        "defense-impairment": 3,
+        "stealth": 8,
+        "credential-access": 7,
+        "discovery": 19,
+        "lateral-movement": 2,
+        "collection": 6,
+        "command-and-control": 9,
+        "exfiltration": 1
+      },
+      "reachable": true,
+      "empty_tactics": [
+        "impact"
+      ],
+      "dijkstra": {
+        "costo_minimo": 0.935,
+        "n_pasos": 6,
+        "ruta": [
+          "ATTACKER",
+          "T1078.003",
+          "T1056.001",
+          "T1001",
+          "T1041",
+          "IMPACT"
+        ],
+        "ruta_detalle": [
+          {
+            "node": "T1078.003",
+            "name": "Local Accounts",
+            "tactics": [
+              "stealth",
+              "persistence",
+              "privilege-escalation",
+              "initial-access"
+            ],
+            "weight": 0.5
+          },
+          {
+            "node": "T1056.001",
+            "name": "Keylogging",
+            "tactics": [
+              "collection",
+              "credential-access"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1001",
+            "name": "Data Obfuscation",
+            "tactics": [
+              "command-and-control"
+            ],
+            "weight": 0.125
+          },
+          {
+            "node": "T1041",
+            "name": "Exfiltration Over C2 Channel",
+            "tactics": [
+              "exfiltration"
+            ],
+            "weight": 0.25
+          }
+        ]
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1056.001",
+          "name": "Keylogging",
+          "fw_betweenness": 1715,
+          "tactics": [
+            "collection",
+            "credential-access"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 10,
+          "out_degree": 28
+        },
+        {
+          "node": "T1570",
+          "name": "Lateral Tool Transfer",
+          "fw_betweenness": 912,
+          "tactics": [
+            "lateral-movement"
+          ],
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
+          "in_degree": 19,
+          "out_degree": 6
+        },
+        {
+          "node": "T1070.004",
+          "name": "File Deletion",
+          "fw_betweenness": 528,
+          "tactics": [
+            "stealth"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 3,
+          "out_degree": 7
+        },
+        {
+          "node": "T1027.005",
+          "name": "Indicator Removal from Tools",
+          "fw_betweenness": 528,
+          "tactics": [
+            "stealth"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 3,
+          "out_degree": 7
+        },
+        {
+          "node": "T1112",
+          "name": "Modify Registry",
+          "fw_betweenness": 519,
+          "tactics": [
+            "defense-impairment",
+            "persistence"
+          ],
+          "weight": 0.125,
+          "weight_source": "mitigaciones=1/8",
+          "in_degree": 12,
+          "out_degree": 9
+        }
+      ],
+      "tiempo_ms": 17.07,
+      "actor": "no atribuido",
+      "context": "[Operation Wocao](https://attack.mitre.org/campaigns/C0014) was a cyber espionage campaign that targeted organizations a"
+    },
+    {
+      "campaign": "Operation Dream Job",
+      "n_nodes": 57,
+      "n_edges": 217,
+      "density": 0.067982,
+      "is_dag": false,
+      "n_techniques": 55,
+      "avg_weight": 0.255,
+      "by_tactic_counts": {
+        "reconnaissance": 4,
+        "resource-development": 13,
+        "initial-access": 3,
+        "execution": 8,
+        "persistence": 3,
+        "privilege-escalation": 2,
+        "defense-impairment": 1,
+        "stealth": 12,
+        "credential-access": 1,
+        "discovery": 6,
+        "lateral-movement": 1,
+        "collection": 2,
+        "command-and-control": 3,
+        "exfiltration": 2
+      },
+      "reachable": true,
+      "empty_tactics": [
+        "impact"
+      ],
+      "dijkstra": {
+        "costo_minimo": 1.496,
+        "n_pasos": 11,
+        "ruta": [
+          "ATTACKER",
+          "T1566.002",
+          "T1059.003",
+          "T1547.001",
+          "T1553.002",
+          "T1497.001",
+          "T1534",
+          "T1005",
+          "T1573.001",
+          "T1567.002",
+          "IMPACT"
+        ],
+        "ruta_detalle": [
+          {
+            "node": "T1566.002",
+            "name": "Spearphishing Link",
+            "tactics": [
+              "initial-access"
+            ],
+            "weight": 0.714
+          },
+          {
+            "node": "T1059.003",
+            "name": "Windows Command Shell",
+            "tactics": [
+              "execution"
+            ],
+            "weight": 0.143
+          },
+          {
+            "node": "T1547.001",
+            "name": "Registry Run Keys / Startup Folder",
+            "tactics": [
+              "persistence",
+              "privilege-escalation"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1553.002",
+            "name": "Code Signing",
+            "tactics": [
+              "defense-impairment"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1497.001",
+            "name": "System Checks",
+            "tactics": [
+              "stealth",
+              "discovery"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1534",
+            "name": "Internal Spearphishing",
+            "tactics": [
+              "lateral-movement"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1005",
+            "name": "Data from Local System",
+            "tactics": [
+              "collection"
+            ],
+            "weight": 0.143
+          },
+          {
+            "node": "T1573.001",
+            "name": "Symmetric Cryptography",
+            "tactics": [
+              "command-and-control"
+            ],
+            "weight": 0.143
+          },
+          {
+            "node": "T1567.002",
+            "name": "Exfiltration to Cloud Storage",
+            "tactics": [
+              "exfiltration"
+            ],
+            "weight": 0.143
+          }
+        ]
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1553.002",
+          "name": "Code Signing",
+          "fw_betweenness": 775,
+          "tactics": [
+            "defense-impairment"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/7",
+          "in_degree": 2,
+          "out_degree": 12
+        },
+        {
+          "node": "T1547.001",
+          "name": "Registry Run Keys / Startup Folder",
+          "fw_betweenness": 754,
+          "tactics": [
+            "persistence",
+            "privilege-escalation"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/7",
+          "in_degree": 10,
+          "out_degree": 3
+        },
+        {
+          "node": "T1566.002",
+          "name": "Spearphishing Link",
+          "fw_betweenness": 648,
+          "tactics": [
+            "initial-access"
+          ],
+          "weight": 0.714,
+          "weight_source": "mitigaciones=5/7",
+          "in_degree": 14,
+          "out_degree": 8
+        },
+        {
+          "node": "T1566.003",
+          "name": "Spearphishing via Service",
+          "fw_betweenness": 648,
+          "tactics": [
+            "initial-access"
+          ],
+          "weight": 0.714,
+          "weight_source": "mitigaciones=5/7",
+          "in_degree": 14,
+          "out_degree": 8
+        },
+        {
+          "node": "T1059.003",
+          "name": "Windows Command Shell",
+          "fw_betweenness": 588,
+          "tactics": [
+            "execution"
+          ],
+          "weight": 0.143,
+          "weight_source": "mitigaciones=1/7",
+          "in_degree": 3,
+          "out_degree": 3
+        }
+      ],
+      "tiempo_ms": 14.29,
+      "actor": "Lazarus Group",
+      "context": "[Operation Dream Job](https://attack.mitre.org/campaigns/C0022) was a cyber espionage operation likely conducted by [Laz"
+    },
+    {
+      "campaign": "2025 Poland Wiper Attacks",
+      "n_nodes": 55,
+      "n_edges": 271,
+      "density": 0.091246,
+      "is_dag": false,
+      "n_techniques": 53,
+      "avg_weight": 0.3236,
+      "by_tactic_counts": {
+        "reconnaissance": 1,
+        "resource-development": 7,
+        "initial-access": 3,
+        "execution": 4,
+        "persistence": 5,
+        "privilege-escalation": 4,
+        "defense-impairment": 3,
+        "stealth": 6,
+        "credential-access": 7,
+        "discovery": 5,
+        "lateral-movement": 3,
+        "collection": 6,
+        "command-and-control": 5,
+        "exfiltration": 2,
+        "impact": 4
+      },
+      "reachable": true,
+      "empty_tactics": [],
+      "dijkstra": {
+        "costo_minimo": 1.485,
+        "n_pasos": 9,
+        "ruta": [
+          "ATTACKER",
+          "T1078.002",
+          "T1110.002",
+          "T1016",
+          "T1570",
+          "T1074.001",
+          "T1090.003",
+          "T1567.004",
+          "IMPACT"
+        ],
+        "ruta_detalle": [
+          {
+            "node": "T1078.002",
+            "name": "Domain Accounts",
+            "tactics": [
+              "stealth",
+              "persistence",
+              "privilege-escalation",
+              "initial-access"
+            ],
+            "weight": 0.625
+          },
+          {
+            "node": "T1110.002",
+            "name": "Password Cracking",
+            "tactics": [
+              "credential-access"
+            ],
+            "weight": 0.25
+          },
+          {
+            "node": "T1016",
+            "name": "System Network Configuration Discovery",
+            "tactics": [
+              "discovery"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1570",
+            "name": "Lateral Tool Transfer",
+            "tactics": [
+              "lateral-movement"
+            ],
+            "weight": 0.25
+          },
+          {
+            "node": "T1074.001",
+            "name": "Local Data Staging",
+            "tactics": [
+              "collection"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1090.003",
+            "name": "Multi-hop Proxy",
+            "tactics": [
+              "command-and-control"
+            ],
+            "weight": 0.125
+          },
+          {
+            "node": "T1567.004",
+            "name": "Exfiltration Over Webhook",
+            "tactics": [
+              "exfiltration"
+            ],
+            "weight": 0.125
+          }
+        ]
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1570",
+          "name": "Lateral Tool Transfer",
+          "fw_betweenness": 612,
+          "tactics": [
+            "lateral-movement"
+          ],
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
+          "in_degree": 5,
+          "out_degree": 6
+        },
+        {
+          "node": "T1049",
+          "name": "System Network Connections Discovery",
+          "fw_betweenness": 609,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 7,
+          "out_degree": 3
+        },
+        {
+          "node": "T1057",
+          "name": "Process Discovery",
+          "fw_betweenness": 609,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 7,
+          "out_degree": 3
+        },
+        {
+          "node": "T1083",
+          "name": "File and Directory Discovery",
+          "fw_betweenness": 609,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 7,
+          "out_degree": 3
+        },
+        {
+          "node": "T1016",
+          "name": "System Network Configuration Discovery",
+          "fw_betweenness": 609,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 7,
+          "out_degree": 3
+        }
+      ],
+      "tiempo_ms": 14.71,
+      "actor": "no atribuido",
+      "context": "[2025 Poland Wiper Attacks](https://attack.mitre.org/campaigns/C0063) is a Russian state-sponsored campaign that conduct"
+    },
+    {
+      "campaign": "SharePoint ToolShell Exploitation",
+      "n_nodes": 37,
+      "n_edges": 100,
+      "density": 0.075075,
+      "is_dag": false,
+      "n_techniques": 35,
+      "avg_weight": 0.2907,
+      "by_tactic_counts": {
+        "reconnaissance": 1,
+        "resource-development": 3,
+        "initial-access": 1,
+        "execution": 5,
+        "persistence": 4,
+        "privilege-escalation": 2,
+        "defense-impairment": 3,
+        "stealth": 4,
+        "credential-access": 2,
+        "discovery": 3,
+        "lateral-movement": 1,
+        "collection": 3,
+        "command-and-control": 4,
+        "exfiltration": 1,
+        "impact": 2
+      },
+      "reachable": true,
+      "empty_tactics": [],
+      "dijkstra": {
+        "costo_minimo": 2.66,
+        "n_pasos": 12,
+        "ruta": [
+          "ATTACKER",
+          "T1190",
+          "T1059.003",
+          "T1112",
+          "T1140",
+          "T1552.001",
+          "T1033",
+          "T1570",
+          "T1074.001",
+          "T1071.001",
+          "T1041",
+          "IMPACT"
+        ],
+        "ruta_detalle": [
+          {
+            "node": "T1190",
+            "name": "Exploit Public-Facing Application",
+            "tactics": [
+              "initial-access"
+            ],
+            "weight": 1.0
+          },
+          {
+            "node": "T1059.003",
+            "name": "Windows Command Shell",
+            "tactics": [
+              "execution"
+            ],
+            "weight": 0.125
+          },
+          {
+            "node": "T1112",
+            "name": "Modify Registry",
+            "tactics": [
+              "defense-impairment",
+              "persistence"
+            ],
+            "weight": 0.125
+          },
+          {
+            "node": "T1140",
+            "name": "Deobfuscate/Decode Files or Information",
+            "tactics": [
+              "stealth"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1552.001",
+            "name": "Credentials In Files",
+            "tactics": [
+              "credential-access"
+            ],
+            "weight": 0.5
+          },
+          {
+            "node": "T1033",
+            "name": "System Owner/User Discovery",
+            "tactics": [
+              "discovery"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1570",
+            "name": "Lateral Tool Transfer",
+            "tactics": [
+              "lateral-movement"
+            ],
+            "weight": 0.25
+          },
+          {
+            "node": "T1074.001",
+            "name": "Local Data Staging",
+            "tactics": [
+              "collection"
+            ],
+            "weight": 0.05
+          },
+          {
+            "node": "T1071.001",
+            "name": "Web Protocols",
+            "tactics": [
+              "command-and-control"
+            ],
+            "weight": 0.25
+          },
+          {
+            "node": "T1041",
+            "name": "Exfiltration Over C2 Channel",
+            "tactics": [
+              "exfiltration"
+            ],
+            "weight": 0.25
+          }
+        ]
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1552.001",
+          "name": "Credentials In Files",
+          "fw_betweenness": 300,
+          "tactics": [
+            "credential-access"
+          ],
+          "weight": 0.5,
+          "weight_source": "mitigaciones=4/8",
+          "in_degree": 4,
+          "out_degree": 3
+        },
+        {
+          "node": "T1570",
+          "name": "Lateral Tool Transfer",
+          "fw_betweenness": 275,
+          "tactics": [
+            "lateral-movement"
+          ],
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
+          "in_degree": 3,
+          "out_degree": 3
+        },
+        {
+          "node": "T1140",
+          "name": "Deobfuscate/Decode Files or Information",
+          "fw_betweenness": 272,
+          "tactics": [
+            "stealth"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 3,
+          "out_degree": 2
+        },
+        {
+          "node": "T1620",
+          "name": "Reflective Code Loading",
+          "fw_betweenness": 272,
+          "tactics": [
+            "stealth"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 3,
+          "out_degree": 2
+        },
+        {
+          "node": "T1082",
+          "name": "System Information Discovery",
+          "fw_betweenness": 264,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 2,
+          "out_degree": 1
+        }
+      ],
+      "tiempo_ms": 15.62,
+      "actor": "no atribuido",
+      "context": "The [SharePoint ToolShell Exploitation](https://attack.mitre.org/campaigns/C0058) campaign was conducted in July 2025 an"
+    },
+    {
+      "campaign": "C0015",
+      "n_nodes": 36,
+      "n_edges": 56,
+      "density": 0.044444,
+      "is_dag": false,
+      "n_techniques": 34,
+      "avg_weight": 0.2574,
+      "by_tactic_counts": {
+        "resource-development": 2,
+        "initial-access": 1,
+        "execution": 5,
+        "privilege-escalation": 1,
+        "defense-impairment": 1,
+        "stealth": 6,
+        "discovery": 9,
+        "lateral-movement": 2,
+        "collection": 3,
+        "command-and-control": 2,
+        "exfiltration": 2,
+        "impact": 1
+      },
+      "reachable": false,
+      "empty_tactics": [
+        "reconnaissance",
+        "persistence",
+        "credential-access"
+      ],
+      "dijkstra": {
+        "costo_minimo": Infinity,
+        "n_pasos": 0,
+        "ruta": [],
+        "ruta_detalle": []
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1570",
+          "name": "Lateral Tool Transfer",
+          "fw_betweenness": 81,
+          "tactics": [
+            "lateral-movement"
+          ],
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
+          "in_degree": 9,
+          "out_degree": 3
+        },
+        {
+          "node": "T1074.001",
+          "name": "Local Data Staging",
+          "fw_betweenness": 66,
+          "tactics": [
+            "collection"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 2,
+          "out_degree": 2
+        },
+        {
+          "node": "T1039",
+          "name": "Data from Network Shared Drive",
+          "fw_betweenness": 66,
+          "tactics": [
+            "collection"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 2,
+          "out_degree": 2
+        },
+        {
+          "node": "T1105",
+          "name": "Ingress Tool Transfer",
+          "fw_betweenness": 56,
+          "tactics": [
+            "command-and-control"
+          ],
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
+          "in_degree": 3,
+          "out_degree": 2
+        },
+        {
+          "node": "T1567.002",
+          "name": "Exfiltration to Cloud Storage",
+          "fw_betweenness": 32,
+          "tactics": [
+            "exfiltration"
+          ],
+          "weight": 0.125,
+          "weight_source": "mitigaciones=1/8",
+          "in_degree": 2,
+          "out_degree": 2
+        }
+      ],
+      "tiempo_ms": 11.81,
+      "actor": "no atribuido",
+      "context": "[C0015](https://attack.mitre.org/campaigns/C0015) was a ransomware intrusion during which the unidentified attackers use"
+    },
+    {
+      "campaign": "Operation CuckooBees",
+      "n_nodes": 35,
+      "n_edges": 83,
+      "density": 0.069748,
+      "is_dag": false,
+      "n_techniques": 33,
+      "avg_weight": 0.2553,
+      "by_tactic_counts": {
+        "resource-development": 1,
+        "initial-access": 3,
+        "execution": 4,
+        "persistence": 6,
+        "privilege-escalation": 4,
+        "stealth": 5,
+        "credential-access": 1,
+        "discovery": 15,
+        "collection": 2,
+        "command-and-control": 1
+      },
+      "reachable": false,
+      "empty_tactics": [
+        "reconnaissance",
+        "defense-impairment",
+        "lateral-movement",
+        "exfiltration",
+        "impact"
+      ],
+      "dijkstra": {
+        "costo_minimo": Infinity,
+        "n_pasos": 0,
+        "ruta": [],
+        "ruta_detalle": []
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1003.002",
+          "name": "Security Account Manager",
+          "fw_betweenness": 225,
+          "tactics": [
+            "credential-access"
+          ],
+          "weight": 0.5,
+          "weight_source": "mitigaciones=4/8",
+          "in_degree": 5,
+          "out_degree": 15
+        },
+        {
+          "node": "T1078.002",
+          "name": "Domain Accounts",
+          "fw_betweenness": 176,
+          "tactics": [
+            "stealth",
+            "persistence",
+            "privilege-escalation",
+            "initial-access"
+          ],
+          "weight": 0.625,
+          "weight_source": "mitigaciones=5/8",
+          "in_degree": 11,
+          "out_degree": 8
+        },
+        {
+          "node": "T1574.001",
+          "name": "DLL",
+          "fw_betweenness": 32,
+          "tactics": [
+            "stealth",
+            "execution"
+          ],
+          "weight": 0.625,
+          "weight_source": "mitigaciones=5/8",
+          "in_degree": 3,
+          "out_degree": 7
+        },
+        {
+          "node": "T1133",
+          "name": "External Remote Services",
+          "fw_betweenness": 23,
+          "tactics": [
+            "persistence",
+            "initial-access"
+          ],
+          "weight": 0.625,
+          "weight_source": "mitigaciones=5/8",
+          "in_degree": 6,
+          "out_degree": 7
+        },
+        {
+          "node": "T1059.003",
+          "name": "Windows Command Shell",
+          "fw_betweenness": 10,
+          "tactics": [
+            "execution"
+          ],
+          "weight": 0.125,
+          "weight_source": "mitigaciones=1/8",
+          "in_degree": 3,
+          "out_degree": 6
+        }
+      ],
+      "tiempo_ms": 13.95,
+      "actor": "no atribuido",
+      "context": "[Operation CuckooBees](https://attack.mitre.org/campaigns/C0012) was a cyber espionage campaign targeting technology and"
+    },
+    {
+      "campaign": "Cutting Edge",
+      "n_nodes": 33,
+      "n_edges": 110,
+      "density": 0.104167,
+      "is_dag": false,
+      "n_techniques": 31,
+      "avg_weight": 0.3217,
+      "by_tactic_counts": {
+        "reconnaissance": 2,
+        "resource-development": 2,
+        "initial-access": 2,
+        "execution": 2,
+        "persistence": 4,
+        "privilege-escalation": 2,
+        "defense-impairment": 1,
+        "stealth": 7,
+        "credential-access": 4,
+        "discovery": 1,
+        "lateral-movement": 3,
+        "collection": 4,
+        "command-and-control": 5
+      },
+      "reachable": false,
+      "empty_tactics": [
+        "exfiltration",
+        "impact"
+      ],
+      "dijkstra": {
+        "costo_minimo": Infinity,
+        "n_pasos": 0,
+        "ruta": [],
+        "ruta_detalle": []
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1056.001",
+          "name": "Keylogging",
+          "fw_betweenness": 363,
+          "tactics": [
+            "collection",
+            "credential-access"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/9",
+          "in_degree": 10,
+          "out_degree": 6
+        },
+        {
+          "node": "T1205",
+          "name": "Traffic Signaling",
+          "fw_betweenness": 231,
+          "tactics": [
+            "stealth",
+            "persistence",
+            "command-and-control"
+          ],
+          "weight": 0.222,
+          "weight_source": "mitigaciones=2/9",
+          "in_degree": 7,
+          "out_degree": 6
+        },
+        {
+          "node": "T1078.002",
+          "name": "Domain Accounts",
+          "fw_betweenness": 201,
+          "tactics": [
+            "stealth",
+            "persistence",
+            "privilege-escalation",
+            "initial-access"
+          ],
+          "weight": 0.556,
+          "weight_source": "mitigaciones=5/9",
+          "in_degree": 10,
+          "out_degree": 9
+        },
+        {
+          "node": "T1082",
+          "name": "System Information Discovery",
+          "fw_betweenness": 162,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/9",
+          "in_degree": 4,
+          "out_degree": 3
+        },
+        {
+          "node": "T1055",
+          "name": "Process Injection",
+          "fw_betweenness": 126,
+          "tactics": [
+            "stealth",
+            "privilege-escalation"
+          ],
+          "weight": 0.222,
+          "weight_source": "mitigaciones=2/9",
+          "in_degree": 5,
+          "out_degree": 5
+        }
+      ],
+      "tiempo_ms": 14.0,
+      "actor": "no atribuido",
+      "context": "[Cutting Edge](https://attack.mitre.org/campaigns/C0029) was a campaign conducted by suspected China-nexus espionage act"
+    },
+    {
+      "campaign": "Night Dragon",
+      "n_nodes": 31,
+      "n_edges": 103,
+      "density": 0.110753,
+      "is_dag": false,
+      "n_techniques": 29,
+      "avg_weight": 0.3328,
+      "by_tactic_counts": {
+        "resource-development": 5,
+        "initial-access": 5,
+        "execution": 2,
+        "persistence": 4,
+        "privilege-escalation": 2,
+        "defense-impairment": 2,
+        "stealth": 4,
+        "credential-access": 2,
+        "discovery": 2,
+        "lateral-movement": 1,
+        "collection": 3,
+        "command-and-control": 5
+      },
+      "reachable": false,
+      "empty_tactics": [
+        "reconnaissance",
+        "exfiltration",
+        "impact"
+      ],
+      "dijkstra": {
+        "costo_minimo": Infinity,
+        "n_pasos": 0,
+        "ruta": [],
+        "ruta_detalle": []
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1110.002",
+          "name": "Password Cracking",
+          "fw_betweenness": 187,
+          "tactics": [
+            "credential-access"
+          ],
+          "weight": 0.25,
+          "weight_source": "mitigaciones=2/8",
+          "in_degree": 4,
+          "out_degree": 2
+        },
+        {
+          "node": "T1083",
+          "name": "File and Directory Discovery",
+          "fw_betweenness": 171,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 2,
+          "out_degree": 1
+        },
+        {
+          "node": "T1033",
+          "name": "System Owner/User Discovery",
+          "fw_betweenness": 171,
+          "tactics": [
+            "discovery"
+          ],
+          "weight": 0.05,
+          "weight_source": "mitigaciones=0/8",
+          "in_degree": 2,
+          "out_degree": 1
+        },
+        {
+          "node": "T1550.002",
+          "name": "Pass the Hash",
+          "fw_betweenness": 168,
+          "tactics": [
+            "lateral-movement"
+          ],
+          "weight": 0.5,
+          "weight_source": "mitigaciones=4/8",
+          "in_degree": 2,
+          "out_degree": 3
+        },
+        {
+          "node": "T1078.002",
+          "name": "Domain Accounts",
+          "fw_betweenness": 129,
+          "tactics": [
+            "stealth",
+            "persistence",
+            "privilege-escalation",
+            "initial-access"
+          ],
+          "weight": 0.625,
+          "weight_source": "mitigaciones=5/8",
+          "in_degree": 13,
+          "out_degree": 8
+        }
+      ],
+      "tiempo_ms": 13.49,
+      "actor": "no atribuido",
+      "context": "[Night Dragon](https://attack.mitre.org/campaigns/C0002) was a cyber espionage campaign that targeted oil, energy, and p"
+    },
+    {
+      "campaign": "C0017",
+      "n_nodes": 31,
+      "n_edges": 67,
+      "density": 0.072043,
+      "is_dag": false,
+      "n_techniques": 29,
+      "avg_weight": 0.2362,
+      "by_tactic_counts": {
+        "resource-development": 1,
+        "initial-access": 1,
+        "execution": 4,
+        "persistence": 2,
+        "privilege-escalation": 2,
+        "stealth": 7,
+        "credential-access": 1,
+        "discovery": 3,
+        "collection": 3,
+        "command-and-control": 6,
+        "exfiltration": 3
+      },
+      "reachable": false,
+      "empty_tactics": [
+        "reconnaissance",
+        "defense-impairment",
+        "lateral-movement",
+        "impact"
+      ],
+      "dijkstra": {
+        "costo_minimo": Infinity,
+        "n_pasos": 0,
+        "ruta": [],
+        "ruta_detalle": []
+      },
+      "fw_betweenness_top5": [
+        {
+          "node": "T1003.002",
+          "name": "Security Account Manager",
+          "fw_betweenness": 42,
+          "tactics": [
+            "credential-access"
+          ],
+          "weight": 0.4,
+          "weight_source": "mitigaciones=4/10",
+          "in_degree": 7,
+          "out_degree": 3
+        },
+        {
+          "node": "T1134",
+          "name": "Access Token Manipulation",
+          "fw_betweenness": 28,
+          "tactics": [
+            "stealth",
+            "privilege-escalation"
+          ],
+          "weight": 0.2,
+          "weight_source": "mitigaciones=2/10",
+          "in_degree": 2,
+          "out_degree": 1
+        },
+        {
+          "node": "T1505.003",
+          "name": "Web Shell",
+          "fw_betweenness": 26,
+          "tactics": [
+            "persistence"
+          ],
+          "weight": 0.2,
+          "weight_source": "mitigaciones=2/10",
+          "in_degree": 4,
+          "out_degree": 2
+        },
+        {
+          "node": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "fw_betweenness": 20,
+          "tactics": [
+            "initial-access"
+          ],
+          "weight": 0.8,
+          "weight_source": "mitigaciones=8/10",
+          "in_degree": 2,
+          "out_degree": 4
+        },
+        {
+          "node": "T1059.003",
+          "name": "Windows Command Shell",
+          "fw_betweenness": 18,
+          "tactics": [
+            "execution"
+          ],
+          "weight": 0.1,
+          "weight_source": "mitigaciones=1/10",
+          "in_degree": 1,
+          "out_degree": 2
+        }
+      ],
+      "tiempo_ms": 12.36,
+      "actor": "APT41",
+      "context": "[C0017](https://attack.mitre.org/campaigns/C0017) was an [APT41](https://attack.mitre.org/groups/G0096) campaign conduct"
+    }
+  ],
+  "comparacion_cruzada": {
+    "n_campanas_evaluadas": 10,
+    "n_campanas_alcanzables": 5,
+    "n_campanas_desconectadas": 5,
+    "top1_betweenness_por_campana": [
+      {
+        "campaign": "SolarWinds Compromise",
+        "node": "T1606.001",
+        "name": "Web Cookies",
+        "fw_betweenness": 1044
+      },
+      {
+        "campaign": "Operation Wocao",
+        "node": "T1056.001",
+        "name": "Keylogging",
+        "fw_betweenness": 1715
+      },
+      {
+        "campaign": "Operation Dream Job",
+        "node": "T1553.002",
+        "name": "Code Signing",
+        "fw_betweenness": 775
+      },
+      {
+        "campaign": "2025 Poland Wiper Attacks",
+        "node": "T1570",
+        "name": "Lateral Tool Transfer",
+        "fw_betweenness": 612
+      },
+      {
+        "campaign": "SharePoint ToolShell Exploitation",
+        "node": "T1552.001",
+        "name": "Credentials In Files",
+        "fw_betweenness": 300
+      }
+    ],
+    "jaccard_rutas_criticas": {
+      "SolarWinds Compromis vs Operation Wocao": {
+        "jaccard": 0.1,
+        "nodos_comunes": [
+          "T1078.003"
+        ]
+      },
+      "SolarWinds Compromis vs Operation Dream Job": {
+        "jaccard": 0.0,
+        "nodos_comunes": []
+      },
+      "SolarWinds Compromis vs 2025 Poland Wiper At": {
+        "jaccard": 0.0,
+        "nodos_comunes": []
+      },
+      "SolarWinds Compromis vs SharePoint ToolShell": {
+        "jaccard": 0.0,
+        "nodos_comunes": []
+      },
+      "Operation Wocao vs Operation Dream Job": {
+        "jaccard": 0.0,
+        "nodos_comunes": []
+      },
+      "Operation Wocao vs 2025 Poland Wiper At": {
+        "jaccard": 0.0,
+        "nodos_comunes": []
+      },
+      "Operation Wocao vs SharePoint ToolShell": {
+        "jaccard": 0.0769,
+        "nodos_comunes": [
+          "T1041"
+        ]
+      },
+      "Operation Dream Job vs 2025 Poland Wiper At": {
+        "jaccard": 0.0,
+        "nodos_comunes": []
+      },
+      "Operation Dream Job vs SharePoint ToolShell": {
+        "jaccard": 0.0556,
+        "nodos_comunes": [
+          "T1059.003"
+        ]
+      },
+      "2025 Poland Wiper At vs SharePoint ToolShell": {
+        "jaccard": 0.1333,
+        "nodos_comunes": [
+          "T1074.001",
+          "T1570"
+        ]
+      }
+    },
+    "jaccard_summary": {
+      "n_pares": 10,
+      "media": 0.0366,
+      "mediana": 0.0,
+      "min": 0.0,
+      "max": 0.1333
+    },
+    "tacticas_en_rutas_criticas": [
+      {
+        "tactica": "stealth",
+        "apariciones": 5
+      },
+      {
+        "tactica": "persistence",
+        "apariciones": 5
+      },
+      {
+        "tactica": "initial-access",
+        "apariciones": 5
+      },
+      {
+        "tactica": "collection",
+        "apariciones": 5
+      },
+      {
+        "tactica": "command-and-control",
+        "apariciones": 5
+      },
+      {
+        "tactica": "exfiltration",
+        "apariciones": 5
+      },
+      {
+        "tactica": "privilege-escalation",
+        "apariciones": 4
+      },
+      {
+        "tactica": "credential-access",
+        "apariciones": 4
+      },
+      {
+        "tactica": "discovery",
+        "apariciones": 4
+      },
+      {
+        "tactica": "lateral-movement",
+        "apariciones": 4
+      },
+      {
+        "tactica": "execution",
+        "apariciones": 2
+      },
+      {
+        "tactica": "defense-impairment",
+        "apariciones": 2
+      }
+    ],
+    "costo_promedio": 1.6222,
+    "costo_min": 0.935,
+    "costo_max": 2.66,
+    "conclusion": "Jaccard bajo entre campañas indica que el método discrimina correctamente entre actores y campañas distintas. Tácticas con alta frecuencia en rutas críticas son candidatos a controles de seguridad universales. Campañas desconectadas (sin ruta ATTACKER->IMPACT) reflejan huecos reales en la cobertura tactica documentada de esa campana en el bundle STIX, no un defecto del metodo."
+  },
+  "metodologia": "Mismo pipeline en todas las campañas: bundle STIX 2.1 → extracción de técnicas por campaña → DiGraph con pesos (mitigaciones documentadas) → Dijkstra → Floyd-Warshall betweenness. Los parámetros son idénticos; solo cambia la campaña de entrada."
+}

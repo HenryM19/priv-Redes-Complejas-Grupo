@@ -1,0 +1,185 @@
+{
+  "campaign": "SolarWinds Compromise",
+  "edge_mode": "cartesian",
+  "weight_mode": "mitigations",
+  "optimal_cost": 1.535,
+  "n_trials_per_bias_power": 10000,
+  "sweep_bias_power": [
+    {
+      "bias_power": 0,
+      "n_trials": 10000,
+      "n_success": 10000,
+      "dead_end_rate": 0.0,
+      "optimal_cost": 1.535,
+      "mean_cost": 5.0714,
+      "median_cost": 4.66,
+      "std_cost": 2.0162,
+      "ci95_mean_cost": [
+        5.0319,
+        5.1109
+      ],
+      "percentiles": {
+        "5": 2.685,
+        "25": 3.685,
+        "50": 4.66,
+        "75": 5.935,
+        "95": 8.935
+      },
+      "ratio_mean_vs_optimal": 3.3039,
+      "exact_path_match_rate": 0.0,
+      "within_optimal_pct": {
+        "within_5pct": 0.0001,
+        "within_10pct": 0.0002,
+        "within_20pct": 0.0014,
+        "within_50pct": 0.0125
+      }
+    },
+    {
+      "bias_power": 0.5,
+      "n_trials": 10000,
+      "n_success": 10000,
+      "dead_end_rate": 0.0,
+      "optimal_cost": 1.535,
+      "mean_cost": 4.1561,
+      "median_cost": 3.885,
+      "std_cost": 1.4118,
+      "ci95_mean_cost": [
+        4.1284,
+        4.1838
+      ],
+      "percentiles": {
+        "5": 2.41,
+        "25": 3.16,
+        "50": 3.885,
+        "75": 4.835,
+        "95": 6.86
+      },
+      "ratio_mean_vs_optimal": 2.7076,
+      "exact_path_match_rate": 0.0,
+      "within_optimal_pct": {
+        "within_5pct": 0.0001,
+        "within_10pct": 0.0005,
+        "within_20pct": 0.0024,
+        "within_50pct": 0.0353
+      }
+    },
+    {
+      "bias_power": 1,
+      "n_trials": 10000,
+      "n_success": 10000,
+      "dead_end_rate": 0.0,
+      "optimal_cost": 1.535,
+      "mean_cost": 3.3356,
+      "median_cost": 3.21,
+      "std_cost": 0.9411,
+      "ci95_mean_cost": [
+        3.3172,
+        3.3541
+      ],
+      "percentiles": {
+        "5": 2.11,
+        "25": 2.66,
+        "50": 3.21,
+        "75": 3.81,
+        "95": 5.085
+      },
+      "ratio_mean_vs_optimal": 2.1731,
+      "exact_path_match_rate": 0.0002,
+      "within_optimal_pct": {
+        "within_5pct": 0.0012,
+        "within_10pct": 0.003,
+        "within_20pct": 0.0096,
+        "within_50pct": 0.1038
+      }
+    },
+    {
+      "bias_power": 2,
+      "n_trials": 10000,
+      "n_success": 10000,
+      "dead_end_rate": 0.0,
+      "optimal_cost": 1.535,
+      "mean_cost": 2.3928,
+      "median_cost": 2.335,
+      "std_cost": 0.433,
+      "ci95_mean_cost": [
+        2.3843,
+        2.4013
+      ],
+      "percentiles": {
+        "5": 1.835,
+        "25": 2.085,
+        "50": 2.335,
+        "75": 2.635,
+        "95": 3.21
+      },
+      "ratio_mean_vs_optimal": 1.5588,
+      "exact_path_match_rate": 0.0,
+      "within_optimal_pct": {
+        "within_5pct": 0.0003,
+        "within_10pct": 0.0057,
+        "within_20pct": 0.0584,
+        "within_50pct": 0.4895
+      }
+    },
+    {
+      "bias_power": 5,
+      "n_trials": 10000,
+      "n_success": 10000,
+      "dead_end_rate": 0.0,
+      "optimal_cost": 1.535,
+      "mean_cost": 1.8686,
+      "median_cost": 1.885,
+      "std_cost": 0.1219,
+      "ci95_mean_cost": [
+        1.8662,
+        1.871
+      ],
+      "percentiles": {
+        "5": 1.76,
+        "25": 1.76,
+        "50": 1.885,
+        "75": 1.885,
+        "95": 2.135
+      },
+      "ratio_mean_vs_optimal": 1.2173,
+      "exact_path_match_rate": 0.0,
+      "within_optimal_pct": {
+        "within_5pct": 0.0,
+        "within_10pct": 0.0052,
+        "within_20pct": 0.4247,
+        "within_50pct": 0.994
+      }
+    },
+    {
+      "bias_power": 10,
+      "n_trials": 10000,
+      "n_success": 10000,
+      "dead_end_rate": 0.0,
+      "optimal_cost": 1.535,
+      "mean_cost": 1.7997,
+      "median_cost": 1.76,
+      "std_cost": 0.0636,
+      "ci95_mean_cost": [
+        1.7985,
+        1.801
+      ],
+      "percentiles": {
+        "5": 1.76,
+        "25": 1.76,
+        "50": 1.76,
+        "75": 1.885,
+        "95": 1.885
+      },
+      "ratio_mean_vs_optimal": 1.1725,
+      "exact_path_match_rate": 0.0,
+      "within_optimal_pct": {
+        "within_5pct": 0.0,
+        "within_10pct": 0.0002,
+        "within_20pct": 0.702,
+        "within_50pct": 1.0
+      }
+    }
+  ],
+  "bias_power_para_robustez_95_10pct": null,
+  "conclusion": "Ningun nivel de bias_power evaluado alcanzo el umbral de robustez (95% de trials dentro del 10% del costo optimo) -- el grafo tiene suficiente varianza de costos entre rutas alternativas para que la irracionalidad del atacante importe incluso con fuerte sesgo hacia el optimo."
+}

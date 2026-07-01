@@ -1,0 +1,172 @@
+{
+  "campaign": "SolarWinds Compromise",
+  "n_empates_mitigaciones_solo": 70,
+  "n_empates_combinado": 63,
+  "reduccion_empates_pct": 10.0,
+  "distribucion_pesos_mitigaciones": [
+    {
+      "peso": 0.05,
+      "n_tecnicas": 14
+    },
+    {
+      "peso": 0.125,
+      "n_tecnicas": 12
+    },
+    {
+      "peso": 0.375,
+      "n_tecnicas": 12
+    },
+    {
+      "peso": 0.5,
+      "n_tecnicas": 10
+    },
+    {
+      "peso": 0.25,
+      "n_tecnicas": 8
+    },
+    {
+      "peso": 0.625,
+      "n_tecnicas": 7
+    },
+    {
+      "peso": 0.875,
+      "n_tecnicas": 4
+    },
+    {
+      "peso": 1.0,
+      "n_tecnicas": 3
+    },
+    {
+      "peso": 0.75,
+      "n_tecnicas": 1
+    }
+  ],
+  "distribucion_pesos_combinado": [
+    {
+      "peso": 0.3,
+      "n_tecnicas": 10
+    },
+    {
+      "peso": 0.525,
+      "n_tecnicas": 7
+    },
+    {
+      "peso": 0.325,
+      "n_tecnicas": 6
+    },
+    {
+      "peso": 0.475,
+      "n_tecnicas": 5
+    },
+    {
+      "peso": 0.45,
+      "n_tecnicas": 5
+    },
+    {
+      "peso": 0.275,
+      "n_tecnicas": 4
+    },
+    {
+      "peso": 0.6,
+      "n_tecnicas": 4
+    },
+    {
+      "peso": 0.4,
+      "n_tecnicas": 3
+    },
+    {
+      "peso": 0.65,
+      "n_tecnicas": 3
+    },
+    {
+      "peso": 0.825,
+      "n_tecnicas": 3
+    },
+    {
+      "peso": 0.35,
+      "n_tecnicas": 3
+    },
+    {
+      "peso": 0.55,
+      "n_tecnicas": 2
+    },
+    {
+      "peso": 0.625,
+      "n_tecnicas": 2
+    },
+    {
+      "peso": 0.575,
+      "n_tecnicas": 2
+    },
+    {
+      "peso": 0.675,
+      "n_tecnicas": 2
+    },
+    {
+      "peso": 0.9,
+      "n_tecnicas": 2
+    },
+    {
+      "peso": 0.775,
+      "n_tecnicas": 1
+    },
+    {
+      "peso": 0.25,
+      "n_tecnicas": 1
+    },
+    {
+      "peso": 0.425,
+      "n_tecnicas": 1
+    },
+    {
+      "peso": 0.925,
+      "n_tecnicas": 1
+    },
+    {
+      "peso": 0.7,
+      "n_tecnicas": 1
+    },
+    {
+      "peso": 0.975,
+      "n_tecnicas": 1
+    },
+    {
+      "peso": 0.5,
+      "n_tecnicas": 1
+    },
+    {
+      "peso": 0.375,
+      "n_tecnicas": 1
+    }
+  ],
+  "costo_ruta_critica_mitigaciones": 1.535,
+  "costo_ruta_critica_combinado": 2.91,
+  "ruta_critica_mitigaciones": [
+    "ATTACKER",
+    "T1078.003",
+    "T1606.001",
+    "T1016.001",
+    "T1550.004",
+    "T1074.002",
+    "T1665",
+    "T1048.002",
+    "IMPACT"
+  ],
+  "ruta_critica_combinado": [
+    "ATTACKER",
+    "T1078.003",
+    "T1003.006",
+    "T1069",
+    "T1550.004",
+    "T1074.002",
+    "T1665",
+    "T1048.002",
+    "IMPACT"
+  ],
+  "ruta_critica_identica": false,
+  "jaccard_ruta_critica": 0.5556,
+  "top1_betweenness_mitigaciones": "T1606.001",
+  "top1_betweenness_combinado": "T1003.006",
+  "spearman_betweenness_mit_vs_combinado": 0.706673,
+  "conclusion": "El modelo combinado (mitigaciones + deteccion) anade una segunda fuente STIX independiente (relaciones 'detects' + profundidad de analiticas), aumentando la resolucion del espacio de pesos posibles y reduciendo el numero de tecnicas que comparten exactamente el mismo peso, sin introducir ningun dato externo a ATT&CK."
+}
