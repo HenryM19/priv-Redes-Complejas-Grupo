@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Contenido de la base de datos</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:flex;flex-direction:column;gap:16px;margin-top:12px}
+  .intro{font-size:15px;color:var(--txt);line-height:1.45;max-width:1010px}.intro b{color:var(--ink)}
+  /* tactic bar row */
+  .tactics{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);
+    padding:14px 18px 10px}
+  .th{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between}
+  .th b{color:var(--blue)}
+  .bars{display:grid;grid-template-columns:repeat(15,1fr);gap:6px;align-items:end;height:104px}
+  .bcol.goal .bar{background:linear-gradient(180deg,var(--green),#57d3a6)}
+  .bcol{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px}
+  .bar{width:76%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--blue),#6d9bff);
+    display:flex;align-items:flex-start;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;
+    font-size:11px;font-weight:600;padding-top:3px;transform-origin:bottom;animation:grY .8s cubic-bezier(.2,.7,.2,1) both}
+  .bcol.hot .bar{background:linear-gradient(180deg,var(--crit),#ff7089)}
+  @keyframes grY{from{transform:scaleY(0)}}
+  .blab{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted);text-align:center;line-height:1.15;height:22px}
+  /* bottom two columns */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow-sm);padding:14px 16px}
+  .box .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px}
+  .box.a .h{color:var(--crit)} .box.b .h{color:var(--amber)}
+  .tac2{margin-bottom:11px}
+  .tac2 .nm{font-size:15px;font-weight:600;color:var(--ink)}
+  .tac2 .nm .ct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue);font-weight:600;margin-left:6px}
+  .tac2 .ds{font-size:13px;color:var(--txt);line-height:1.4;margin-top:3px}
+  .tk{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px}
+  .tk .id{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--ink);flex:none;min-width:82px}
+  .tk .tx{font-size:12.5px;line-height:1.38;color:var(--txt)}.tk .tx b{color:var(--ink)}
+  .tk.star .id{color:var(--crit)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>04 · Contenido de la base de datos</span><span>Taxonomía ATT&amp;CK · campaña G0118</span></div>
+
+  <div class="body">
+    <p class="intro anim d1">La base extraída se organiza como en MITRE ATT&amp;CK: <b>15 tácticas</b> (el <b>objetivo</b> del adversario en cada fase) que agrupan <b>71 técnicas</b> (el <b>cómo</b> concreto). Una misma técnica puede servir a varias tácticas.</p>
+
+    <div class="tactics anim d2">
+      <div class="th"><span>Técnicas documentadas por táctica (orden de kill chain →)</span><span><b>71</b> técnicas · <b>15</b> tácticas</span></div>
+      <div class="bars">
+        <div class="bcol"><div class="bar" style="height:9%;animation-delay:.05s">1</div><div class="blab">Recon</div></div>
+        <div class="bcol"><div class="bar" style="height:22%;animation-delay:.1s">3</div><div class="blab">Res.Dev</div></div>
+        <div class="bcol"><div class="bar" style="height:62%;animation-delay:.15s">8</div><div class="blab">Initial<br>Access</div></div>
+        <div class="bcol"><div class="bar" style="height:40%;animation-delay:.2s">5</div><div class="blab">Exec</div></div>
+        <div class="bcol"><div class="bar" style="height:85%;animation-delay:.25s">11</div><div class="blab">Persist</div></div>
+        <div class="bcol"><div class="bar" style="height:85%;animation-delay:.3s">11</div><div class="blab">Priv<br>Esc</div></div>
+        <div class="bcol"><div class="bar" style="height:40%;animation-delay:.35s">5</div><div class="blab">Def.Imp</div></div>
+        <div class="bcol"><div class="bar" style="height:100%;animation-delay:.4s">12</div><div class="blab">Stealth</div></div>
+        <div class="bcol hot"><div class="bar" style="height:62%;animation-delay:.45s">8</div><div class="blab">Cred.<br>Access</div></div>
+        <div class="bcol"><div class="bar" style="height:78%;animation-delay:.5s">10</div><div class="blab">Discov</div></div>
+        <div class="bcol"><div class="bar" style="height:47%;animation-delay:.55s">6</div><div class="blab">Lat.Mov</div></div>
+        <div class="bcol"><div class="bar" style="height:47%;animation-delay:.6s">6</div><div class="blab">Collect</div></div>
+        <div class="bcol"><div class="bar" style="height:40%;animation-delay:.65s">5</div><div class="blab">C2</div></div>
+        <div class="bcol"><div class="bar" style="height:9%;animation-delay:.7s">1</div><div class="blab">Exfil</div></div>
+        <div class="bcol goal"><div class="bar" style="height:14%;animation-delay:.75s">◎</div><div class="blab">Impact<br>(meta)</div></div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="box a anim d3">
+        <div class="h">◆ Qué es una táctica (2 ejemplos)</div>
+        <div class="tac2">
+          <div class="nm">Initial Access <span class="ct">Forma parte de 8 técnicas</span></div>
+          <div class="ds">Cómo el adversario logra su <b>primer punto de apoyo</b> dentro de la red objetivo.</div>
+        </div>
+        <div class="tac2">
+          <div class="nm">Credential Access <span class="ct">Forma parte de 8 técnicas</span></div>
+          <div class="ds">Cómo <b>roba o abusa de credenciales</b> (contraseñas, cookies, tokens) para autenticarse como un usuario legítimo.</div>
+        </div>
+      </div>
+
+      <div class="box b anim d4">
+        <div class="h">◈ Qué es una técnica (ejemplos)</div>
+        <div class="tk"><div class="id">T1195.002</div><div class="tx"><b>Compromise Software Supply Chain</b> — inyectar código en software confiable (la firma de SolarWinds).</div></div>
+        <div class="tk star"><div class="id">T1606.001</div><div class="tx"><b>Web Cookies</b> — falsificar cookies de sesión para acceder sin contraseña (nodo más central del grafo).</div></div>
+        <div class="tk"><div class="id">T1078.003</div><div class="tx"><b>Local Accounts</b> — usar cuentas locales válidas para persistir y moverse sin levantar alarmas.</div></div>
+        <div class="tk"><div class="id">T1048.002</div><div class="tx"><b>Exfiltration over Non-C2</b> — sacar datos cifrados por un canal distinto al de control.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Contenido de la base de datos · tácticas y técnicas</span><span>05 / 13</span></div>
+</div></body></html>
