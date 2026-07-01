@@ -1,158 +1,169 @@
 # Dijkstra en Grafos de Ataque — Explicación del Proyecto
 
-El proyecto modela ataques informáticos como un **problema de camino mínimo en grafos**.
-La idea central es: si representamos una red de computadoras como un grafo donde las
-aristas son vulnerabilidades reales, Dijkstra puede encontrar la **secuencia de ataque
-de menor resistencia** que un atacante usaría para llegar a un activo crítico.
+## Escenario y pregunta central
 
-El proyecto tiene **dos análisis**: uno con una red sintética (para demostrar el concepto)
-y uno con datos 100% reales del caso SolarWinds.
+El proyecto responde a una pregunta concreta de ciberseguridad:
+
+> **Si un adversario intenta comprometer una red usando técnicas reales documentadas,
+> ¿qué secuencia de pasos representa el menor esfuerzo para él? ¿Y qué técnica,
+> si se defiende correctamente, corta la mayor cantidad de rutas posibles de ataque?**
+
+La idea es tratar los ataques informáticos como un **problema de camino mínimo en grafos**.
+Un grafo de ataque tiene nodos que representan técnicas o sistemas, y aristas que representan
+la posibilidad de pasar de una técnica a la siguiente. Los pesos de las aristas codifican
+cuánto le cuesta al atacante usar cada técnica: más defensas documentadas = mayor costo.
+
+Dijkstra halla la ruta de menor costo. Floyd-Warshall responde cuántas rutas de ataque
+pasan por cada nodo. Juntos, los dos algoritmos dan una respuesta táctica y una estratégica.
+
+El proyecto tiene **dos análisis**: uno con una red sintética controlada (para demostrar
+el concepto) y uno con datos 100% reales del caso SolarWinds Compromise.
 
 ---
 
-## 1. Análisis 1 — Red sintética con CVEs reales
+## Análisis 1 — Red sintética con CVEs reales
 
-### Por qué esta red
+### Escenario y objetivo
 
-Se construyó una red corporativa ficticia pero **plausible**: tiene los mismos componentes
-que tiene cualquier empresa mediana (firewall, servidores web, correo, Active Directory,
-base de datos). Es sintética porque no existe una empresa real llamada `FW-VPN` o
-`DB-CRITICAL`, pero su estructura refleja topologías reales documentadas en literatura
-de seguridad. Se usó una red sintética para poder **controlar el experimento** y
-demostrar el concepto de forma clara.
+Se modela una red corporativa ficticia pero plausible. El objetivo es demostrar el concepto
+de grafo de ataque de forma controlada, donde los pesos están dados por vulnerabilidades
+reales del catálogo CVE. Los datos son **parcialmente sintéticos**: la topología de la red
+es inventada, pero los CVEs y sus puntajes son reales y provienen del NVD (NIST).
 
-### Datos: los CVEs
+### De dónde salen los datos
 
 Un **CVE** (Common Vulnerabilities and Exposures) es un identificador oficial de una
-vulnerabilidad de seguridad en software real. Lo asigna el NIST/MITRE con el formato
-`CVE-AÑO-NÚMERO`. Cada CVE tiene un puntaje **CVSS** (del 0 al 10) que mide su gravedad:
+vulnerabilidad de software real. Lo asigna el NIST/MITRE. Cada CVE tiene un puntaje
+**CVSS** (0–10) que mide su gravedad:
 
-| Rango CVSS | Nivel |
-|---|---|
+| Rango CVSS | Nivel    |
+|------------|----------|
 | 9.0 – 10.0 | CRITICAL |
-| 7.0 – 8.9 | HIGH |
-| 4.0 – 6.9 | MEDIUM |
-| 0.1 – 3.9 | LOW |
+| 7.0 – 8.9  | HIGH     |
+| 4.0 – 6.9  | MEDIUM   |
+| 0.1 – 3.9  | LOW      |
 
-El proyecto usa **20 CVEs reales** con sus puntajes CVSS oficiales del NVD, organizados
-por capa de red según el tipo de servicio que afectan:
+El pipeline descarga 20 CVEs reales desde la API pública del NVD (`nvd.nist.gov`).
+Si no hay conexión, usa un dataset embebido. Los CVEs cubren cinco capas de infraestructura:
 
-| CVE | Nombre popular | CVSS | Capa | Qué hace |
-|---|---|---|---|---|
-| CVE-2018-13379 | Fortinet FortiOS SSL VPN | 9.8 | perimeter | Lee archivos de sesión sin autenticación |
-| CVE-2019-19781 | Citrix ADC / Gateway | 9.8 | perimeter | Ejecución de código en el perímetro |
-| CVE-2023-27997 | Fortinet FortiOS (XORtigate) | 9.8 | perimeter | Heap overflow pre-autenticación |
-| CVE-2014-0160 | OpenSSL Heartbleed | 7.5 | perimeter | Filtra claves y credenciales TLS |
-| CVE-2020-5902 | F5 BIG-IP | 9.8 | perimeter | RCE en el balanceador de carga |
-| CVE-2021-44228 | Apache Log4j (Log4Shell) | 10.0 | web | RCE no autenticado en apps Java |
-| CVE-2017-5638 | Apache Struts 2 | 10.0 | web | RCE vía cabecera HTTP maliciosa |
-| CVE-2021-41773 | Apache HTTP Server 2.4.49 | 7.5 | web | Path traversal en servidor web |
-| CVE-2022-22965 | Spring Framework (Spring4Shell) | 9.8 | web | RCE en apps Spring/Tomcat |
-| CVE-2017-0144 | Microsoft SMBv1 (EternalBlue) | 8.1 | service | RCE en SMB, usado por WannaCry |
-| CVE-2019-0708 | Microsoft RDP (BlueKeep) | 9.8 | service | Control remoto sin contraseña |
-| CVE-2021-26855 | Microsoft Exchange (ProxyLogon) | 9.8 | service | RCE en servidor de correo |
-| CVE-2023-21554 | Microsoft MSMQ (QueueJumper) | 9.8 | service | RCE en servicio de colas |
-| CVE-2020-1472 | Microsoft Netlogon (Zerologon) | 10.0 | host | Escalada a Domain Admin |
-| CVE-2021-4034 | Polkit pkexec (PwnKit) | 7.8 | host | Escalada a root en Linux |
-| CVE-2021-3156 | Sudo (Baron Samedit) | 7.8 | host | Escalada a root vía sudo |
-| CVE-2022-0847 | Linux Kernel (Dirty Pipe) | 7.8 | host | Sobrescritura de archivos → root |
-| CVE-2012-2122 | MySQL/MariaDB auth bypass | 5.9 | data | Bypass de autenticación |
-| CVE-2019-10149 | Exim MTA | 9.8 | data | RCE en servidor de correo → datos |
-| CVE-2020-2555 | Oracle Coherence (WebLogic) | 9.8 | data | Deserialización insegura → RCE |
+| CVE            | Nombre popular                  | CVSS | Capa     |
+|----------------|---------------------------------|------|----------|
+| CVE-2021-44228 | Apache Log4j (Log4Shell)        | 10.0 | web      |
+| CVE-2017-5638  | Apache Struts 2                 | 10.0 | web      |
+| CVE-2020-1472  | Microsoft Netlogon (Zerologon)  | 10.0 | host     |
+| CVE-2018-13379 | Fortinet FortiOS SSL VPN        | 9.8  | perimeter|
+| CVE-2019-0708  | Microsoft RDP (BlueKeep)        | 9.8  | service  |
+| CVE-2021-26855 | Microsoft Exchange (ProxyLogon) | 9.8  | service  |
+| CVE-2022-0847  | Linux Kernel (Dirty Pipe)       | 7.8  | host     |
+| CVE-2012-2122  | MySQL/MariaDB auth bypass       | 5.9  | data     |
+| ...            | (20 CVEs en total)              |      |          |
 
-Los CVEs pueden obtenerse en tiempo real desde la API pública del NVD. Si no hay
-conexión, el pipeline usa el dataset embebido anterior.
+### Cómo se forma el grafo
 
-### Cómo se arma el grafo
-
-La red está organizada en **6 capas**, de afuera hacia adentro:
+La red tiene 6 capas ordenadas de afuera hacia adentro:
 
 ```
 INTERNET → Perímetro → Web/App → Servicios → Hosts/SO → Datos
 ```
 
-**Nodos** — cada uno representa un host o servicio concreto:
+**Nodos**: hosts y servicios concretos (`FW-VPN`, `WEB-01`, `DC-01`, `DB-CRITICAL`…).
 
-| Nodo | Capa | Qué representa |
-|---|---|---|
-| `INTERNET` | internet | El atacante externo. Punto de partida |
-| `FW-VPN` | perimeter | Firewall / concentrador VPN |
-| `GW-EDGE` | perimeter | Gateway de borde (router de frontera) |
-| `WEB-01` | web | Servidor web público |
-| `APP-02` | web | Servidor de aplicaciones |
-| `SMB-FILES` | service | Servidor de archivos compartidos (SMB) |
-| `RDP-JUMP` | service | Servidor de acceso remoto (RDP) |
-| `MAIL-EX` | service | Servidor de correo Exchange |
-| `DC-01` | host | Controlador de dominio (Active Directory) |
-| `WS-ADMIN` | host | Workstation del administrador de sistemas |
-| `DB-CRITICAL` | data | Base de datos crítica. Objetivo final |
+**Aristas**: solo entre capas consecutivas. Para cada nodo destino se asigna aleatoriamente
+un CVE de su capa y se crea la arista. Se añaden atajos manuales basados en rutas de ataque
+reales conocidas (`SMB-FILES → DC-01`, `DC-01→ DB-CRITICAL`, etc.). La semilla es 42
+para reproducibilidad.
 
-**Aristas** — hay dos mecanismos que definen qué nodos se conectan:
+**Pesos**: `w = 10 - CVSS`. Vulnerabilidades más críticas tienen menor costo para el
+atacante, representando el camino de menor resistencia.
 
-*Regla de capas (automático)*: solo se conectan capas consecutivas. Para cada nodo
-destino se elige aleatoriamente un CVE del pool de su capa y se crea la arista:
+| CVSS | Peso w | Interpretación               |
+|------|--------|------------------------------|
+| 10.0 | 0.1    | Trivial para el atacante      |
+| 9.8  | 0.2    | Casi sin esfuerzo             |
+| 7.5  | 2.5    | Moderado                      |
+| 5.9  | 4.1    | Requiere más trabajo          |
 
-```
-FW-VPN  ──(CVE-2021-44228, w=0.1)──► APP-02
-GW-EDGE ──(CVE-2022-22965, w=0.2)──► APP-02
-FW-VPN  ──(CVE-2017-5638,  w=0.1)──► WEB-01
-```
+### Resultado
 
-*Atajos manuales (hardcodeados)*: conexiones adicionales basadas en rutas de ataque
-reales conocidas, para que existan caminos alternativos:
-
-```
-FW-VPN    → WEB-01        APP-02    → MAIL-EX
-WEB-01    → SMB-FILES     SMB-FILES → DC-01
-RDP-JUMP  → DC-01         MAIL-EX   → WS-ADMIN
-DC-01     → DB-CRITICAL   WS-ADMIN  → DB-CRITICAL
-```
-
-La aleatoriedad usa `seed=42` para garantizar reproducibilidad.
-
-### Los pesos
-
-Cada arista tiene peso `w = 10 - CVSS`. Esta inversión es necesaria porque Dijkstra
-minimiza costos: queremos que las vulnerabilidades más críticas (CVSS alto) tengan el
-**menor costo** para el atacante, representando el camino de menor resistencia.
-
-| CVSS | Peso w | Interpretación |
-|---|---|---|
-| 10.0 | 0.1 | Trivial para el atacante |
-| 9.8 | 0.2 | Casi sin esfuerzo |
-| 8.1 | 1.9 | Fácil de explotar |
-| 7.5 | 2.5 | Moderado |
-| 5.9 | 4.1 | Requiere más trabajo |
-
-El mínimo es 0.1 (no 0) para que Dijkstra funcione con pesos estrictamente positivos.
-
-Los CVEs definen el **peso** de cada arista, no la topología. La topología es
-conocimiento experto hardcodeado; los CVEs solo ponen el precio a cada conexión.
+Dijkstra encuentra la ruta que encadena los CVEs más críticos (CVSS más alto), minimizando
+el esfuerzo total del atacante. El resultado muestra que el atacante racional evita siempre
+los nodos con vulnerabilidades moderadas o bajas, aunque existan caminos hacia el objetivo.
 
 ---
 
-## 2. Análisis 2 — Caso real: SolarWinds Compromise
+## Análisis 2 — Caso real: SolarWinds Compromise
 
-### Por qué SolarWinds
+### Escenario
 
 SolarWinds Compromise (2019-2020) es uno de los ataques más documentados de la historia.
 El grupo APT29 comprometió la cadena de suministro de SolarWinds Orion, afectando a
-18,000 organizaciones incluyendo agencias del gobierno de EE.UU. MITRE ATT&CK lo
-documentó exhaustivamente como campaña G0118, registrando cada técnica que el atacante
-usó en el mundo real. Esto lo hace ideal para un análisis con datos 100% reales.
+~18,000 organizaciones incluyendo agencias del gobierno de EE.UU. MITRE ATT&CK lo
+documentó exhaustivamente como campaña G0118, registrando con evidencia técnica cada
+técnica que el atacante usó. Los datos son **100% reales**: provienen directamente del
+bundle oficial de MITRE ATT&CK en formato STIX 2.1.
 
-### Datos: MITRE ATT&CK
+La pregunta de investigación es:
 
-En lugar de CVEs, este análisis usa el framework **MITRE ATT&CK**: una base de
-conocimiento pública que cataloga técnicas de ataque reales observadas en campo. Cada
-técnica tiene un ID con el formato `TXXXX` o `TXXXX.XXX` (subtécnica).
+> **¿Cuál es la secuencia de técnicas de menor resistencia defensiva desde el
+> acceso inicial hasta el impacto? ¿Y qué técnicas son los cuellos de botella
+> universales del grafo de ataque real de SolarWinds?**
 
-La fuente de datos es el bundle **STIX 2.1** de ATT&CK Enterprise (~40 MB de JSON),
-descargado directamente desde el repositorio oficial de MITRE en GitHub. Este bundle
-contiene todas las técnicas, grupos, campañas y sus relaciones documentadas.
+### De dónde salen los datos
 
-Del bundle se extraen solo las técnicas que ATT&CK documenta como usadas por SolarWinds,
-organizadas en 15 tácticas ordenadas según la kill chain del atacante:
+La fuente es el **bundle STIX 2.1 de ATT&CK Enterprise** (~40 MB de JSON), descargado
+desde el repositorio oficial de MITRE en GitHub. Este bundle contiene:
+
+- Todas las técnicas de ATT&CK (con nombre, descripción, tácticas asociadas)
+- Las relaciones entre campañas y técnicas (qué técnicas usó qué grupo)
+- Las mitigaciones documentadas para cada técnica
+- Los objetos de campaña con su período y descripción
+
+El pipeline los descarga con `src/dataset_real.py` y cachea en `data/mitre_attack.json`.
+De los ~14,000 objetos del bundle, se extraen únicamente los 71 documentados para
+SolarWinds Compromise.
+
+### Cómo se usa el dato: los pesos
+
+La fórmula de peso **no usa CVEs**. El problema con mapear CVE↔técnica ATT&CK para una
+campaña específica es que esa asociación no está en el bundle STIX y requiere juicio manual
+no reproducible. En su lugar, el peso refleja la **resistencia defensiva** de cada técnica
+según ATT&CK:
+
+```
+w = max(0.05, n_mitigaciones / max_mitigaciones)
+```
+
+Donde:
+- `n_mitigaciones` = número de mitigaciones que ATT&CK documenta para esa técnica
+- `max_mitigaciones` = 8 (el máximo entre las 71 técnicas de la campaña)
+- El piso de 0.05 evita pesos cero (Dijkstra requiere pesos no negativos)
+
+La lógica es directa: más controles de defensa documentados = mayor costo para el atacante
+= mayor resistencia. Una técnica sin mitigaciones documentadas tiene el peso mínimo (0.05)
+porque no hay controles establecidos para detectarla o prevenirla.
+
+Pesos reales de las técnicas en la ruta crítica:
+
+| Técnica    | Nombre                              | Mitig. | Peso  |
+|------------|-------------------------------------|--------|-------|
+| T1078.003  | Local Accounts                      | 4/8    | 0.500 |
+| T1606.001  | Web Cookies                         | 2/8    | 0.250 |
+| T1550.004  | Web Session Cookie                  | 1/8    | 0.125 |
+| T1016.001  | Internet Connection Discovery       | 0/8    | 0.050 |
+| T1074.002  | Remote Data Staging                 | 0/8    | 0.050 |
+| T1665      | Hide Infrastructure                 | 0/8    | 0.050 |
+| T1048.002  | Exfiltración cifrada no-C2          | 4/8    | 0.500 |
+
+### Cómo se forma el grafo
+
+El grafo tiene **73 nodos** y **653 aristas**.
+
+**Nodos**: cada una de las 71 técnicas ATT&CK documentadas para SolarWinds, más dos nodos
+de frontera: `ATTACKER` (punto de entrada) e `IMPACT` (objetivo logrado).
+
+**Aristas**: representan la **progresión táctica real del atacante**. Si SolarWinds usó
+técnicas A (en táctica i) y B (en táctica i+1), existe la arista A→B. Las 15 tácticas
+están ordenadas según la kill chain:
 
 ```
 reconnaissance → resource-development → initial-access → execution →
@@ -161,64 +172,229 @@ credential-access → discovery → lateral-movement → collection →
 command-and-control → exfiltration → impact
 ```
 
-### Cómo se arma el grafo
+`ATTACKER` se conecta a todos los nodos de la primera táctica (reconnaissance). `IMPACT`
+recibe aristas desde todos los nodos de la última táctica (impact). Esto crea un grafo
+dirigido que modela todas las progresiones posibles dentro de la campaña real.
 
-**Nodos** — cada nodo es una técnica ATT&CK real usada por SolarWinds. Por ejemplo:
+### Qué representa cada elemento del grafo
 
-| ID | Nombre | Táctica | Qué hizo SolarWinds |
-|---|---|---|---|
-| `T1195.002` | Supply Chain Compromise | initial-access | Insertó SUNBURST en el software de Orion |
-| `T1078` | Valid Accounts | initial-access / persistence | Usó credenciales legítimas robadas |
-| `T1027` | Obfuscated Files | defense-impairment | Ofuscó el malware SUNBURST para evadir detección |
-| `T1558.003` | Kerberoasting | credential-access | Robó tickets Kerberos para moverse lateralmente |
-| `T1021.001` | Remote Desktop Protocol | lateral-movement | Se movió entre sistemas vía RDP |
-| `T1071.001` | Web Protocols | command-and-control | Usó HTTP para comunicación C2 encubierta |
+| Elemento   | Representa en el mundo real                                              |
+|------------|--------------------------------------------------------------------------|
+| Nodo       | Una técnica de ataque real usada por APT29 en SolarWinds                 |
+| Arista A→B | La posibilidad de pasar de la técnica A a la B siguiendo la kill chain   |
+| Peso w     | Cuánta resistencia defensiva tiene esa técnica (más peso = más difícil)  |
+| Camino     | Una secuencia completa de ataque desde acceso inicial hasta impacto      |
+| Costo total| La resistencia defensiva acumulada que el atacante debe superar          |
 
-Más dos nodos de frontera: `ATTACKER` (atacante externo) e `IMPACT` (objetivo logrado).
+Un camino de **menor costo** es la secuencia que el atacante racional preferiría: aquella
+que atraviesa las técnicas con menos controles de defensa documentados.
 
-**Aristas** — solo existen entre técnicas de tácticas consecutivas que SolarWinds
-**realmente usó**. Si la campaña usó técnicas A (en táctica i) y B (en táctica i+1),
-existe una arista A→B. Esto representa la progresión real del atacante: primero
-usaron initial-access, luego execution, luego persistence, etc.
+---
 
-### Los pesos
+## Métodos algorítmicos
 
-La fórmula de peso ya no es `10 - CVSS`. Ahora refleja **qué tan defendible es cada
-técnica** según los datos reales del bundle STIX:
+El proyecto implementa cuatro algoritmos para responder distintas preguntas, todos sobre
+el mismo grafo:
+
+### Dijkstra — "¿Cuál es LA ruta óptima?"
+
+Algoritmo de camino mínimo de fuente única. Explora nodos en orden de distancia creciente
+usando una cola de prioridad (heap binario). Solo funciona con pesos no negativos.
+
+- **Complejidad**: O((V+E)·log V) = O((73+653)·log 73) ≈ **4,500 operaciones**
+- **Tiempo real**: 0.98 ms en el grafo SolarWinds
+- **Salida**: distancia mínima desde `ATTACKER` a todos los nodos, y el predecesor de cada uno (para reconstruir la ruta)
+- **Limitación**: reporta una sola ruta óptima, aunque existan varias equivalentes
+
+### Floyd-Warshall — "¿Qué nodo bloquear?"
+
+Algoritmo de todos los pares de caminos mínimos. Itera sobre todos los posibles nodos
+intermedios k y relaja todas las distancias: `d[i][j] = min(d[i][j], d[i][k] + d[k][j])`.
+
+- **Complejidad**: O(V³) = O(73³) = **389,017 operaciones**
+- **Tiempo real**: 5.4 ms (5× más lento que Dijkstra, pero 5.4 ms sigue siendo trivial)
+- **Salida**: matriz 73×73 con distancia mínima entre todo par (i,j)
+- **Uso en el proyecto**: a partir de la matriz se calcula el **FW-betweenness** de cada nodo:
+  cuántos pares (i,j) tienen su camino óptimo pasando por ese nodo. Nodo con betweenness
+  alto = nodo que aparece en muchas rutas óptimas = cuello de botella estructural.
+- **Limitación**: O(V³) crece cúbicamente. Para grafos de 1,000 nodos serían 10⁹ operaciones;
+  para esos casos se prefiere Dijkstra repetido N veces.
+
+### Algoritmos de validación
+
+Para verificar que las implementaciones propias son correctas, se corre el mismo caso con
+tres implementaciones independientes:
+
+| Algoritmo          | Implementación  | Por qué se incluye                                           |
+|--------------------|-----------------|--------------------------------------------------------------|
+| Dijkstra propio    | `src/analisis_real.py` | Implementación desde cero con heap                   |
+| Bellman-Ford propio| `src/analisis_real.py` | Acepta pesos negativos; sirve de cross-check         |
+| Dijkstra NetworkX  | biblioteca NetworkX    | Implementación de referencia de la industria         |
+| BFS sin pesos      | `src/analisis_real.py` | Caso base: qué pasa si ignoramos los pesos           |
+
+---
+
+## Resultados del Análisis 2 (SolarWinds)
+
+### Ruta crítica — Dijkstra
+
+La secuencia de técnicas de menor resistencia defensiva desde el acceso inicial hasta
+el impacto es:
 
 ```
-w = max(0.05, n_mitigaciones / max_mitigaciones_en_campaña)
+ATTACKER → T1078.003 → T1606.001 → T1016.001 → T1550.004 → T1074.002 → T1665 → T1048.002 → IMPACT
 ```
 
-Donde `n_mitigaciones` es el número de mitigaciones que ATT&CK documenta para esa
-técnica. La lógica es:
+| Paso | Técnica    | Nombre                              | Táctica            | Peso  | Costo acum. |
+|------|------------|-------------------------------------|--------------------|-------|-------------|
+| 0    | ATTACKER   | —                                   | —                  | —     | 0.000       |
+| 1    | T1078.003  | Local Accounts                      | persistence/stealth| 0.500 | 0.500       |
+| 2    | T1606.001  | Web Cookies                         | credential-access  | 0.250 | 0.750       |
+| 3    | T1016.001  | Internet Connection Discovery       | discovery          | 0.050 | 0.800       |
+| 4    | T1550.004  | Web Session Cookie                  | lateral-movement   | 0.125 | 0.925       |
+| 5    | T1074.002  | Remote Data Staging                 | collection         | 0.050 | 0.975       |
+| 6    | T1665      | Hide Infrastructure                 | command-and-control| 0.050 | 1.025       |
+| 7    | T1048.002  | Exfiltración cifrada no-C2          | exfiltration       | 0.500 | 1.525       |
+| 8    | IMPACT     | —                                   | —                  | 0.010 | **1.535**   |
 
-- Más mitigaciones documentadas = más controles de defensa = **mayor costo** para el atacante (w alto)
-- 0 mitigaciones = técnica sin contramedidas documentadas = **peso 0.05** (camino de mínima resistencia)
+**Costo total óptimo: 1.535**. Esto significa que el atacante racional que sigue esta
+secuencia enfrenta una resistencia defensiva acumulada de solo 1.535 (en una escala donde
+el máximo por técnica es 1.0). En la práctica, el bajo costo se debe a que la mayoría
+de las técnicas en la ruta tienen 0 o muy pocas mitigaciones documentadas.
 
-Dijkstra sobre estos pesos halla la ruta de **menor resistencia defensiva**: la secuencia
-de técnicas con menos controles documentados. **No se usan pesos por CVE/CVSS** — la
-asociación CVE↔técnica para una campaña no está en el bundle STIX y requería juicio manual
-no reproducible (además contenía mapeos incorrectos). Todos los pesos derivan solo de
-mitigaciones documentadas en ATT&CK.
+### Rutas alternativas equivalentes — Floyd-Warshall
 
-Ejemplos de pesos reales calculados:
+Dijkstra reporta una sola ruta. Pero la enumeración a partir de la matriz FW revela que
+existen **7 rutas distintas con exactamente el mismo costo 1.535**. Esto es importante:
+el atacante tiene 7 caminos igualmente eficientes, no uno solo.
 
-| Técnica | Nombre | Peso w | Fuente |
-|---|---|---|---|
-| `T1078.003` | Local Accounts | 0.50 | Mitigaciones: 4/8 |
-| `T1606.001` | Web Cookies | 0.25 | Mitigaciones: 2/8 |
-| `T1550.004` | Web Session Cookie | 0.125 | Mitigaciones: 1/8 |
-| `T1016.001` | Internet Conn. Discovery | 0.05 | Mitigaciones: 0/8 |
-| `T1048.002` | Exfiltración cifrada | 0.50 | Mitigaciones: 4/8 |
+De los 71 nodos técnicos, **13 aparecen en al menos una ruta óptima**, pero solo **6
+aparecen en TODAS las 7 rutas** — son los nodos obligatorios:
 
-### Resumen de diferencias entre los dos análisis
+| Nodo obligatorio | Nombre                              | FW-betweenness |
+|------------------|-------------------------------------|----------------|
+| T1606.001        | Web Cookies                         | 1,044          |
+| T1550.004        | Web Session Cookie                  | 702            |
+| T1074.002        | Remote Data Staging                 | 420            |
+| T1078.003        | Local Accounts                      | 357            |
+| T1665            | Hide Infrastructure                 | 132            |
+| T1048.002        | Exfiltración cifrada no-C2          | 71             |
 
-| Aspecto | Análisis 1 (sintético) | Análisis 2 (SolarWinds) |
-|---|---|---|
-| **Red** | Ficticia pero plausible | Técnicas reales de ATT&CK |
-| **Nodos** | Hosts/servicios (`FW-VPN`, `APP-02`…) | Técnicas de ataque (`T1078`, `T1027`…) |
-| **Aristas** | Regla de capas + atajos manuales | Progresión táctica real documentada |
-| **Pesos** | `10 - CVSS` | `max(0.05, mitigaciones / max)` (solo mitigaciones STIX) |
-| **Datos** | CVEs del NVD | Bundle STIX de MITRE ATT&CK |
-| **Objetivo** | Demostrar el concepto | Responder pregunta de investigación real |
+El nodo T1016.001 está en la ruta que Dijkstra encontró, pero **no es obligatorio**: en
+algunas de las 7 rutas óptimas aparece T1057 (Process Discovery) en su lugar. Ambos tienen
+el mismo peso 0.05 (cero mitigaciones), por lo que son intercambiables para el atacante.
+
+### FW-betweenness: cuellos de botella globales
+
+El FW-betweenness cuenta cuántos pares (i,j) del grafo completo tienen su camino óptimo
+pasando por cada nodo. Los 5 primeros de las 71 técnicas:
+
+| Rk | Técnica    | Nombre                              | FW-Betweenness | % del máximo |
+|----|------------|-------------------------------------|----------------|--------------|
+| 1  | T1606.001  | Web Cookies                         | 1,044          | 100.0%       |
+| 2  | T1018      | Remote System Discovery             | 836            | 80.1%        |
+| 3  | T1069.002  | Domain Groups                       | 836            | 80.1%        |
+| 4  | T1016.001  | Internet Connection Discovery       | 836            | 80.1%        |
+| 5  | T1550.004  | Web Session Cookie                  | 702            | 67.2%        |
+
+T1606.001 domina con 1,044 rutas óptimas pasando por él. Esto no solo lo convierte en el
+cuello de botella #1 del grafo, sino que coincide exactamente con el resultado de Dijkstra.
+
+La correlación de Spearman entre FW-betweenness y la betweenness estándar de NetworkX
+(algoritmo de Brandes) es **ρ = 0.973**, lo que confirma que el FW-betweenness basado en
+distancias es consistente con la medida clásica de centralidad.
+
+### Comparación de algoritmos de resolución
+
+Los cuatro algoritmos producen resultados coherentes entre sí:
+
+| Algoritmo        | Costo   | Nodos en ruta | Tiempo    | Ruta idéntica a Dijkstra |
+|------------------|---------|---------------|-----------|--------------------------|
+| Dijkstra propio  | 1.535   | 9             | 0.22 ms   | — (referencia)           |
+| Bellman-Ford     | 1.535   | 9             | 0.63 ms   | No (T1016.001 vs T1057)  |
+| NetworkX Dijkstra| 1.535   | 9             | 0.90 ms   | Sí                       |
+| BFS sin pesos    | 2.925   | 9             | 0.04 ms   | No                       |
+
+**Dijkstra vs Bellman-Ford**: ambos hallan el mismo costo óptimo (1.535), pero la ruta
+difiere en el paso 3: Dijkstra elige T1016.001 y Bellman-Ford elige T1057. Ambas técnicas
+tienen exactamente el mismo peso (0.05), por lo que son óptimas equivalentes. La diferencia
+se debe al orden de exploración del heap. Esto es correcto y esperado.
+
+**BFS sin pesos**: halla la ruta más corta en saltos, pero su costo acumulado real es
+**2.925**, un sobrecoste del **+90.55%** respecto al óptimo. Esto demuestra que los pesos
+son informativos: ignorarlos lleva al atacante (o al defensor modelando al atacante) a
+elegir una ruta significativamente más costosa. La ruta BFS comienza por T1078.002
+(Domain Accounts) en lugar de T1078.003, entrando a la red por técnicas con más mitigaciones.
+
+### Cross-validación Dijkstra ↔ Floyd-Warshall
+
+El valor FW[ATTACKER][IMPACT] de la matriz completa es exactamente **1.535**, idéntico al
+resultado de Dijkstra. Esto es la cross-validación definitiva: dos algoritmos completamente
+distintos, con implementaciones independientes, confirman el mismo costo óptimo.
+
+```
+d_Dijkstra(ATTACKER → IMPACT) = FW[ATTACKER][IMPACT] = 1.535 ✓
+```
+
+### Análisis de sensibilidad de pesos
+
+Para verificar que los resultados no dependen críticamente de los valores exactos de los
+pesos, se corre Dijkstra con cuatro esquemas:
+
+| Esquema           | Descripción                        | Costo | Jaccard vs base |
+|-------------------|------------------------------------|-------|-----------------|
+| Base (lineal)     | w = max(0.05, n_mit/8) — canónico  | 1.535 | 1.000           |
+| −20% (×0.8)       | Todos los pesos × 0.8              | 1.260 | 1.000           |
+| +20% (×1.2)       | Todos los pesos × 1.2              | 1.840 | 1.000           |
+| Binario (umbral)  | w ∈ {0, 1} según mediana           | 1.910 | 0.125           |
+
+Los esquemas ±20% producen **exactamente la misma ruta** (Jaccard = 1.0). El modelo es
+robusto a variaciones moderadas de los pesos. Solo el esquema binario, que destruye la
+información ordinal de los pesos, produce una ruta completamente diferente (13 pasos,
+Jaccard = 0.125 = solo 2 nodos compartidos de 16 en la unión). Esto valida que la
+granularidad de los pesos tiene impacto real en el resultado, pero el resultado es estable
+dentro de un rango razonable.
+
+---
+
+## Interpretación defensiva
+
+Los resultados de Dijkstra y Floyd-Warshall juntos responden dos preguntas complementarias:
+
+**Dijkstra responde**: *si el atacante racional opera hoy, ¿qué ruta toma?*
+→ La secuencia T1078.003 → T1606.001 → T1016.001 → T1550.004 → T1074.002 → T1665 → T1048.002
+
+**Floyd-Warshall responde**: *¿qué técnica, si se defiende, elimina la mayor cantidad
+de rutas de ataque posibles en el grafo completo?*
+→ T1606.001 (Web Cookies, 1,044 rutas), T1550.004 (702), T1074.002 (420)
+
+La concordancia entre ambos análisis en T1606.001 es el hallazgo más robusto del proyecto:
+esta técnica no es solo la que aparece en la ruta que Dijkstra encuentra (resultado táctico),
+sino también la que aparece en la mayor cantidad de rutas óptimas de todo el grafo (resultado
+estratégico). Su eliminación impacta simultáneamente la mejor ruta disponible y 1,044 rutas
+alternativas del espacio de ataque.
+
+La **recomendación defensiva principal** es bloquear cualquiera de los **6 nodos obligatorios**
+(T1606.001, T1550.004, T1074.002, T1078.003, T1665, T1048.002). Bloquear cualquiera de los
+seis garantiza que no existe ninguna de las 7 rutas óptimas. La prioridad debe ser T1606.001
+porque además es el #1 en betweenness global.
+
+El nodo T1016.001 (Internet Connection Discovery), que aparece en la ruta Dijkstra, **no es
+obligatorio** porque tiene un sustituto equivalente (T1057). Defender solo T1016.001 no es
+suficiente: el atacante simplemente usaría T1057 para alcanzar el mismo costo.
+
+---
+
+## Comparación entre los dos análisis
+
+| Aspecto         | Análisis 1 (sintético)                         | Análisis 2 (SolarWinds)                              |
+|-----------------|------------------------------------------------|------------------------------------------------------|
+| **Datos**       | CVEs del NVD, red ficticia                     | Bundle STIX 2.1 de MITRE ATT&CK                      |
+| **Son reales**  | CVEs sí, topología no                          | Ambos 100% reales                                    |
+| **Nodos**       | Hosts/servicios (`FW-VPN`, `DC-01`…)           | Técnicas ATT&CK (`T1078`, `T1606.001`…)              |
+| **Aristas**     | Regla de capas + atajos manuales               | Progresión táctica real documentada                  |
+| **Pesos**       | `10 - CVSS` (por arista/CVE)                   | `max(0.05, n_mit/8)` (por nodo/técnica)              |
+| **Tamaño grafo**| 11 nodos, ~20 aristas                          | 73 nodos, 653 aristas                                |
+| **Algoritmos**  | Dijkstra                                       | Dijkstra + Floyd-Warshall + BF + BFS + NetworkX      |
+| **Resultado**   | Demuestra que la ruta evita CVEs bajos         | Ruta crítica real, 7 óptimas, 6 obligatorios         |
+| **Objetivo**    | Demostrar el concepto                          | Responder pregunta de investigación con datos reales |
