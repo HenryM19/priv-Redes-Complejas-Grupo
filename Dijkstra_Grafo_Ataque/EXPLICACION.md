@@ -13,32 +13,9 @@ Un grafo de ataque tiene nodos que representan técnicas de ataque, y aristas qu
 la posibilidad de progresar de una técnica a la siguiente. Los pesos de las aristas codifican
 cuánto le cuesta al atacante usar cada técnica: más defensas documentadas = mayor costo.
 
-**Todo el trabajo principal, los slides y los resultados son del Análisis 2 (SolarWinds
-Compromise) con datos 100% reales de MITRE ATT&CK.** El Análisis 1 (red sintética con CVEs)
-fue la implementación original con la que se demostró el concepto, y sigue existiendo como
-código en `src/attack_graph.py` y `src/run_pipeline.py`, pero ya no es el foco del proyecto.
-
 ---
 
-## Antecedente: Análisis 1 — Red sintética con CVEs (código heredado)
-
-El punto de partida del proyecto fue una red corporativa ficticia pero plausible (firewall,
-servidores web, Active Directory, base de datos) donde los pesos de las aristas venían de
-**CVEs reales** descargados del NVD con puntaje CVSS. El peso era `w = 10 - CVSS`, de modo
-que vulnerabilidades más críticas (CVSS alto) tenían menor costo para el atacante. Dijkstra
-encontraba la ruta que encadenaba los CVEs más graves.
-
-Este análisis demostró el concepto correctamente, pero tiene un límite: la topología de la
-red era inventada y los CVEs se asignaban arbitrariamente a las capas de infraestructura,
-no a una campaña documentada real. Por eso el proyecto evolucionó al Análisis 2.
-
-El código sigue presente en `src/attack_graph.py`, `src/dijkstra.py`, `src/run_pipeline.py`,
-`src/nvd_fetch.py` y `src/animate.py`. Los outputs de este análisis están en `results/report/`
-y `results/animations/`.
-
----
-
-## Análisis 2 — Caso real: SolarWinds Compromise (foco actual del proyecto)
+## Caso de estudio: SolarWinds Compromise
 
 ### Escenario
 
