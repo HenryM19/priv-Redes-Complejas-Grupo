@@ -6,7 +6,10 @@
   .figbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
     padding:14px;position:relative}
   .figbox img{width:100%;border-radius:9px;display:block}
+  .figbox iframe{width:100%;height:420px;border:0;border-radius:9px;display:block;background:#0d1320}
   .figcap{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+  .figcap a{color:var(--blue);text-decoration:none;font-weight:600}
+  .figcap a:hover{text-decoration:underline}
   .side h2{font-size:26px}
   .lead2{font-size:15px;color:var(--txt);line-height:1.5;margin-top:8px}.lead2 b{color:var(--ink)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
@@ -24,8 +27,8 @@
 
   <div class="body">
     <div class="figbox anim d2">
-      <img src="../assets/full_graph_solarwinds.png" alt="Grafo de ataque SolarWinds (73 nodos, 653 aristas)">
-      <div class="figcap">Grafo dirigido SolarWinds · 73 nodos ordenados por táctica (kill chain, izq→der) · ruta crítica de Dijkstra resaltada en rojo (resistencia = 1.535)</div>
+      <iframe src="../../diapositivas/grafo-interactivo.html" title="Grafo interactivo SolarWinds" loading="lazy"></iframe>
+      <div class="figcap">Grafo dirigido SolarWinds · 73 nodos ordenados por táctica (kill chain, izq→der) · ruta crítica de Dijkstra resaltada en rojo (resistencia = 1.535) · <a href="../../diapositivas/grafo-interactivo.html" target="_blank">abrir a pantalla completa ↗</a></div>
     </div>
 
     <div class="side">

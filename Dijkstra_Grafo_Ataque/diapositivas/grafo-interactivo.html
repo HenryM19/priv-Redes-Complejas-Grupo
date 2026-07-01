@@ -151,6 +151,16 @@
     #canvas { height:48vh; }
     #sidebar { height:52vh; padding:14px; }
   }
+  /* embebido pequeno (iframe dentro de slide) */
+  @media (max-height: 500px) {
+    #header { height:auto; padding:6px 12px; flex-wrap:wrap; gap:6px; }
+    #header h1 { font-size:12px; }
+    #header .hint { display:none; }
+    #controls { position:static; height:auto; flex-wrap:wrap; padding:4px 12px; gap:8px; }
+    #controls label { font-size:10px; }
+    #canvas { position:relative; top:0; left:0; right:260px; bottom:auto; height:calc(100vh - 90px); }
+    #sidebar { top:0; bottom:0; width:260px; padding:12px; }
+  }
 </style>
 </head>
 <body>
