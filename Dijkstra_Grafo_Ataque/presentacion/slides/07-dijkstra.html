@@ -9,9 +9,16 @@
   .fx{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.4}
   .fx .k{font-family:'JetBrains Mono',monospace;color:var(--blue);font-weight:600;flex:none;min-width:104px}
   .fx .v b{color:var(--ink)}
-  .figbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-sm);padding:8px;margin-top:14px}
-  .figbox img{width:100%;border-radius:7px;display:block}
-  .figcap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);text-align:center;margin-top:5px}
+  .figbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-sm);padding:14px 16px;margin-top:16px}
+  .figbox .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:6px}
+  .figcap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);text-align:center;margin-top:6px}
+  .dk circle.set{fill:var(--blue);stroke:var(--blue)}
+  .dk circle.fr{fill:#fff;stroke:var(--amber);stroke-width:2.5;stroke-dasharray:4 3;animation:pulse 2s ease-in-out infinite}
+  .dk circle.un{fill:#fff;stroke:var(--line-2);stroke-width:2}
+  .dk circle.src{fill:var(--crit);stroke:var(--crit)}
+  .dk line{stroke:var(--line-2);stroke-width:2}
+  .dk line.on{stroke:var(--blue);stroke-width:3}
+  .dk text{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--muted)}
   /* route table */
   .rt{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);padding:6px 6px 4px;overflow:hidden}
   .rt table{width:100%;border-collapse:collapse;font-size:13px}
@@ -51,8 +58,26 @@
       </div>
 
       <div class="figbox anim d6">
-        <img src="../assets/dijkstra_expansion.gif" alt="Expansión de Dijkstra">
-        <div class="figcap">Expansión de Dijkstra: la frontera crece por costo creciente</div>
+        <div class="h">▸ Cómo expande Dijkstra</div>
+        <svg class="dk" viewBox="0 0 440 150">
+          <line class="on" x1="40" y1="75" x2="140" y2="40"/>
+          <line class="on" x1="40" y1="75" x2="140" y2="110"/>
+          <line x1="140" y1="40" x2="250" y2="40"/>
+          <line x1="140" y1="110" x2="250" y2="110"/>
+          <line x1="140" y1="40" x2="250" y2="110"/>
+          <line x1="250" y1="40" x2="360" y2="75"/>
+          <line x1="250" y1="110" x2="360" y2="75"/>
+          <circle class="src" cx="40" cy="75" r="15"/>
+          <circle class="set" cx="140" cy="40" r="13"/>
+          <circle class="set" cx="140" cy="110" r="13"/>
+          <circle class="fr" cx="250" cy="40" r="13"/>
+          <circle class="fr" cx="250" cy="110" r="13"/>
+          <circle class="un" cx="360" cy="75" r="13"/>
+          <text x="40" y="112" text-anchor="middle" fill="#e23a56">ATK</text>
+          <text x="195" y="140" text-anchor="middle" fill="#e08a00">frontera activa</text>
+          <text x="360" y="112" text-anchor="middle">por visitar</text>
+        </svg>
+        <div class="figcap">Se fija el nodo de menor costo acumulado y la frontera (—) se expande hacia sus vecinos</div>
       </div>
     </div>
 
