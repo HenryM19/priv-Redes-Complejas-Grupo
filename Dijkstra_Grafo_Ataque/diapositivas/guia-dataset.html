@@ -238,20 +238,56 @@
   .flow-step h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
   .flow-step p { font-size: 14px; margin: 0; }
 
-  /* ── Kill chain timeline ── */
+  /* ── Kill chain timeline (animada) ── */
   .kc {
+    --kc-accent: var(--cyan);
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin: 16px 0;
+    align-items: stretch;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+    counter-reset: kc-step;
   }
   .kc-item {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 10px 14px;
+    border-radius: 10px;
+    padding: 12px 16px;
     font-size: 13px;
     position: relative;
+    flex: 1 1 150px;
+    min-width: 130px;
+    opacity: 0;
+    transform: translateY(14px) scale(.96);
+    transition: transform .5s cubic-bezier(.2,.7,.3,1), opacity .5s ease, border-color .25s ease, background .25s ease, box-shadow .25s ease;
+    cursor: default;
+    overflow: hidden;
+  }
+  .kc.kc-play .kc-item {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition-delay: calc(var(--kc-i, 0) * 90ms);
+  }
+  /* linea de flujo detras de las cajas */
+  .kc-item::before {
+    content: '';
+    position: absolute;
+    left: -1px; right: -1px; bottom: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--kc-item-color, var(--cyan)), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .6s ease;
+    transition-delay: calc(var(--kc-i, 0) * 90ms + .25s);
+  }
+  .kc.kc-play .kc-item::before { transform: scaleX(1); }
+  .kc-item:hover {
+    border-color: var(--kc-item-color, var(--cyan));
+    background: var(--panel2);
+    box-shadow: 0 0 0 1px var(--kc-item-color, var(--cyan)) inset, 0 8px 24px -8px var(--kc-item-color, var(--cyan));
+    transform: translateY(-3px) scale(1.03);
+    z-index: 2;
   }
   .kc-item .kc-n {
     font-family: 'JetBrains Mono', monospace;
@@ -259,6 +295,7 @@
     color: var(--muted);
     display: block;
     margin-bottom: 3px;
+    letter-spacing: .05em;
   }
   .kc-item .kc-c {
     font-family: 'JetBrains Mono', monospace;
@@ -270,6 +307,52 @@
   .kc-item .kc-c.few { color: var(--muted); }
   .kc-item .kc-c.mid { color: var(--high); }
   .kc-item .kc-c.many { color: var(--crit); }
+
+  .kc-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 16px;
+    position: relative;
+    opacity: 0;
+    transition: opacity .4s ease;
+    transition-delay: calc(var(--kc-i, 0) * 90ms + .35s);
+  }
+  .kc.kc-play .kc-arrow { opacity: 1; }
+  .kc-arrow span {
+    display: inline-block;
+    animation: kc-pulse-arrow 1.6s ease-in-out infinite;
+    animation-delay: calc(var(--kc-i, 0) * .12s);
+  }
+  .kc.kc-play .kc-arrow span { animation-play-state: running; }
+  .kc-arrow:not(.kc-play-active) span { animation-play-state: paused; }
+
+  @keyframes kc-pulse-arrow {
+    0%, 100% { transform: translateX(0); opacity: .55; }
+    50% { transform: translateX(4px); opacity: 1; }
+  }
+
+  /* dot indicador de progreso, coloreado por densidad de tecnicas */
+  .kc-item .kc-dot {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--kc-item-color, var(--muted));
+    box-shadow: 0 0 0 0 var(--kc-item-color, var(--muted));
+  }
+  .kc.kc-play .kc-item .kc-dot {
+    animation: kc-dot-ping 1.8s ease-out;
+    animation-delay: calc(var(--kc-i, 0) * 90ms + .3s);
+  }
+  @keyframes kc-dot-ping {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--kc-item-color, var(--muted)) 55%, transparent); }
+    70% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--kc-item-color, var(--muted)) 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--kc-item-color, var(--muted)) 0%, transparent); }
+  }
 
   /* ── Path visualization ── */
   .path {
@@ -890,34 +973,34 @@ w = max(<span class="n">0.05</span>, w)  <span class="c"># nunca llega a cero (s
     </div>
   </div>
 
-  <div class="kc">
-    <div class="kc-item"><span class="kc-n">01</span><span class="kc-c few">reconnaissance</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">02</span><span class="kc-c few">resource-development</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item active"><span class="kc-n">03 · 8 técnicas</span><span class="kc-c">initial-access</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">04 · 5 técnicas</span><span class="kc-c mid">execution</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">05 · 11 técnicas</span><span class="kc-c many">persistence</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">06 · 11 técnicas</span><span class="kc-c many">privilege-escalation</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">07 · 5 técnicas</span><span class="kc-c mid">defense-impairment</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">08 · 12 técnicas</span><span class="kc-c many">stealth</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">09 · 8 técnicas</span><span class="kc-c mid">credential-access</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">10 · 10 técnicas</span><span class="kc-c many">discovery</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">11 · 6 técnicas</span><span class="kc-c mid">lateral-movement</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">12 · 6 técnicas</span><span class="kc-c mid">collection</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">13 · 5 técnicas</span><span class="kc-c mid">command-and-control</span></div>
-    <div style="display:flex;align-items:center;color:var(--muted);font-size:18px">›</div>
-    <div class="kc-item"><span class="kc-n">14 · 1 técnica</span><span class="kc-c few">exfiltration</span></div>
+  <div class="kc" id="kcTimeline">
+    <div class="kc-item" style="--kc-i:0; --kc-item-color:#6366f1"><span class="kc-dot"></span><span class="kc-n">01</span><span class="kc-c few">reconnaissance</span></div>
+    <div class="kc-arrow" style="--kc-i:0"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:1; --kc-item-color:#8b5cf6"><span class="kc-dot"></span><span class="kc-n">02</span><span class="kc-c few">resource-development</span></div>
+    <div class="kc-arrow" style="--kc-i:1"><span>›</span></div>
+    <div class="kc-item active" style="--kc-i:2; --kc-item-color:#ff8c42"><span class="kc-dot"></span><span class="kc-n">03 · 8 técnicas</span><span class="kc-c">initial-access</span></div>
+    <div class="kc-arrow" style="--kc-i:2"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:3; --kc-item-color:#ffd23f"><span class="kc-dot"></span><span class="kc-n">04 · 5 técnicas</span><span class="kc-c mid">execution</span></div>
+    <div class="kc-arrow" style="--kc-i:3"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:4; --kc-item-color:#ff3b5c"><span class="kc-dot"></span><span class="kc-n">05 · 11 técnicas</span><span class="kc-c many">persistence</span></div>
+    <div class="kc-arrow" style="--kc-i:4"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:5; --kc-item-color:#c084fc"><span class="kc-dot"></span><span class="kc-n">06 · 11 técnicas</span><span class="kc-c many">privilege-escalation</span></div>
+    <div class="kc-arrow" style="--kc-i:5"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:6; --kc-item-color:#22d3ee"><span class="kc-dot"></span><span class="kc-n">07 · 5 técnicas</span><span class="kc-c mid">defense-impairment</span></div>
+    <div class="kc-arrow" style="--kc-i:6"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:7; --kc-item-color:#5ad1a0"><span class="kc-dot"></span><span class="kc-n">08 · 12 técnicas</span><span class="kc-c many">stealth</span></div>
+    <div class="kc-arrow" style="--kc-i:7"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:8; --kc-item-color:#f472b6"><span class="kc-dot"></span><span class="kc-n">09 · 8 técnicas</span><span class="kc-c mid">credential-access</span></div>
+    <div class="kc-arrow" style="--kc-i:8"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:9; --kc-item-color:#3fb6ff"><span class="kc-dot"></span><span class="kc-n">10 · 10 técnicas</span><span class="kc-c many">discovery</span></div>
+    <div class="kc-arrow" style="--kc-i:9"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:10; --kc-item-color:#fb923c"><span class="kc-dot"></span><span class="kc-n">11 · 6 técnicas</span><span class="kc-c mid">lateral-movement</span></div>
+    <div class="kc-arrow" style="--kc-i:10"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:11; --kc-item-color:#a3e635"><span class="kc-dot"></span><span class="kc-n">12 · 6 técnicas</span><span class="kc-c mid">collection</span></div>
+    <div class="kc-arrow" style="--kc-i:11"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:12; --kc-item-color:#e879f9"><span class="kc-dot"></span><span class="kc-n">13 · 5 técnicas</span><span class="kc-c mid">command-and-control</span></div>
+    <div class="kc-arrow" style="--kc-i:12"><span>›</span></div>
+    <div class="kc-item" style="--kc-i:13; --kc-item-color:#f87171"><span class="kc-dot"></span><span class="kc-n">14 · 1 técnica</span><span class="kc-c few">exfiltration</span></div>
   </div>
 
   <h3>¿Qué significa cada táctica en SolarWinds?</h3>
@@ -1200,6 +1283,20 @@ w = max(<span class="n">0.05</span>, w)  <span class="c"># nunca llega a cero (s
   }, { rootMargin: '-30% 0px -60% 0px' });
 
   sections.forEach(s => obs.observe(s));
+
+  // Kill chain: animar en cascada al entrar en viewport
+  const kc = document.getElementById('kcTimeline');
+  if (kc) {
+    const kcObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          kc.classList.add('kc-play');
+          kcObs.disconnect();
+        }
+      });
+    }, { threshold: .35 });
+    kcObs.observe(kc);
+  }
 </script>
 </body>
 </html>

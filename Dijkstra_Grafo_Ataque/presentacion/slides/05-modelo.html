@@ -8,12 +8,27 @@
   /* kill chain */
   .kc{margin-top:12px}
   .kc .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-  .chain{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
-  .tac{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--panel);border:1px solid var(--line);
-    border-radius:6px;padding:4px 7px;color:var(--txt);white-space:nowrap}
+  .chain{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+  .tac{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;padding:8px 12px;color:var(--txt);white-space:nowrap;position:relative;
+    display:inline-flex;align-items:center;gap:6px;
+    opacity:0;transform:translateY(8px) scale(.94);
+    animation:tacIn .5s cubic-bezier(.2,.7,.2,1) forwards;
+    animation-delay:calc(.5s + var(--ti,0)*.09s)}
+  .tac .em{font-size:16px;line-height:1}
   .tac.s{background:rgba(226,58,86,.1);border-color:rgba(226,58,86,.35);color:var(--crit)}
   .tac.e{background:rgba(15,163,107,.1);border-color:rgba(15,163,107,.35);color:var(--green)}
-  .sep{color:var(--line-2);font-size:11px}
+  .tac::after{content:'';position:absolute;left:2px;right:2px;bottom:-1px;height:2px;border-radius:2px;
+    background:var(--tac-c,var(--blue));transform:scaleX(0);transform-origin:left;
+    animation:tacBar .45s ease forwards;animation-delay:calc(.5s + var(--ti,0)*.09s + .3s)}
+  .tac:hover{border-color:var(--tac-c,var(--blue));box-shadow:0 4px 14px -6px var(--tac-c,var(--blue));transform:translateY(-2px)}
+  @keyframes tacIn{to{opacity:1;transform:none}}
+  @keyframes tacBar{to{transform:scaleX(1)}}
+  .sep{color:var(--line-2);font-size:14px;display:inline-block;
+    opacity:0;animation:sepIn .4s ease forwards;animation-delay:calc(.5s + var(--ti,0)*.09s + .12s)}
+  .sep.pulse{animation:sepIn .4s ease forwards, sepPulse 1.6s ease-in-out .95s infinite;animation-delay:calc(.5s + var(--ti,0)*.09s + .12s),0s}
+  @keyframes sepIn{to{opacity:1}}
+  @keyframes sepPulse{0%,100%{transform:translateX(0);opacity:.5}50%{transform:translateX(3px);opacity:1}}
   .edge-rule{margin-top:16px;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
   .edge-rule .m{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--blue);font-weight:600}
   .edge-rule p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.4}
@@ -53,17 +68,17 @@
       <div class="kc anim d4">
         <div class="h" style="margin-top:16px">Orden táctico (15 tácticas de la kill chain)</div>
         <div class="chain">
-          <span class="tac s">initial-access</span><span class="sep">→</span>
-          <span class="tac">execution</span><span class="sep">→</span>
-          <span class="tac">persistence</span><span class="sep">→</span>
-          <span class="tac">priv-escalation</span><span class="sep">→</span>
-          <span class="tac">defense-evasion</span><span class="sep">→</span>
-          <span class="tac">credential-access</span><span class="sep">→</span>
-          <span class="tac">discovery</span><span class="sep">→</span>
-          <span class="tac">lateral-movement</span><span class="sep">→</span>
-          <span class="tac">collection</span><span class="sep">→</span>
-          <span class="tac">command-&amp;-control</span><span class="sep">→</span>
-          <span class="tac e">exfiltration / impact</span>
+          <span class="tac s" style="--ti:0;--tac-c:#e23a56"><span class="em">🚪</span>initial-access</span><span class="sep pulse" style="--ti:0">→</span>
+          <span class="tac" style="--ti:1;--tac-c:#ffb020"><span class="em">⚙️</span>execution</span><span class="sep pulse" style="--ti:1">→</span>
+          <span class="tac" style="--ti:2;--tac-c:#ff7a45"><span class="em">🧷</span>persistence</span><span class="sep pulse" style="--ti:2">→</span>
+          <span class="tac" style="--ti:3;--tac-c:#c65cff"><span class="em">👑</span>priv-escalation</span><span class="sep pulse" style="--ti:3">→</span>
+          <span class="tac" style="--ti:4;--tac-c:#2fb8c6"><span class="em">🥷</span>defense-evasion</span><span class="sep pulse" style="--ti:4">→</span>
+          <span class="tac" style="--ti:5;--tac-c:#e35cc0"><span class="em">🔑</span>credential-access</span><span class="sep pulse" style="--ti:5">→</span>
+          <span class="tac" style="--ti:6;--tac-c:#2f6bff"><span class="em">🔍</span>discovery</span><span class="sep pulse" style="--ti:6">→</span>
+          <span class="tac" style="--ti:7;--tac-c:#ff8a3d"><span class="em">🧭</span>lateral-movement</span><span class="sep pulse" style="--ti:7">→</span>
+          <span class="tac" style="--ti:8;--tac-c:#8fc63d"><span class="em">📦</span>collection</span><span class="sep pulse" style="--ti:8">→</span>
+          <span class="tac" style="--ti:9;--tac-c:#d65cff"><span class="em">📡</span>command-&amp;-control</span><span class="sep pulse" style="--ti:9">→</span>
+          <span class="tac e" style="--ti:10;--tac-c:#0fa36b"><span class="em">💥</span>exfiltration / impact</span>
         </div>
       </div>
 
