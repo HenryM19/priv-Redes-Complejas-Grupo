@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Floyd-Warshall</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:.92fr 1.08fr;gap:32px;margin-top:14px}
+  .lead2{font-size:15px;color:var(--txt);line-height:1.5;margin-top:8px}.lead2 b{color:var(--ink)}
+  .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .formula{margin-top:16px;background:#0f1626;border-radius:10px;padding:14px 16px;text-align:center;
+    font-family:'JetBrains Mono',monospace;font-size:15px;color:#e8edf6}
+  .formula .k{color:#5ad1a0}.formula .v{color:#ffd23f}
+  .facts{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+  .fx{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.4}
+  .fx .k{font-family:'JetBrains Mono',monospace;color:var(--purple);font-weight:600;flex:none;min-width:120px}
+  .fx .v b{color:var(--ink)}
+  .def{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+  /* betweenness chart */
+  .chart{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);padding:20px 22px}
+  .chart .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);font-weight:600;margin-bottom:16px}
+  .brow{display:flex;align-items:center;gap:12px;margin-bottom:13px}
+  .brow .lab{font-family:'JetBrains Mono',monospace;font-size:12.5px;width:96px;flex:none;color:var(--ink);font-weight:600}
+  .brow .name{font-size:11px;color:var(--muted);width:118px;flex:none}
+  .track{flex:1;height:22px;background:var(--panel-2);border-radius:6px;overflow:hidden;position:relative}
+  .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#8b5cf6,#5b4be0);
+    display:flex;align-items:center;justify-content:flex-end;padding-right:8px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:#fff;font-weight:600;
+    width:0;animation:grow 1.1s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes grow{from{width:0}}
+  .note{margin-top:8px;font-size:12.5px;color:var(--muted);line-height:1.4}.note b{color:var(--ink)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>07 · Floyd-Warshall · todos los pares</span><span>Cuellos de botella estructurales</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1" style="color:var(--purple)">¿Qué nodo bloquear?</div>
+      <h2 class="anim d2" style="margin-top:4px;font-size:30px">Floyd-Warshall</h2>
+      <p class="lead2 anim d3">Camino mínimo entre <b>todos los pares</b> (i, j). Itera sobre cada intermedio posible k:</p>
+      <div class="formula anim d3">d[i][j] = min( d[i][j], d[i][<span class="k">k</span>] + d[<span class="k">k</span>][j] )</div>
+
+      <div class="meta anim d4">
+        <span class="chip" style="color:var(--purple);border-color:rgba(139,92,246,.35);background:rgba(139,92,246,.08)">O(V³)</span>
+        <span class="chip">≈ 389 017 ops</span>
+        <span class="chip green">5.4 ms</span>
+      </div>
+
+      <div class="facts anim d5">
+        <div class="fx"><div class="k">Salida</div><div class="v">matriz <b>73×73</b> de distancias mínimas</div></div>
+        <div class="fx"><div class="k">FW-betweenness</div><div class="v">cuántos pares (i,j) pasan su ruta óptima por cada nodo</div></div>
+        <div class="fx"><div class="k">Interpretación</div><div class="v">betweenness alto = <b>cuello de botella</b> = objetivo defensivo</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="chart anim d3">
+        <div class="h">▚ FW-betweenness · Top-5 de las 71 técnicas</div>
+        <div class="brow anim d4"><div class="lab">T1606.001</div><div class="name">Web Cookies</div>
+          <div class="track"><div class="fill" style="width:100%;animation-delay:.2s">1 044</div></div></div>
+        <div class="brow anim d5"><div class="lab">T1018</div><div class="name">Remote Sys. Discovery</div>
+          <div class="track"><div class="fill" style="width:80%;animation-delay:.35s">836</div></div></div>
+        <div class="brow anim d6"><div class="lab">T1069.002</div><div class="name">Domain Groups</div>
+          <div class="track"><div class="fill" style="width:80%;animation-delay:.5s">836</div></div></div>
+        <div class="brow anim d7"><div class="lab">T1016.001</div><div class="name">Internet Conn. Disc.</div>
+          <div class="track"><div class="fill" style="width:80%;animation-delay:.65s">836</div></div></div>
+        <div class="brow anim d8"><div class="lab">T1550.004</div><div class="name">Web Session Cookie</div>
+          <div class="track"><div class="fill" style="width:67%;animation-delay:.8s">702</div></div></div>
+        <div class="note anim d9"><b>T1606.001 (Web Cookies)</b> es el nodo más central del grafo completo: 1 044 pares dependen de él. Validación: correlación de Spearman con la betweenness clásica (Brandes / NetworkX) = <b>ρ = 0.973</b>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Floyd-Warshall · FW-betweenness</span><span>08 / 12</span></div>
+</div></body></html>

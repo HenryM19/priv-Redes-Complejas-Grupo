@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Conclusiones</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.1fr .9fr;gap:36px;margin-top:16px}
+  .concl{display:flex;flex-direction:column;gap:13px}
+  .ci{display:flex;gap:14px;align-items:flex-start}
+  .ci .ic{flex:none;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px}
+  .ci .ic.b{background:rgba(47,107,255,.1)}.ci .ic.c{background:rgba(226,58,86,.1)}
+  .ci .ic.p{background:rgba(139,92,246,.1)}.ci .ic.g{background:rgba(15,163,107,.1)}
+  .ci .tx{font-size:15.5px;line-height:1.45;color:var(--txt)}.ci .tx b{color:var(--ink)}
+  .side{display:flex;flex-direction:column;gap:14px}
+  .kbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);padding:18px 20px}
+  .kbox .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .kgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .kv .n{font-size:26px;font-weight:700;line-height:1}
+  .kv .l{font-size:11px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace}
+  .final{background:linear-gradient(135deg,#101725,#1b2740);border-radius:14px;padding:20px 22px;color:#e8edf6}
+  .final .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7fb0ff;margin-bottom:8px}
+  .final p{font-size:15px;line-height:1.5}.final p b{color:#fff}
+  .final .r{color:#ffd23f;font-family:'JetBrains Mono',monospace}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>11 · Conclusiones</span><span>Redes complejas + camino mínimo aplicados a ciberseguridad</span></div>
+
+  <h1 class="anim d1" style="font-size:38px;margin-top:6px">Qué demostró el proyecto</h1>
+
+  <div class="body">
+    <div class="concl">
+      <div class="ci anim d2"><div class="ic b">🕸️</div><div class="tx">Un ataque real (<b>SolarWinds</b>, datos 100% de MITRE ATT&amp;CK) se modela como un <b>problema de redes complejas</b>: 73 nodos, 653 aristas, pesos = resistencia defensiva.</div></div>
+      <div class="ci anim d3"><div class="ic c">🎯</div><div class="tx"><b>Dijkstra</b> identifica la <b>ruta de menor resistencia</b> (costo 1.535): el adversario racional elige las técnicas con menos mitigaciones.</div></div>
+      <div class="ci anim d4"><div class="ic p">🔗</div><div class="tx"><b>Floyd-Warshall</b> revela los <b>cuellos de botella</b> del grafo completo vía FW-betweenness — validado contra Brandes (ρ = 0.973).</div></div>
+      <div class="ci anim d5"><div class="ic g">🛡️</div><div class="tx">Ambos convergen en <b>T1606.001 (Web Cookies)</b>: defender 1 de los 6 nodos obligatorios <b>elimina el 100% de las rutas óptimas</b>.</div></div>
+    </div>
+
+    <div class="side">
+      <div class="kbox anim d3">
+        <div class="h">Resultados clave</div>
+        <div class="kgrid">
+          <div class="kv"><div class="n c-crit">1.535</div><div class="l">costo ruta crítica</div></div>
+          <div class="kv"><div class="n c-blue">7</div><div class="l">rutas óptimas equiv.</div></div>
+          <div class="kv"><div class="n c-purple">1 044</div><div class="l">bw máx (T1606.001)</div></div>
+          <div class="kv"><div class="n c-green">0.973</div><div class="l">ρ Spearman validación</div></div>
+        </div>
+      </div>
+      <div class="final anim d5">
+        <div class="h">Aporte</div>
+        <p>Las herramientas clásicas de <b>grafos ponderados</b> convierten datos de amenazas en <b>decisiones defensivas priorizadas</b>: <span class="r">dónde</span> invertir para cortar más ataques con menos esfuerzo.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Gracias · Redes Complejas · Universidad de Cuenca 2026</span><span>12 / 12</span></div>
+</div></body></html>

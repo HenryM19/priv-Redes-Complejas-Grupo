@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Validación y sensibilidad</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:14px}
+  .h3{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:12px}
+  .h3.a{color:var(--green)} .h3.b{color:var(--amber)}
+  .lead2{font-size:14px;color:var(--txt);line-height:1.5;margin-bottom:14px}.lead2 b{color:var(--ink)}
+  table.tbl td .ok{color:var(--green);font-weight:600}
+  table.tbl td .no{color:var(--crit);font-weight:600}
+  table.tbl tr.ref td{background:rgba(47,107,255,.06)}
+  .callout{margin-top:14px;background:rgba(226,58,86,.07);border:1px solid rgba(226,58,86,.28);
+    border-radius:11px;padding:12px 15px;font-size:13px;line-height:1.45}.callout b{color:var(--ink)}
+  .callout .big{color:var(--crit);font-weight:700}
+  .jac{margin-top:8px}
+  .jrow{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px}
+  .jrow .lab{font-family:'JetBrains Mono',monospace;width:120px;flex:none;color:var(--ink)}
+  .jtrack{flex:1;height:18px;background:var(--panel-2);border-radius:5px;overflow:hidden}
+  .jfill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--green),var(--blue));
+    width:0;animation:grow 1s cubic-bezier(.2,.7,.2,1) forwards}
+  .jfill.bad{background:linear-gradient(90deg,var(--amber),var(--crit))}
+  @keyframes grow{from{width:0}}
+  .jrow .jval{font-family:'JetBrains Mono',monospace;width:44px;text-align:right;color:var(--muted)}
+  .note{margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.45}.note b{color:var(--ink)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>09 · Validación y sensibilidad</span><span>¿Son correctos y robustos los resultados?</span></div>
+
+  <div class="body">
+    <div>
+      <div class="h3 a anim d1">✓ Validación cruzada de algoritmos</div>
+      <p class="lead2 anim d2">Cuatro algoritmos independientes sobre el mismo grafo. Todos los ponderados coinciden en el costo <b>1.535</b>.</p>
+      <table class="tbl anim d3">
+        <tr><th>Algoritmo</th><th>Costo</th><th>Tiempo</th><th>= ruta Dijkstra</th></tr>
+        <tr class="ref"><td>Dijkstra propio</td><td class="mono">1.535</td><td class="mono">0.22 ms</td><td>referencia</td></tr>
+        <tr><td>Bellman-Ford</td><td class="mono">1.535</td><td class="mono">0.63 ms</td><td><span class="ok">≈</span> (T1057, mismo w)</td></tr>
+        <tr><td>NetworkX Dijkstra</td><td class="mono">1.535</td><td class="mono">0.90 ms</td><td><span class="ok">Sí ✓</span></td></tr>
+        <tr><td>BFS sin pesos</td><td class="mono">2.925</td><td class="mono">0.04 ms</td><td><span class="no">No</span></td></tr>
+      </table>
+      <div class="callout anim d4">El <b>BFS sin pesos</b> halla la ruta más corta en saltos, pero su costo real es 2.925 — un sobrecoste del <span class="big">+90.55%</span>. Ignorar los pesos degrada seriamente el modelo: <b>los pesos son informativos</b>.</div>
+    </div>
+
+    <div>
+      <div class="h3 b anim d2">◈ Sensibilidad de los pesos</div>
+      <p class="lead2 anim d3">¿Cambia la ruta si perturbamos los pesos? Índice de <b>Jaccard</b> = solapamiento de nodos vs. el esquema base.</p>
+      <div class="jac">
+        <div class="jrow anim d4"><div class="lab">Base (lineal)</div><div class="jtrack"><div class="jfill" style="width:100%;animation-delay:.2s"></div></div><div class="jval">1.00</div></div>
+        <div class="jrow anim d5"><div class="lab">−20% (×0.8)</div><div class="jtrack"><div class="jfill" style="width:100%;animation-delay:.35s"></div></div><div class="jval">1.00</div></div>
+        <div class="jrow anim d6"><div class="lab">+20% (×1.2)</div><div class="jtrack"><div class="jfill" style="width:100%;animation-delay:.5s"></div></div><div class="jval">1.00</div></div>
+        <div class="jrow anim d7"><div class="lab">Binario {0,1}</div><div class="jtrack"><div class="jfill bad" style="width:12.5%;animation-delay:.65s"></div></div><div class="jval">0.125</div></div>
+      </div>
+      <div class="note anim d8">Perturbaciones moderadas (±20%) dan <b>exactamente la misma ruta</b> (Jaccard 1.0): el modelo es <b>robusto</b> al escalado de pesos. Solo el esquema binario — que destruye la información ordinal de las mitigaciones — produce una ruta distinta (Jaccard 0.125).</div>
+      <div class="callout anim d9" style="background:rgba(15,163,107,.08);border-color:rgba(15,163,107,.28)">Conclusión de validación: la ruta óptima es <b>estable</b> mientras se conserve el orden de las mitigaciones, pero <b>depende de que los pesos sean informativos</b> — no basta con contar saltos.</div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Validación y sensibilidad</span><span>10 / 12</span></div>
+</div></body></html>

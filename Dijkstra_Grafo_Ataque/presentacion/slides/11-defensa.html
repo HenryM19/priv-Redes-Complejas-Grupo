@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Interpretación defensiva</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.05fr .95fr;gap:32px;margin-top:14px}
+  .lead2{font-size:15px;color:var(--txt);line-height:1.5;margin-top:6px}.lead2 b{color:var(--ink)}
+  .h3{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--green);margin:16px 0 12px}
+  /* obligatory nodes */
+  .nodes{display:flex;flex-direction:column;gap:8px}
+  .nd{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
+    border-radius:11px;padding:10px 14px;box-shadow:var(--shadow-sm)}
+  .nd.top{border-color:rgba(226,58,86,.4);background:rgba(226,58,86,.05)}
+  .nd .tk{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink);width:96px;flex:none}
+  .nd .nm{font-size:13px;color:var(--txt);flex:1}
+  .nd .bw{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--purple);font-weight:600}
+  .nd .star{color:var(--crit);font-size:14px}
+  /* right column recommendation */
+  .rec{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px 24px}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--crit);color:#fff;font-family:'JetBrains Mono',monospace;
+    font-size:12px;font-weight:600;letter-spacing:.08em;padding:5px 12px;border-radius:7px;text-transform:uppercase}
+  .rec h3{font-size:23px;color:var(--ink);margin:14px 0 6px}
+  .rec p{font-size:14.5px;line-height:1.55;color:var(--txt)}.rec p b{color:var(--ink)}
+  .prio{margin-top:16px;background:rgba(226,58,86,.08);border:1px solid rgba(226,58,86,.3);border-radius:12px;padding:14px 16px}
+  .prio .k{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--crit);font-weight:600}
+  .prio .v{font-size:18px;font-weight:700;color:var(--ink);margin-top:4px}
+  .prio .v code{color:var(--crit)}
+  .warn{margin-top:14px;font-size:13px;color:var(--muted);line-height:1.5;border-left:3px solid var(--amber);padding-left:12px}
+  .warn b{color:var(--ink)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>10 · Interpretación defensiva</span><span>De grafos a decisiones de seguridad</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1" style="color:var(--green)">7 rutas óptimas equivalentes</div>
+      <p class="lead2 anim d2">Dijkstra reporta 1 ruta, pero la enumeración sobre la matriz de Floyd revela <b>7 rutas distintas con el mismo costo 1.535</b>. De los 71 nodos técnicos, <b>6 aparecen en TODAS</b> — son obligatorios: bloquear cualquiera elimina el 100% de las rutas óptimas.</p>
+
+      <div class="h3 anim d3">◆ Nodos obligatorios (en las 7 rutas)</div>
+      <div class="nodes">
+        <div class="nd top anim d4"><span class="star">★</span><span class="tk">T1606.001</span><span class="nm">Web Cookies</span><span class="bw">bw 1 044</span></div>
+        <div class="nd anim d5"><span class="star">★</span><span class="tk">T1550.004</span><span class="nm">Web Session Cookie</span><span class="bw">bw 702</span></div>
+        <div class="nd anim d6"><span class="star">★</span><span class="tk">T1074.002</span><span class="nm">Remote Data Staging</span><span class="bw">bw 420</span></div>
+        <div class="nd anim d7"><span class="star">★</span><span class="tk">T1078.003</span><span class="nm">Local Accounts</span><span class="bw">bw 357</span></div>
+        <div class="nd anim d8"><span class="star">★</span><span class="tk">T1665</span><span class="nm">Hide Infrastructure</span><span class="bw">bw 132</span></div>
+        <div class="nd anim d9"><span class="star">★</span><span class="tk">T1048.002</span><span class="nm">Exfil. cifrada no-C2</span><span class="bw">bw 71</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="rec anim d4">
+        <span class="badge">◆ Recomendación defensiva</span>
+        <h3>Prioriza T1606.001</h3>
+        <p>Es el único nodo que domina <b>ambos análisis</b>: está en la <b>ruta crítica de Dijkstra</b> (táctico) Y es el de <b>mayor FW-betweenness</b> (estratégico). Defenderlo golpea la ruta racional del atacante y el mayor número de rutas del grafo a la vez.</p>
+        <div class="prio">
+          <div class="k">Objetivo #1</div>
+          <div class="v"><code>T1606.001</code> · Web Cookies</div>
+        </div>
+        <div class="warn"><b>Cuidado con T1016.001:</b> está en la ruta de Dijkstra pero <b>no es obligatorio</b> — tiene un sustituto de igual peso (T1057, Process Discovery). Defenderlo solo a él no corta las 7 rutas óptimas.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Interpretación defensiva · objetivo prioritario T1606.001</span><span>11 / 12</span></div>
+</div></body></html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Motivación</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-top:20px}
+  .lead2{font-size:20px;color:var(--txt);line-height:1.55;margin-top:14px}
+  .lead2 b{color:var(--ink)} .lead2 .hl{color:var(--crit);font-weight:600}
+  .idea{margin-top:26px;display:flex;flex-direction:column;gap:14px}
+  .row{display:flex;gap:14px;align-items:flex-start}
+  .num{flex:none;width:34px;height:34px;border-radius:9px;background:rgba(47,107,255,.1);color:var(--blue);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px}
+  .row .t{font-size:16px;line-height:1.45}.row .t b{color:var(--ink)}
+  /* diagrama analogía */
+  .diagram{position:relative}
+  svg.map{width:100%;height:auto}
+  .lbl{font-family:'JetBrains Mono',monospace;font-size:12px;fill:var(--muted)}
+  .node-lbl{font-family:'Space Grotesk';font-size:13px;font-weight:600;fill:var(--ink)}
+  .mp line.edge{stroke:var(--line-2);stroke-width:2}
+  .mp line.path{stroke:var(--crit);stroke-width:4;stroke-dasharray:8 7;animation:dashflow 2.6s linear infinite}
+  @keyframes dashflow{to{stroke-dashoffset:-120}}
+  .mp circle{fill:#fff;stroke:var(--line-2);stroke-width:2.5}
+  .mp circle.on{stroke:var(--crit);fill:#fff}
+  .mp circle.src{fill:var(--crit);stroke:var(--crit)} .mp circle.dst{fill:var(--green);stroke:var(--green)}
+  .cap{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>01 · Motivación</span><span>Redes complejas aplicadas a ciberseguridad</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1">La idea central</div>
+      <h2 class="anim d2" style="margin-top:8px">Atacar una red es<br>encontrar un camino</h2>
+      <p class="lead2 anim d3">Un adversario no ejecuta técnicas al azar: <b>encadena pasos</b> desde el acceso inicial hasta su objetivo. Cada paso tiene un <span class="hl">costo</span> — cuánto esfuerzo y riesgo implica frente a las defensas existentes.</p>
+      <div class="idea">
+        <div class="row anim d4"><div class="num">1</div><div class="t"><b>Nodos</b> = técnicas de ataque reales documentadas</div></div>
+        <div class="row anim d5"><div class="num">2</div><div class="t"><b>Aristas</b> = progresión posible de una técnica a la siguiente</div></div>
+        <div class="row anim d6"><div class="num">3</div><div class="t"><b>Pesos</b> = resistencia defensiva de cada técnica</div></div>
+      </div>
+      <p class="lead2 anim d7" style="font-size:17px;margin-top:22px">El atacante racional busca el <b>camino de mínimo costo</b>. Ese es exactamente el problema que resuelven <b>Dijkstra</b> y <b>Floyd-Warshall</b>.</p>
+    </div>
+
+    <div class="diagram anim d5">
+      <svg class="map mp" viewBox="0 0 520 380">
+        <!-- edges -->
+        <line class="edge" x1="70" y1="190" x2="200" y2="90"/>
+        <line class="edge" x1="70" y1="190" x2="200" y2="290"/>
+        <line class="edge" x1="200" y1="90" x2="340" y2="90"/>
+        <line class="edge" x1="200" y1="290" x2="340" y2="290"/>
+        <line class="edge" x1="200" y1="90" x2="340" y2="290"/>
+        <line class="edge" x1="340" y1="90" x2="450" y2="190"/>
+        <line class="edge" x1="340" y1="290" x2="450" y2="190"/>
+        <!-- critical path -->
+        <line class="path" x1="70" y1="190" x2="200" y2="290"/>
+        <line class="path" x1="200" y1="290" x2="340" y2="290"/>
+        <line class="path" x1="340" y1="290" x2="450" y2="190"/>
+        <!-- nodes -->
+        <circle class="src" cx="70" cy="190" r="20"/>
+        <circle cx="200" cy="90" r="17"/>
+        <circle class="on" cx="200" cy="290" r="17"/>
+        <circle cx="340" cy="90" r="17"/>
+        <circle class="on" cx="340" cy="290" r="17"/>
+        <circle class="dst" cx="450" cy="190" r="20"/>
+        <text class="node-lbl" x="70" y="195" text-anchor="middle" fill="#fff" style="font-size:11px">ATK</text>
+        <text class="node-lbl" x="450" y="195" text-anchor="middle" fill="#fff" style="font-size:11px">GOAL</text>
+        <text class="lbl" x="70" y="240" text-anchor="middle">acceso inicial</text>
+        <text class="lbl" x="450" y="240" text-anchor="middle">impacto</text>
+        <text class="lbl" x="260" y="330" text-anchor="middle" fill="#e23a56">ruta de menor resistencia</text>
+      </svg>
+      <div class="cap">Grafo de ataque: entre muchas rutas, una es la más barata para el adversario</div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Motivación · atacar = camino mínimo</span><span>02 / 12</span></div>
+</div></body></html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Dijkstra vs Floyd</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:flex;flex-direction:column;gap:20px;margin-top:14px}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .cc{border-radius:16px;padding:22px 24px;box-shadow:var(--shadow-sm);border:1px solid var(--line);background:var(--panel);position:relative;overflow:hidden}
+  .cc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+  .cc.d::before{background:var(--crit)} .cc.f::before{background:var(--purple)}
+  .cc .tag{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+  .cc.d .tag{color:var(--crit)} .cc.f .tag{color:var(--purple)}
+  .cc h3{font-size:22px;color:var(--ink);margin:6px 0 4px}
+  .cc .q{font-size:14px;color:var(--muted);font-style:italic;line-height:1.4;margin-bottom:14px}
+  .cc .ans{font-size:14px;line-height:1.5;color:var(--txt)}.cc .ans b{color:var(--ink)}
+  .cc .res{margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--panel-2);border-radius:9px;padding:10px 12px;color:var(--txt);line-height:1.5}
+  .cc .res b{color:var(--ink)}
+  /* cross validation */
+  .xv{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:center;
+    background:rgba(15,163,107,.08);border:1px solid rgba(15,163,107,.3);border-radius:16px;padding:20px 26px}
+  .xv .big{font-family:'JetBrains Mono',monospace;font-size:19px;color:var(--ink);text-align:center;line-height:1.7}
+  .xv .big .g{color:var(--green);font-weight:600} .xv .big .chk{color:var(--green);font-size:24px}
+  .xv .tx{font-size:15px;line-height:1.5}.xv .tx b{color:var(--ink)}
+  .xv .tx .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:8px}
+  .conc{text-align:center;font-size:16px;color:var(--txt);margin-top:2px}.conc b{color:var(--ink)}
+  .conc .hl{color:var(--blue);font-weight:600}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>08 · Dijkstra vs Floyd-Warshall</span><span>Dos algoritmos, dos preguntas complementarias</span></div>
+
+  <div class="body">
+    <div class="cmp">
+      <div class="cc d anim d2">
+        <div class="tag">◆ Dijkstra — táctico</div>
+        <h3>¿Qué ruta toma el atacante?</h3>
+        <div class="q">Una fuente → todos los destinos</div>
+        <div class="ans">Devuelve <b>la</b> secuencia óptima concreta que un adversario racional ejecutaría hoy.</div>
+        <div class="res"><b>Ruta:</b> T1078.003 → T1606.001 → T1016.001 → T1550.004 → T1074.002 → T1665 → T1048.002<br><b>Costo:</b> 1.535 · <b>Tiempo:</b> 0.22 ms</div>
+      </div>
+      <div class="cc f anim d3">
+        <div class="tag">▚ Floyd-Warshall — estratégico</div>
+        <h3>¿Qué nodo defender?</h3>
+        <div class="q">Todos los pares → todos los pares</div>
+        <div class="ans">Revela los <b>cuellos de botella</b> por los que pasa la mayor cantidad de rutas del grafo completo.</div>
+        <div class="res"><b>Puentes:</b> T1606.001 (1 044) · T1550.004 (702) · T1074.002 (420)<br><b>Costo:</b> O(V³) · <b>Tiempo:</b> 5.4 ms (5× Dijkstra)</div>
+      </div>
+    </div>
+
+    <div class="xv anim d4">
+      <div class="big"><span class="chk">✓</span> d<sub>Dijkstra</sub>(ATTACKER→IMPACT) &nbsp;=&nbsp; <span class="g">FW[ATTACKER][IMPACT]</span> &nbsp;=&nbsp; <b style="color:var(--crit)">1.535</b></div>
+      <div class="tx"><div class="h">Cross-validación</div>Dos algoritmos distintos, <b>implementaciones independientes</b>, exactamente el mismo resultado. La consistencia confirma la corrección del modelo.</div>
+    </div>
+
+    <div class="conc anim d5">Convergencia clave: <b>T1606.001 (Web Cookies)</b> aparece en la <span class="hl">ruta de Dijkstra</span> Y es el nodo de <span class="hl">mayor FW-betweenness</span> — el único que domina ambos análisis.</div>
+  </div>
+
+  <div class="footer"><span>Dijkstra vs Floyd-Warshall</span><span>09 / 12</span></div>
+</div></body></html>

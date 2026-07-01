@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>De los datos al grafo</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.15fr .85fr;gap:34px;margin-top:14px}
+  .lead2{font-size:15px;color:var(--txt);line-height:1.5}
+  .lead2 b{color:var(--ink)}
+  /* kill chain */
+  .kc{margin-top:12px}
+  .kc .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .chain{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+  .tac{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--panel);border:1px solid var(--line);
+    border-radius:6px;padding:4px 7px;color:var(--txt);white-space:nowrap}
+  .tac.s{background:rgba(226,58,86,.1);border-color:rgba(226,58,86,.35);color:var(--crit)}
+  .tac.e{background:rgba(15,163,107,.1);border-color:rgba(15,163,107,.35);color:var(--green)}
+  .sep{color:var(--line-2);font-size:11px}
+  .edge-rule{margin-top:16px;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+  .edge-rule .m{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--blue);font-weight:600}
+  .edge-rule p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .maps{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mrow{display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.35}
+  .mrow .k{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--blue);flex:none;min-width:58px}
+  .mrow .v b{color:var(--ink)}
+  /* weight formula */
+  .wf{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);padding:20px}
+  .wf .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--crit);font-weight:600}
+  .formula{margin:14px 0;background:#0f1626;border-radius:10px;padding:16px 18px;text-align:center;
+    font-family:'JetBrains Mono',monospace;font-size:19px;color:#e8edf6}
+  .formula .v{color:#ffd23f} .formula .k{color:#5ad1a0}
+  .wf .exp{font-size:13px;color:var(--txt);line-height:1.5}.wf .exp b{color:var(--ink)}
+  .wtab{width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px}
+  .wtab th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--line-2)}
+  .wtab td{padding:6px 8px;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace}
+  .wtab td:first-child{color:var(--ink)}
+  .bar{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--crit));display:inline-block;vertical-align:middle}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>04 · De los datos al grafo</span><span>Nodos · aristas · kill chain · pesos</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1">Construcción del grafo dirigido</div>
+      <h2 class="anim d2" style="margin-top:4px;font-size:28px">Cómo se forma la red</h2>
+
+      <div class="maps anim d3" style="margin-top:12px">
+        <div class="mrow"><div class="k">Nodo</div><div class="v">una <b>técnica</b> real usada por APT29 (+ nodos frontera <code>ATTACKER</code> e <code>IMPACT</code>)</div></div>
+        <div class="mrow"><div class="k">Arista A→B</div><div class="v">progresar de la técnica A a la B en la <b>kill chain</b></div></div>
+        <div class="mrow"><div class="k">Peso w</div><div class="v"><b>resistencia defensiva</b> de la técnica</div></div>
+        <div class="mrow"><div class="k">Camino</div><div class="v">una <b>secuencia de ataque</b> completa acceso→impacto</div></div>
+      </div>
+
+      <div class="kc anim d4">
+        <div class="h" style="margin-top:16px">Orden táctico (15 tácticas de la kill chain)</div>
+        <div class="chain">
+          <span class="tac s">initial-access</span><span class="sep">→</span>
+          <span class="tac">execution</span><span class="sep">→</span>
+          <span class="tac">persistence</span><span class="sep">→</span>
+          <span class="tac">priv-escalation</span><span class="sep">→</span>
+          <span class="tac">defense-evasion</span><span class="sep">→</span>
+          <span class="tac">credential-access</span><span class="sep">→</span>
+          <span class="tac">discovery</span><span class="sep">→</span>
+          <span class="tac">lateral-movement</span><span class="sep">→</span>
+          <span class="tac">collection</span><span class="sep">→</span>
+          <span class="tac">command-&amp;-control</span><span class="sep">→</span>
+          <span class="tac e">exfiltration / impact</span>
+        </div>
+      </div>
+
+      <div class="edge-rule anim d5">
+        <div class="m">A (táctica i) ──▶ B (táctica i+1)</div>
+        <p>Si SolarWinds usó A en una táctica y B en la siguiente, existe la arista A→B. <code>ATTACKER</code> conecta con toda la primera táctica; <code>IMPACT</code> recibe de la última. Resultado: un <b>grafo dirigido de todas las progresiones posibles</b> dentro de la campaña real.</p>
+      </div>
+    </div>
+
+    <div class="wf anim d4">
+      <div class="h">⚖️ Fórmula de peso</div>
+      <div class="formula">w = max(0.05, <span class="k">n_mit</span> / <span class="v">8</span>)</div>
+      <p class="exp"><b>n_mit</b> = mitigaciones que ATT&amp;CK documenta para la técnica · <b>8</b> = máximo entre las 71.<br><br>Más controles documentados = <b>más costo</b> para el atacante. Una técnica sin mitigaciones recibe el <b>piso 0.05</b>: es trivial de explotar (Dijkstra exige pesos &gt; 0).</p>
+      <table class="wtab">
+        <tr><th>Técnica</th><th>mit/8</th><th>w</th><th></th></tr>
+        <tr><td>T1078.003</td><td>4/8</td><td>0.500</td><td><span class="bar" style="width:44px"></span></td></tr>
+        <tr><td>T1606.001</td><td>2/8</td><td>0.250</td><td><span class="bar" style="width:24px"></span></td></tr>
+        <tr><td>T1550.004</td><td>1/8</td><td>0.125</td><td><span class="bar" style="width:14px"></span></td></tr>
+        <tr><td>T1016.001</td><td>0/8</td><td>0.050</td><td><span class="bar" style="width:7px"></span></td></tr>
+        <tr><td>T1665</td><td>0/8</td><td>0.050</td><td><span class="bar" style="width:7px"></span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer"><span>De los datos al grafo</span><span>05 / 12</span></div>
+</div></body></html>

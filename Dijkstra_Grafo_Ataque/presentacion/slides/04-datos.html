@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Los datos</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.05fr .95fr;gap:36px;margin-top:18px}
+  .col h2{margin-bottom:6px}
+  .lead2{font-size:16px;color:var(--txt);line-height:1.5;margin-top:8px}
+  .lead2 b{color:var(--ink)}
+  .flow{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+  .step{display:flex;gap:13px;align-items:center;background:var(--panel);border:1px solid var(--line);
+    border-radius:11px;padding:12px 15px;box-shadow:var(--shadow-sm)}
+  .step .ic{flex:none;width:38px;height:38px;border-radius:9px;background:var(--panel-2);
+    display:flex;align-items:center;justify-content:center;font-size:18px}
+  .step .tx{font-size:14px;line-height:1.35}.step .tx b{color:var(--ink)}
+  .step .tx .m{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+  .arrow{align-self:center;color:var(--line-2);font-size:16px;margin:-4px 0}
+  /* real vs sintético banner */
+  .real{margin-top:16px;background:rgba(15,163,107,.09);border:1px solid rgba(15,163,107,.3);
+    border-radius:12px;padding:14px 18px;display:flex;gap:12px;align-items:center}
+  .real .big{font-size:30px;font-weight:700;color:var(--green);font-family:'Space Grotesk'}
+  .real .tx{font-size:14px;line-height:1.4}.real .tx b{color:var(--ink)}
+  /* stats */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px}
+  .sc{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+  .case{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+  .case .h{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--crit);font-weight:600;margin-bottom:8px}
+  .case p{font-size:14px;line-height:1.5;color:var(--txt)}.case p b{color:var(--ink)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>03 · Los datos</span><span>De dónde salen · qué son · reales o sintéticos</span></div>
+
+  <div class="body">
+    <div class="col">
+      <div class="kicker anim d1">MITRE ATT&amp;CK · Bundle STIX 2.1</div>
+      <h2 class="anim d2" style="margin-top:6px">¿De dónde salen los datos?</h2>
+      <p class="lead2 anim d3">La fuente es el <b>bundle oficial STIX 2.1 de ATT&amp;CK Enterprise</b> (~40 MB), descargado del repositorio de MITRE en GitHub: el catálogo estándar de la industria sobre técnicas adversarias reales.</p>
+
+      <div class="flow">
+        <div class="step anim d4"><div class="ic">🗄️</div><div class="tx"><b>Bundle STIX 2.1</b> — ~14 000 objetos<div class="m">técnicas · relaciones campaña→técnica · mitigaciones</div></div></div>
+        <div class="arrow anim d5">▼ filtrar campaña G0118</div>
+        <div class="step anim d5"><div class="ic">🎯</div><div class="tx"><b>71 técnicas de SolarWinds</b><div class="m">solo las documentadas con evidencia para APT29</div></div></div>
+        <div class="arrow anim d6">▼ extraer atributos</div>
+        <div class="step anim d6"><div class="ic">⚖️</div><div class="tx"><b>N.º de mitigaciones por técnica</b><div class="m">→ define el peso (resistencia defensiva)</div></div></div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="real anim d3">
+        <div class="big">100%</div>
+        <div class="tx"><b>Datos reales, no sintéticos.</b> Cada técnica del grafo fue efectivamente usada por APT29 en SolarWinds y está registrada con evidencia técnica en MITRE ATT&amp;CK.</div>
+      </div>
+
+      <div class="stats" style="margin-top:16px">
+        <div class="sc anim d4 stat"><div class="n c-blue">71</div><div class="l">técnicas ATT&amp;CK reales</div></div>
+        <div class="sc anim d5 stat"><div class="n c-ink">15</div><div class="l">tácticas (kill chain)</div></div>
+        <div class="sc anim d6 stat"><div class="n c-amber">G0118</div><div class="l">campaña / grupo APT29</div></div>
+        <div class="sc anim d7 stat"><div class="n c-green">8</div><div class="l">máx. mitigaciones / técnica</div></div>
+      </div>
+
+      <div class="case anim d7">
+        <div class="h">◆ Caso de estudio · SolarWinds Compromise (2019–2020)</div>
+        <p>APT29 comprometió la <b>cadena de suministro</b> de SolarWinds Orion, afectando a <b>~18 000 organizaciones</b>, incluidas agencias del gobierno de EE.&nbsp;UU. Es uno de los ataques <b>mejor documentados</b> de la historia — ideal para un modelo basado en datos verificables.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Los datos · MITRE ATT&amp;CK (100% reales)</span><span>04 / 12</span></div>
+</div></body></html>

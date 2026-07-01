@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>El grafo de ataque</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.35fr .65fr;gap:32px;margin-top:14px;align-items:center}
+  .figbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+    padding:14px;position:relative}
+  .figbox img{width:100%;border-radius:9px;display:block}
+  .figcap{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+  .side h2{font-size:26px}
+  .lead2{font-size:15px;color:var(--txt);line-height:1.5;margin-top:8px}.lead2 b{color:var(--ink)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+  .sc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-sm)}
+  .sc .n{font-size:30px;font-weight:700;color:var(--ink);line-height:1}
+  .sc .l{font-size:11.5px;color:var(--muted);margin-top:5px;font-family:'JetBrains Mono',monospace}
+  .legend{margin-top:16px;display:flex;flex-direction:column;gap:7px;font-size:13px}
+  .lg{display:flex;align-items:center;gap:9px}
+  .dotc{width:12px;height:12px;border-radius:50%;flex:none}
+  .dotc.a{background:var(--crit)}.dotc.g{background:var(--green)}.dotc.n{background:var(--blue)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>05 · El grafo de ataque</span><span>Qué representa la red · métricas estructurales</span></div>
+
+  <div class="body">
+    <div class="figbox anim d2">
+      <img src="../assets/attack_graph.png" alt="Grafo de ataque SolarWinds">
+      <div class="figcap">Grafo dirigido SolarWinds — nodos por táctica (kill chain, izquierda→derecha) · ruta crítica de Dijkstra en rojo</div>
+    </div>
+
+    <div class="side">
+      <div class="kicker anim d1">La red resultante</div>
+      <h2 class="anim d2" style="margin-top:4px">Todas las progresiones posibles</h2>
+      <p class="lead2 anim d3">Cada nodo es una técnica real; cada arista, un paso viable en la kill chain. El grafo es <b>denso y con ciclos</b> (no es un DAG): existen muchísimas rutas alternativas del acceso al impacto.</p>
+
+      <div class="grid2">
+        <div class="sc anim d4"><div class="n c-blue">73</div><div class="l">nodos (71 técnicas + 2)</div></div>
+        <div class="sc anim d5"><div class="n c-crit">653</div><div class="l">aristas dirigidas</div></div>
+        <div class="sc anim d6"><div class="n c-ink">0.124</div><div class="l">densidad</div></div>
+        <div class="sc anim d7"><div class="n c-amber">8.9</div><div class="l">grado medio</div></div>
+      </div>
+
+      <div class="legend anim d8">
+        <div class="lg"><span class="dotc a"></span> <b style="color:var(--ink)">ATTACKER</b> — punto de entrada</div>
+        <div class="lg"><span class="dotc n"></span> técnicas ATT&amp;CK por táctica</div>
+        <div class="lg"><span class="dotc g"></span> <b style="color:var(--ink)">IMPACT</b> — objetivo logrado</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>El grafo de ataque · 73 nodos · 653 aristas</span><span>06 / 12</span></div>
+</div></body></html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Dijkstra</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:.9fr 1.1fr;gap:32px;margin-top:14px}
+  .lead2{font-size:15px;color:var(--txt);line-height:1.5;margin-top:8px}.lead2 b{color:var(--ink)}
+  .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .facts{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+  .fx{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.4}
+  .fx .k{font-family:'JetBrains Mono',monospace;color:var(--blue);font-weight:600;flex:none;min-width:104px}
+  .fx .v b{color:var(--ink)}
+  .figbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-sm);padding:8px;margin-top:14px}
+  .figbox img{width:100%;border-radius:7px;display:block}
+  .figcap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);text-align:center;margin-top:5px}
+  /* route table */
+  .rt{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);padding:6px 6px 4px;overflow:hidden}
+  .rt table{width:100%;border-collapse:collapse;font-size:13px}
+  .rt th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--line-2)}
+  .rt td{padding:7px 10px;border-bottom:1px solid var(--line)}
+  .rt tr:last-child td{border-bottom:none}
+  .rt td.tk{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink)}
+  .rt td.w,.rt td.c{font-family:'JetBrains Mono',monospace;text-align:right}
+  .rt tr.imp td{background:rgba(15,163,107,.08);font-weight:600}
+  .rt tr.atk td{background:rgba(226,58,86,.06)}
+  .rt td.c b{color:var(--crit)}
+  .total{margin-top:12px;display:flex;align-items:center;gap:14px;background:rgba(226,58,86,.08);
+    border:1px solid rgba(226,58,86,.3);border-radius:12px;padding:12px 18px}
+  .total .n{font-size:32px;font-weight:700;color:var(--crit);font-family:'Space Grotesk'}
+  .total .t{font-size:13px;color:var(--txt);line-height:1.4}.total .t b{color:var(--ink)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>06 · Dijkstra · fuente única</span><span>La ruta de menor resistencia</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1">¿Cuál es LA ruta óptima?</div>
+      <h2 class="anim d2" style="margin-top:4px;font-size:30px">Dijkstra</h2>
+      <p class="lead2 anim d3">Camino mínimo desde <code>ATTACKER</code> con heap binario. Halla la secuencia de <b>menor resistencia defensiva acumulada</b> hasta el impacto.</p>
+
+      <div class="meta anim d4">
+        <span class="chip blue">O((V+E)·log V)</span>
+        <span class="chip">≈ 4 500 ops</span>
+        <span class="chip green">0.22 ms</span>
+      </div>
+
+      <div class="facts anim d5">
+        <div class="fx"><div class="k">Entrada</div><div class="v">grafo con pesos <b>no negativos</b></div></div>
+        <div class="fx"><div class="k">Salida</div><div class="v"><b>1 ruta</b> + distancias acumuladas</div></div>
+        <div class="fx"><div class="k">Limitación</div><div class="v">reporta una sola ruta aunque existan <b>varias óptimas</b> equivalentes</div></div>
+      </div>
+
+      <div class="figbox anim d6">
+        <img src="../assets/dijkstra_expansion.gif" alt="Expansión de Dijkstra">
+        <div class="figcap">Expansión de Dijkstra: la frontera crece por costo creciente</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="kicker anim d3" style="margin-bottom:10px">Ruta crítica encontrada</div>
+      <div class="rt anim d4">
+        <table>
+          <tr><th>#</th><th>Técnica</th><th>Nombre</th><th style="text-align:right">w</th><th style="text-align:right">acum.</th></tr>
+          <tr class="atk"><td>0</td><td class="tk">ATTACKER</td><td>acceso inicial</td><td class="w">—</td><td class="c">0.000</td></tr>
+          <tr><td>1</td><td class="tk">T1078.003</td><td>Local Accounts</td><td class="w">0.500</td><td class="c">0.500</td></tr>
+          <tr><td>2</td><td class="tk">T1606.001</td><td>Web Cookies</td><td class="w">0.250</td><td class="c">0.750</td></tr>
+          <tr><td>3</td><td class="tk">T1016.001</td><td>Internet Conn. Discovery</td><td class="w">0.050</td><td class="c">0.800</td></tr>
+          <tr><td>4</td><td class="tk">T1550.004</td><td>Web Session Cookie</td><td class="w">0.125</td><td class="c">0.925</td></tr>
+          <tr><td>5</td><td class="tk">T1074.002</td><td>Remote Data Staging</td><td class="w">0.050</td><td class="c">0.975</td></tr>
+          <tr><td>6</td><td class="tk">T1665</td><td>Hide Infrastructure</td><td class="w">0.050</td><td class="c">1.025</td></tr>
+          <tr><td>7</td><td class="tk">T1048.002</td><td>Exfil. cifrada no-C2</td><td class="w">0.500</td><td class="c">1.525</td></tr>
+          <tr class="imp"><td>8</td><td class="tk">IMPACT</td><td>objetivo logrado</td><td class="w">0.010</td><td class="c"><b>1.535</b></td></tr>
+        </table>
+      </div>
+      <div class="total anim d6">
+        <div class="n">1.535</div>
+        <div class="t"><b>Costo total bajo.</b> El atacante racional elige justo las técnicas con <b>0 o pocas mitigaciones</b> — las que el defensor menos cubre.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Dijkstra · ruta crítica (costo 1.535)</span><span>07 / 12</span></div>
+</div></body></html>
