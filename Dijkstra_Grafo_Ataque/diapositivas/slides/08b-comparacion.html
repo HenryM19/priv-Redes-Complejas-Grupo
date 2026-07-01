@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Dijkstra vs Floyd-Warshall: comparación</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{--bg:#0d1320;--panel:#121a2b;--line:#1e2a40;--txt:#e8edf6;--muted:#8a97ad;
+        --crit:#ff3b5c;--high:#ff8c42;--cyan:#3fb6ff;--green:#5ad1a0;--amber:#ffd23f;--purple:#c084fc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt)}
+  .slide{width:1920px;height:1080px;position:relative;display:flex;flex-direction:column;padding:52px 90px 46px}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.22;pointer-events:none}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:20px;z-index:2;margin:0 30px}
+  h2{font-size:50px;font-weight:700;letter-spacing:-.02em;margin:20px 30px 4px;z-index:2}
+  h2 .d{color:var(--amber)} h2 .fw{color:var(--cyan)}
+  .lead{margin:0 30px 16px;z-index:2;font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--muted)}
+  .lead b{color:var(--green)}
+
+  /* Layout: 3 columns */
+  .cols{display:grid;grid-template-columns:1fr 520px 1fr;gap:28px;z-index:2;flex:1;margin:0 30px}
+
+  /* Algorithm panels */
+  .algo{border-radius:14px;padding:24px 26px;display:flex;flex-direction:column;gap:14px}
+  .algo.dijk{border:2px solid rgba(255,210,63,.4);background:rgba(255,210,63,.06)}
+  .algo.fw  {border:2px solid rgba(63,182,255,.4);background:rgba(63,182,255,.06)}
+  .algo h3{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px}
+  .algo h3.d{color:var(--amber)} .algo h3.fw{color:var(--cyan)}
+  .algo .title{font-size:28px;font-weight:700}
+  .kv{display:flex;flex-direction:column;gap:10px}
+  .kv .row{display:flex;gap:10px;align-items:baseline}
+  .kv .lbl{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--muted);min-width:130px}
+  .kv .val{font-size:18px;font-weight:600}
+  .kv .val.hi{color:var(--amber)} .kv .val.fw{color:var(--cyan)} .kv .val.ok{color:var(--green)} .kv .val.warn{color:var(--high)}
+  .sep{height:1px;background:var(--line);margin:4px 0}
+  .result-box{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .result-box .rlbl{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);margin-bottom:8px;letter-spacing:.1em;text-transform:uppercase}
+  .result-box .rval{font-size:17px;font-weight:500}
+  .result-box .rpath{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--txt);line-height:1.8;margin-top:4px}
+  .result-box .rpath .crit{color:var(--crit);font-weight:700}
+  .result-box .rpath .step{color:var(--muted)}
+
+  /* Center comparison table */
+  .center-col{display:flex;flex-direction:column;gap:20px}
+  .comp-title{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;text-align:center;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  table.comp{border-collapse:collapse;width:100%}
+  table.comp th,table.comp td{padding:10px 12px;border:1px solid var(--line);font-size:16px;vertical-align:middle}
+  table.comp th{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;background:rgba(255,255,255,.03)}
+  table.comp td:first-child{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px;width:36%}
+  table.comp td.td-d{color:var(--amber);font-weight:600;font-size:15px;text-align:center}
+  table.comp td.td-f{color:var(--cyan);font-weight:600;font-size:15px;text-align:center}
+  table.comp tr.hi td{background:rgba(255,255,255,.04)}
+
+  /* Cross-validation badge */
+  .xval{background:rgba(90,209,160,.12);border:1px solid rgba(90,209,160,.35);border-radius:10px;padding:14px 16px;text-align:center}
+  .xval .xv-lbl{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+  .xval .xv-val{font-size:22px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace}
+  .xval .xv-note{font-size:14px;color:var(--muted);margin-top:4px}
+
+  /* Synthesis bottom */
+  .synthesis{margin:14px 30px 0;z-index:2;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px}
+  .scard{border-radius:12px;padding:14px 18px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+  .scard .sc-lbl{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .scard .sc-val{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace}
+  .scard .sc-desc{font-size:15px;color:var(--muted);margin-top:4px;line-height:1.4}
+  .scard.v1 .sc-val{color:var(--amber)} .scard.v2 .sc-val{color:var(--cyan)}
+  .scard.v3 .sc-val{color:var(--crit)} .scard.v4 .sc-val{color:var(--green)}
+  .scard.v3{border-color:rgba(255,59,92,.3);background:rgba(255,59,92,.07)}
+  .scard.v4{border-color:rgba(90,209,160,.3);background:rgba(90,209,160,.06)}
+
+  /* Obligatory nodes */
+  .obl-nodes{margin:14px 30px 0;z-index:2;display:flex;align-items:center;gap:12px;font-size:17px;
+             padding:12px 20px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px}
+  .obl-nodes .lbl{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);min-width:220px}
+  .obl-chip{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;padding:4px 12px;
+            border-radius:6px;background:rgba(255,59,92,.15);border:1px solid rgba(255,59,92,.4);color:var(--crit)}
+  .obl-chip.star{background:rgba(255,59,92,.3);border-color:var(--crit);font-size:16px}
+  .obl-note{margin-left:auto;font-size:15px;color:var(--muted);font-style:italic}
+
+  .footer{position:absolute;bottom:28px;right:120px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span>Dijkstra · SolarWinds Compromise</span><span>Universidad de Cuenca · DEET · 2026</span></div>
+  <h2><span class="d">Dijkstra</span> vs <span class="fw">Floyd-Warshall</span>: comparación sobre el grafo real</h2>
+  <div class="lead">Mismos datos, mismos pesos → <b>dos respuestas distintas</b>, ambas necesarias para defender la red.</div>
+
+  <div class="cols">
+    <!-- DIJKSTRA PANEL -->
+    <div class="algo dijk">
+      <div><h3 class="d">Dijkstra</h3><div class="title">¿Cuál es LA ruta óptima?</div></div>
+      <div class="kv">
+        <div class="row"><span class="lbl">Complejidad</span><span class="val hi">O((V+E)·log V)</span></div>
+        <div class="row"><span class="lbl">En nuestro grafo</span><span class="val">O((73+653)·log 73)</span></div>
+        <div class="row"><span class="lbl">Tiempo real</span><span class="val hi">0.98 ms</span></div>
+        <div class="row"><span class="lbl">Alcance</span><span class="val">1 fuente → todos los nodos</span></div>
+        <div class="row"><span class="lbl">Salida</span><span class="val">1 ruta + dist. acumuladas</span></div>
+      </div>
+      <div class="sep"></div>
+      <div class="result-box">
+        <div class="rlbl">Resultado · costo mínimo</div>
+        <div class="rval" style="color:var(--amber);font-size:26px;font-family:'JetBrains Mono',monospace">costo = 1.535</div>
+        <div class="rpath">
+          <span class="step">ATTACKER →</span>
+          <span>T1078.003 →</span>
+          <span class="crit">T1606.001</span>
+          <span> → T1016.001 →</span><br>
+          <span>T1550.004 → T1074.002 → T1665 →</span><br>
+          <span>T1048.002 → IMPACT</span>
+        </div>
+      </div>
+      <div class="result-box" style="margin-top:4px">
+        <div class="rlbl">Limitación</div>
+        <div class="rval" style="font-size:16px;color:var(--muted)">Reporta <strong style="color:var(--amber)">1</strong> de las <strong style="color:var(--crit)">7</strong> rutas óptimas equivalentes.<br>No cuantifica la criticidad de cada nodo en el grafo global.</div>
+      </div>
+    </div>
+
+    <!-- CENTER: comparison table + cross-validation -->
+    <div class="center-col">
+      <div class="comp-title">Comparación de propiedades</div>
+      <table class="comp">
+        <tr><th>Dimensión</th><th style="color:var(--amber)">Dijkstra</th><th style="color:var(--cyan)">Floyd-Warshall</th></tr>
+        <tr class="hi"><td>Complejidad</td><td class="td-d">O((V+E)·log V)</td><td class="td-f">O(V³)</td></tr>
+        <tr><td>Tiempo real</td><td class="td-d">0.98 ms</td><td class="td-f">5.4 ms</td></tr>
+        <tr class="hi"><td>Operaciones</td><td class="td-d">~4 500</td><td class="td-f">389 017</td></tr>
+        <tr><td>Pares (i,j)</td><td class="td-d">1 fuente × 73</td><td class="td-f">73 × 73 = 5 329</td></tr>
+        <tr class="hi"><td>Rutas halladas</td><td class="td-d" style="color:var(--high)">1</td><td class="td-f">7 óptimas</td></tr>
+        <tr><td>Pregunta clave</td><td class="td-d">¿Cuál ruta tomar?</td><td class="td-f">¿Qué nodo bloquear?</td></tr>
+        <tr class="hi"><td>Escalabilidad</td><td class="td-d">✓ miles de nodos</td><td class="td-f" style="color:var(--high)">± &lt;500 nodos</td></tr>
+      </table>
+
+      <div class="xval" style="margin-top:4px">
+        <div class="xv-lbl">✓ Cross-validación</div>
+        <div class="xv-val">d<sub style="font-size:14px">Dijk</sub>(ATT→IMP) = d<sub style="font-size:14px">FW</sub>[ATT][IMP] = 1.535</div>
+        <div class="xv-note">Ambos algoritmos confirman el mismo costo óptimo</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:4px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Cuándo usar cada uno</div>
+        <div style="font-size:15px;line-height:1.7;color:var(--txt)">
+          <span style="color:var(--amber)">▶ Dijkstra</span> para <strong>respuesta táctica</strong>: "si un adversario racional ataca hoy, ¿qué ruta toma?"<br>
+          <span style="color:var(--cyan)">▶ Floyd-Warshall</span> para <strong>prioridad defensiva</strong>: "¿qué técnica, si es neutralizada, elimina más rutas de ataque?"
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOYD-WARSHALL PANEL -->
+    <div class="algo fw">
+      <div><h3 class="fw">Floyd-Warshall</h3><div class="title">¿Qué nodo bloquear?</div></div>
+      <div class="kv">
+        <div class="row"><span class="lbl">Complejidad</span><span class="val fw">O(V³) = O(73³)</span></div>
+        <div class="row"><span class="lbl">En nuestro grafo</span><span class="val">389 017 operaciones</span></div>
+        <div class="row"><span class="lbl">Tiempo real</span><span class="val fw">5.4 ms</span></div>
+        <div class="row"><span class="lbl">Alcance</span><span class="val">Todos los pares · 73×73</span></div>
+        <div class="row"><span class="lbl">Salida</span><span class="val">Matriz 73×73 + betweenness</span></div>
+      </div>
+      <div class="sep"></div>
+      <div class="result-box">
+        <div class="rlbl">Top betweenness · rutas óptimas</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:4px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--crit)">#1 T1606.001</span>
+            <span style="font-size:14px;color:var(--muted)">Web Cookies</span>
+            <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--crit)">1 044 rutas</span>
+          </div>
+          <div style="height:12px;background:var(--line);border-radius:6px;overflow:hidden"><div style="width:100%;height:100%;background:var(--crit);border-radius:6px"></div></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--high)">#2 T1550.004</span>
+            <span style="font-size:14px;color:var(--muted)">Web Session Cookie</span>
+            <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--high)">702</span>
+          </div>
+          <div style="height:12px;background:var(--line);border-radius:6px;overflow:hidden"><div style="width:67.2%;height:100%;background:var(--high);border-radius:6px"></div></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--cyan)">#3 T1074.002</span>
+            <span style="font-size:14px;color:var(--muted)">Remote Data Staging</span>
+            <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--cyan)">420</span>
+          </div>
+          <div style="height:12px;background:var(--line);border-radius:6px;overflow:hidden"><div style="width:40.2%;height:100%;background:var(--cyan);border-radius:6px"></div></div>
+        </div>
+      </div>
+      <div class="result-box" style="margin-top:4px">
+        <div class="rlbl">Hallazgo clave de FW</div>
+        <div style="font-size:16px;color:var(--muted)">Existen <strong style="color:var(--cyan)">7</strong> rutas equivalentes de costo 1.535 — no una sola. FW revela cuáles nodos son <strong style="color:var(--green)">obligatorios en todas</strong>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Obligatory nodes -->
+  <div class="obl-nodes">
+    <div class="lbl">6 nodos en TODAS las 7 rutas óptimas →</div>
+    <span class="obl-chip star">T1606.001</span>
+    <span class="obl-chip">T1078.003</span>
+    <span class="obl-chip">T1550.004</span>
+    <span class="obl-chip">T1074.002</span>
+    <span class="obl-chip">T1665</span>
+    <span class="obl-chip">T1048.002</span>
+    <div class="obl-note">Bloquear cualquiera de estos elimina el 100% de rutas óptimas · T1016.001 tiene alternativa (T1057)</div>
+  </div>
+
+  <!-- 4 synthesis cards -->
+  <div class="synthesis">
+    <div class="scard v1">
+      <div class="sc-lbl">Speedup Dijkstra</div>
+      <div class="sc-val">5×</div>
+      <div class="sc-desc">Más rápido que FW (0.98 ms vs 5.4 ms). Para grafos &gt;500 nodos, Dijkstra escala mejor.</div>
+    </div>
+    <div class="scard v2">
+      <div class="sc-lbl">Rutas óptimas reales</div>
+      <div class="sc-val">7</div>
+      <div class="sc-desc">Dijkstra reporta 1; FW + enumeración revela las 7 con costo idéntico = 1.535.</div>
+    </div>
+    <div class="scard v3">
+      <div class="sc-lbl">Top defensa · ambos</div>
+      <div class="sc-val">T1606.001</div>
+      <div class="sc-desc">En la ruta crítica Dijkstra Y #1 FW-betweenness (1 044). Prioridad máxima validada.</div>
+    </div>
+    <div class="scard v4">
+      <div class="sc-lbl">Cross-validación</div>
+      <div class="sc-val">✓ 1.535</div>
+      <div class="sc-desc">d_Dijkstra = FW[ATT][IMP] = 1.535. Implementaciones independientes, resultado idéntico.</div>
+    </div>
+  </div>
+
+  <div class="footer">8b / 10</div>
+</div>
+</body>
+</html>

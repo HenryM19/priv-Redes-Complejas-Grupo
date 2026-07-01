@@ -1,0 +1,150 @@
+{
+  "grafo": {
+    "n_nodes": 73,
+    "n_edges": 653
+  },
+  "dijkstra": {
+    "complejidad": "O((V+E)·log V)",
+    "complejidad_numerica": "O((73+653)·log73)",
+    "tiempo_ms": 0.979,
+    "costo_optimo": 1.535,
+    "n_pasos": 9,
+    "ruta": [
+      "ATTACKER",
+      "T1078.003",
+      "T1606.001",
+      "T1016.001",
+      "T1550.004",
+      "T1074.002",
+      "T1665",
+      "T1048.002",
+      "IMPACT"
+    ],
+    "pregunta_que_responde": "Ruta de menor resistencia ATTACKER->IMPACT",
+    "limitacion": "Solo halla UNA ruta; no cuantifica importancia de cada nodo en el grafo completo"
+  },
+  "floyd_warshall": {
+    "complejidad": "O(V^3)",
+    "complejidad_numerica": "O(73^3) = O(389,017)",
+    "tiempo_ms": 5.4,
+    "speedup_vs_dijkstra": 5.5,
+    "costo_att_imp": 1.535,
+    "validacion_dijkstra": true,
+    "pares_calculados": 5329,
+    "nodos_alcanzables_desde_att": 72,
+    "nodos_que_alcanzan_imp": 72,
+    "pregunta_que_responde": "Para todo par (i,j): d(i,j) y cuantas rutas pasan por cada nodo",
+    "limitacion": "Costo O(V^3) crece cubicamente; impractico para grafos de miles de nodos"
+  },
+  "comparacion_rutas_optimas": {
+    "n_rutas_optimas_encontradas": 7,
+    "costo_optimo": 1.535,
+    "nodos_en_alguna_ruta_optima": 13,
+    "nodos_en_todas_rutas_optimas": 6,
+    "obligatorios": [
+      "T1048.002",
+      "T1074.002",
+      "T1078.003",
+      "T1550.004",
+      "T1606.001",
+      "T1665"
+    ],
+    "nota": "Dijkstra reporta 1 ruta; FW + enumeracion revela todas las equivalentes"
+  },
+  "strong_bottlenecks": [
+    {
+      "node": "T1606.001",
+      "name": "Web Cookies",
+      "tactics": [
+        "credential-access"
+      ],
+      "weight": 0.25,
+      "dist_acumulada": 0.75,
+      "fw_betweenness": 1044,
+      "in_all_optimal_paths": true,
+      "fw_betw_pct": 100.0
+    },
+    {
+      "node": "T1016.001",
+      "name": "Internet Connection Discovery",
+      "tactics": [
+        "discovery"
+      ],
+      "weight": 0.05,
+      "dist_acumulada": 0.8,
+      "fw_betweenness": 836,
+      "in_all_optimal_paths": false,
+      "fw_betw_pct": 80.1
+    },
+    {
+      "node": "T1550.004",
+      "name": "Web Session Cookie",
+      "tactics": [
+        "lateral-movement"
+      ],
+      "weight": 0.125,
+      "dist_acumulada": 0.925,
+      "fw_betweenness": 702,
+      "in_all_optimal_paths": true,
+      "fw_betw_pct": 67.2
+    },
+    {
+      "node": "T1074.002",
+      "name": "Remote Data Staging",
+      "tactics": [
+        "collection"
+      ],
+      "weight": 0.05,
+      "dist_acumulada": 0.975,
+      "fw_betweenness": 420,
+      "in_all_optimal_paths": true,
+      "fw_betw_pct": 40.2
+    },
+    {
+      "node": "T1078.003",
+      "name": "Local Accounts",
+      "tactics": [
+        "stealth",
+        "persistence",
+        "privilege-escalation",
+        "initial-access"
+      ],
+      "weight": 0.5,
+      "dist_acumulada": 0.5,
+      "fw_betweenness": 357,
+      "in_all_optimal_paths": true,
+      "fw_betw_pct": 34.2
+    },
+    {
+      "node": "T1665",
+      "name": "Hide Infrastructure",
+      "tactics": [
+        "command-and-control"
+      ],
+      "weight": 0.05,
+      "dist_acumulada": 1.025,
+      "fw_betweenness": 132,
+      "in_all_optimal_paths": true,
+      "fw_betw_pct": 12.6
+    },
+    {
+      "node": "T1048.002",
+      "name": "Exfiltration Over Asymmetric Encrypted Non-C2 Protocol",
+      "tactics": [
+        "exfiltration"
+      ],
+      "weight": 0.5,
+      "dist_acumulada": 1.525,
+      "fw_betweenness": 71,
+      "in_all_optimal_paths": true,
+      "fw_betw_pct": 6.8
+    }
+  ],
+  "sintesis": {
+    "top_fw_betweenness_en_ruta_critica": "T1606.001",
+    "fw_betweenness_top": 1044,
+    "interpretacion": "T1606.001 es la tecnica mas critica segun AMBOS algoritmos: esta en la ruta optima de Dijkstra Y es el nodo con mayor FW-betweenness (1044 rutas). Dijkstra responde 'que ruta ataca el adversario racional'; FW responde 'que nodo bloquear para afectar la mayor cantidad de rutas posibles'. La concordancia en T1606.001 valida la recomendacion defensiva.",
+    "speedup_factor": 5.5,
+    "conclusion_complejidad": "Dijkstra (0.98ms) es 5x mas rapido que FW (5ms). Para el grafo de 73 nodos FW es factible; para grafos de 1000+ nodos Dijkstra (repetido N veces) seria preferible."
+  }
+}
