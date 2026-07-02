@@ -104,20 +104,21 @@
 
   <div class="grp">Fundamentos</div>
   <a href="#kill-chain">1 · Qué es un kill chain</a>
-  <a href="#el-grafo">2 · Cómo se arma el grafo</a>
-  <a href="#tecnicas">3 · Las técnicas de la ruta crítica</a>
+  <a href="#tacticas">2 · Las 14 tácticas, una por una</a>
+  <a href="#el-grafo">3 · Cómo se arma el grafo</a>
+  <a href="#tecnicas">4 · Las técnicas de la ruta crítica</a>
 
   <div class="grp">Algoritmos</div>
-  <a href="#dijkstra">4 · Dijkstra</a>
-  <a href="#floyd">5 · Floyd-Warshall</a>
-  <a href="#comparacion">6 · Comparación directa</a>
+  <a href="#dijkstra">5 · Dijkstra</a>
+  <a href="#floyd">6 · Floyd-Warshall</a>
+  <a href="#comparacion">7 · Comparación directa</a>
 
   <div class="grp">Demo en vivo</div>
-  <a href="#demo">7 · Guion para grafo-interactivo.html</a>
+  <a href="#demo">8 · Guion para grafo-interactivo.html</a>
 
   <div class="grp">Cierre</div>
-  <a href="#preguntas">8 · Preguntas esperadas</a>
-  <a href="#numeros">9 · Chuleta de números</a>
+  <a href="#preguntas">9 · Preguntas esperadas</a>
+  <a href="#numeros">10 · Chuleta de números</a>
 </nav>
 
 <main>
@@ -145,6 +146,42 @@
   </div>
 
   <div class="callout">💡 <b>Transición sugerida:</b> "Ahora que sabemos qué es una etapa de ataque, veamos cómo convertimos esa secuencia en un grafo que un algoritmo pueda recorrer."</div>
+</section>
+
+<section id="tacticas">
+  <div class="kicker">01 · Fundamentos</div>
+  <h1>Las 14 tácticas, una por una</h1>
+  <p class="intro">Cada barra del slide "Contenido de la BD" es una táctica con su conteo real de técnicas documentadas para esta campaña. Esta tabla es la chuleta para explicar cada una en una frase, sin quedarse trabado.</p>
+
+  <table class="tbl">
+    <tr><th>#</th><th>Táctica</th><th>Técnicas</th><th>Qué significa en una frase</th></tr>
+    <tr><td>1</td><td>Reconnaissance</td><td><code>1</code></td><td>Recolectar información del objetivo antes de atacar (emails, infraestructura, empleados).</td></tr>
+    <tr><td>2</td><td>Resource Development</td><td><code>3</code></td><td>Preparar la infraestructura propia del ataque: dominios, malware, cuentas falsas.</td></tr>
+    <tr><td>3</td><td>Initial Access</td><td><code>8</code></td><td>El primer punto de entrada real a la red de la víctima.</td></tr>
+    <tr><td>4</td><td>Execution</td><td><code>5</code></td><td>Correr código malicioso dentro del sistema ya comprometido.</td></tr>
+    <tr><td>5</td><td>Persistence</td><td><code>11</code></td><td>Asegurarse de seguir teniendo acceso aunque el sistema se reinicie o alguien cierre sesión.</td></tr>
+    <tr><td>6</td><td>Privilege Escalation</td><td><code>11</code></td><td>Pasar de un usuario normal a permisos de administrador o dominio.</td></tr>
+    <tr><td>7</td><td>Defense Evasion / Impairment</td><td><code>5</code></td><td>Desactivar o esquivar antivirus, logs y herramientas de detección.</td></tr>
+    <tr><td>8</td><td>Stealth (Discovery evasion)</td><td><code>12</code></td><td>Camuflarse dentro del tráfico y comportamiento normal del sistema — la táctica con más técnicas documentadas en esta campaña.</td></tr>
+    <tr><td>9</td><td>Credential Access</td><td><code>8</code></td><td>Robar contraseñas, tokens o cookies de sesión para moverse sin levantar sospechas.</td></tr>
+    <tr><td>10</td><td>Discovery</td><td><code>10</code></td><td>Explorar la red desde adentro: qué usuarios, equipos y permisos existen.</td></tr>
+    <tr><td>11</td><td>Lateral Movement</td><td><code>6</code></td><td>Saltar de un sistema comprometido a otro dentro de la misma red.</td></tr>
+    <tr><td>12</td><td>Collection</td><td><code>6</code></td><td>Juntar los datos de interés antes de sacarlos (repositorios, correos, documentos).</td></tr>
+    <tr><td>13</td><td>Command &amp; Control (C2)</td><td><code>5</code></td><td>Mantener un canal de comunicación remoto con la infraestructura del atacante.</td></tr>
+    <tr><td>14</td><td>Exfiltration / Impact</td><td><code>1</code></td><td>Sacar los datos robados de la red — el objetivo final del ataque.</td></tr>
+  </table>
+
+  <div class="say">
+    <span class="tag">Por qué la suma da más de 71</span>
+    <p>"Sumando las 14 columnas da 92, no 71 — es porque hay técnicas que sirven para <b>más de una táctica a la vez</b>. El ejemplo más claro es <code>T1078.003 — Local Accounts</code>: la misma técnica de usar cuentas comprometidas cuenta en initial-access, persistence, privilege-escalation Y stealth, porque literalmente hace las 4 cosas. No es un error de conteo, es una propiedad real de cómo funciona el abuso de credenciales."</p>
+  </div>
+
+  <div class="say warn">
+    <span class="tag">Por qué "Credential Access" está resaltado en rojo en el slide</span>
+    <p>"En esta campaña específica, Credential Access (8 técnicas) es la táctica marcada porque conecta directamente con el nodo más central del grafo completo — T1606.001 (Web Cookies), con 1,044 rutas óptimas pasando por él. No es la táctica con más técnicas (esa es Stealth con 12), pero sí la más estructuralmente importante."</p>
+  </div>
+
+  <div class="callout">💡 <b>Transición sugerida:</b> "Con esas 14 fases y sus técnicas reales, ya tenemos todo el vocabulario. Ahora veamos cómo esas técnicas se convierten en nodos de un grafo."</div>
 </section>
 
 <section id="el-grafo">
