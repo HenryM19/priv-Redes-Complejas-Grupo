@@ -2,21 +2,21 @@
 <html lang="es"><head><meta charset="UTF-8"><title>El grafo de ataque</title>
 <link rel="stylesheet" href="../theme.css">
 <style>
-  .body{flex:1;display:grid;grid-template-columns:1.35fr .65fr;gap:32px;margin-top:14px;align-items:center}
+  .body{flex:1;display:grid;grid-template-columns:1.7fr .3fr;gap:24px;margin-top:14px;align-items:center}
   .figbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
     padding:14px;position:relative}
   .figbox img{width:100%;border-radius:9px;display:block}
-  .figbox iframe{width:100%;height:420px;border:0;border-radius:9px;display:block;background:#0d1320}
+  .figbox iframe{width:100%;height:600px;border:0;border-radius:9px;display:block;background:#ffffff}
   .figcap{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
   .figcap a{color:var(--blue);text-decoration:none;font-weight:600}
   .figcap a:hover{text-decoration:underline}
-  .side h2{font-size:26px}
-  .lead2{font-size:15px;color:var(--txt);line-height:1.5;margin-top:8px}.lead2 b{color:var(--ink)}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
-  .sc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-sm)}
-  .sc .n{font-size:30px;font-weight:700;color:var(--ink);line-height:1}
-  .sc .l{font-size:11.5px;color:var(--muted);margin-top:5px;font-family:'JetBrains Mono',monospace}
-  .legend{margin-top:16px;display:flex;flex-direction:column;gap:7px;font-size:13px}
+  .side h2{font-size:19px}
+  .lead2{font-size:12.5px;color:var(--txt);line-height:1.4;margin-top:6px}.lead2 b{color:var(--ink)}
+  .grid2{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+  .sc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;box-shadow:var(--shadow-sm)}
+  .sc .n{font-size:22px;font-weight:700;color:var(--ink);line-height:1}
+  .sc .l{font-size:10px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace}
+  .legend{margin-top:12px;display:flex;flex-direction:column;gap:5px;font-size:11px}
   .lg{display:flex;align-items:center;gap:9px}
   .dotc{width:12px;height:12px;border-radius:50%;flex:none}
   .dotc.a{background:var(--crit)}.dotc.g{background:var(--green)}.dotc.n{background:var(--blue)}
