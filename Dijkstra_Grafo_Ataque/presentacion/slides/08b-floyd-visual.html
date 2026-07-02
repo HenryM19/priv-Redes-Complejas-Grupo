@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Cómo funciona Floyd-Warshall</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:.62fr 1.38fr;gap:32px;margin-top:14px}
+  .lead2{font-size:14.5px;color:var(--txt);line-height:1.5;margin-top:8px}.lead2 b{color:var(--ink)}
+  .stepper{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+  .st{display:flex;gap:11px;align-items:flex-start;font-size:13px;line-height:1.4;padding:10px 12px;
+    border-radius:9px;border:1px solid var(--line);background:var(--panel)}
+  .st.active{border-color:var(--purple);background:rgba(139,92,246,.06)}
+  .st .n{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--muted);flex:none;width:20px}
+  .st.active .n{color:var(--purple)}
+  .st .v b{color:var(--ink)}
+  .kbadge{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:13px;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px 14px;margin-top:16px}
+  .kbadge b{color:var(--purple);font-size:16px}
+
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);
+    padding:24px 28px;display:flex;flex-direction:column;align-items:center;gap:18px}
+  .stage .h{align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--purple);font-weight:600}
+
+  /* mini-grafo de 5 nodos */
+  .g5{position:relative;width:520px;height:190px}
+  .g5 svg{width:100%;height:100%;overflow:visible}
+  .gnode{fill:var(--panel);stroke:var(--line-2);stroke-width:2;transition:stroke .3s ease, fill .3s ease}
+  .gnode.k{stroke:var(--amber);stroke-width:3;fill:rgba(200,138,0,.12)}
+  .glabel{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+  .gedge{stroke:var(--line-2);stroke-width:1.6;fill:none}
+  .gedge.viak{stroke:var(--amber);stroke-width:2.6;stroke-dasharray:5,4;opacity:0;transition:opacity .35s ease}
+  .gedge.viak.show{opacity:1}
+  .gedge.direct{opacity:.35}
+
+  /* matriz */
+  table.mx{border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:16px}
+  table.mx td,table.mx th{width:56px;height:40px;text-align:center;border:1px solid var(--line);color:var(--txt)}
+  table.mx th{color:var(--muted);font-weight:600;background:var(--panel-2)}
+  table.mx td.k-row,table.mx th.k-row{background:rgba(200,138,0,.10)}
+  table.mx td.k-col,table.mx th.k-col{background:rgba(200,138,0,.10)}
+  table.mx td.updated{color:#fff;background:var(--green);font-weight:700;transition:background .3s ease, color .3s ease}
+  table.mx td.checking{background:rgba(139,92,246,.22);color:var(--purple);font-weight:700}
+
+  .mxnote{font-size:13px;color:var(--muted);text-align:center;max-width:480px;line-height:1.5}
+  .mxnote b{color:var(--ink)}
+
+  .ctrl{display:flex;gap:10px;align-items:center;margin-top:4px}
+  .ctrl button{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--panel-2);
+    border:1px solid var(--line);color:var(--txt);padding:7px 14px;border-radius:7px;cursor:pointer;transition:all .15s}
+  .ctrl button:hover{background:var(--line);color:var(--ink)}
+  .ctrl button.play{border-color:var(--purple);color:var(--purple)}
+  .ctrl .kpos{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)}
+  .ctrl .kpos b{color:var(--purple)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>08b · Floyd-Warshall visualmente</span><span>Relajación paso a paso, nodo por nodo</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1" style="color:var(--purple)">¿Cómo llega a la matriz?</div>
+      <h2 class="anim d2" style="margin-top:4px;font-size:26px">Un mini-grafo de 5 nodos</h2>
+      <p class="lead2 anim d3">Floyd-Warshall no recorre un camino: prueba, <b>uno por uno</b>, si cada nodo <b>k</b> sirve de atajo entre cualquier par (i, j). Si <code>d[i][k] + d[k][j]</code> es más barato que lo que ya sabías, actualiza.</p>
+
+      <div class="stepper anim d4" id="stepper">
+        <div class="st" data-k="0"><div class="n">k=A</div><div class="v">¿A conecta algo mejor? A es el origen, nada mejora todavía.</div></div>
+        <div class="st" data-k="1"><div class="n">k=B</div><div class="v">¿Pasar por <b>B</b> acorta algo? <b>A→B→D</b> (0.7) es más barato que A→D directo (∞): se actualiza.</div></div>
+        <div class="st" data-k="2"><div class="n">k=C</div><div class="v">¿Pasar por <b>C</b> acorta algo? Se revisan las 25 combinaciones; en este ejemplo ninguna mejora.</div></div>
+        <div class="st" data-k="3"><div class="n">k=D</div><div class="v">¿Pasar por <b>D</b> acorta algo? <b>A→D→E</b> y <b>B→D→E</b> ya son más baratos que las rutas conocidas: se actualiza.</div></div>
+        <div class="st" data-k="4"><div class="n">k=E</div><div class="v">Último intermediario. La matriz queda <b>definitiva</b>: distancia mínima real entre cualquier par.</div></div>
+      </div>
+
+      <div class="kbadge">d[i][j] = min( d[i][j], d[i][<b>k</b>] + d[<b>k</b>][j] )</div>
+    </div>
+
+    <div class="stage anim d3">
+      <div class="h">▚ Simulación en vivo · 5 nodos, iterando k</div>
+
+      <div class="g5">
+        <svg viewBox="0 0 520 190">
+          <!-- aristas directas (siempre visibles, tenues) -->
+          <path class="gedge direct" d="M 60,95 L 190,40" marker-end="url(#arrM)"/>
+          <path class="gedge direct" d="M 60,95 L 190,150" marker-end="url(#arrM)"/>
+          <path class="gedge direct" d="M 190,40 L 330,40" marker-end="url(#arrM)"/>
+          <path class="gedge direct" d="M 190,150 L 330,150" marker-end="url(#arrM)"/>
+          <path class="gedge direct" d="M 330,40 L 460,95" marker-end="url(#arrM)"/>
+          <path class="gedge direct" d="M 330,150 L 460,95" marker-end="url(#arrM)"/>
+          <path class="gedge direct" d="M 60,95 Q 260,-10 460,95" marker-end="url(#arrM)"/>
+
+          <defs>
+            <marker id="arrM" markerWidth="7" markerHeight="7" refX="7" refY="2.5" orient="auto">
+              <path d="M0,0 L0,5 L7,2.5 z" fill="#c6d0e0"/>
+            </marker>
+            <marker id="arrK" markerWidth="7" markerHeight="7" refX="7" refY="2.5" orient="auto">
+              <path d="M0,0 L0,5 L7,2.5 z" fill="#c98a00"/>
+            </marker>
+          </defs>
+
+          <g id="nodeA"><circle class="gnode" cx="60" cy="95" r="24"/><text class="glabel" x="60" y="96">A</text></g>
+          <g id="nodeB"><circle class="gnode" cx="190" cy="40" r="24"/><text class="glabel" x="190" y="41">B</text></g>
+          <g id="nodeC"><circle class="gnode" cx="190" cy="150" r="24"/><text class="glabel" x="190" y="151">C</text></g>
+          <g id="nodeD"><circle class="gnode" cx="330" cy="40" r="24"/><text class="glabel" x="330" y="41">D</text></g>
+          <g id="nodeE"><circle class="gnode" cx="330" cy="150" r="24"/><text class="glabel" x="330" y="151">E</text></g>
+          <g id="nodeF"><circle class="gnode" cx="460" cy="95" r="24"/><text class="glabel" x="460" y="96">salida</text></g>
+        </svg>
+      </div>
+
+      <table class="mx" id="mx">
+        <tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+        <tr><th>A</th><td id="c00">0</td><td id="c01">0.1</td><td id="c02">0.9</td><td id="c03">∞</td><td id="c04">∞</td></tr>
+        <tr><th>B</th><td id="c10">∞</td><td id="c11">0</td><td id="c12">∞</td><td id="c13">0.6</td><td id="c14">∞</td></tr>
+        <tr><th>C</th><td id="c20">∞</td><td id="c21">∞</td><td id="c22">0</td><td id="c23">∞</td><td id="c24">0.3</td></tr>
+        <tr><th>D</th><td id="c30">∞</td><td id="c31">∞</td><td id="c32">∞</td><td id="c33">0</td><td id="c34">0.2</td></tr>
+        <tr><th>E</th><td id="c40">∞</td><td id="c41">∞</td><td id="c42">∞</td><td id="c43">∞</td><td id="c44">0</td></tr>
+      </table>
+
+      <div class="mxnote" id="mxnote">Matriz inicial: solo las <b>aristas directas</b> tienen valor; el resto es <b>∞</b> (sin conexión conocida todavía).</div>
+
+      <div class="ctrl">
+        <button id="btnPlay" class="play">▶ Reproducir relajación</button>
+        <button id="btnReset">↺ Reiniciar</button>
+        <span class="kpos" id="kpos">k = <b>—</b> / 5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Floyd-Warshall · relajación k a k</span><span>8b / 13</span></div>
+</div>
+
+<script>
+// Matriz de ejemplo (5 nodos, pesos ilustrativos — no son datos reales de SolarWinds,
+// es una version reducida para explicar el MECANISMO del algoritmo).
+const NAMES = ['A','B','C','D','E'];
+const INF = Infinity;
+let dist;
+const initial = [
+  [0,   0.1, 0.9, INF, INF],
+  [INF, 0,   INF, 0.6, INF],
+  [INF, INF, 0,   INF, 0.3],
+  [INF, INF, INF, 0,   0.2],
+  [INF, INF, INF, INF, 0],
+];
+
+function fmt(v){ return v === INF ? '∞' : (Number.isInteger(v) ? v : v.toFixed(1)); }
+
+function renderMatrix(prevDist, highlightUpdates) {
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      const cell = document.getElementById('c' + i + j);
+      cell.textContent = fmt(dist[i][j]);
+      cell.className = '';
+      const updated = highlightUpdates && prevDist && dist[i][j] < prevDist[i][j];
+      if (updated) cell.classList.add('updated');
+    }
+  }
+}
+
+function markKRowCol(k) {
+  document.querySelectorAll('table.mx td, table.mx th').forEach(el => {
+    el.classList.remove('k-row', 'k-col');
+  });
+  if (k === null) return;
+  for (let j = 0; j < 5; j++) document.getElementById('c' + k + j)?.classList.add('k-row');
+  document.querySelectorAll('table.mx tr').forEach((tr, ri) => {
+    if (ri === 0) return;
+    const cell = tr.children[k + 1];
+    if (cell) cell.classList.add('k-col');
+  });
+}
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+function resetAll() {
+  dist = initial.map(row => row.slice());
+  renderMatrix(null, false);
+  markKRowCol(null);
+  document.querySelectorAll('.gnode').forEach(n => n.classList.remove('k'));
+  document.querySelectorAll('.st').forEach(s => s.classList.remove('active'));
+  document.getElementById('kpos').innerHTML = 'k = <b>—</b> / 5';
+  document.getElementById('mxnote').innerHTML = 'Matriz inicial: solo las <b>aristas directas</b> tienen valor; el resto es <b>∞</b> (sin conexión conocida todavía).';
+}
+
+async function runFloyd() {
+  const btn = document.getElementById('btnPlay');
+  btn.disabled = true;
+  resetAll();
+  await sleep(400);
+
+  for (let k = 0; k < 5; k++) {
+    document.querySelectorAll('.st').forEach(s => s.classList.remove('active'));
+    document.querySelector(`.st[data-k="${k}"]`).classList.add('active');
+    document.getElementById('kpos').innerHTML = `k = <b>${NAMES[k]}</b> / 5`;
+    document.querySelectorAll('.gnode').forEach(n => n.classList.remove('k'));
+    document.getElementById('node' + NAMES[k])?.classList.add('k');
+    document.getElementById('mxnote').innerHTML =
+      `Fijando <b>k = ${NAMES[k]}</b>: revisando las 25 combinaciones (i, j) para ver si pasar por ${NAMES[k]} acorta camino.`;
+    markKRowCol(k);
+    await sleep(650);
+
+    const prevDist = dist.map(row => row.slice());
+    let anyUpdate = false;
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        if (dist[i][k] + dist[k][j] < dist[i][j]) {
+          dist[i][j] = dist[i][k] + dist[k][j];
+          anyUpdate = true;
+        }
+      }
+    }
+    renderMatrix(prevDist, true);
+
+    if (anyUpdate) {
+      document.getElementById('mxnote').innerHTML =
+        `<b style="color:var(--green)">Actualización encontrada</b>: al menos un par (i, j) mejora pasando por <b>${NAMES[k]}</b> — celdas en verde.`;
+    } else {
+      document.getElementById('mxnote').innerHTML =
+        `Ningún par mejora pasando por <b>${NAMES[k]}</b> — la matriz no cambia en esta iteración.`;
+    }
+    await sleep(1100);
+  }
+
+  document.querySelectorAll('.st').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.gnode').forEach(n => n.classList.remove('k'));
+  markKRowCol(null);
+  document.getElementById('mxnote').innerHTML =
+    'Matriz <b>final</b>: distancia mínima real entre cualquier par (i, j), habiendo probado los 5 nodos como posibles atajos. Esto es exactamente lo que Floyd-Warshall calcula sobre el grafo real de <b>73×73</b>.';
+  btn.disabled = false;
+}
+
+document.getElementById('btnPlay').addEventListener('click', runFloyd);
+document.getElementById('btnReset').addEventListener('click', resetAll);
+resetAll();
+</script>
+</body></html>
