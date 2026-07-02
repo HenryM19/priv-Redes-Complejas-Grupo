@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Libreto del presentador — Dijkstra &amp; Floyd-Warshall en grafos de ataque</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  :root{
+    --bg:#f4f6fb; --panel:#ffffff; --panel-2:#eef2f9; --line:#dbe2ee; --line-2:#c6d0e0;
+    --ink:#101725; --txt:#2b3547; --muted:#69748a;
+    --blue:#2f6bff; --crit:#e23a56; --amber:#c98a00; --green:#0fa36b; --cyan:#0891c9; --purple:#8b5cf6;
+    --shadow:0 18px 44px rgba(24,39,75,.10), 0 4px 12px rgba(24,39,75,.06);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);line-height:1.5}
+
+  /* ── layout: sidebar + contenido ── */
+  #shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  #nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--panel);border-right:1px solid var(--line);padding:24px 18px}
+  #nav .brand{font-weight:700;font-size:15px;color:var(--ink);margin-bottom:4px}
+  #nav .sub{font-size:11px;color:var(--muted);margin-bottom:20px;font-family:'JetBrains Mono',monospace}
+  #nav a{display:block;font-size:13px;color:var(--txt);text-decoration:none;padding:7px 10px;border-radius:7px;margin-bottom:2px;border-left:2px solid transparent}
+  #nav a:hover{background:var(--panel-2);color:var(--blue)}
+  #nav a.active{background:rgba(47,107,255,.08);color:var(--blue);border-left-color:var(--blue);font-weight:600}
+  #nav .grp{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px;padding:0 10px}
+
+  main{padding:48px 56px;max-width:900px}
+  section{margin-bottom:64px;scroll-margin-top:24px}
+  section h1{font-size:30px;color:var(--ink);letter-spacing:-.01em;margin-bottom:6px}
+  section .kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:8px}
+  section > p.intro{font-size:15px;color:var(--muted);margin:10px 0 24px;max-width:680px}
+
+  /* ── tarjeta "que decir" ── */
+  .say{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;
+    padding:18px 22px;margin:14px 0;box-shadow:var(--shadow-sm,0 6px 18px rgba(24,39,75,.06))}
+  .say .tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:8px;display:block}
+  .say p{font-size:14.5px;color:var(--txt);margin-bottom:8px}
+  .say p:last-child{margin-bottom:0}
+  .say b{color:var(--ink)}
+  .say.warn{border-left-color:var(--amber)}
+  .say.warn .tag{color:var(--amber)}
+  .say.crit{border-left-color:var(--crit)}
+  .say.crit .tag{color:var(--crit)}
+  .say.green{border-left-color:var(--green)}
+  .say.green .tag{color:var(--green)}
+
+  .callout{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0;font-size:13.5px;color:var(--txt)}
+  .callout b{color:var(--ink)}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.tbl th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--line-2)}
+  table.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--txt)}
+  table.tbl td:first-child{font-family:'JetBrains Mono',monospace;color:var(--ink);font-weight:600}
+  table.tbl tr:last-child td{border-bottom:none}
+
+  .chip{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 9px;border-radius:6px;
+    border:1px solid var(--line-2);background:var(--panel);margin:2px 3px 2px 0}
+  .chip.blue{color:var(--blue);border-color:rgba(47,107,255,.35);background:rgba(47,107,255,.08)}
+  .chip.crit{color:var(--crit);border-color:rgba(226,58,86,.35);background:rgba(226,58,86,.08)}
+  .chip.cyan{color:var(--cyan);border-color:rgba(8,145,201,.35);background:rgba(8,145,201,.08)}
+  .chip.green{color:var(--green);border-color:rgba(15,163,107,.35);background:rgba(15,163,107,.08)}
+
+  .qa{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:10px 0}
+  .qa .q{font-weight:600;color:var(--ink);font-size:14px;margin-bottom:6px}
+  .qa .q::before{content:"P: ";color:var(--crit)}
+  .qa .a{font-size:13.5px;color:var(--txt)}
+  .qa .a::before{content:"R: ";color:var(--green);font-weight:700}
+
+  .timing{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--muted);background:var(--panel-2);border-radius:6px;padding:3px 9px;margin-bottom:10px}
+  .timing::before{content:"⏱";}
+
+  .kc-mini{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+  .kc-mini span{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--panel-2);border:1px solid var(--line);
+    border-radius:6px;padding:3px 7px;color:var(--txt);white-space:nowrap}
+  .kc-mini span.hi{background:rgba(226,58,86,.1);border-color:rgba(226,58,86,.35);color:var(--crit)}
+
+  .stepper{counter-reset:step;margin:16px 0}
+  .step{counter-increment:step;display:flex;gap:14px;margin-bottom:14px}
+  .step::before{content:counter(step);flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700}
+  .step .body2{font-size:13.5px;padding-top:2px}
+  .step .body2 b{color:var(--ink)}
+
+  code{font-family:'JetBrains Mono',monospace;background:var(--panel-2);padding:1px 6px;border-radius:4px;font-size:.92em;color:var(--ink)}
+
+  footer{padding:24px 56px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;border-top:1px solid var(--line)}
+
+  @media (max-width:800px){
+    #shell{grid-template-columns:1fr}
+    #nav{position:static;height:auto}
+    main{padding:28px 20px}
+  }
+</style>
+</head>
+<body>
+<div id="shell">
+
+<nav id="nav">
+  <div class="brand">📋 Libreto del presentador</div>
+  <div class="sub">Dijkstra &amp; Floyd-Warshall<br>en grafos de ataque · SolarWinds</div>
+
+  <div class="grp">Fundamentos</div>
+  <a href="#kill-chain">1 · Qué es un kill chain</a>
+  <a href="#el-grafo">2 · Cómo se arma el grafo</a>
+
+  <div class="grp">Algoritmos</div>
+  <a href="#dijkstra">3 · Dijkstra</a>
+  <a href="#floyd">4 · Floyd-Warshall</a>
+  <a href="#comparacion">5 · Comparación directa</a>
+
+  <div class="grp">Demo en vivo</div>
+  <a href="#demo">6 · Guion para grafo-interactivo.html</a>
+
+  <div class="grp">Cierre</div>
+  <a href="#preguntas">7 · Preguntas esperadas</a>
+  <a href="#numeros">8 · Chuleta de números</a>
+</nav>
+
+<main>
+
+<section id="kill-chain">
+  <div class="kicker">01 · Fundamentos</div>
+  <h1>Qué es un kill chain</h1>
+  <p class="intro">Antes de hablar de algoritmos, el público necesita el vocabulario de ataque. Este bloque se explica en 60-90 segundos, sirve de base para todo lo que sigue.</p>
+
+  <div class="say">
+    <span class="tag">Qué decir</span>
+    <p>"Un <b>kill chain</b> es la secuencia de etapas por las que pasa un atacante real, desde el primer acceso hasta lograr su objetivo. MITRE ATT&amp;CK documenta <b>14 tácticas</b> ordenadas cronológicamente — no son pasos obligatorios uno a uno, son <b>fases</b>: el atacante puede usar varias técnicas dentro de la misma fase, pero generalmente no retrocede a una fase anterior."</p>
+    <p>"Piensen en el plan de un robo de banco: reconocer el objetivo → conseguir herramientas → entrar → neutralizar alarmas → abrir la caja fuerte → huir. Cada fase habilita la siguiente. ATT&amp;CK describe lo mismo pero para ciberataques."</p>
+  </div>
+
+  <div class="kc-mini">
+    <span class="hi">initial-access</span><span>execution</span><span>persistence</span><span>privilege-escalation</span>
+    <span>defense-evasion</span><span>credential-access</span><span>discovery</span><span>lateral-movement</span>
+    <span>collection</span><span>command-and-control</span><span class="hi">exfiltration / impact</span>
+  </div>
+
+  <div class="say warn">
+    <span class="tag">Punto clave a remarcar</span>
+    <p>Cada <b>técnica</b> (ej. <code>T1078.003 — Local Accounts</code>) es un nodo concreto documentado por MITRE, no una categoría abstracta. En este proyecto se usaron <b>71 técnicas reales</b> que la campaña SolarWinds/APT29 efectivamente empleó — no técnicas inventadas ni genéricas.</p>
+  </div>
+
+  <div class="callout">💡 <b>Transición sugerida:</b> "Ahora que sabemos qué es una etapa de ataque, veamos cómo convertimos esa secuencia en un grafo que un algoritmo pueda recorrer."</div>
+</section>
+
+<section id="el-grafo">
+  <div class="kicker">01 · Fundamentos</div>
+  <h1>Cómo se arma el grafo</h1>
+  <p class="intro">La construcción del grafo es la decisión de modelado más importante del proyecto. Explicarla bien evita preguntas de "¿por qué esto es un grafo y no una lista?" más adelante.</p>
+
+  <table class="tbl">
+    <tr><th>Elemento</th><th>Qué representa</th></tr>
+    <tr><td>Nodo</td><td>una técnica ATT&amp;CK real usada por la campaña (+ nodos frontera <code>ATTACKER</code> e <code>IMPACT</code>)</td></tr>
+    <tr><td>Arista A→B</td><td>progresar de la técnica A a la técnica B en la kill chain (A en táctica <i>i</i>, B en táctica <i>i+1</i>)</td></tr>
+    <tr><td>Peso w</td><td><b>resistencia defensiva</b> de la técnica destino — cuántas mitigaciones documenta ATT&amp;CK para bloquearla</td></tr>
+    <tr><td>Camino</td><td>una secuencia de ataque completa, de acceso inicial a impacto</td></tr>
+  </table>
+
+  <div class="say">
+    <span class="tag">Qué decir sobre el peso</span>
+    <p>"El peso <b>no es un dato inventado</b>: es <code>w = max(0.05, n_mitigaciones / 8)</code>, donde <code>n_mitigaciones</code> es cuántos controles documenta MITRE para esa técnica específica, y 8 es el máximo observado entre las 71 técnicas de la campaña. Más controles documentados = más cuesta ejecutarla = mayor peso. Una técnica sin ninguna mitigación conocida recibe el piso <b>0.05</b> — nunca cero, porque Dijkstra exige pesos positivos."</p>
+  </div>
+
+  <div class="say crit">
+    <span class="tag">Si preguntan "¿por qué el peso va en el nodo destino y no en la arista?"</span>
+    <p>"Porque el costo que estamos modelando es <b>ejecutar la técnica</b>, no viajar entre técnicas. El costo de moverte de A a B es el costo de <i>lograr B</i>, sin importar de dónde vengas — así que cualquier arista que llega a B tiene el mismo peso: el peso de B."</p>
+  </div>
+
+  <div class="callout">💡 <b>Resultado final:</b> un grafo dirigido de <b>73 nodos</b> (71 técnicas + ATTACKER + IMPACT) y <b>653 aristas</b>, con densidad 0.124 y grado medio 8.9 — denso, con ciclos posibles entre tácticas no consecutivas, no es un DAG estrictamente simple.</div>
+</section>
+
+<section id="dijkstra">
+  <div class="kicker">02 · Algoritmos</div>
+  <h1>Dijkstra</h1>
+  <p class="intro">Este es el algoritmo "estrella" del proyecto — resuelve la pregunta central: ¿cuál es la ruta de menor resistencia que puede tomar un atacante?</p>
+
+  <div class="timing">~2 min</div>
+
+  <div class="say">
+    <span class="tag">Qué decir — la idea central</span>
+    <p>"Dijkstra responde una sola pregunta pero la responde muy bien: <b>dado un punto de partida, ¿cuál es el camino más barato hacia cada nodo del grafo?</b> Mantiene una lista de nodos 'candidatos' con su mejor distancia conocida hasta ahora, y en cada paso <b>se compromete</b> con el candidato más barato — lo marca como definitivo y nunca vuelve a revisarlo."</p>
+    <p>"Es un algoritmo <b>voraz (greedy)</b>: nunca reconsidera una decisión ya tomada. Eso solo funciona porque todos los pesos son positivos — si hubiera pesos negativos, un camino 'peor' al principio podría terminar siendo mejor, y Dijkstra se equivocaría."</p>
+  </div>
+
+  <div class="stepper">
+    <div class="step"><div class="body2"><b>Inicializar:</b> distancia a <code>ATTACKER</code> = 0, distancia a todos los demás = infinito.</div></div>
+    <div class="step"><div class="body2"><b>Elegir</b> el nodo no visitado con menor distancia acumulada.</div></div>
+    <div class="step"><div class="body2"><b>Relajar</b> sus vecinos: si llegar a un vecino vía este nodo es más barato que lo que ya sabíamos, actualizar.</div></div>
+    <div class="step"><div class="body2"><b>Marcar</b> el nodo como definitivo (nunca se vuelve a tocar).</div></div>
+    <div class="step"><div class="body2"><b>Repetir</b> hasta asentar todos los nodos alcanzables — el resultado es la ruta óptima ATTACKER→IMPACT.</div></div>
+  </div>
+
+  <div class="callout">📊 <b>Resultado real:</b> ruta de <b>9 pasos</b>, costo total <b>1.535</b>, tiempo de ejecución <b>0.22 ms</b>. Complejidad <code>O((V+E)·log V)</code> — con 73 nodos y 653 aristas, prácticamente instantáneo.</div>
+
+  <div class="say warn">
+    <span class="tag">La limitación que hay que decir en voz alta</span>
+    <p>"Dijkstra encuentra <b>UNA</b> ruta óptima y listo. No te dice si hay otras rutas igual de buenas, ni qué tan importante es cada nodo en el resto del grafo. Para eso necesitamos otra herramienta — ahí es donde entra Floyd-Warshall."</p>
+  </div>
+</section>
+
+<section id="floyd">
+  <div class="kicker">02 · Algoritmos</div>
+  <h1>Floyd-Warshall</h1>
+  <p class="intro">El contraste con Dijkstra es lo que hace interesante esta sección: mismo grafo, pregunta completamente distinta.</p>
+
+  <div class="timing">~2 min</div>
+
+  <div class="say">
+    <span class="tag">Qué decir — la idea central</span>
+    <p>"Floyd-Warshall NO busca un camino. Busca la <b>distancia mínima entre TODOS los pares de nodos a la vez</b>. La forma de pensarlo: arranca con una tabla V×V donde cada celda (i, j) es 'la distancia directa de i a j, o infinito si no hay arista'. Después, para cada nodo k del grafo, se pregunta: <i>¿pasar por k mejora la distancia entre cualquier par (i, j)?</i> Si sí, actualiza la tabla. Repite eso para los 73 nodos como intermediarios posibles."</p>
+    <p>"Es <b>programación dinámica</b>, no un recorrido secuencial de un camino. No hay 'un frente que avanza' como en Dijkstra — cada iteración toca potencialmente toda la matriz."</p>
+  </div>
+
+  <div class="say crit">
+    <span class="tag">Anticipar la pregunta "¿se puede animar Floyd-Warshall recorriendo un camino?"</span>
+    <p>"No de forma fiel al algoritmo — Floyd-Warshall no recorre un camino, refina una matriz. Lo que SÍ podemos animar honestamente es su <b>resultado</b>: qué nodos resultan más 'centrales' (FW-betweenness: cuántos caminos óptimos entre otros pares pasan por ese nodo). Eso es exactamente lo que hace la animación cyan en la demo — pulsa TODOS los nodos a la vez, con brillo proporcional a su importancia estructural, en vez de fingir un recorrido secuencial que el algoritmo no hace."</p>
+  </div>
+
+  <div class="callout">📊 <b>Resultado real:</b> <b>5,329 pares</b> calculados (73²), tiempo <b>5.4 ms</b> — unas <b>5.5× más lento</b> que Dijkstra para esta pregunta puntual, pero responde muchas más preguntas a la vez. Complejidad <code>O(V³)</code> — con miles de nodos esto se vuelve impráctico; con 73 es trivial.</div>
+
+  <div class="say green">
+    <span class="tag">El hallazgo que vale la pena resaltar</span>
+    <p>"Al calcular TODOS los pares, Floyd-Warshall reveló algo que Dijkstra por sí solo nunca hubiera mostrado: existen <b>7 rutas distintas</b> con el mismo costo óptimo de 1.535. Dijkstra solo reporta una. Y de esas 7 rutas, hay <b>6 técnicas que aparecen en TODAS</b> — esos son los verdaderos cuellos de botella defensivos, sin importar qué ruta tome el atacante."</p>
+  </div>
+</section>
+
+<section id="comparacion">
+  <div class="kicker">02 · Algoritmos</div>
+  <h1>Comparación directa</h1>
+  <p class="intro">El momento de amarrar todo: mismo grafo, dos preguntas, dos respuestas complementarias.</p>
+
+  <table class="tbl">
+    <tr><th></th><th>Dijkstra</th><th>Floyd-Warshall</th></tr>
+    <tr><td>Pregunta que responde</td><td>ruta de menor resistencia desde UN origen</td><td>distancia entre TODOS los pares</td></tr>
+    <tr><td>Complejidad</td><td>O((V+E)·log V)</td><td>O(V³)</td></tr>
+    <tr><td>Tiempo real</td><td>0.22 ms</td><td>5.4 ms</td></tr>
+    <tr><td>Resultado</td><td>1 ruta, costo 1.535</td><td>5,329 distancias, mismo costo óptimo 1.535 (valida Dijkstra)</td></tr>
+    <tr><td>Revela</td><td>el camino más probable</td><td>rutas alternativas + importancia estructural de cada nodo</td></tr>
+    <tr><td>Escala a miles de nodos</td><td>sí</td><td>no (cúbico)</td></tr>
+  </table>
+
+  <div class="say">
+    <span class="tag">Qué decir para cerrar el bloque</span>
+    <p>"No es que uno sea 'mejor' que el otro — son <b>complementarios</b>. Dijkstra te dice rápido cuál es el camino más urgente que defender. Floyd-Warshall, más lento, te dice si ese camino es el único que importa o si hay 6 más igual de peligrosas, y qué nodos son estructuralmente críticos sin importar la ruta exacta. En seguridad real, ambas respuestas importan: una para priorizar rápido, otra para no tener puntos ciegos."</p>
+  </div>
+
+  <div class="callout">✅ <b>Validación cruzada:</b> ambos algoritmos, corriendo sobre el mismo grafo real de 73 nodos / 653 aristas, coinciden en el costo óptimo (1.535) — eso confirma que la implementación de Dijkstra es correcta, usando Floyd-Warshall como verificador independiente.</div>
+</section>
+
+<section id="demo">
+  <div class="kicker">03 · Demo en vivo</div>
+  <h1>Guion para grafo-interactivo.html</h1>
+  <p class="intro">La demo interactiva (<code>diapositivas/grafo-interactivo.html</code>, embebida también en la slide 06) tiene un botón <b>"▶ Dijkstra vs Floyd-Warshall"</b> que anima ambos algoritmos sobre el grafo real. Este es el guion recomendado para narrar mientras corre.</p>
+
+  <div class="timing">~30-40 seg de animación automática</div>
+
+  <div class="stepper">
+    <div class="step"><div class="body2"><b>Antes de apretar el botón:</b> "Este es el grafo completo real — 73 nodos, 653 aristas, generado directamente de datos de MITRE ATT&amp;CK, no inventado. Voy a correr ambos algoritmos sobre él, en vivo."</div></div>
+    <div class="step"><div class="body2"><b>Fase 1 — frente de exploración (rojo tenue):</b> "Esto es Dijkstra explorando de verdad — no solo mostrando el resultado final. Cada nodo que se enciende es un nodo que el algoritmo acaba de 'asentar', en el orden real en que lo hace, siguiendo siempre el costo acumulado más bajo."</div></div>
+    <div class="step"><div class="body2"><b>Fase 2 — ruta final (rojo fuerte):</b> "Ahora Dijkstra descarta todo ese trabajo de exploración y se queda con UNA ruta: la óptima. Ese es el costo real de usar Dijkstra — mucho cómputo interno, pero solo te entrega el ganador."</div></div>
+    <div class="step"><div class="body2"><b>Fase 3 — pulso cyan (Floyd-Warshall):</b> "Ahora el color cambia a cyan. Esto NO es un recorrido — es Floyd-Warshall terminando de calcular todos los pares, y lo que ven es el brillo de cada nodo proporcional a su importancia real (FW-betweenness). Los nodos que más brillan son los que aparecen en más rutas óptimas distintas."</div></div>
+    <div class="step"><div class="body2"><b>Cierre:</b> "Los números en el mensaje final son reales, salen del mismo análisis: costo 1.535 en ambos, 7 rutas óptimas equivalentes, 5,329 pares calculados por Floyd-Warshall."</div></div>
+  </div>
+
+  <div class="say warn">
+    <span class="tag">Si el proyector falla o no hay internet (D3.js viene de CDN)</span>
+    <p>Tener de respaldo una captura de pantalla o grabación corta de la animación ya corrida, por si <code>d3js.org</code> no carga en el lugar de la presentación.</p>
+  </div>
+</section>
+
+<section id="preguntas">
+  <div class="kicker">04 · Cierre</div>
+  <h1>Preguntas esperadas</h1>
+  <p class="intro">Preguntas típicas de audiencia técnica (compañeros, profesor) con respuesta corta lista.</p>
+
+  <div class="qa">
+    <div class="q">¿Por qué no usaron A* en vez de Dijkstra, si es más rápido?</div>
+    <div class="a">A* necesita una heurística admisible (una estimación de distancia al objetivo) que no tenemos para "resistencia defensiva" — no hay forma honesta de estimar eso sin ya conocer el grafo completo. Dijkstra es la elección correcta cuando no hay heurística confiable.</div>
+  </div>
+  <div class="qa">
+    <div class="q">¿Los pesos son subjetivos?</div>
+    <div class="a">No — se derivan directamente de <code>n_mitigaciones / 8</code>, un conteo objetivo de cuántas mitigaciones documenta MITRE ATT&amp;CK para cada técnica específica. Cero curación manual.</div>
+  </div>
+  <div class="qa">
+    <div class="q">¿El grafo tiene ciclos? ¿Eso no rompe Dijkstra?</div>
+    <div class="a">Dijkstra funciona con ciclos siempre que todos los pesos sean positivos (que es el caso, mínimo 0.05). Los ciclos solo serían un problema con pesos negativos.</div>
+  </div>
+  <div class="qa">
+    <div class="q">¿Por qué Floyd-Warshall si ya tienen Dijkstra?</div>
+    <div class="a">Dijkstra responde "¿cuál es LA ruta?" — Floyd-Warshall responde "¿qué tan importante es CADA nodo, y hay rutas alternativas igual de buenas?". Son preguntas distintas que useamos para: (1) validar cruzadamente el costo óptimo, (2) identificar cuellos de botella estructurales para recomendaciones defensivas.</div>
+  </div>
+  <div class="qa">
+    <div class="q">¿Esto escala a un grafo con miles de técnicas?</div>
+    <div class="a">Dijkstra sí, sin problema (crece con (V+E)log V). Floyd-Warshall no —crece con V³, sería impráctico. Por eso Dijkstra es la herramienta operativa y Floyd-Warshall se usa puntualmente para análisis profundo, no en tiempo real.</div>
+  </div>
+</section>
+
+<section id="numeros">
+  <div class="kicker">04 · Cierre</div>
+  <h1>Chuleta de números</h1>
+  <p class="intro">Para no dudar en vivo — todos estos números están verificados contra <code>results/real/*.json</code>.</p>
+
+  <table class="tbl">
+    <tr><th>Dato</th><th>Valor</th></tr>
+    <tr><td>Campaña</td><td>SolarWinds Compromise (APT29)</td></tr>
+    <tr><td>Técnicas reales</td><td>71</td></tr>
+    <tr><td>Nodos totales</td><td>73 (71 + ATTACKER + IMPACT)</td></tr>
+    <tr><td>Aristas</td><td>653</td></tr>
+    <tr><td>Densidad</td><td>0.124</td></tr>
+    <tr><td>Grado medio</td><td>8.9</td></tr>
+    <tr><td>Costo ruta óptima (Dijkstra)</td><td>1.535</td></tr>
+    <tr><td>Pasos de la ruta</td><td>9</td></tr>
+    <tr><td>Tiempo Dijkstra</td><td>0.22 ms</td></tr>
+    <tr><td>Tiempo Floyd-Warshall</td><td>5.4 ms (5.5× más lento)</td></tr>
+    <tr><td>Pares calculados por FW</td><td>5,329</td></tr>
+    <tr><td>Rutas óptimas equivalentes</td><td>7</td></tr>
+    <tr><td>Técnicas en TODAS las rutas óptimas</td><td>6</td></tr>
+  </table>
+
+  <div class="callout">🔗 Fuente de todos los números: <code>results/real/comparacion_dijk_fw.json</code>, <code>results/real/ruta_critica_solarwinds.json</code>, <code>results/real/fw_betweenness_solarwinds.json</code>.</div>
+</section>
+
+</main>
+</div>
+
+<footer>Universidad de Cuenca · DEET · Redes Complejas 2026 · Libreto de apoyo, no forma parte del deck de slides</footer>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('#nav a');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`#nav a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

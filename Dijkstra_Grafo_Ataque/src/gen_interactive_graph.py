@@ -143,14 +143,17 @@ def build_graph_data(nodes_data, ruta_data):
         "y": pos["IMPACT"]["y"],
     })
 
-    # Aristas
+    # Aristas — indice por TODAS las tacticas de cada nodo (no solo la primera),
+    # igual que build_attack_graph() en dataset_real.py. Usar solo la primera
+    # tactica aqui subrepresenta el grafo real: un nodo con tacticas
+    # ["stealth", "persistence", "privilege-escalation", "initial-access"]
+    # debe conectar en las 4 columnas, no solo en la primera de su lista.
     node_ids = {n["id"] for n in nodes}
     by_tactic_ids = {t: [] for t in TACTIC_ORDER}
     for nd in nodes_data:
         for tac in nd.get("tactics", []):
             if tac in by_tactic_ids:
                 by_tactic_ids[tac].append(nd["node"])
-                break
 
     edges = []
     added = set()
@@ -173,9 +176,10 @@ def build_graph_data(nodes_data, ruta_data):
         for nid in by_tactic_ids.get(tac, []):
             add_edge("ATTACKER", nid)
 
-    # Última táctica → IMPACT
-    for nid in by_tactic_ids.get("exfiltration", []):
-        add_edge(nid, "IMPACT")
+    # Última táctica → IMPACT (impact + exfiltration, igual que dataset_real.py)
+    for tac in ["impact", "exfiltration"]:
+        for nid in by_tactic_ids.get(tac, []):
+            add_edge(nid, "IMPACT")
 
     # Tácticas consecutivas
     for i in range(len(TACTIC_ORDER) - 1):
