@@ -133,6 +133,32 @@
   /* ── Placeholder ── */
   #info-placeholder { color:var(--muted); font-size:14px; text-align:center; padding:20px 0; }
 
+  /* ── Comparacion Dijkstra vs Floyd-Warshall ── */
+  #controls button#btn-compare { border-color:rgba(255,178,0,.4); color:#ffb200; }
+  #controls button#btn-compare:hover { background:rgba(255,178,0,.12); }
+  #controls button#btn-compare.running { background:rgba(255,178,0,.18); color:#ffd23f; border-color:#ffd23f; }
+
+  #compare-caption {
+    position:absolute; left:50%; bottom:22px; transform:translateX(-50%) translateY(10px);
+    background:rgba(18,26,43,.95); border:1px solid var(--line); border-radius:10px;
+    padding:10px 18px; font-size:13px; color:var(--txt); text-align:center;
+    opacity:0; pointer-events:none; transition:opacity .35s ease, transform .35s ease;
+    max-width:min(560px, 88%); box-shadow:0 10px 30px rgba(0,0,0,.4); z-index:50;
+  }
+  #compare-caption.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  #compare-caption b.dj { color:#ff3b5c; }
+  #compare-caption b.fw { color:#3fb6ff; }
+
+  .fw-ring { fill:none; pointer-events:none; }
+  @keyframes fwPulseRing {
+    0%   { r:6;  stroke-opacity:.9; stroke-width:3; }
+    100% { r:34; stroke-opacity:0;  stroke-width:.5; }
+  }
+  @keyframes djHopFlash {
+    0%   { stroke-opacity:1; filter:drop-shadow(0 0 6px #ff3b5c); }
+    100% { stroke-opacity:.95; filter:none; }
+  }
+
   /* ── Responsive ── */
   @media (max-width: 900px) {
     #header { flex-wrap:wrap; height:auto; padding:10px 14px; gap:8px; }
@@ -181,6 +207,8 @@
   <button id="btn-crit" class="active">Ruta crítica</button>
   <button id="btn-all">Todas aristas</button>
   <div class="sep"></div>
+  <button id="btn-compare">&#9654; Dijkstra vs Floyd-Warshall</button>
+  <div class="sep"></div>
   <label>Opacidad aristas <input type="range" id="edge-opacity" min="5" max="100" value="35"></label>
   <div class="sep"></div>
   <label>Tamaño nodos <input type="range" id="node-size" min="50" max="200" value="100"></label>
@@ -200,10 +228,12 @@
     <g id="graph-root">
       <g id="layer-edges"></g>
       <g id="layer-nodes"></g>
+      <g id="layer-fw-pulse"></g>
       <g id="layer-labels"></g>
       <g id="layer-tactic-labels"></g>
     </g>
   </svg>
+  <div id="compare-caption"></div>
 </div>
 
 <!-- SIDEBAR -->
@@ -499,6 +529,132 @@ document.getElementById('btn-all').addEventListener('click', function() {
   line.style('display', null);
   this.classList.add('active');
   document.getElementById('btn-crit').classList.remove('active');
+});
+
+// ── Animacion comparativa: Dijkstra (rojo, 1 ruta secuencial) ─────────────────
+// vs Floyd-Warshall (cyan, importancia de TODOS los nodos via fw_betweenness) ──
+const fwLayer = d3.select('#layer-fw-pulse');
+const caption = document.getElementById('compare-caption');
+const compareBtn = document.getElementById('btn-compare');
+let compareRunning = false;
+
+function showCaption(html, ms) {
+  caption.innerHTML = html;
+  caption.classList.add('show');
+  if (ms) setTimeout(() => caption.classList.remove('show'), ms);
+}
+
+function dimAllExceptCritical() {
+  circle.transition().duration(400)
+    .attr('fill-opacity', d => d.critical ? 0.15 : 0.08)
+    .attr('r', d => d.size * sizeMultiplier);
+  line.transition().duration(400).attr('stroke-opacity', 0.05);
+}
+
+async function runDijkstraPhase() {
+  showCaption('<b class="dj">DIJKSTRA</b> — avanza nodo por nodo, sigue SIEMPRE la arista de menor peso. Encuentra <b>una sola</b> ruta óptima (costo 1.535).', null);
+  dimAllExceptCritical();
+  await sleep(500);
+
+  for (let i = 0; i < CRITICAL_PATH.length; i++) {
+    const nid = CRITICAL_PATH[i];
+    const nd = nodeIndex[nid];
+    if (!nd) continue;
+
+    circle.filter(d => d.id === nid)
+      .transition().duration(250)
+      .attr('r', nd.size * sizeMultiplier * 1.6)
+      .attr('fill-opacity', 1)
+      .transition().duration(250)
+      .attr('r', d => d.size * sizeMultiplier * (d.critical ? 1.15 : 1));
+
+    if (i > 0) {
+      const prev = CRITICAL_PATH[i - 1];
+      line.filter(e => e.source === prev && e.target === nid)
+        .transition().duration(200)
+        .attr('stroke', '#ff3b5c')
+        .attr('stroke-opacity', 1)
+        .attr('stroke-width', 4)
+        .style('display', null);
+    }
+    await sleep(380);
+  }
+  showCaption('<b class="dj">DIJKSTRA</b> terminó: 1 ruta, 9 pasos, costo <b>1.535</b>. Ignora el resto del grafo.', 1800);
+  await sleep(1800);
+}
+
+async function runFloydPhase() {
+  showCaption('<b class="fw">FLOYD-WARSHALL</b> — calcula distancias entre <b>todos los pares</b> de nodos a la vez. El brillo de cada nodo = cuántas rutas óptimas pasan por él (FW-betweenness).', null);
+
+  // aristas se apagan del todo; el foco pasa a los nodos
+  line.transition().duration(400).attr('stroke-opacity', 0.04);
+  circle.transition().duration(400).attr('fill-opacity', 0.25);
+
+  const maxBw = Math.max(1, ...NODES.map(n => n.fw_betweenness || 0));
+  const ranked = [...NODES].filter(n => n.fw_betweenness > 0).sort((a, b) => b.fw_betweenness - a.fw_betweenness);
+
+  // Pulso simultaneo en oleadas cortas para dar sensacion de "todo a la vez"
+  const batches = 6;
+  for (let b = 0; b < batches; b++) {
+    const batchNodes = ranked.filter((_, idx) => idx % batches === b);
+    batchNodes.forEach(nd => {
+      const intensity = (nd.fw_betweenness || 0) / maxBw;
+      fwLayer.append('circle')
+        .attr('class', 'fw-ring')
+        .attr('cx', nd.x).attr('cy', nd.y)
+        .attr('r', 6)
+        .attr('stroke', '#3fb6ff')
+        .attr('stroke-width', 3)
+        .style('animation', `fwPulseRing ${0.9 + intensity * 0.6}s ease-out forwards`)
+        .on('animationend', function() { d3.select(this).remove(); });
+
+      circle.filter(d => d.id === nd.id)
+        .transition().duration(200)
+        .attr('fill-opacity', 0.35 + intensity * 0.65)
+        .attr('r', d => (d.size * sizeMultiplier) * (1 + intensity * 0.5))
+        .transition().duration(500)
+        .attr('r', d => d.size * sizeMultiplier);
+    });
+    await sleep(220);
+  }
+
+  await sleep(600);
+  showCaption('<b class="fw">FLOYD-WARSHALL</b> terminó: 5329 pares calculados, revela <b>7 rutas óptimas</b> equivalentes y qué nodos son <b>cuellos de botella</b> estructurales (ej. T1606.001, 100% de las rutas óptimas).', 2600);
+  await sleep(2600);
+}
+
+function resetCompareView() {
+  fwLayer.selectAll('*').remove();
+  circle
+    .attr('fill-opacity', d => d.critical ? 0.95 : 0.7)
+    .attr('r', d => d.size * sizeMultiplier);
+  line
+    .attr('stroke', e => e.color)
+    .attr('stroke-width', e => e.width)
+    .attr('stroke-opacity', e => e.critical ? e.opacity : 0.35)
+    .style('display', e => (showAllEdges || e.critical) ? null : 'none');
+  caption.classList.remove('show');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+compareBtn.addEventListener('click', async function() {
+  if (compareRunning) return;
+  compareRunning = true;
+  this.classList.add('running');
+  this.textContent = '⏸ Comparando…';
+
+  resetCompareView();
+  await sleep(200);
+  await runDijkstraPhase();
+  await runFloydPhase();
+  resetCompareView();
+  showCaption('<b class="dj">Dijkstra</b> = rápido, 1 ruta. <b class="fw">Floyd-Warshall</b> = más lento (O(V³)), pero revela la estructura completa del grafo. Ambos coinciden en el costo óptimo: <b>1.535</b>.', 3200);
+  await sleep(3200);
+
+  this.classList.remove('running');
+  this.innerHTML = '&#9654; Dijkstra vs Floyd-Warshall';
+  compareRunning = false;
 });
 
 document.getElementById('edge-opacity').addEventListener('input', function() {
