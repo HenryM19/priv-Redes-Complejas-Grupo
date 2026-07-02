@@ -105,18 +105,19 @@
   <div class="grp">Fundamentos</div>
   <a href="#kill-chain">1 · Qué es un kill chain</a>
   <a href="#el-grafo">2 · Cómo se arma el grafo</a>
+  <a href="#tecnicas">3 · Las técnicas de la ruta crítica</a>
 
   <div class="grp">Algoritmos</div>
-  <a href="#dijkstra">3 · Dijkstra</a>
-  <a href="#floyd">4 · Floyd-Warshall</a>
-  <a href="#comparacion">5 · Comparación directa</a>
+  <a href="#dijkstra">4 · Dijkstra</a>
+  <a href="#floyd">5 · Floyd-Warshall</a>
+  <a href="#comparacion">6 · Comparación directa</a>
 
   <div class="grp">Demo en vivo</div>
-  <a href="#demo">6 · Guion para grafo-interactivo.html</a>
+  <a href="#demo">7 · Guion para grafo-interactivo.html</a>
 
   <div class="grp">Cierre</div>
-  <a href="#preguntas">7 · Preguntas esperadas</a>
-  <a href="#numeros">8 · Chuleta de números</a>
+  <a href="#preguntas">8 · Preguntas esperadas</a>
+  <a href="#numeros">9 · Chuleta de números</a>
 </nav>
 
 <main>
@@ -170,6 +171,70 @@
   </div>
 
   <div class="callout">💡 <b>Resultado final:</b> un grafo dirigido de <b>73 nodos</b> (71 técnicas + ATTACKER + IMPACT) y <b>653 aristas</b>, con densidad 0.124 y grado medio 8.9 — denso, con ciclos posibles entre tácticas no consecutivas, no es un DAG estrictamente simple.</div>
+</section>
+
+<section id="tecnicas">
+  <div class="kicker">01 · Fundamentos</div>
+  <h1>Las técnicas de la ruta crítica</h1>
+  <p class="intro">Estas son las 7 técnicas reales que Dijkstra encuentra como la ruta de menor resistencia — las mismas que se animan en rojo en la demo. Tenerlas claras evita quedarse en blanco si preguntan "¿qué es T1606.001?" en vivo.</p>
+
+  <div class="say">
+    <span class="tag">Cómo presentarlas sin perder al público</span>
+    <p>No hace falta explicar las 71 técnicas del grafo — solo estas 7, en orden, contando la historia real de SolarWinds/APT29 paso a paso. Cada una es un <b>hecho documentado</b> de la campaña, no un ejemplo genérico.</p>
+  </div>
+
+  <table class="tbl">
+    <tr><th>#</th><th>Técnica</th><th>Táctica</th><th>Qué hizo el atacante</th><th>Peso</th></tr>
+    <tr>
+      <td>1</td><td>T1078.003<br><span style="font-family:'Space Grotesk',sans-serif;font-weight:400;color:var(--muted);font-size:11.5px">Local Accounts</span></td>
+      <td><span class="chip crit">initial-access</span><span class="chip">persistence</span><span class="chip">priv-esc</span><span class="chip">stealth</span></td>
+      <td>Usó <b>cuentas locales legítimas ya comprometidas</b> para entrar y quedarse — no explota una vulnerabilidad, abusa de credenciales válidas. Por eso aparece en 4 tácticas distintas: sirve para entrar, mantenerse, escalar y pasar desapercibido a la vez.</td>
+      <td><code>0.5</code><br><span style="font-size:10.5px;color:var(--muted)">4/8 mitigaciones</span></td>
+    </tr>
+    <tr>
+      <td>2</td><td>T1606.001<br><span style="font-family:'Space Grotesk',sans-serif;font-weight:400;color:var(--muted);font-size:11.5px">Web Cookies</span></td>
+      <td><span class="chip">credential-access</span></td>
+      <td>Robó o forjó <b>cookies de sesión web</b> para autenticarse sin necesitar la contraseña — el nodo más central de todo el grafo (aparece en 1,044 rutas óptimas distintas, ver Floyd-Warshall).</td>
+      <td><code>0.25</code><br><span style="font-size:10.5px;color:var(--muted)">2/8 mitigaciones</span></td>
+    </tr>
+    <tr>
+      <td>3</td><td>T1016.001<br><span style="font-family:'Space Grotesk',sans-serif;font-weight:400;color:var(--muted);font-size:11.5px">Internet Connection Discovery</span></td>
+      <td><span class="chip cyan">discovery</span></td>
+      <td>Revisó si el sistema comprometido tenía <b>salida a internet</b> — reconocimiento básico antes de decidir cómo exfiltrar. Sin mitigaciones documentadas: prácticamente imposible de bloquear (peso mínimo 0.05).</td>
+      <td><code>0.05</code><br><span style="font-size:10.5px;color:var(--muted)">0/8 mitigaciones</span></td>
+    </tr>
+    <tr>
+      <td>4</td><td>T1550.004<br><span style="font-family:'Space Grotesk',sans-serif;font-weight:400;color:var(--muted);font-size:11.5px">Web Session Cookie</span></td>
+      <td><span class="chip">lateral-movement</span></td>
+      <td>Reutilizó la <b>cookie de sesión robada</b> (paso 2) para saltar a otro sistema sin volver a autenticarse — movimiento lateral sin generar alertas de login.</td>
+      <td><code>0.125</code><br><span style="font-size:10.5px;color:var(--muted)">1/8 mitigaciones</span></td>
+    </tr>
+    <tr>
+      <td>5</td><td>T1074.002<br><span style="font-family:'Space Grotesk',sans-serif;font-weight:400;color:var(--muted);font-size:11.5px">Remote Data Staging</span></td>
+      <td><span class="chip green">collection</span></td>
+      <td>Copió los datos de interés a un <b>servidor intermedio bajo su control</b> antes de sacarlos — no exfiltra directo desde el origen, junta todo primero.</td>
+      <td><code>0.05</code><br><span style="font-size:10.5px;color:var(--muted)">0/8 mitigaciones</span></td>
+    </tr>
+    <tr>
+      <td>6</td><td>T1665<br><span style="font-family:'Space Grotesk',sans-serif;font-weight:400;color:var(--muted);font-size:11.5px">Hide Infrastructure</span></td>
+      <td><span class="chip">command-and-control</span></td>
+      <td>Ocultó la <b>infraestructura de C2</b> (servidores propios) para que no se pudiera atribuir ni bloquear fácilmente por IP/dominio.</td>
+      <td><code>0.05</code><br><span style="font-size:10.5px;color:var(--muted)">0/8 mitigaciones</span></td>
+    </tr>
+    <tr>
+      <td>7</td><td>T1048.002<br><span style="font-family:'Space Grotesk',sans-serif;font-weight:400;color:var(--muted);font-size:11.5px">Exfiltration Over Asymmetric Encrypted Non-C2 Protocol</span></td>
+      <td><span class="chip crit">exfiltration</span></td>
+      <td>Sacó los datos usando un <b>protocolo cifrado distinto</b> al canal de C2 habitual — dificulta que las herramientas de DLP (data loss prevention) detecten la fuga por firma de tráfico.</td>
+      <td><code>0.5</code><br><span style="font-size:10.5px;color:var(--muted)">4/8 mitigaciones</span></td>
+    </tr>
+  </table>
+
+  <div class="say crit">
+    <span class="tag">El hilo narrativo completo (para decir de corrido)</span>
+    <p>"El atacante entra con <b>cuentas válidas robadas</b> (1), roba una <b>cookie de sesión</b> para no depender de contraseñas (2), confirma que tiene <b>salida a internet</b> (3), reutiliza esa cookie para <b>moverse a otro sistema</b> (4), junta los datos en un <b>servidor intermedio</b> (5), <b>oculta su infraestructura</b> de comando y control (6), y finalmente <b>exfiltra todo cifrado</b> por un canal separado (7). Cada paso es barato — por eso esta es la ruta de menor resistencia."</p>
+  </div>
+
+  <div class="callout">🔎 <b>Patrón a señalar:</b> las 3 técnicas con <b>0 mitigaciones documentadas</b> (discovery, staging, ocultar infraestructura) son exactamente las que un defensor normalmente <i>no monitorea</i> — reconocimiento pasivo y movimiento de infraestructura propia. El modelo lo detecta solo, sin que nadie lo haya señalado a mano.</div>
 </section>
 
 <section id="dijkstra">
