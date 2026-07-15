@@ -1,0 +1,12 @@
+# Julia
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+/docs/build/
+
+# Sistema
+Thumbs.db
+.DS_Store
+
+# Temporales de Plots
+*.tmp
