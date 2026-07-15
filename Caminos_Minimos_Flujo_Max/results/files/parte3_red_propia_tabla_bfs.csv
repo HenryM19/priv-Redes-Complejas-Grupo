@@ -1,0 +1,6 @@
+iteracion,camino_aumentante,longitud_arcos,delta,flujo_acumulado,usa_arco_retroceso
+1,s -> a -> d -> t,3,4,4,False
+2,s -> b -> c -> f -> t,4,1,5,False
+3,s -> b -> d -> f -> t,4,2,7,False
+4,s -> b -> e -> f -> t,4,2,9,False
+5,s -> b -> d -> a -> c -> f -> t,6,1,10,True

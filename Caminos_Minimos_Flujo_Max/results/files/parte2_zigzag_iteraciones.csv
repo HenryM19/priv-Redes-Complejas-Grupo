@@ -1,0 +1,9 @@
+M,metodo,iteraciones,flujo_max
+10,BFS(Edmonds-Karp),2,20
+10,"DFS(estandar,repo)",2,20
+100,BFS(Edmonds-Karp),2,200
+100,"DFS(estandar,repo)",2,200
+1000,BFS(Edmonds-Karp),2,2000
+1000,"DFS(estandar,repo)",2,2000
+10000,BFS(Edmonds-Karp),2,20000
+10000,"DFS(estandar,repo)",2,20000

@@ -1,0 +1,15 @@
+arco,capacidad
+s->a,4
+s->b,12
+a->c,1
+a->d,11
+b->c,1
+b->e,9
+e->b,7
+b->d,10
+c->f,2
+c->d,5
+d->f,2
+d->t,4
+e->f,2
+f->t,11
