@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Conclusiones</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:flex;flex-direction:column;margin-top:14px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .c{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:15px 17px;
+    box-shadow:var(--shadow-sm);display:flex;gap:13px;align-items:flex-start}
+  .c .n{flex:none;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;
+    justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700}
+  .c1 .n{background:rgba(15,163,107,.12);color:var(--green);border:1px solid rgba(15,163,107,.4)}
+  .c2 .n{background:rgba(242,97,12,.12);color:var(--back);border:1px solid rgba(242,97,12,.4)}
+  .c3 .n{background:rgba(226,58,86,.1);color:var(--crit);border:1px solid rgba(226,58,86,.4)}
+  .c4 .n{background:rgba(8,145,201,.1);color:var(--flow);border:1px solid rgba(8,145,201,.4)}
+  .c5 .n{background:rgba(139,92,246,.1);color:var(--cut);border:1px solid rgba(139,92,246,.4)}
+  .c .b .t{font-size:14.5px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1.3}
+  .c .b p{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .c .b p b{color:var(--ink)}
+  .c .b .mono{font-family:'JetBrains Mono',monospace;font-size:11.5px}
+
+  .hero{margin-top:16px;background:linear-gradient(100deg, rgba(8,145,201,.09), rgba(139,92,246,.07));
+    border:1px solid rgba(8,145,201,.32);border-radius:14px;padding:20px 24px;
+    display:flex;align-items:center;gap:24px}
+  .hero .q{flex:1;font-size:19px;line-height:1.42;color:var(--ink);font-weight:600}
+  .hero .q em{font-style:normal;color:var(--flow)}
+  .hero .q .c{color:var(--crit)}
+  .hero .nums{flex:none;display:flex;gap:16px}
+  .nm{text-align:center;padding:0 6px}
+  .nm .v{font-family:'JetBrains Mono',monospace;font-size:25px;font-weight:700;line-height:1}
+  .nm .l{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);
+    letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
+  .nm.a .v{color:var(--flow)} .nm.b .v{color:var(--crit)} .nm.c .v{color:var(--green)}
+  .rep{margin-top:14px;display:flex;justify-content:space-between;align-items:center;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:12px 16px}
+  .rep .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--muted);font-weight:600}
+  .rep .f{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--txt)}
+  .rep .f b{color:var(--flow)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>12 · Conclusiones</span><span>Qué nos llevamos</span></div>
+
+  <div class="body">
+    <div class="grid">
+      <div class="c c1 anim d1">
+        <div class="n">1</div>
+        <div class="b">
+          <div class="t">La elección del camino no afecta el resultado, solo el costo</div>
+          <p>Los dos métodos llegan <b>siempre</b> al mismo flujo máximo. <b>Max-flow min-cut</b> explica por qué: la demostración solo usa la <b>condición de parada</b>, nunca cómo se eligieron los caminos.</p>
+        </div>
+      </div>
+
+      <div class="c c2 anim d2">
+        <div class="n">2</div>
+        <div class="b">
+          <div class="t">El peor caso es real, pero cuesta provocarlo</div>
+          <p>La DFS del repositorio <b>no lo alcanza</b> (2 iteraciones para cualquier M), ni una DFS que prefiera caminos largos (4). Hizo falta un <b>adversario que alternara</b> los dos caminos que cruzan la trampa para llegar a las <b>2M exactas</b>.</p>
+        </div>
+      </div>
+
+      <div class="c c3 anim d3">
+        <div class="n">3</div>
+        <div class="b">
+          <div class="t">Y por eso el peor caso no es culpa de DFS</div>
+          <p>Es culpa de la <b>libertad que el método deja abierta</b>. La cota <span class="mono">O(E·|f*|)</span> no describe lo que DFS hace; describe <b>lo que Ford-Fulkerson no prohíbe</b>. Edmonds-Karp no es "DFS arreglado": es Ford-Fulkerson <b>con la libertad de elegir mal eliminada</b>.</p>
+        </div>
+      </div>
+
+      <div class="c c4 anim d4">
+        <div class="n">4</div>
+        <div class="b">
+          <div class="t">La monotonía de las longitudes es la bisagra de todo</div>
+          <p>Nuestra red la exhibe <b>en las dos direcciones a la vez</b>: BFS <span class="mono">3,3,3,5,7</span> (nunca baja) y DFS <span class="mono">3,4,3,4,3,4,5,6</span> (baja tres veces), misma red, misma implementación. Por eso la cota de Edmonds-Karp <b>no menciona las capacidades</b>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="c c5 anim d5" style="margin-top:16px">
+      <div class="n">5</div>
+      <div class="b">
+        <div class="t">Encontrar una red donde DFS se vea mal es estadísticamente difícil — y eso es una lección incómoda</div>
+        <p>De <b>400 000</b> combinaciones de capacidades sobre nuestra topología, el <b>77.5%</b> daba DFS igual o mejor que BFS. Eso explica por qué la red CLRS no separa los métodos, y sugiere algo que va más allá de esta actividad: <b>medir un algoritmo en unos pocos casos y concluir que va bien es exactamente el error que la teoría del peor caso existe para prevenir</b>.</p>
+      </div>
+    </div>
+
+    <div class="hero anim d6">
+      <div class="q">Un cambio de <em>una línea</em> — pila por cola — convierte una garantía que <span class="c">depende de los datos</span> en una que <em>depende solo del tamaño del grafo</em>. El precio: <em>cero</em>.</div>
+      <div class="nums">
+        <div class="nm a"><div class="v">5</div><div class="l">BFS · nuestra red</div></div>
+        <div class="nm b"><div class="v">8</div><div class="l">DFS · nuestra red</div></div>
+        <div class="nm c"><div class="v">24</div><div class="l">flujo · ambos</div></div>
+      </div>
+    </div>
+
+    <div class="rep anim d7">
+      <span class="t">◆ Todo reproducible</span>
+      <span class="f">julia --project=. src/parte<b>{1,2,3,4}</b>_*.jl · <b>results/data/*.json</b> · <b>INFORME.md</b></span>
+    </div>
+  </div>
+
+  <div class="footer"><span>Ford-Fulkerson vs Edmonds-Karp · Redes Complejas · U. de Cuenca</span><span>12 / 12</span></div>
+</div></body></html>

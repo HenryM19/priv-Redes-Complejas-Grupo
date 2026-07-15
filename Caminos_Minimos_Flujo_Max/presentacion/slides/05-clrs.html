@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Parte 1 · CLRS</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:14px 18px}
+  .card .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;font-weight:600;margin-bottom:9px;display:flex;justify-content:space-between}
+  .card.bfs .h{color:var(--flow)} .card.dfs .h{color:var(--crit)}
+  table.tbl{font-size:12.5px} table.tbl td{padding:5.5px 8px}
+  table.tbl th{padding:5.5px 8px;font-size:9.5px}
+  .ruta{font-family:'JetBrains Mono',monospace;font-size:12px}
+  .lens{margin-top:12px;display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;
+    font-size:12px;color:var(--muted);padding-top:11px;border-top:1px solid var(--line)}
+  .lens .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+    border-radius:6px;background:var(--panel-2);border:1px solid var(--line-2);font-weight:700;color:var(--ink)}
+  .verdict{margin-top:13px;background:rgba(242,97,12,.08);border:1px solid rgba(242,97,12,.32);
+    border-radius:12px;padding:13px 16px}
+  .verdict .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--back);font-weight:600;margin-bottom:6px}
+  .verdict p{font-size:13px;line-height:1.45;color:var(--txt)}.verdict b{color:var(--ink)}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .mini{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-sm)}
+  .mini .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;font-weight:600;margin-bottom:8px;color:var(--muted)}
+  .mini .big{font-size:15px;font-weight:700;color:var(--ink);line-height:1.35}
+  .mini p{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:6px}
+  .mini.ok{border-color:rgba(15,163,107,.35);background:rgba(15,163,107,.05)}
+  .mini.ok .t{color:var(--green)}
+  .back-demo{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;box-shadow:var(--shadow-sm)}
+  .back-demo .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--back);font-weight:600;margin-bottom:9px}
+  .bd{display:flex;align-items:center;gap:14px}
+  .bd svg{flex:none}
+  .bd .txt{font-size:12.5px;color:var(--muted);line-height:1.5}.bd .txt b{color:var(--ink)}
+  .bd .txt code{color:var(--back);font-size:12px}
+  .bedge{stroke:var(--line-2);stroke-width:2;fill:none}
+  .bedge.fwd{stroke:var(--flow);stroke-width:3}
+  .bedge.rev{stroke:var(--back);stroke-width:3;stroke-dasharray:5 4;animation:flowdash 1.4s linear infinite}
+  .bnode{fill:var(--panel);stroke:var(--line-2);stroke-width:2}
+  .blab{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;fill:var(--ink);
+    text-anchor:middle;dominant-baseline:central}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>05 · Parte 1 · Red CLRS</span><span>Cuando la red no separa los métodos</span></div>
+
+  <div class="body">
+    <div>
+      <div class="card bfs anim d1">
+        <div class="h"><span>▸ Edmonds-Karp (BFS)</span><span>flujo 23</span></div>
+        <table class="tbl">
+          <tr><th>It</th><th>Camino</th><th>Long</th><th>Δ</th><th>Flujo</th></tr>
+          <tr><td>1</td><td class="ruta">s → v₁ → v₃ → t</td><td>3</td><td>12</td><td>12</td></tr>
+          <tr><td>2</td><td class="ruta">s → v₂ → v₄ → t</td><td>3</td><td>4</td><td>16</td></tr>
+          <tr><td>3</td><td class="ruta">s → v₂ → v₄ → v₃ → t</td><td>4</td><td>7</td><td><b>23</b></td></tr>
+        </table>
+        <div class="lens"><span>longitudes</span><span class="n">3</span><span class="n">3</span><span class="n">4</span>
+          <span style="color:var(--green);font-weight:600">no decrecen ✓</span></div>
+      </div>
+
+      <div class="card dfs anim d3" style="margin-top:16px">
+        <div class="h"><span>▸ Ford-Fulkerson (DFS)</span><span>flujo 23</span></div>
+        <table class="tbl">
+          <tr><th>It</th><th>Camino</th><th>Long</th><th>Δ</th><th>Flujo</th></tr>
+          <tr><td>1</td><td class="ruta">s → v₁ → v₃ → t</td><td>3</td><td>12</td><td>12</td></tr>
+          <tr><td>2</td><td class="ruta">s → v₂ → v₄ → t</td><td>3</td><td>4</td><td>16</td></tr>
+          <tr><td>3</td><td class="ruta">s → v₂ → v₄ → v₃ → t</td><td>4</td><td>7</td><td><b>23</b></td></tr>
+        </table>
+        <div class="lens"><span>longitudes</span><span class="n">3</span><span class="n">3</span><span class="n">4</span>
+          <span style="color:var(--muted)">idénticas</span></div>
+      </div>
+
+      <div class="verdict anim d5">
+        <div class="t">◆ Hallazgo · las dos tablas son idénticas</div>
+        <p>No es casualidad: la DFS del repositorio usa una <b>pila</b>, que devuelve el último insertado, así que acaba visitando primero los índices bajos — <b>el mismo orden que la BFS</b>. En una red pequeña tropiezan con los mismos caminos.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="split">
+        <div class="mini ok anim d2">
+          <div class="t">¿Mismo flujo?</div>
+          <div class="big">Sí · 23</div>
+          <p><b>Siempre</b>, en cualquier red. Lo garantiza max-flow min-cut.</p>
+        </div>
+        <div class="mini ok anim d3">
+          <div class="t">¿Mismo corte?</div>
+          <div class="big">Sí · {s,v₁,v₂,v₄}</div>
+          <p>Aquí sí, pero <b>no tiene por qué</b>: puede haber varios cortes mínimos.</p>
+        </div>
+      </div>
+      <div class="mini anim d4" style="margin-top:16px">
+        <div class="t">¿Mismos flujos arco por arco?</div>
+        <div class="big" style="color:var(--muted)">Sí — pero solo porque las trazas coinciden</div>
+        <p>Es la coincidencia <b>más frágil</b> de las tres. En nuestra red (slide 08) BFS y DFS llegan ambos a 24 y al mismo corte, pero <b>reparten el flujo distinto</b>. El valor es único; el reparto, no.</p>
+      </div>
+
+      <div class="back-demo anim d5">
+        <div class="t">▸ El arco de retroceso · qué cancela y por qué es válido</div>
+        <div class="bd">
+          <svg width="176" height="104" viewBox="0 0 176 104">
+            <line class="bedge fwd" x1="38" y1="26" x2="38" y2="78"/>
+            <line class="bedge rev" x1="52" y1="78" x2="52" y2="26"/>
+            <circle class="bnode" cx="45" cy="18" r="14"/><text class="blab" x="45" y="18">v₃</text>
+            <circle class="bnode" cx="45" cy="86" r="14"/><text class="blab" x="45" y="86">v₂</text>
+            <text x="78" y="34" style="font-family:'JetBrains Mono';font-size:10px;fill:var(--flow)">v₃→v₂ = 4</text>
+            <text x="78" y="52" style="font-family:'JetBrains Mono';font-size:10px;fill:var(--muted)">(enviado)</text>
+            <text x="78" y="74" style="font-family:'JetBrains Mono';font-size:10px;fill:var(--back)">v₂→v₃ = 4</text>
+            <text x="78" y="92" style="font-family:'JetBrains Mono';font-size:10px;fill:var(--muted)">(residual)</text>
+          </svg>
+          <div class="txt">
+            Mandar 4 por <b>v₃→v₂</b> crea el retroceso <b>v₂→v₃</b>: la opción de <b>deshacer</b> ese envío.<br><br>
+            Cancelar no es trampa, es <b>reencaminar</b>: las 4 unidades entran por s→v₂ y salen por v₃→t. Se conserva el flujo y el total <b>sube</b>.
+          </div>
+        </div>
+        <p style="margin-top:9px;font-size:11.5px;color:var(--muted);line-height:1.4;padding-top:8px;border-top:1px solid var(--line)">
+          ⚠ <b style="color:var(--ink)">Ojo:</b> ninguna variante estándar usa retroceso en CLRS. Lo forzamos con una <b style="color:var(--ink)">DFS profunda</b> (su iteración 3).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Red CLRS · 6 nodos · flujo máximo 23</span><span>05 / 12</span></div>
+</div></body></html>

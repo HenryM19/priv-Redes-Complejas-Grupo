@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>El lema y las aplicaciones</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:16px 18px}
+  .card .h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;font-weight:600;margin-bottom:11px;color:var(--flow)}
+  /* cadena de la demostración */
+  .chain{display:flex;flex-direction:column;gap:0}
+  .step{display:flex;gap:12px;align-items:flex-start;position:relative;padding-bottom:11px}
+  .step:not(:last-child)::before{content:'';position:absolute;left:13px;top:28px;bottom:0;
+    width:2px;background:var(--line-2)}
+  .step .n{flex:none;width:28px;height:28px;border-radius:50%;background:rgba(8,145,201,.1);
+    border:2px solid var(--flow);color:var(--flow);font-family:'JetBrains Mono',monospace;
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:2}
+  .step .c{flex:1;padding-top:3px}
+  .step .c .t{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px}
+  .step .c p{font-size:12.5px;color:var(--muted);line-height:1.45}
+  .step .c code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--flow)}
+  .step .c b{color:var(--ink)}
+  .break{margin-top:4px;background:rgba(226,58,86,.07);border:1px solid rgba(226,58,86,.3);
+    border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.5;color:var(--txt)}
+  .break b{color:var(--ink)}
+  .break .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--crit);font-weight:600;margin-bottom:5px}
+
+  .app{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    box-shadow:var(--shadow-sm);margin-bottom:13px}
+  .app .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--cut);font-weight:600;margin-bottom:7px}
+  .app h3{font-size:15px;color:var(--ink);margin-bottom:6px;font-weight:700}
+  .app p{font-size:12.5px;color:var(--muted);line-height:1.5}.app b{color:var(--ink)}
+  .model{margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
+  .mr{display:flex;gap:10px;font-size:12px;padding:3.5px 0;line-height:1.4}
+  .mr .k{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cut);font-weight:600;
+    flex:none;min-width:80px}
+  .mr .v{color:var(--muted)}.mr .v b{color:var(--ink)}
+  .twist{margin-top:9px;background:rgba(8,145,201,.06);border:1px solid rgba(8,145,201,.28);
+    border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.5;color:var(--txt)}
+  .twist b{color:var(--ink)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>11 · Por qué funciona · para qué sirve</span><span>El lema y dos aplicaciones</span></div>
+
+  <div class="body">
+    <div>
+      <div class="card anim d1">
+        <div class="h">▸ Por qué la cota O(V·E²) no menciona capacidades</div>
+        <div class="chain">
+          <div class="step">
+            <div class="n">1</div>
+            <div class="c"><div class="t">Lema de monotonía</div>
+              <p>Con BFS, la distancia <code>d(v)</code> desde s en la red residual <b>nunca decrece</b>. Los arcos nuevos que aparecen son de retroceso: apuntan hacia atrás en el árbol BFS y <b>no crean atajos</b>.</p></div>
+          </div>
+          <div class="step">
+            <div class="n">2</div>
+            <div class="c"><div class="t">Arco crítico</div>
+              <p>Cada iteración <b>satura al menos un arco</b> — el del cuello de botella. Se le llama <i>crítico</i> en esa iteración.</p></div>
+          </div>
+          <div class="step">
+            <div class="n">3</div>
+            <div class="c"><div class="t">Cada arco es crítico O(V) veces</div>
+              <p>Si <code>(u,v)</code> es crítico, entonces <code>d(v) = d(u)+1</code>. Para volver a serlo, debe reaparecer en la residual, lo que exige mandar flujo por <code>v→u</code>, es decir <code>d'(u) = d'(v)+1</code>.<br>
+              Con la monotonía: <code>d'(u) ≥ d(u)+2</code>. <b>Cada reaparición sube d(u) en al menos 2</b>, y <code>d(u) &lt; V</code> ⇒ a lo sumo <b>V/2 veces</b>.</p></div>
+          </div>
+          <div class="step">
+            <div class="n">4</div>
+            <div class="c"><div class="t">La cuenta final</div>
+              <p><code>E</code> arcos × <code>O(V)</code> veces = <code>O(V·E)</code> iteraciones, cada una a coste <code>O(E)</code> de la BFS ⇒ <b><code>O(V·E²)</code></b>.</p></div>
+          </div>
+        </div>
+        <div class="break">
+          <div class="t">◆ Dónde se rompe todo si las longitudes decrecen</div>
+          El paso 3 usa la monotonía en <code style="font-family:'JetBrains Mono';font-size:11.5px;color:var(--crit)">d'(v) ≥ d(v)</code>. Sin ella, <b>d(u) puede subir y bajar</b>, y no hay forma de acotar cuántas veces un arco vuelve a ser crítico — podría serlo <b>|f*| veces</b>. Ahí reaparece la dependencia de las capacidades y la cota se degrada a <code style="font-family:'JetBrains Mono';font-size:11.5px;color:var(--crit)">O(E·|f*|)</code>.<br><br>
+          <b>Nuestra tabla de DFS</b> (3,4,3,4,3,4,5,6) es exactamente la situación que el lema prohíbe. <b>El zigzag con el adversario</b> es esa situación llevada al extremo.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="app anim d2">
+        <div class="t">▸ Aplicación 1 · robustez de una red de comunicaciones</div>
+        <h3>¿Cuántos enlaces hay que cortar?</h3>
+        <p>Por max-flow min-cut, el corte mínimo es el <b>conjunto más barato de enlaces cuya eliminación desconecta s de t</b>. Es la medida natural de robustez: si el corte vale 24 Gb/s en 4 enlaces, un atacante que tumbe esos 4 aísla el destino — y <b>no hay forma más barata</b> de lograrlo.</p>
+        <div class="model">
+          <div class="mr"><div class="k">Nodos</div><div class="v">enrutadores, switches, centros de datos</div></div>
+          <div class="mr"><div class="k">Arcos</div><div class="v">enlaces físicos (fibra, radio), dirigidos</div></div>
+          <div class="mr"><div class="k">s / t</div><div class="v">el peering por donde entra el tráfico / el data center a proteger</div></div>
+          <div class="mr"><div class="k">Capacidad</div><div class="v"><b>ancho de banda en Gb/s</b></div></div>
+          <div class="mr"><div class="k">Corte mín.</div><div class="v">los enlaces a reforzar — <b>ampliar otro no sirve</b></div></div>
+        </div>
+        <div class="twist">
+          <b>El giro:</b> con <b>capacidad 1</b> en cada enlace, el flujo máximo pasa a contar <b>caminos disjuntos</b> (Menger) — <b>cuántos fallos simultáneos tolera</b> el par. <b>El mismo algoritmo responde otra pregunta</b> solo cambiando qué significa la capacidad.
+        </div>
+      </div>
+
+      <div class="app anim d4" style="margin-bottom:0">
+        <div class="t">▸ Aplicación 2 · detección de comunidades vía cortes</div>
+        <h3>Dónde está la frontera entre grupos</h3>
+        <p>Si dos grupos están densamente conectados por dentro y poco entre sí, el <b>corte mínimo</b> entre un nodo de cada grupo cae <b>justo en la frontera</b>. Es la base de <b>Gomory-Hu</b>, que resume los <span style="font-family:'JetBrains Mono';font-size:11.5px">n(n−1)/2</span> cortes de todos los pares en un árbol de <b>n−1 aristas</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>El lema de Edmonds-Karp · aplicaciones en redes complejas</span><span>11 / 12</span></div>
+</div></body></html>

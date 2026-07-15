@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Las animaciones</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:12px}
+  .g{background:var(--panel);border:1px solid var(--line);border-radius:13px;
+    box-shadow:var(--shadow-sm);padding:11px 13px;display:flex;flex-direction:column}
+  .g .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;
+    text-transform:uppercase;font-weight:600;margin-bottom:6px;display:flex;
+    justify-content:space-between;align-items:baseline}
+  .g.bfs{border-color:rgba(8,145,201,.35)} .g.bfs .h{color:var(--flow)}
+  .g.dfs{border-color:rgba(226,58,86,.32)} .g.dfs .h{color:var(--crit)}
+  .g.zz{border-color:rgba(242,97,12,.35)} .g.zz .h{color:var(--back)}
+  .g .h .n{font-size:11px;color:var(--muted);font-weight:400}
+  .g img{width:100%;display:block;border-radius:7px;background:#fff}
+  .g .cap{font-size:11px;color:var(--muted);line-height:1.38;margin-top:6px;padding-top:6px;
+    border-top:1px solid var(--line)}
+  .g .cap b{color:var(--ink)}
+  .note{margin-top:12px;background:rgba(8,145,201,.06);border:1px solid rgba(8,145,201,.3);
+    border-radius:11px;padding:12px 15px;font-size:12.5px;line-height:1.5;color:var(--txt)}
+  .note b{color:var(--ink)}
+  .note .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:5px}
+  .files{margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);line-height:1.7}
+  .files b{color:var(--flow)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>09b · Las animaciones</span><span>Generadas con animar_ford_fulkerson y animar_edmonds_karp</span></div>
+
+  <div class="body">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="g bfs anim d1">
+        <div class="h"><span>▸ propia_ek.gif · Edmonds-Karp con onda BFS</span><span class="n">5 iteraciones</span></div>
+        <img src="../assets/propia_ek.gif" alt="Edmonds-Karp sobre nuestra red, con la onda BFS"
+             style="height:132px;object-fit:contain;width:100%">
+        <div class="cap">A la izquierda la red de flujo; a la derecha la <b>onda BFS creciendo capa por capa</b> con la distancia <b>d</b> anotada bajo cada nodo. El camino resaltado siempre tiene <b>d(t)</b> arcos.</div>
+      </div>
+      <div class="g zz anim d3">
+        <div class="h"><span>▸ zigzag_adversario.gif · el peor caso en vivo</span><span class="n">M=3 · 6 iteraciones</span></div>
+        <img src="../assets/zigzag_adversario.gif" alt="El adversario alternante sobre la red zigzag"
+             style="height:150px;object-fit:contain;width:100%">
+        <div class="cap">El adversario alterna los dos caminos que cruzan la trampa. Cada par de iteraciones mueve <b>2 unidades</b>. Con BFS, la misma red se resuelve en <b>2 iteraciones</b>.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="g dfs anim d2">
+        <div class="h"><span>▸ propia_ff_dfs.gif · Ford-Fulkerson con DFS</span><span class="n">8 iteraciones</span></div>
+        <img src="../assets/propia_ff_dfs.gif" alt="Ford-Fulkerson con DFS sobre nuestra red"
+             style="height:132px;object-fit:contain;width:100%">
+        <div class="cap">La misma red que arriba, resuelta con <b>DFS</b>: <b>3 iteraciones más</b> para el mismo flujo de 24. A la derecha, la <b>red residual</b> — en rojo punteado los arcos de retroceso disponibles.</div>
+      </div>
+
+      <div class="note anim d4">
+        <div class="t">▸ Cómo leer estas animaciones</div>
+        <b style="color:var(--back)">Naranja</b> = camino aumentante · <b style="color:var(--cut)">púrpura</b> = aristas del corte mínimo · <b style="color:var(--flow)">azul</b> = arcos con flujo · <b>dorado</b> = nodos de S.<br><br>
+        En el panel derecho, <b style="color:var(--crit)">rojo punteado</b> son los <b>arcos de retroceso</b>: la capacidad de cancelar flujo ya enviado. Van en sentido contrario a los arcos que llevan flujo.<br><br>
+        El último fotograma muestra el <b>corte mínimo</b> con S en dorado — su capacidad coincide con el flujo máximo.
+      </div>
+
+      <div class="note anim d5" style="background:var(--panel-2);border-color:var(--line-2)">
+        <div class="t" style="color:var(--muted)">▸ Los siete GIF del entregable</div>
+        <div class="files" style="line-height:1.55">
+          <b>propia_ff_bfs</b> · <b>propia_ff_dfs</b> · <b>propia_ek</b><br>
+          <b>zigzag_adversario</b> · <b>zigzag_bfs</b><br>
+          <b>clrs_bfs</b> · <b>clrs_dfs</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>results/animations/ · generadas desde Julia</span><span>09b</span></div>
+</div></body></html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Parte 3 · Corte mínimo</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.15fr .85fr;gap:28px;margin-top:14px}
+  .shot{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:12px 14px}
+  .shot .h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--cut);font-weight:600;margin-bottom:7px;
+    display:flex;justify-content:space-between}
+  .shot img{width:100%;display:block;border-radius:8px}
+  .legend{display:flex;gap:16px;margin-top:9px;flex-wrap:wrap;padding-top:9px;border-top:1px solid var(--line)}
+  .lg{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted)}
+  .lg i{width:13px;height:13px;border-radius:50%;display:block;flex:none}
+
+  .calc{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:16px 18px}
+  .calc .h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--cut);font-weight:600;margin-bottom:10px}
+  .sets{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+  .set{display:flex;gap:9px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:12.5px}
+  .set .k{color:var(--muted);min-width:34px}
+  .set .v{font-weight:700;color:var(--ink)}
+  .set.s .v{color:var(--cut)}
+  .rows{border-top:1px solid var(--line);padding-top:10px}
+  .r{display:flex;align-items:center;gap:10px;padding:6px 0;font-family:'JetBrains Mono',monospace;font-size:12.5px;
+    animation:rise .5s cubic-bezier(.2,.7,.2,1) backwards}
+  .r .e{color:var(--cut);font-weight:700;min-width:52px}
+  .r .bar{flex:1;height:16px;background:var(--panel-2);border-radius:4px;overflow:hidden}
+  .r .fl{height:100%;background:linear-gradient(90deg,#8b5cf6,#5b4be0);border-radius:4px;
+    width:0;animation:grow 1s cubic-bezier(.2,.7,.2,1) forwards}
+  .r .c{color:var(--ink);font-weight:700;min-width:22px;text-align:right}
+  .r .sat{color:var(--green);font-size:10.5px;min-width:56px;text-align:right}
+  .sum{margin-top:10px;padding-top:11px;border-top:2px solid var(--line-2);
+    display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace}
+  .sum .l{font-size:12px;color:var(--muted)}
+  .sum .v{font-size:26px;font-weight:700;color:var(--cut)}
+  .eq{margin-top:12px;background:rgba(15,163,107,.07);border:1px solid rgba(15,163,107,.32);
+    border-radius:10px;padding:12px 14px;text-align:center;font-family:'JetBrains Mono',monospace;
+    font-size:15px;color:var(--ink);font-weight:600}
+  .eq .g{color:var(--green)}
+  .checks{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  .ch{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:var(--muted)}
+  .ch .ck{color:var(--green);font-weight:700;flex:none}
+  .ch b{color:var(--ink)}
+  .read{margin-top:12px;background:rgba(8,145,201,.06);border:1px solid rgba(8,145,201,.3);
+    border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.5;color:var(--txt)}
+  .read b{color:var(--ink)}
+  .read .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:5px}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>09 · Parte 3 · El corte mínimo</span><span>Verificado sumando a mano</span></div>
+
+  <div class="body">
+    <div>
+      <div class="shot anim d1">
+        <div class="h"><span>▸ Estado final · salida real de Julia</span><span>flujo 24</span></div>
+        <img src="../assets/propia_final.png" alt="Estado final con el corte mínimo">
+        <div class="legend">
+          <div class="lg"><i style="background:gold"></i>S = alcanzables desde s</div>
+          <div class="lg"><i style="background:#8b5cf6"></i>aristas del corte</div>
+          <div class="lg"><i style="background:steelblue"></i>arcos con flujo</div>
+          <div class="lg"><i style="background:indianred"></i>retroceso (residual)</div>
+        </div>
+      </div>
+
+      <div class="read anim d5">
+        <div class="t">▸ Qué significa este corte para un ingeniero de redes</div>
+        El corte <b>atraviesa el interior</b> de la red, no se limita a los arcos que entran a t. La red no está limitada por la entrada ni por la salida, sino por <b>tres estrangulamientos internos</b> (s→b, c→d, c→f) más el enlace <b>e→t</b>.<br><br>
+        Consecuencia práctica: <b>ampliar f→t no serviría de nada</b> — tiene 14 y usa 14, pero mientras c→f siga en 8, ese ancho no se puede alimentar. <b>Reforzar cualquier enlace fuera del corte es dinero perdido.</b>
+      </div>
+    </div>
+
+    <div>
+      <div class="calc anim d2">
+        <div class="h">▸ Verificación manual del teorema</div>
+        <div class="sets">
+          <div class="set s"><span class="k">S =</span><span class="v">{ s, a, c, e }</span></div>
+          <div class="set"><span class="k">V∖S =</span><span class="v" style="color:var(--muted)">{ b, d, f, g, t }</span></div>
+        </div>
+        <div class="rows">
+          <div class="r" style="animation-delay:.3s"><span class="e">s→b</span>
+            <div class="bar"><div class="fl" style="width:100%;animation-delay:.4s"></div></div>
+            <span class="c">8</span><span class="sat">8/8 ✓</span></div>
+          <div class="r" style="animation-delay:.4s"><span class="e">c→d</span>
+            <div class="bar"><div class="fl" style="width:62.5%;animation-delay:.5s"></div></div>
+            <span class="c">5</span><span class="sat">5/5 ✓</span></div>
+          <div class="r" style="animation-delay:.5s"><span class="e">c→f</span>
+            <div class="bar"><div class="fl" style="width:100%;animation-delay:.6s"></div></div>
+            <span class="c">8</span><span class="sat">8/8 ✓</span></div>
+          <div class="r" style="animation-delay:.6s"><span class="e">e→t</span>
+            <div class="bar"><div class="fl" style="width:37.5%;animation-delay:.7s"></div></div>
+            <span class="c">3</span><span class="sat">3/3 ✓</span></div>
+        </div>
+        <div class="sum"><span class="l">8 + 5 + 8 + 3 =</span><span class="v">24</span></div>
+        <div class="eq">24 <span class="g">=</span> flujo máximo <span class="g">✓</span></div>
+      </div>
+
+      <div class="calc anim d4" style="margin-top:14px">
+        <div class="h" style="color:var(--green)">▸ Dos comprobaciones que lo confirman</div>
+        <div class="checks">
+          <div class="ch"><span class="ck">✓</span><div><b>Las cuatro aristas están saturadas.</b> Tienen que estarlo: si a alguna le sobrara capacidad, su destino sería alcanzable desde s y estaría <b>dentro de S</b> — contradicción.</div></div>
+          <div class="ch"><span class="ck">✓</span><div><b>Ningún arco de V∖S hacia S lleva flujo.</b> También forzoso: si lo llevara, existiría su arco residual inverso y el origen estaría en S.</div></div>
+          <div class="ch"><span class="ck">✓</span><div><b>BFS y DFS llegan al mismo corte</b>, pese a repartir el flujo de forma distinta.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Teorema max-flow min-cut · verificado a mano</span><span>09 / 12</span></div>
+</div></body></html>

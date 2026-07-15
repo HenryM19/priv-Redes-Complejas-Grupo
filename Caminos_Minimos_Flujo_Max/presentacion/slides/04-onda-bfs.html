@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>La onda BFS</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.06fr .94fr;gap:32px;margin-top:16px}
+  .lead2{font-size:15.5px;color:var(--txt);line-height:1.55;margin-top:10px}.lead2 b{color:var(--ink)}
+
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:18px 20px;display:flex;flex-direction:column}
+  .stage .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:4px}
+  .stage .sh{font-size:12px;color:var(--muted);margin-bottom:10px}
+  svg.g{width:100%;height:258px;overflow:visible}
+  .edge{stroke:var(--line-2);stroke-width:1.8;fill:none;opacity:.45}
+  .edge.tree{stroke:var(--flow);stroke-width:3;opacity:1}
+  .edge.path{stroke:var(--back);stroke-width:4.6;opacity:1}
+  .node{fill:#eef2f9;stroke:var(--line-2);stroke-width:2;transition:all .45s ease}
+  .nlab{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;fill:var(--ink);
+    text-anchor:middle;dominant-baseline:central}
+  .dlab{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;fill:var(--flow);
+    text-anchor:middle;dominant-baseline:central;opacity:0;transition:opacity .4s ease}
+  .dlab.on{opacity:1}
+  .wave{fill:none;stroke:var(--flow);stroke-width:2;opacity:0}
+  .legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+  .lg{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+  .lg i{width:16px;height:3px;border-radius:2px;display:block}
+  .caption{margin-top:10px;background:var(--panel-2);border-radius:8px;padding:9px 12px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--txt);min-height:34px;
+    display:flex;align-items:center}
+  .caption b{color:var(--flow)}
+
+  .facts{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+  .fx{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.45}
+  .fx .k{font-family:'JetBrains Mono',monospace;color:var(--flow);font-weight:600;flex:none;min-width:52px}
+  .fx .v b{color:var(--ink)}
+  .key{margin-top:16px;background:rgba(8,145,201,.07);border:1px solid rgba(8,145,201,.3);
+    border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.5;color:var(--txt)}
+  .key b{color:var(--ink)}
+  .key .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:6px}
+  .levels{display:flex;gap:6px;margin-top:14px}
+  .lv{flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:var(--panel-2);
+    border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+  .lv b{display:block;font-size:15px;color:var(--ink);margin-bottom:2px}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>04 · Parte 1 · La onda BFS</span><span>¿Qué es d y por qué el camino tiene d(t) arcos?</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1">Edmonds-Karp por dentro</div>
+      <h2 class="anim d2" style="margin-top:6px;font-size:30px">La onda BFS</h2>
+      <p class="lead2 anim d3">BFS explora la red residual <b>por capas</b>. El número <code>d</code> bajo cada nodo es su <b>distancia desde s en número de arcos</b> — no en capacidad.</p>
+
+      <div class="facts anim d4">
+        <div class="fx"><div class="k">d(s)=0</div><div class="v">la fuente, capa cero</div></div>
+        <div class="fx"><div class="k">d(v)=k</div><div class="v">el camino más corto de <b>s a v</b> por arcos con capacidad libre tiene <b>k arcos</b></div></div>
+      </div>
+
+      <div class="key anim d5">
+        <div class="t">◆ Por qué el camino tiene exactamente d(t) arcos</div>
+        Cuando BFS descubre <b>t</b>, lo hace desde un nodo de capa <b>d(t)−1</b>, que vino de uno de capa <b>d(t)−2</b>… hasta s. El camino reconstruido tiene <b>un arco por capa</b>.<br><br>
+        Y no puede haber uno más corto: si existiera un camino de <b>k &lt; d(t)</b> arcos, BFS habría alcanzado t en la capa k. <b>Esta propiedad es toda la diferencia</b> con Ford-Fulkerson.
+      </div>
+
+      <div class="levels anim d6">
+        <div class="lv"><b>0</b>s</div>
+        <div class="lv"><b>1</b>v₁ · v₂</div>
+        <div class="lv"><b>2</b>v₃ · v₄</div>
+        <div class="lv"><b>3</b>t</div>
+      </div>
+    </div>
+
+    <div class="stage anim d3">
+      <div class="h">▸ Onda BFS en vivo · red CLRS, primera iteración</div>
+      <div class="sh">La onda crece capa por capa; el camino resaltado es el más corto.</div>
+      <svg class="g" viewBox="0 0 440 258" id="g"></svg>
+      <div class="legend">
+        <div class="lg"><i style="background:var(--flow)"></i>árbol BFS</div>
+        <div class="lg"><i style="background:var(--back)"></i>camino más corto</div>
+        <div class="lg"><i style="background:var(--line-2)"></i>arco residual</div>
+      </div>
+      <div class="caption" id="cap">&nbsp;</div>
+    </div>
+  </div>
+
+  <div class="footer"><span>BFS por capas · d(t) = longitud mínima</span><span>04 / 12</span></div>
+</div>
+
+<script>
+// Mini-animación en loop: ejecuta la BFS REAL de bfs_niveles (edmonds_karp.jl)
+// sobre la red CLRS con flujo cero, mostrando cómo la onda crece capa por capa.
+(function(){
+  const NAMES = ['s','v₁','v₂','v₃','v₄','t'];
+  const POS = [[32,129],[145,52],[145,206],[295,52],[295,206],[408,129]];
+  const N = 6, S = 0, T = 5;
+  const CAP = [
+    [0,16,13,0,0,0],
+    [0,0,0,12,0,0],
+    [0,4,0,0,14,0],
+    [0,0,9,0,0,20],
+    [0,0,0,7,0,4],
+    [0,0,0,0,0,0],
+  ];
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const g = document.getElementById('g'), cap = document.getElementById('cap');
+  const edges = {}, dlabs = [], nodes = [];
+
+  function el(tag, attrs, cls, parent){
+    const e = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (cls) e.setAttribute('class', cls);
+    (parent || g).appendChild(e); return e;
+  }
+  function build(){
+    g.innerHTML = '';
+    for (let u=0;u<N;u++) for (let v=0;v<N;v++){
+      if (!CAP[u][v]) continue;
+      const [x1,y1] = POS[u], [x2,y2] = POS[v];
+      const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L, R=17;
+      edges[u+'-'+v] = el('line', {x1:x1+ux*R, y1:y1+uy*R, x2:x2-ux*R, y2:y2-uy*R}, 'edge');
+    }
+    for (let i=0;i<N;i++){
+      nodes.push(el('circle', {cx:POS[i][0], cy:POS[i][1], r:17}, 'node'));
+      el('text', {x:POS[i][0], y:POS[i][1]}, 'nlab').textContent = NAMES[i];
+      dlabs.push(el('text', {x:POS[i][0], y:POS[i][1]+29}, 'dlab'));
+    }
+  }
+  // Paleta por nivel: la misma idea que PALETA_NIVELES en edmonds_karp.jl
+  const PAL = ['#0fa36b', '#0891c9', '#5b4be0', '#e23a56'];
+  function bfsNiveles(){
+    const nivel = new Array(N).fill(-1), padre = new Array(N).fill(-1), arbol = [];
+    nivel[S]=0; padre[S]=S;
+    const q=[S];
+    while(q.length){
+      const u=q.shift();
+      for(let v=0;v<N;v++){
+        if(nivel[v]===-1 && CAP[u][v] > 0){
+          nivel[v]=nivel[u]+1; padre[v]=u; arbol.push([u,v]); q.push(v);
+        }
+      }
+    }
+    const p=[T]; while(p[0]!==S) p.unshift(padre[p[0]]);
+    return {nivel, arbol, camino:p};
+  }
+  const {nivel, arbol, camino} = bfsNiveles();
+
+  function reset(){
+    for(const k in edges) edges[k].setAttribute('class','edge');
+    nodes.forEach(n => { n.setAttribute('fill','#eef2f9'); n.setAttribute('stroke','var(--line-2)'); });
+    dlabs.forEach(d => d.classList.remove('on'));
+    cap.innerHTML = '&nbsp;';
+  }
+  function showLevel(k){
+    // pintar nodos y arcos del árbol hasta la capa k
+    nodes.forEach((n,i) => {
+      if (nivel[i] >= 0 && nivel[i] <= k){
+        const c = PAL[Math.min(nivel[i], PAL.length-1)];
+        n.setAttribute('fill', c + '28'); n.setAttribute('stroke', c);
+        dlabs[i].classList.add('on');
+        dlabs[i].textContent = 'd=' + nivel[i];
+        dlabs[i].setAttribute('fill', c);
+      }
+    });
+    arbol.forEach(([u,v]) => {
+      if (nivel[v] <= k) edges[u+'-'+v].setAttribute('class','edge tree');
+    });
+    cap.innerHTML = k === 0 ? 'La onda arranca en <b>s</b> · d(s) = 0'
+                            : 'BFS explora la capa <b>&nbsp;' + k + '&nbsp;</b> · nodos a ' + k + ' arco' + (k>1?'s':'') + ' de s';
+  }
+  function showPath(){
+    for(let i=0;i<camino.length-1;i++)
+      edges[camino[i]+'-'+camino[i+1]].setAttribute('class','edge path');
+    cap.innerHTML = 'Camino más corto: <b>' + camino.map(i=>NAMES[i]).join(' → ') +
+                    '</b> · ' + (camino.length-1) + ' arcos = d(t) ✓';
+  }
+  function run(){
+    reset();
+    let k = 0;
+    const maxL = Math.max(...nivel);
+    (function next(){
+      if (k <= maxL){ showLevel(k); k++; setTimeout(next, 1050); }
+      else { setTimeout(() => { showPath(); setTimeout(() => setTimeout(run, 900), 2600); }, 350); }
+    })();
+  }
+  build();
+  setTimeout(run, 700);
+})();
+</script>
+</body></html>

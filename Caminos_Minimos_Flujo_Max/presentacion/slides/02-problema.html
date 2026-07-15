@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>El problema</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1.15fr;gap:36px;margin-top:16px}
+  .lead2{font-size:15.5px;color:var(--txt);line-height:1.55;margin-top:10px}.lead2 b{color:var(--ink)}
+  .formula{margin-top:16px;background:#0f1626;border-radius:10px;padding:14px 16px;text-align:center;
+    font-family:'JetBrains Mono',monospace;font-size:15px;color:#e8edf6}
+  .formula .k{color:#5ad1a0}.formula .v{color:#ffd23f}
+  .defs{margin-top:18px;display:flex;flex-direction:column;gap:11px}
+  .fx{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.45}
+  .fx .k{font-family:'JetBrains Mono',monospace;color:var(--flow);font-weight:600;flex:none;min-width:125px}
+  .fx .v b{color:var(--ink)}
+
+  /* --- animación: el ciclo de aumento --- */
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:18px 20px;display:flex;flex-direction:column}
+  .stage .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:4px}
+  .stage .sh{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .gwrap{flex:1;display:flex;align-items:center;justify-content:center}
+  svg.g{width:100%;height:236px;overflow:visible}
+  .edge{stroke:var(--line-2);stroke-width:2;fill:none}
+  .edge.used{stroke:var(--flow);stroke-width:3.4}
+  .edge.path{stroke:var(--back);stroke-width:4.6;stroke-dasharray:8 6;animation:flowdash 1.1s linear infinite}
+  .node{fill:var(--panel);stroke:var(--line-2);stroke-width:2}
+  .node.s{fill:rgba(15,163,107,.16);stroke:var(--green)}
+  .node.t{fill:rgba(226,58,86,.14);stroke:var(--crit)}
+  .node.on{stroke:var(--back);stroke-width:3;fill:rgba(242,97,12,.12)}
+  .nlab{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;fill:var(--ink);
+    text-anchor:middle;dominant-baseline:central}
+  .elab{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--muted);
+    text-anchor:middle;dominant-baseline:central}
+  .elab.used{fill:var(--flow);font-weight:600}
+  .steps{display:flex;gap:8px;margin-top:12px}
+  .st{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+    padding:8px 10px;font-size:11.5px;color:var(--muted);transition:all .3s ease;line-height:1.35}
+  .st.on{background:rgba(242,97,12,.1);border-color:var(--back);color:var(--ink)}
+  .st b{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--back);margin-bottom:2px;opacity:.55}
+  .st.on b{opacity:1}
+  .fnow{margin-top:11px;display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--muted)}
+  .fnow .bar{flex:1;height:9px;background:var(--panel-2);border-radius:5px;overflow:hidden}
+  .fnow .fill{height:100%;width:0;background:linear-gradient(90deg,var(--flow),var(--green));
+    border-radius:5px;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+  .fnow b{color:var(--ink);min-width:52px;text-align:right}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>02 · El problema</span><span>Flujo máximo y red residual</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1">¿Cuánto cabe por la red?</div>
+      <h2 class="anim d2" style="margin-top:6px;font-size:30px">Flujo máximo</h2>
+      <p class="lead2 anim d3">Una <b>red de flujo</b> es un grafo dirigido con capacidades <code>c(u,v)</code>, una fuente <code>s</code> y un sumidero <code>t</code>. Buscamos mandar <b>lo máximo posible</b> de s a t sin exceder ninguna capacidad.</p>
+
+      <div class="formula anim d3">r(u,v) = c(u,v) <span class="v">−</span> f(u,v)</div>
+
+      <div class="defs anim d4">
+        <div class="fx"><div class="k">Red residual</div><div class="v">lo que <b>todavía cabe</b> por cada arco</div></div>
+        <div class="fx"><div class="k">Camino aumentante</div><div class="v">un camino s→t en la red residual</div></div>
+        <div class="fx"><div class="k">Cuello de botella Δ</div><div class="v">la <b>mínima</b> capacidad residual del camino</div></div>
+        <div class="fx"><div class="k">Arco de retroceso</div><div class="v">permite <b>cancelar</b> flujo ya enviado y reencaminarlo</div></div>
+      </div>
+
+      <p class="lead2 anim d5" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+        Los <b>dos algoritmos</b> ejecutan exactamente este ciclo. La única diferencia está en el paso <span class="chip back" style="padding:2px 8px;font-size:11px">buscar</span> — y de ahí sale todo lo demás.</p>
+    </div>
+
+    <div class="stage anim d3">
+      <div class="h">▸ El ciclo de aumento · red CLRS real</div>
+      <div class="sh">Mientras exista un camino aumentante: buscarlo, calcular Δ, aumentar.</div>
+      <div class="gwrap">
+        <svg class="g" viewBox="0 0 460 236" id="g"></svg>
+      </div>
+      <div class="steps">
+        <div class="st" id="st0"><b>1 · buscar</b>camino s→t en la residual</div>
+        <div class="st" id="st1"><b>2 · Δ</b>mínima capacidad del camino</div>
+        <div class="st" id="st2"><b>3 · aumentar</b>empujar Δ por el camino</div>
+      </div>
+      <div class="fnow">
+        <span>flujo</span><div class="bar"><div class="fill" id="fill"></div></div><b id="fval">0 / 23</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Red de flujo · red residual · camino aumentante</span><span>02 / 12</span></div>
+</div>
+
+<script>
+// Mini-animación en loop: ejecuta Ford-Fulkerson DE VERDAD sobre la red CLRS
+// (la misma de la Parte 1) y muestra el ciclo buscar → Δ → aumentar.
+// No es una animación "decorativa": los caminos y los Δ salen del algoritmo.
+(function(){
+  const NAMES = ['s','v1','v2','v3','v4','t'];
+  const POS = [[30,118],[150,44],[150,192],[300,44],[300,192],[420,118]];
+  const N = 6, S = 0, T = 5;
+  // capacidades de la red CLRS (mismos números que redes.jl)
+  const CAP = [
+    [0,16,13,0,0,0],
+    [0,0,0,12,0,0],
+    [0,4,0,0,14,0],
+    [0,0,9,0,0,20],
+    [0,0,0,7,0,4],
+    [0,0,0,0,0,0],
+  ];
+  const g = document.getElementById('g');
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  let F, edges = {}, labels = {}, nodes = [];
+
+  function el(tag, attrs, cls){
+    const e = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (cls) e.setAttribute('class', cls);
+    g.appendChild(e); return e;
+  }
+  function build(){
+    g.innerHTML = '';
+    for (let u=0;u<N;u++) for (let v=0;v<N;v++){
+      if (!CAP[u][v]) continue;
+      const [x1,y1] = POS[u], [x2,y2] = POS[v];
+      const dx = x2-x1, dy = y2-y1, L = Math.hypot(dx,dy);
+      const ux = dx/L, uy = dy/L, R = 17;
+      const ax = x1+ux*R, ay = y1+uy*R, bx = x2-ux*R, by = y2-uy*R;
+      edges[u+'-'+v] = el('line', {x1:ax,y1:ay,x2:bx,y2:by}, 'edge');
+      labels[u+'-'+v] = el('text', {x:(ax+bx)/2 - uy*11, y:(ay+by)/2 + ux*11}, 'elab');
+    }
+    nodes = [];
+    for (let i=0;i<N;i++){
+      const c = el('circle', {cx:POS[i][0], cy:POS[i][1], r:17},
+                   'node' + (i===S?' s':i===T?' t':''));
+      el('text', {x:POS[i][0], y:POS[i][1]}, 'nlab').textContent = NAMES[i];
+      nodes.push(c);
+    }
+  }
+  function paint(path){
+    const inPath = new Set();
+    for (let i=0;i<(path||[]).length-1;i++) inPath.add(path[i]+'-'+path[i+1]);
+    for (const k in edges){
+      const [u,v] = k.split('-').map(Number);
+      const f = Math.max(F[u][v], 0);
+      edges[k].setAttribute('class', 'edge' + (inPath.has(k) ? ' path' : f>0 ? ' used' : ''));
+      labels[k].setAttribute('class', 'elab' + (f>0 ? ' used' : ''));
+      labels[k].textContent = f + '/' + CAP[u][v];
+    }
+    nodes.forEach((n,i) => {
+      const base = 'node' + (i===S?' s':i===T?' t':'');
+      n.setAttribute('class', base + ((path||[]).includes(i) ? ' on' : ''));
+    });
+  }
+  function bfs(){   // Edmonds-Karp: el camino más corto
+    const par = new Array(N).fill(-1); par[S] = S;
+    const q = [S];
+    while (q.length){
+      const u = q.shift();
+      for (let v=0;v<N;v++){
+        if (par[v] === -1 && CAP[u][v] - F[u][v] > 0){
+          par[v] = u;
+          if (v === T){ const p=[T]; while(p[0]!==S) p.unshift(par[p[0]]); return p; }
+          q.push(v);
+        }
+      }
+    }
+    return null;
+  }
+  function step(k){ ['st0','st1','st2'].forEach((id,i) =>
+    document.getElementById(id).classList.toggle('on', i === k)); }
+  function setFlow(f){
+    document.getElementById('fill').style.width = (100*f/23) + '%';
+    document.getElementById('fval').textContent = f + ' / 23';
+  }
+
+  let flow = 0;
+  function reset(){
+    F = Array.from({length:N}, () => new Array(N).fill(0));
+    flow = 0; build(); paint(null); setFlow(0); step(-1);
+  }
+  function iterate(){
+    step(0);                                    // 1 · buscar
+    const path = bfs();
+    if (!path){                                 // sin caminos ⇒ terminó
+      step(-1); paint(null);
+      setTimeout(() => { reset(); setTimeout(iterate, 900); }, 2200);
+      return;
+    }
+    paint(path);                                // resaltar el camino encontrado
+    setTimeout(() => {
+      step(1);                                  // 2 · calcular Δ
+      let d = Infinity;
+      for (let i=0;i<path.length-1;i++) d = Math.min(d, CAP[path[i]][path[i+1]] - F[path[i]][path[i+1]]);
+      setTimeout(() => {
+        step(2);                                // 3 · aumentar
+        for (let i=0;i<path.length-1;i++){
+          const u = path[i], v = path[i+1];
+          F[u][v] += d; F[v][u] -= d;
+        }
+        flow += d;
+        paint(null); setFlow(flow);
+        setTimeout(iterate, 1250);
+      }, 850);
+    }, 1050);
+  }
+  reset();
+  setTimeout(iterate, 800);
+})();
+</script>
+</body></html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Parte 2 · El zigzag</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:.92fr 1.08fr;gap:30px;margin-top:14px}
+  .lead2{font-size:15px;color:var(--txt);line-height:1.5;margin-top:8px}.lead2 b{color:var(--ink)}
+
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:16px 18px}
+  .stage .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--back);font-weight:600;margin-bottom:3px}
+  .stage .sh{font-size:11.5px;color:var(--muted);margin-bottom:8px}
+  svg.g{width:100%;height:150px;overflow:visible}
+  .edge{stroke:var(--line-2);stroke-width:2.4;fill:none}
+  .edge.trap{stroke:var(--back);stroke-width:2.6;stroke-dasharray:4 4}
+  .edge.on{stroke:var(--back);stroke-width:5;stroke-dasharray:7 5;animation:flowdash .9s linear infinite}
+  .edge.sat{stroke:var(--crit);stroke-width:3;opacity:.35}
+  .node{fill:var(--panel);stroke:var(--line-2);stroke-width:2.2}
+  .node.s{fill:rgba(15,163,107,.16);stroke:var(--green)}
+  .node.t{fill:rgba(226,58,86,.14);stroke:var(--crit)}
+  .nlab{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;fill:var(--ink);
+    text-anchor:middle;dominant-baseline:central}
+  .elab{font-family:'JetBrains Mono',monospace;font-size:10.5px;fill:var(--muted);
+    text-anchor:middle;dominant-baseline:central}
+  .trapv{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;fill:var(--back);
+    text-anchor:middle;dominant-baseline:central}
+  .cap{margin-top:8px;background:var(--panel-2);border-radius:8px;padding:8px 11px;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--txt);min-height:32px;
+    display:flex;align-items:center;gap:8px}
+  .cap b{color:var(--back)} .cap .it{color:var(--muted)}
+  .counter{display:flex;gap:9px;margin-top:9px}
+  .cn{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-align:center}
+  .cn b{display:block;font-size:16px;color:var(--ink);margin-top:2px}
+
+  table.tbl{font-size:12.5px;margin-top:2px} table.tbl td{padding:6.5px 8px}
+  table.tbl th{padding:6.5px 8px;font-size:9.5px}
+  table.tbl tr.hl td{background:rgba(226,58,86,.07);font-weight:600}
+  table.tbl tr.hl td:first-child{color:var(--crit)}
+  table.tbl tr.teo td{color:var(--muted);font-style:italic;border-top:2px solid var(--line-2)}
+  .num{font-family:'JetBrains Mono',monospace;text-align:right}
+  .verdict{margin-top:14px;background:rgba(226,58,86,.07);border:1px solid rgba(226,58,86,.3);
+    border-radius:12px;padding:14px 16px}
+  .verdict .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--crit);font-weight:600;margin-bottom:7px}
+  .verdict p{font-size:13.5px;line-height:1.5;color:var(--txt)}.verdict b{color:var(--ink)}
+  .why{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  .w{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:var(--muted)}
+  .w .k{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--back);font-weight:600;flex:none;min-width:74px}
+  .w b{color:var(--ink)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>06 · Parte 2 · El experimento zigzag</span><span>El peor caso 2M: real, pero difícil de provocar</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1" style="color:var(--back)">El arco trampa</div>
+      <h2 class="anim d2" style="margin-top:4px;font-size:28px">La red zigzag</h2>
+      <p class="lead2 anim d3">Dos rutas de capacidad <b>M</b> unidas por un arco trampa de capacidad <b>1</b>. La teoría dice que un Ford-Fulkerson que insistiera en cruzar la trampa necesitaría <b>2M iteraciones</b>.</p>
+
+      <div class="stage anim d4" style="margin-top:14px">
+        <div class="h">▸ El adversario alternante · M = 5</div>
+        <div class="sh">Alterna los dos caminos largos. El segundo reabre la trampa.</div>
+        <svg class="g" viewBox="0 0 400 150" id="g"></svg>
+        <div class="cap" id="cap">&nbsp;</div>
+        <div class="counter">
+          <div class="cn">iteración<b id="cIt">0</b></div>
+          <div class="cn">flujo<b id="cFl">0 / 10</b></div>
+          <div class="cn">Δ de esta ronda<b id="cD" style="color:var(--crit)">—</b></div>
+        </div>
+      </div>
+
+      <div class="why anim d6">
+        <div class="w"><div class="k">geometría</div><div>El camino trampa <b>s→u→v→t</b> tiene 3 arcos; el atajo <b>s→u→t</b> solo 2. Cualquier búsqueda que corte al ver <b>t</b> toma el atajo.</div></div>
+        <div class="w"><div class="k">la clave</div><div><b>s→v→u→t</b> usa el retroceso <b>v→u</b>, que cancela el flujo de la trampa y <b>la reabre</b>. El par se repite M veces.</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="stage anim d3" style="border-color:var(--line-2)">
+        <div class="h" style="color:var(--flow)">▸ Iteraciones medidas · flujo máximo = 2M siempre</div>
+        <table class="tbl">
+          <tr><th>Método</th><th class="num">M=10</th><th class="num">M=100</th><th class="num">M=1000</th><th class="num">M=10000</th></tr>
+          <tr><td>BFS (Edmonds-Karp)</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num"><b style="color:var(--green)">2</b></td></tr>
+          <tr><td>DFS del repositorio</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num"><b style="color:var(--green)">2</b></td></tr>
+          <tr><td>DFS orden invertido</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">2</td></tr>
+          <tr><td>DFS profunda (t al final)</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">4</td></tr>
+          <tr class="hl"><td>Adversario alternante</td><td class="num">20</td><td class="num">200</td><td class="num">2 000</td><td class="num">20 000</td></tr>
+          <tr class="teo"><td>peor caso teórico (2M)</td><td class="num">20</td><td class="num">200</td><td class="num">2 000</td><td class="num">20 000</td></tr>
+        </table>
+      </div>
+
+      <div class="verdict anim d5">
+        <div class="t">◆ Nuestro hallazgo principal</div>
+        <p><b>Ninguna DFS razonable alcanza el peor caso.</b> La del repositorio termina en <b>2 iteraciones</b> para cualquier M. Ni la DFS profunda basta: cruza la trampa una vez y luego el atajo se lleva M−1 de golpe.<br><br>
+        Hizo falta un <b>adversario que alterne</b> los dos caminos largos para clavar las <b>2M exactas</b>. <b>El peor caso no es culpa de DFS</b>, sino de la libertad de elegir mal que el método deja abierta.</p>
+      </div>
+
+      <div class="stage anim d7" style="margin-top:12px;background:rgba(8,145,201,.05);border-color:rgba(8,145,201,.3)">
+        <div class="h" style="color:var(--flow)">▸ ¿Por qué BFS es inmune, sin importar M?</div>
+        <p style="font-size:12.5px;line-height:1.45;color:var(--txt)">El adversario necesita caminos de <b style="color:var(--ink)">3 arcos</b>; BFS siempre encuentra el de <b style="color:var(--ink)">2</b>. <b style="color:var(--ink)">El arco trampa nunca se usa.</b> Su cota <code style="font-family:'JetBrains Mono';font-size:12px;color:var(--flow)">O(V·E²)</code> cuenta longitudes, no unidades de flujo.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Red zigzag · el peor caso construido a mano</span><span>06 / 12</span></div>
+</div>
+
+<script>
+// Mini-animación en loop: el adversario alternante REAL sobre la red zigzag M=5.
+// Alterna s→u→v→t (satura la trampa) y s→v→u→t (retroceso v→u que la REABRE).
+// Los Δ y el flujo salen de ejecutar el algoritmo, no están escritos a mano.
+(function(){
+  const M = 5;
+  const NAMES = ['s','u','v','t'];
+  const POS = [[36,75],[168,26],[168,124],[330,75]];
+  const S = 0, U = 1, V = 2, T = 3, N = 4;
+  const CAP0 = () => {
+    const C = Array.from({length:N}, () => new Array(N).fill(0));
+    C[S][U] = M; C[S][V] = M; C[U][V] = 1; C[U][T] = M; C[V][T] = M;
+    return C;
+  };
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const g = document.getElementById('g'), cap = document.getElementById('cap');
+  let C, F, edges = {}, trapLabel;
+
+  function el(tag, attrs, cls){
+    const e = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (cls) e.setAttribute('class', cls);
+    g.appendChild(e); return e;
+  }
+  function build(){
+    g.innerHTML = ''; edges = {};
+    const arcs = [[S,U],[S,V],[U,T],[V,T],[U,V]];
+    arcs.forEach(([u,v]) => {
+      const [x1,y1] = POS[u], [x2,y2] = POS[v];
+      const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L, R=18;
+      edges[u+'-'+v] = el('line', {x1:x1+ux*R, y1:y1+uy*R, x2:x2-ux*R, y2:y2-uy*R},
+                          'edge' + (u===U && v===V ? ' trap' : ''));
+      if (!(u===U && v===V)){
+        el('text', {x:(x1+x2)/2 - uy*13, y:(y1+y2)/2 + ux*13}, 'elab').textContent = 'M=' + M;
+      }
+    });
+    trapLabel = el('text', {x:190, y:75}, 'trapv');
+    for (let i=0;i<N;i++){
+      el('circle', {cx:POS[i][0], cy:POS[i][1], r:18},
+         'node' + (i===S?' s':i===T?' t':''));
+      el('text', {x:POS[i][0], y:POS[i][1]}, 'nlab').textContent = NAMES[i];
+    }
+  }
+  function paint(path){
+    const inPath = new Set();
+    for (let i=0;i<(path||[]).length-1;i++) inPath.add(path[i]+'-'+path[i+1]);
+    for (const k in edges){
+      const [u,v] = k.split('-').map(Number);
+      const isTrap = (u===U && v===V);
+      const r = C[u][v] - F[u][v];
+      let cls = 'edge' + (isTrap ? ' trap' : '');
+      if (inPath.has(k)) cls = 'edge on';
+      else if (!isTrap && r === 0) cls = 'edge sat';
+      edges[k].setAttribute('class', cls);
+    }
+    // el camino de retroceso v→u no tiene línea propia: se resalta la trampa
+    if ((path||[]).length && path[1] === V && path[2] === U)
+      edges[U+'-'+V].setAttribute('class','edge on');
+    trapLabel.textContent = 'r=' + (C[U][V] - F[U][V]);
+  }
+  const RUTAS = [[S,U,V,T], [S,V,U,T]];   // los dos caminos que cruzan la trampa
+  function disponible(p){
+    for (let i=0;i<p.length-1;i++) if (C[p[i]][p[i+1]] - F[p[i]][p[i+1]] <= 0) return false;
+    return true;
+  }
+  let it, flujo;
+  function reset(){
+    C = CAP0();
+    F = Array.from({length:N}, () => new Array(N).fill(0));
+    it = 0; flujo = 0;
+    build(); paint(null);
+    document.getElementById('cIt').textContent = '0';
+    document.getElementById('cFl').textContent = '0 / ' + (2*M);
+    document.getElementById('cD').textContent = '—';
+    cap.innerHTML = '<span class="it">el arco trampa vale 1 · el flujo máximo es ' + (2*M) + '</span>';
+  }
+  function iterate(){
+    const p = RUTAS.find(disponible);
+    if (!p){
+      cap.innerHTML = '<b>' + it + ' iteraciones</b> <span class="it">para transportar ' + flujo + ' unidades — de 1 en 1</span>';
+      setTimeout(() => { reset(); setTimeout(iterate, 1000); }, 3000);
+      return;
+    }
+    paint(p);
+    let d = Infinity;
+    for (let i=0;i<p.length-1;i++) d = Math.min(d, C[p[i]][p[i+1]] - F[p[i]][p[i+1]]);
+    const usaRetroceso = p[1] === V;   // s→v→u→t usa el retroceso v→u
+    it++;
+    document.getElementById('cIt').textContent = it;
+    document.getElementById('cD').textContent = 'Δ = ' + d;
+    cap.innerHTML = '<b>' + p.map(i=>NAMES[i]).join(' → ') + '</b> ' +
+      (usaRetroceso ? '<span class="it">· retroceso v→u ⇒ REABRE la trampa</span>'
+                    : '<span class="it">· satura el arco trampa u→v</span>');
+    setTimeout(() => {
+      for (let i=0;i<p.length-1;i++){ const u=p[i], v=p[i+1]; F[u][v]+=d; F[v][u]-=d; }
+      flujo += d;
+      document.getElementById('cFl').textContent = flujo + ' / ' + (2*M);
+      paint(null);
+      setTimeout(iterate, 620);
+    }, 1150);
+  }
+  reset();
+  setTimeout(iterate, 900);
+})();
+</script>
+</body></html>

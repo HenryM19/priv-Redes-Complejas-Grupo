@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Parte 4 · Comparación</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.32fr .68fr;gap:26px;margin-top:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:15px 18px}
+  .card .h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;font-weight:600;margin-bottom:10px;color:var(--flow)}
+  table.cmp{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.cmp th{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:10px;
+    letter-spacing:.07em;text-transform:uppercase;text-align:left;padding:8px 9px;
+    border-bottom:2px solid var(--line-2)}
+  table.cmp th.ff{color:var(--crit)} table.cmp th.ek{color:var(--flow)}
+  table.cmp td{padding:5.5px 9px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.32}
+  table.cmp td.crit{font-weight:600;color:var(--ink);font-size:12px}
+  table.cmp td.ff{color:var(--txt)} table.cmp td.ek{color:var(--txt)}
+  table.cmp .mono{font-family:'JetBrains Mono',monospace;font-size:11.5px}
+  table.cmp tr.hero td{background:rgba(226,58,86,.06)}
+  table.cmp tr.hero td.crit{color:var(--crit)}
+  table.cmp tr:last-child td{border-bottom:none}
+  .win{color:var(--green);font-weight:700} .lose{color:var(--crit);font-weight:700}
+
+  .side{display:flex;flex-direction:column;gap:13px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px;box-shadow:var(--shadow-sm)}
+  .box .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;
+    text-transform:uppercase;font-weight:600;margin-bottom:7px}
+  .box p{font-size:12.5px;line-height:1.5;color:var(--muted)}.box b{color:var(--ink)}
+  .box.sens{border-color:rgba(224,138,0,.32);background:rgba(224,138,0,.05)}
+  .box.sens .t{color:var(--amber)}
+  .box.hon{border-color:rgba(105,116,138,.35);background:var(--panel-2)}
+  .box.hon .t{color:var(--muted)}
+  .box.rec{border-color:rgba(15,163,107,.35);background:rgba(15,163,107,.05)}
+  .box.rec .t{color:var(--green)}
+  .ktab{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:6px}
+  .ktab td{padding:3.5px 5px;border-bottom:1px solid var(--line)}
+  .ktab td:first-child{color:var(--muted)}
+  .ktab td:last-child{text-align:right;color:var(--ink);font-weight:600}
+  .ktab tr:last-child td{border-bottom:none}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>10 · Parte 4 · Análisis comparativo</span><span>Cuadro 3 · toda la evidencia junta</span></div>
+
+  <div class="body">
+    <div class="card anim d1">
+      <div class="h">▸ Cuadro comparativo · todo medido por nosotros salvo donde se indica</div>
+      <table class="cmp">
+        <tr><th style="width:27%">Criterio</th><th class="ff" style="width:36%">Ford-Fulkerson (DFS)</th><th class="ek" style="width:37%">Edmonds-Karp (BFS)</th></tr>
+        <tr><td class="crit">Estrategia de búsqueda</td>
+            <td class="ff">El <b>primer</b> camino que encuentre</td>
+            <td class="ek">Siempre el <b>más corto</b> en nº de arcos</td></tr>
+        <tr><td class="crit">Complejidad teórica</td>
+            <td class="ff mono">O(E·|f*|)</td>
+            <td class="ek mono">O(V·E²)</td></tr>
+        <tr><td class="crit">¿Termina con capacidades irracionales?</td>
+            <td class="ff"><span class="lose">No garantizado</span><br><span style="font-size:11px;color:var(--muted)">(Zwick 1995 · teoría citada)</span></td>
+            <td class="ek"><span class="win">Sí, siempre</span><br><span style="font-size:11px;color:var(--muted)">(≤ V·E/2 iteraciones)</span></td></tr>
+        <tr><td class="crit">Iteraciones · CLRS</td>
+            <td class="ff mono">3</td><td class="ek mono">3</td></tr>
+        <tr class="hero"><td class="crit">Iteraciones · zigzag M=10⁴</td>
+            <td class="ff mono">2 <span style="color:var(--muted)">(repo)</span> · <span class="lose">20 000</span> <span style="color:var(--muted)">(adversario)</span></td>
+            <td class="ek mono"><span class="win">2</span></td></tr>
+        <tr><td class="crit">Iteraciones · nuestra red</td>
+            <td class="ff mono"><span class="lose">8</span></td><td class="ek mono"><span class="win">5</span></td></tr>
+        <tr class="hero"><td class="crit">Longitudes de los caminos</td>
+            <td class="ff mono">3,4,3,4,3,4,5,6 — <span class="lose">oscilan</span></td>
+            <td class="ek mono">3,3,3,5,7 — <span class="win">no decrecen</span></td></tr>
+        <tr><td class="crit">Sensibilidad al valor de las capacidades</td>
+            <td class="ff">Sí en el peor caso (2M)</td>
+            <td class="ek">No: <b>la cota no menciona capacidades</b></td></tr>
+        <tr><td class="crit">Flujo máximo · nuestra red</td>
+            <td class="ff mono">24</td><td class="ek mono">24</td></tr>
+        <tr><td class="crit">Corte mínimo · nuestra red</td>
+            <td class="ff mono">{s,a,c,e} = 24</td><td class="ek mono">{s,a,c,e} = 24</td></tr>
+      </table>
+    </div>
+
+    <div class="side">
+      <div class="box sens anim d2">
+        <div class="t">▸ Experimento propio · sensibilidad</div>
+        <p>Multiplicamos <b>todas</b> las capacidades de nuestra red por k:</p>
+        <table class="ktab">
+          <tr><td>k</td><td>flujo · BFS · DFS</td></tr>
+          <tr><td>1</td><td>24 · 5 · 8</td></tr>
+          <tr><td>10</td><td>240 · 5 · 8</td></tr>
+          <tr><td>100</td><td>2 400 · 5 · 8</td></tr>
+          <tr><td>1000</td><td>24 000 · 5 · 8</td></tr>
+        </table>
+        <p style="margin-top:8px">El flujo escala <b>×1000</b>; las iteraciones <b>ni se mueven</b>. En una red concreta DFS puede ser insensible al valor — la diferencia es que para BFS está <b>garantizado</b> y para DFS es <b>suerte</b>.</p>
+      </div>
+
+      <div class="box hon anim d4">
+        <div class="t">▸ Nota de honestidad · irracionales</div>
+        <p><b>No presentamos experimento propio.</b> Reproducir Zwick exige aritmética exacta en <span style="font-family:'JetBrains Mono'">ℚ(√5)</span>: en Float64 el invariante se rompe por redondeo y el algoritmo terminaría <b>por el error numérico, no por el algoritmo</b>. Citamos la teoría y apoyamos el argumento en el peor caso 2M, que <b>sí</b> es evidencia nuestra.</p>
+      </div>
+
+      <div class="box rec anim d5">
+        <div class="t">▸ Nuestra recomendación</div>
+        <p><b>Edmonds-Karp por defecto.</b> El precio es cero y compra una garantía <b>independiente de los datos</b>. DFS solo si se conoce la red <b>y</b> se verificó que el patrón patológico no aparece — <b>más fácil de suponer que de comprobar</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Cuadro 3 · Ford-Fulkerson vs Edmonds-Karp</span><span>10 / 12</span></div>
+</div></body></html>

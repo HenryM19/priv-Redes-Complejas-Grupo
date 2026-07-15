@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Parte 3 · Resultados</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:11px 15px}
+  .card .h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;font-weight:600;margin-bottom:7px;display:flex;justify-content:space-between;align-items:baseline}
+  .card.bfs{border-color:rgba(8,145,201,.35)} .card.bfs .h{color:var(--flow)}
+  .card.dfs{border-color:rgba(226,58,86,.32)} .card.dfs .h{color:var(--crit)}
+  .card .h .n{font-size:19px;font-weight:700}
+  table.tbl{font-size:11.5px} table.tbl td{padding:3.4px 6px} table.tbl th{padding:3.4px 6px;font-size:9px}
+  .ruta{font-family:'JetBrains Mono',monospace;font-size:10.5px}
+  tr.ret td{background:rgba(242,97,12,.08)}
+  tr.ret td:last-child{color:var(--back);font-weight:700}
+  .d1n{font-family:'JetBrains Mono',monospace;text-align:right}
+
+  /* panel comparativo de longitudes: la evidencia visual del lema */
+  .cmp2{display:grid;grid-template-columns:5fr 8fr;gap:18px;margin-top:16px}
+  .cmp2 .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:700;margin-bottom:19px;text-align:center}
+  .bars{display:flex;align-items:flex-end;gap:4px;height:54px}
+  .b{flex:1;border-radius:3px 3px 0 0;position:relative;
+    animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards}
+  .b span{position:absolute;top:-14px;left:0;right:0;text-align:center;
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--ink)}
+  .side.bfs .b{background:linear-gradient(180deg,#0891c9,#0670a0)}
+  .side.dfs .b{background:linear-gradient(180deg,#e23a56,#b82a42)}
+  .side.dfs .b.down{background:linear-gradient(180deg,#f2610c,#c04a05)}
+  .side.dfs .b.down::after{content:'↓';position:absolute;bottom:-14px;left:0;right:0;text-align:center;
+    font-size:9px;color:var(--back);font-weight:700}
+
+  .key{margin-top:14px;background:rgba(8,145,201,.06);border:1px solid rgba(8,145,201,.3);
+    border-radius:12px;padding:14px 16px}
+  .key .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:7px}
+  .key p{font-size:13px;line-height:1.5;color:var(--txt)}.key b{color:var(--ink)}
+  .back-note{margin-top:12px;background:rgba(242,97,12,.07);border:1px solid rgba(242,97,12,.3);
+    border-radius:10px;padding:11px 13px;font-size:12.5px;line-height:1.5;color:var(--txt)}
+  .back-note b{color:var(--ink)}
+  .back-note .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--back);font-weight:600;margin-bottom:5px}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>08 · Parte 3 · Resultados</span><span>La evidencia del lema, en la misma red</span></div>
+
+  <div class="body">
+    <div>
+      <div class="card bfs anim d1">
+        <div class="h"><span>▸ Edmonds-Karp (BFS)</span><span class="n">5 iteraciones</span></div>
+        <table class="tbl">
+          <tr><th>It</th><th>Camino</th><th class="d1n">L</th><th class="d1n">Δ</th><th class="d1n">Flujo</th><th></th></tr>
+          <tr><td>1</td><td class="ruta">s → a → e → t</td><td class="d1n">3</td><td class="d1n">3</td><td class="d1n">3</td><td></td></tr>
+          <tr><td>2</td><td class="ruta">s → b → f → t</td><td class="d1n">3</td><td class="d1n">8</td><td class="d1n">11</td><td></td></tr>
+          <tr><td>3</td><td class="ruta">s → c → f → t</td><td class="d1n">3</td><td class="d1n">6</td><td class="d1n">17</td><td></td></tr>
+          <tr><td>4</td><td class="ruta">s → a → c → d → g → t</td><td class="d1n">5</td><td class="d1n">5</td><td class="d1n">22</td><td></td></tr>
+          <tr class="ret"><td>5</td><td class="ruta">s → a → c → f → b → d → g → t</td><td class="d1n">7</td><td class="d1n">2</td><td class="d1n"><b>24</b></td><td>↩</td></tr>
+        </table>
+      </div>
+
+      <div class="card dfs anim d4" style="margin-top:14px">
+        <div class="h"><span>▸ Ford-Fulkerson (DFS)</span><span class="n">8 iteraciones</span></div>
+        <table class="tbl">
+          <tr><th>It</th><th>Camino</th><th class="d1n">L</th><th class="d1n">Δ</th><th class="d1n">Flujo</th><th></th></tr>
+          <tr><td>1</td><td class="ruta">s → a → e → t</td><td class="d1n">3</td><td class="d1n">3</td><td class="d1n">3</td><td></td></tr>
+          <tr><td>2</td><td class="ruta">s → b → d → g → t</td><td class="d1n">4</td><td class="d1n">6</td><td class="d1n">9</td><td></td></tr>
+          <tr><td>3</td><td class="ruta">s → b → f → t</td><td class="d1n">3</td><td class="d1n">2</td><td class="d1n">11</td><td></td></tr>
+          <tr><td>4</td><td class="ruta">s → c → d → g → t</td><td class="d1n">4</td><td class="d1n">1</td><td class="d1n">12</td><td></td></tr>
+          <tr><td>5</td><td class="ruta">s → c → f → t</td><td class="d1n">3</td><td class="d1n">5</td><td class="d1n">17</td><td></td></tr>
+          <tr><td>6</td><td class="ruta">s → a → c → f → t</td><td class="d1n">4</td><td class="d1n">3</td><td class="d1n">20</td><td></td></tr>
+          <tr><td>7</td><td class="ruta">s → a → c → d → f → t</td><td class="d1n">5</td><td class="d1n">3</td><td class="d1n">23</td><td></td></tr>
+          <tr class="ret"><td>8</td><td class="ruta">s → a → c → d → b → f → t</td><td class="d1n">6</td><td class="d1n">1</td><td class="d1n"><b>24</b></td><td>↩</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card anim d2" style="border-color:var(--line-2)">
+        <div class="h" style="color:var(--ink)">▸ Longitudes de los caminos aumentantes · la evidencia del lema</div>
+        <div class="cmp2">
+          <div class="side bfs">
+            <div class="lbl c-flow">BFS · nunca decrecen ✓</div>
+            <div class="bars">
+              <div class="b" style="height:43%;animation-delay:.2s"><span>3</span></div>
+              <div class="b" style="height:43%;animation-delay:.3s"><span>3</span></div>
+              <div class="b" style="height:43%;animation-delay:.4s"><span>3</span></div>
+              <div class="b" style="height:71%;animation-delay:.5s"><span>5</span></div>
+              <div class="b" style="height:100%;animation-delay:.6s"><span>7</span></div>
+            </div>
+          </div>
+          <div class="side dfs">
+            <div class="lbl c-crit">DFS · decrecen 3 veces ✗</div>
+            <div class="bars">
+              <div class="b" style="height:43%;animation-delay:.2s"><span>3</span></div>
+              <div class="b" style="height:57%;animation-delay:.27s"><span>4</span></div>
+              <div class="b down" style="height:43%;animation-delay:.34s"><span>3</span></div>
+              <div class="b" style="height:57%;animation-delay:.41s"><span>4</span></div>
+              <div class="b down" style="height:43%;animation-delay:.48s"><span>3</span></div>
+              <div class="b" style="height:57%;animation-delay:.55s"><span>4</span></div>
+              <div class="b" style="height:71%;animation-delay:.62s"><span>5</span></div>
+              <div class="b" style="height:86%;animation-delay:.69s"><span>6</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="key anim d3" style="margin-top:13px">
+        <div class="t">◆ Esta es la evidencia central del lema</div>
+        <p>Misma red. Misma implementación. <b>Solo cambia la línea que elige el camino.</b> La demostración de <code style="font-family:'JetBrains Mono';font-size:12px;color:var(--flow)">O(V·E²)</code> se apoya exactamente en que las longitudes <b>no pueden decrecer</b> — y aquí se ve pasar.</p>
+      </div>
+
+      <div class="key anim d4" style="background:rgba(226,58,86,.05);border-color:rgba(226,58,86,.3)">
+        <div class="t" style="color:var(--crit)">◆ El desperdicio, en números</div>
+        <p>DFS gasta las iteraciones <b>4 y 8</b> en aumentos de <b>Δ = 1</b>. BFS <b>nunca baja de Δ = 2</b>.<br>
+        Mismo flujo final (24), <b>60% más de iteraciones</b>.</p>
+      </div>
+
+      <div class="back-note anim d5">
+        <div class="t">▸ Arcos de retroceso · uno por método, en su última iteración</div>
+        <b>BFS · iter 5</b> — el arco <b>f→b</b> cancela <b>2</b> de las 8 unidades que la iteración 2 mandó por b→f. Esas 2 salen ahora por b→d→g→t, y el hueco en f→t lo llena el tráfico de c→f.<br><br>
+        <b>DFS · iter 8</b> — el arco <b>d→b</b> cancela <b>1</b> de las 6 unidades enviadas por b→d.<br><br>
+        En ambos casos el retroceso es lo que permite exprimir las <b>últimas unidades</b>: sin cancelar, los algoritmos se habrían detenido en <b>22 y 23</b>, por debajo del óptimo.
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer"><span>Nuestra red · flujo máximo 24 · BFS 5 vs DFS 8</span><span>08 / 12</span></div>
+</div></body></html>

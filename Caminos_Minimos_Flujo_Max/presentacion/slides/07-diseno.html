@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Parte 3 · Diseño</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1.04fr;gap:30px;margin-top:14px}
+  .lead2{font-size:15px;color:var(--txt);line-height:1.5;margin-top:8px}.lead2 b{color:var(--ink)}
+  .net{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:14px 16px;margin-top:14px}
+  .net .h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:6px}
+  .net img{width:100%;height:178px;object-fit:contain;display:block;border-radius:8px}
+  .reqs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+  .rq{background:rgba(15,163,107,.06);border:1px solid rgba(15,163,107,.3);border-radius:9px;
+    padding:9px 11px;font-size:12px;color:var(--txt);display:flex;align-items:center;gap:8px}
+  .rq b{color:var(--ink)}
+  .rq .ck{color:var(--green);font-weight:700;flex:none}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:16px 18px}
+  .card .h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--back);font-weight:600;margin-bottom:9px}
+  .fails{margin-top:4px}
+  .fr{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .fr .lab{font-size:12px;color:var(--txt);width:190px;flex:none;line-height:1.3}
+  .fr .track{flex:1;height:20px;background:var(--panel-2);border-radius:5px;overflow:hidden}
+  .fr .fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#fff;font-weight:600;
+    width:0;animation:grow 1.2s cubic-bezier(.2,.7,.2,1) forwards}
+  .fr .fill.a{background:linear-gradient(90deg,#e23a56,#c02840)}
+  .fr .fill.b{background:linear-gradient(90deg,#f2610c,#d04e05)}
+  .fr .fill.c{background:linear-gradient(90deg,#e08a00,#b87000)}
+  .fr .pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);width:46px;text-align:right;flex:none}
+  .punch{margin-top:12px;background:rgba(226,58,86,.07);border:1px solid rgba(226,58,86,.3);
+    border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;color:var(--txt)}
+  .punch b{color:var(--ink)}
+  .punch .n{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--crit)}
+  .story{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+  .sr{display:flex;gap:11px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:var(--muted)}
+  .sr .k{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;flex:none;min-width:78px;padding-top:1px}
+  .sr.bad .k{color:var(--crit)} .sr.good .k{color:var(--green)}
+  .sr b{color:var(--ink)}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>07 · Parte 3 · Diseño de la red</span><span>Por qué costó tanto encontrarla</span></div>
+
+  <div class="body">
+    <div>
+      <div class="kicker anim d1">Nuestra red</div>
+      <h2 class="anim d2" style="margin-top:4px;font-size:28px">Backbone de un ISP</h2>
+      <p class="lead2 anim d3"><b>s</b> es el punto de peering donde entra el tráfico, <b>t</b> el data center que lo consume, los intermedios son enrutadores. Capacidades en <b>Gb/s</b>.</p>
+
+      <div class="net anim d4">
+        <div class="h">▸ 9 nodos · 16 arcos · antiparalelo c ⇄ d</div>
+        <img src="../assets/propia_topologia.png" alt="Topología de nuestra red">
+      </div>
+
+      <div class="reqs anim d5">
+        <div class="rq"><span class="ck">✓</span><span><b>9 nodos</b> · se piden ≥ 8</span></div>
+        <div class="rq"><span class="ck">✓</span><span><b>16 arcos</b> · se piden ≥ 12</span></div>
+        <div class="rq"><span class="ck">✓</span><span><b>c ⇄ d</b> antiparalelo (5/7)</span></div>
+        <div class="rq"><span class="ck">✓</span><span><b>BFS 5 ≠ DFS 8</b> iteraciones</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card anim d3">
+        <div class="h">▸ El proceso de diseño · 400 000 combinaciones probadas</div>
+        <div class="story">
+          <div class="sr bad"><div class="k">intento 1</div><div>Capacidades <b>a ojo</b>. Falló 2 de 4 requisitos: BFS y DFS daban ambos 7 iteraciones y <b>nadie usaba retroceso</b>. Encima el corte salía trivial.</div></div>
+          <div class="sr good"><div class="k">intento 2</div><div>La topología se dibuja a mano; las <b>capacidades se buscan</b>. Exigimos 6 condiciones a la vez y exploramos el espacio 2..15.</div></div>
+        </div>
+      </div>
+
+      <div class="card anim d4" style="margin-top:14px">
+        <div class="h" style="color:var(--crit)">▸ Por qué se descartó cada candidata</div>
+        <div class="fails">
+          <div class="fr"><div class="lab">DFS <b>no</b> resulta peor que BFS</div>
+            <div class="track"><div class="fill a" style="width:100%;animation-delay:.2s">309 909</div></div>
+            <div class="pct">77.5%</div></div>
+          <div class="fr"><div class="lab">BFS no usa retroceso</div>
+            <div class="track"><div class="fill b" style="width:28.4%;animation-delay:.35s">88 074</div></div>
+            <div class="pct">22.0%</div></div>
+          <div class="fr"><div class="lab">DFS no usa retroceso</div>
+            <div class="track"><div class="fill c" style="width:2.5%;animation-delay:.5s"></div></div>
+            <div class="pct">0.5%</div></div>
+          <div class="fr"><div class="lab">Corte mínimo trivial</div>
+            <div class="track"><div class="fill c" style="width:1%;animation-delay:.6s"></div></div>
+            <div class="pct">0.01%</div></div>
+        </div>
+      </div>
+
+      <div class="punch anim d6">
+        Solo el <span class="n">0.02%</span> de las redes cumple las seis condiciones a la vez.<br><br>
+        Ese número <b>es un resultado en sí mismo</b>: con capacidades al azar, <b>DFS iguala o supera a BFS el 77.5% de las veces</b>. Por eso la red CLRS no logra separarlos.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>El diseño de la red también se evalúa · intentos fallidos incluidos</span><span>07 / 12</span></div>
+</div></body></html>
