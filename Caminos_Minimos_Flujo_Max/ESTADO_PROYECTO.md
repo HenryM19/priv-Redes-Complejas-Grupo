@@ -6,6 +6,50 @@
 
 ---
 
+## ⚠️ Hay DOS soluciones completas en esta carpeta — hay que decidir qué se entrega
+
+Henry y Jean resolvimos la actividad **en paralelo, sin coordinarnos**. El merge fue
+limpio (los archivos no colisionan), así que ahora conviven las dos:
+
+| | Henry | Jean |
+|---|---|---|
+| **Código** | `src/01_ford_fulkerson.jl`, `02_edmonds_karp.jl`, `03..06_parte*.jl` | `src/{motor,redes,busqueda_red}.jl`, `src/parte{1,2,3,4}_*.jl` |
+| **Resultados** | `results/{files,images,animations}/parte*` | `results/{data,animations}/` |
+| **Informe** | `results/report/report.md` | `INFORME.md` |
+| **Diapositivas** | — | `presentacion/` (13 láminas + libreto) |
+| **Red propia** | 8 nodos, 14 arcos | 9 nodos, 16 arcos |
+| **Ejecutado con** | motor Python equivalente (no tuvo acceso a instalar Julia) | **Julia 1.12.5 real** |
+
+### Las dos soluciones se validan mutuamente
+
+Esto es lo valioso del merge: **dos implementaciones independientes, en dos lenguajes
+distintos, dan los mismos números**.
+
+- **Red CLRS** — los dos obtenemos 3 iteraciones con los mismos caminos y los mismos Δ,
+  tanto en BFS como en DFS. Y los dos medimos `usa_arco_retroceso = False` en **todas**
+  las iteraciones: la guía da por supuesto que hay un retroceso en CLRS y **no lo hay**.
+- **Zigzag** — los dos medimos que la DFS de orden invertido **no empeora nada** (2
+  iteraciones para todo M), y que hace falta un adversario explícito para llegar a 2M.
+  Henry lo llama «oráculo adversarial», Jean «adversario alternante»; los dos dan
+  20 / 200 / 2 000 / 20 000 exactos.
+- **La conclusión de fondo también coincide**, escrita por separado: el peor caso no lo
+  produce DFS, sino la libertad de elegir mal que Ford-Fulkerson deja abierta; BFS es
+  inmune porque mientras exista el camino de 2 arcos nunca tomará el de 3.
+
+### Qué hay que decidir entre los dos
+
+1. **Cuál red propia se entrega.** Son distintas (8/14 vs 9/16) y las dos cumplen los
+   cuatro requisitos. La de Jean tiene además corte no trivial y documentación del
+   proceso de búsqueda; la de Henry es más pequeña y quizá más fácil de explicar en clase.
+2. **Cuál informe.** `report.md` o `INFORME.md`, o uno fusionado.
+3. **Ejecutar los scripts de Henry con Julia real** antes de entregar — él mismo lo
+   recomienda en su nota metodológica, porque sus números salieron de un motor Python
+   equivalente. Los de Jean ya están corridos en Julia 1.12.5.
+4. Si se entrega una sola solución, **borrar la otra de la carpeta** para no confundir al
+   profesor. Ninguno de los dos debería borrar el trabajo del otro sin hablarlo.
+
+---
+
 ## Avance global
 
 | Parte | Puntos | Estado | Evidencia |

@@ -6,7 +6,7 @@ Capítulo de Optimización en Redes · Actividad práctica en parejas
 | | |
 |---|---|
 | **Integrante 1** | Jean Carlo Aucapiña — jean.aucapina@ucuenca.edu.ec |
-| **Integrante 2** | *(completar: nombre y correo institucional)* |
+| **Integrante 2** | Henry M. — *(completar: nombre completo y correo institucional)* |
 | **Código base** | [fabianastudillo/ComplexNetworks](https://github.com/fabianastudillo/ComplexNetworks) · `optimization/ford-fulkerson/`, `optimization/edmonds-karp/` |
 | **Reproducir** | `julia --project=. src/parte1_exploracion.jl` … `src/parte4_comparacion.jl` |
 
@@ -21,6 +21,8 @@ Los dos algoritmos ejecutan el mismo ciclo y llegan al mismo flujo máximo. La �
 - **El peor caso de la red zigzag es real, pero no es culpa de DFS.** Ninguna DFS razonable lo alcanza: la del repositorio termina en 2 iteraciones para cualquier `M`. Hizo falta construir un adversario que alterna los dos caminos que cruzan el arco trampa para llegar a las **2M iteraciones exactas** que predice la teoría: 20, 200, 2000 y 20 000 para `M` = 10, 100, 1000 y 10 000.
 
 La conclusión que nos llevamos: el problema no es DFS. Es la **libertad de elegir mal** que Ford-Fulkerson deja abierta, y que BFS cierra por construcción.
+
+> **Validación cruzada.** Los dos integrantes implementamos la actividad por separado y sin coordinarnos, con motores distintos. Los números coinciden exactamente: 3 iteraciones y los mismos caminos en CLRS, `usa_arco_retroceso = False` en todas ellas, la DFS de orden invertido sin empeorar nada (2 iteraciones para todo M), y el adversario dando 20 / 200 / 2 000 / 20 000. Dos implementaciones independientes llegando a lo mismo es la mejor evidencia que podemos ofrecer de que los resultados no son un artefacto de una implementación concreta. El detalle está en `ESTADO_PROYECTO.md`.
 
 ---
 
