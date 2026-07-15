@@ -1,0 +1,14 @@
+nodo_lado_S
+s
+a
+b
+d
+e
+
+arco_del_corte,capacidad
+a->c,1
+b->c,1
+d->f,2
+d->t,4
+e->f,2
+capacidad_total_corte,10

@@ -1,0 +1,10 @@
+Criterio,Ford-Fulkerson (DFS),Edmonds-Karp (BFS)
+Estrategia de busqueda del camino aumentante,"Cualquier camino aumentante (DFS: profundidad, primer vecino valido)",Siempre el camino con menos arcos (BFS)
+Complejidad teorica,"O(E * |f*|), |f*| = valor del flujo maximo","O(V * E^2), independiente de las capacidades"
+Termina con capacidades irracionales?,"No garantizado; existen redes (Zwick, 1995) donde no converge","Si, siempre termina"
+"Iteraciones observadas (red CLRS, flujo=23)",3,3
+"Iteraciones observadas (zigzag, M=10^4)",2 (implementacion del repo); 20000 con el oraculo adversarial que fuerza el peor caso teorico 2M,2 (inmune a M: siempre halla el camino de longitud minima)
+Longitudes de los caminos aumentantes,"No garantizadas no-decrecientes: contraejemplo observado en la red propia [4,3,4,3,4,4]","Siempre no decrecientes (verificado empiricamente en las 3 redes: CLRS, zigzag y red propia)"
+Sensibilidad al valor de las capacidades,Alta: el numero de iteraciones puede depender de |f*| (caso zigzag con oraculo adversarial),Ninguna: la cota O(V*E^2) no depende de las capacidades
+Flujo maximo obtenido,"23 (CLRS), 10 (red propia), 20000 (zigzag M=10^4)",Identico en los 3 casos (teorema max-flow min-cut)
+Corte minimo obtenido,Identico al obtenido por BFS en las 3 redes (mismo valor de capacidad),Identico al obtenido por DFS en las 3 redes (mismo valor de capacidad)

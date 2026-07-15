@@ -1,0 +1,4 @@
+iteracion,camino_aumentante,longitud_arcos,cuello_botella_delta,flujo_acumulado,usa_arco_retroceso
+1,s -> v1 -> v3 -> t,3,12,12,False
+2,s -> v2 -> v4 -> t,3,4,16,False
+3,s -> v2 -> v4 -> v3 -> t,4,7,23,False

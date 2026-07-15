@@ -1,0 +1,9 @@
+M,metodo,iteraciones,flujo_max
+10,DFS_modificado(orden_invertido),2,20
+10,Oraculo_adversarial(peor_caso_teorico),20,20
+100,DFS_modificado(orden_invertido),2,200
+100,Oraculo_adversarial(peor_caso_teorico),200,200
+1000,DFS_modificado(orden_invertido),2,2000
+1000,Oraculo_adversarial(peor_caso_teorico),2000,2000
+10000,DFS_modificado(orden_invertido),2,20000
+10000,Oraculo_adversarial(peor_caso_teorico),20000,20000
