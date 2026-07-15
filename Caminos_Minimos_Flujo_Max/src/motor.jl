@@ -58,40 +58,77 @@ function buscar_camino_dfs_adversaria(C::Matrix{Int}, F::Matrix{Int}, s::Int, t:
 end
 
 """
-    buscar_camino_zigzag(C, F, s, t) -> Vector{Int}
+    buscar_camino_dfs_profunda(C, F, s, t) -> Vector{Int}
 
-El ADVERSARIO del peor caso: DFS que prefiere explícitamente el arco
-trampa. Prioriza, para cada nodo, el vecino residual que NO lleva
-directamente a `t`; solo cuando no hay otra opción avanza hacia `t`.
+El ADVERSARIO más agresivo que existe para esta familia de redes: DFS
+recursiva que, en cada nodo, prueba `t` en ÚLTIMO lugar. Al no cortar la
+búsqueda cuando descubre `t`, se hunde en profundidad y solo acepta llegar
+al sumidero cuando ya no queda ningún otro vecino residual por explorar.
 
-Esto reproduce el comportamiento patológico que la guía menciona en teoría
-(2M iteraciones en la red zigzag) y que ni la DFS del repositorio ni la
-adversaria por índices alcanzan. Sirve como cota superior experimental:
-demuestra que el problema NO está en DFS-vs-BFS por sí mismo, sino en el
-poder de elegir mal el camino, que BFS elimina por construcción.
+Es decir: de todos los caminos aumentantes disponibles, elige
+sistemáticamente uno de los más LARGOS — exactamente lo contrario de
+Edmonds-Karp. Si el peor caso de 2M iteraciones fuese alcanzable en la red
+zigzag, esta función lo alcanzaría.
+
+El resultado experimental (Parte 2) es que NO lo alcanza: se estanca en 4
+iteraciones para cualquier M. La razón está documentada en
+`results/parte2_zigzag.md`. Esta función es la evidencia de esa afirmación.
 """
-function buscar_camino_zigzag(C::Matrix{Int}, F::Matrix{Int}, s::Int, t::Int)
+function buscar_camino_dfs_profunda(C::Matrix{Int}, F::Matrix{Int}, s::Int, t::Int)
     n = size(C, 1)
-    padre = zeros(Int, n)
-    padre[s] = s
-    pila = [s]
-    while !isempty(pila)
-        u = pop!(pila)
-        # Vecinos residuales de u, con los que llevan a t al final:
-        # la pila saca el último ⇒ ponemos t primero para sacarlo último.
-        vecinos = [v for v in 1:n if padre[v] == 0 && C[u, v] - F[u, v] > 0]
-        sort!(vecinos; by = v -> (v == t ? 0 : 1))   # t primero en la lista
+    visitado = falses(n)
+    camino = Int[]
+    function dfs(u::Int)
+        push!(camino, u)
+        visitado[u] = true
+        u == t && return true
+        # Vecinos alcanzables en la red residual, con `t` relegado al final.
+        vecinos = [v for v in 1:n if !visitado[v] && C[u, v] - F[u, v] > 0]
+        sort!(vecinos; by = v -> (v == t ? 1 : 0))
         for v in vecinos
-            padre[v] = u
-            push!(pila, v)
+            dfs(v) && return true
         end
-        # Si t quedó descubierto y ya no hay alternativas más profundas,
-        # la pila lo alcanzará al final. Comprobamos si se cerró el camino.
-        if padre[t] != 0 && isempty([v for v in pila if v != t])
-            return _reconstruir(padre, s, t)
-        end
+        pop!(camino)   # backtracking: u no lleva a t
+        return false
     end
-    return padre[t] != 0 ? _reconstruir(padre, s, t) : Int[]
+    return dfs(s) ? copy(camino) : Int[]
+end
+
+"""
+    buscar_camino_alternante(C, F, s, t) -> Vector{Int}
+
+El adversario que SÍ alcanza el peor caso de 2M iteraciones en la red
+zigzag. Está escrito específicamente para esa red (s=1, u=2, v=3, t=4).
+
+La idea: alternar los dos caminos de longitud 3 que cruzan el arco trampa,
+
+    s → u → v → t     (satura el arco trampa u→v)
+    s → v → u → t     (usa el RETROCESO v→u, que cancela el flujo de u→v
+                       y por tanto REABRE el arco trampa)
+
+Cada uno tiene cuello de botella Δ = 1, porque el arco trampa vale 1. Como
+el segundo camino reabre el arco que el primero saturó, el par se puede
+repetir M veces, dando 2M iteraciones para transportar 2M unidades: el
+algoritmo avanza de uno en uno.
+
+Este adversario es la demostración de que el peor caso NO es un defecto de
+la DFS, sino de la LIBERTAD de elegir el camino que Ford-Fulkerson deja
+abierta. Ninguna DFS razonable lo alcanza (ver Parte 2), pero el método de
+Ford-Fulkerson lo permite, y por eso su cota es O(E·|f*|).
+
+Si ningún camino largo está disponible, cae de vuelta en BFS.
+"""
+function buscar_camino_alternante(C::Matrix{Int}, F::Matrix{Int}, s::Int, t::Int)
+    size(C, 1) == 4 || return buscar_camino_bfs(C, F, s, t)
+
+    "¿Es `ruta` un camino aumentante en la red residual actual?"
+    disponible(ruta) = all(C[ruta[i], ruta[i+1]] - F[ruta[i], ruta[i+1]] > 0
+                           for i in 1:length(ruta)-1)
+
+    for ruta in ([1, 2, 3, 4], [1, 3, 2, 4])   # s→u→v→t , s→v→u→t
+        disponible(ruta) && return ruta
+    end
+    return buscar_camino_bfs(C, F, s, t)   # ya no hay caminos largos
 end
 
 # ------------------------------------------------------------
