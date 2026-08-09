@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Hubs</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1.2fr;gap:28px;margin-top:14px}
+  .def{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
+  .def .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-bottom:7px}
+  .def .h.crit{color:var(--crit)} .def .h.blue{color:var(--blue)}
+  .def p{font-size:13px;color:var(--muted);line-height:1.55}.def p b{color:var(--ink)}
+  table.tbl2{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.tbl2 th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--line-2);text-align:left}
+  table.tbl2 td{padding:8px 10px;border-bottom:1px solid var(--line)}
+  table.tbl2 td.mono{font-family:'JetBrains Mono',monospace}
+  table.tbl2 tr.hub td{font-weight:700}
+  table.tbl2 tr.hub td.mono{color:var(--crit)}
+  .bar-deg{display:inline-block;height:8px;border-radius:4px;vertical-align:middle;margin-left:6px}
+  .netp{display:flex;align-items:center;justify-content:center;flex:1;padding:10px}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>06 · Identificación de hubs</span><span>Nodos críticos para la conectividad</span></div>
+
+  <div class="body">
+    <div>
+      <div class="def anim d1">
+        <div class="h blue">¿Qué es un hub?</div>
+        <p>Un nodo cuyo grado supera significativamente el grado medio de la red. Se clasifican como hubs los nodos con grado en el <b>percentil 75 o superior</b> (k ≥ 4 en nuestra red).</p>
+        <p style="margin-top:8px">Los hubs sostienen la conectividad global: su remoción tiene un impacto <b>desproporcionado</b> sobre el GCC comparado con un nodo de grado promedio.</p>
+      </div>
+
+      <div class="anim d2" style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-sm)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:8px">▸ Ranking por grado</div>
+        <table class="tbl2">
+          <tr><th>Nodo</th><th>Rol ISP</th><th>Grado</th><th>Tipo</th></tr>
+          <tr class="hub"><td class="mono">c</td><td>Núcleo norte</td><td class="mono">5 <span class="bar-deg" style="width:60px;background:var(--crit)"></span></td><td style="color:var(--crit)">HUB ★</td></tr>
+          <tr class="hub"><td class="mono">d</td><td>Núcleo sur</td><td class="mono">4 <span class="bar-deg" style="width:48px;background:var(--crit)"></span></td><td style="color:var(--crit)">HUB ★</td></tr>
+          <tr class="hub"><td class="mono">f</td><td>Agregador central</td><td class="mono">4 <span class="bar-deg" style="width:48px;background:var(--crit)"></span></td><td style="color:var(--crit)">HUB ★</td></tr>
+          <tr><td class="mono">s,a,b,e,t</td><td>Acceso / peering</td><td class="mono">3 <span class="bar-deg" style="width:36px;background:var(--blue)"></span></td><td style="color:var(--muted)">normal</td></tr>
+          <tr><td class="mono">g</td><td>Agregador sur</td><td class="mono">2 <span class="bar-deg" style="width:24px;background:var(--line-2)"></span></td><td style="color:var(--muted)">normal</td></tr>
+        </table>
+      </div>
+
+      <div class="def anim d3" style="margin-top:12px;background:rgba(226,58,86,.05);border-color:rgba(226,58,86,.25)">
+        <div class="h crit">Implicación para el ISP</div>
+        <p>Los nodos <b>c, d y f</b> deben ser protegidos con <b>redundancia física y failover</b> automático. El nodo c (k=5) concentra el 33% de las aristas de la red.</p>
+      </div>
+    </div>
+
+    <!-- Red con hubs resaltados -->
+    <div class="netp anim d2">
+      <svg viewBox="0 0 480 540" width="100%" height="100%">
+        <!-- aristas -->
+        <line x1="45" y1="270" x2="150" y2="150" stroke="#c6d0e0" stroke-width="2"/>
+        <line x1="45" y1="270" x2="150" y2="390" stroke="#c6d0e0" stroke-width="2"/>
+        <line x1="45" y1="270" x2="250" y2="200" stroke="#c6d0e0" stroke-width="2.5"/>
+        <line x1="150" y1="150" x2="250" y2="200" stroke="#c6d0e0" stroke-width="2.5"/>
+        <line x1="150" y1="150" x2="340" y2="90" stroke="#c6d0e0" stroke-width="2"/>
+        <line x1="150" y1="390" x2="250" y2="340" stroke="#c6d0e0" stroke-width="2.5"/>
+        <line x1="150" y1="390" x2="340" y2="270" stroke="#c6d0e0" stroke-width="2.5"/>
+        <line x1="250" y1="200" x2="250" y2="340" stroke="#e74c3c" stroke-width="2.5"/>
+        <line x1="250" y1="200" x2="340" y2="90" stroke="#c6d0e0" stroke-width="2"/>
+        <line x1="250" y1="200" x2="340" y2="270" stroke="#e74c3c" stroke-width="2.5"/>
+        <line x1="250" y1="340" x2="340" y2="270" stroke="#e74c3c" stroke-width="2.5"/>
+        <line x1="250" y1="340" x2="340" y2="430" stroke="#c6d0e0" stroke-width="2"/>
+        <line x1="340" y1="90" x2="430" y2="270" stroke="#c6d0e0" stroke-width="2"/>
+        <line x1="340" y1="270" x2="430" y2="270" stroke="#e74c3c" stroke-width="2.5"/>
+        <line x1="340" y1="430" x2="430" y2="270" stroke="#c6d0e0" stroke-width="2"/>
+        <!-- hubs -->
+        <circle cx="250" cy="200" r="24" fill="#e74c3c" stroke="#922b21" stroke-width="2.5"/>
+        <circle cx="250" cy="340" r="20" fill="#e74c3c" stroke="#922b21" stroke-width="2.5"/>
+        <circle cx="340" cy="270" r="20" fill="#e74c3c" stroke="#922b21" stroke-width="2.5"/>
+        <!-- nodos normales -->
+        <circle cx="45" cy="270" r="18" fill="#2980b9" stroke="#1a5276" stroke-width="2"/>
+        <circle cx="150" cy="150" r="14" fill="#aed6f1" stroke="#2980b9" stroke-width="1.5"/>
+        <circle cx="150" cy="390" r="14" fill="#aed6f1" stroke="#2980b9" stroke-width="1.5"/>
+        <circle cx="340" cy="90" r="14" fill="#aed6f1" stroke="#2980b9" stroke-width="1.5"/>
+        <circle cx="340" cy="430" r="14" fill="#aed6f1" stroke="#2980b9" stroke-width="1.5"/>
+        <circle cx="430" cy="270" r="18" fill="#e74c3c" stroke="#922b21" stroke-width="2"/>
+        <!-- etiquetas -->
+        <text x="45" y="274" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">s</text>
+        <text x="150" y="154" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#2b3547" text-anchor="middle" dominant-baseline="central">a</text>
+        <text x="150" y="394" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#2b3547" text-anchor="middle" dominant-baseline="central">b</text>
+        <text x="250" y="204" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">c</text>
+        <text x="250" y="344" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">d</text>
+        <text x="340" y="94" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#2b3547" text-anchor="middle" dominant-baseline="central">e</text>
+        <text x="340" y="274" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">f</text>
+        <text x="340" y="434" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#2b3547" text-anchor="middle" dominant-baseline="central">g</text>
+        <text x="430" y="274" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">t</text>
+        <!-- etiquetas grado -->
+        <text x="250" y="228" font-family="'JetBrains Mono',monospace" font-size="10" fill="#922b21" font-weight="700" text-anchor="middle">k=5 ★</text>
+        <text x="250" y="366" font-family="'JetBrains Mono',monospace" font-size="10" fill="#922b21" font-weight="700" text-anchor="middle">k=4 ★</text>
+        <text x="340" y="296" font-family="'JetBrains Mono',monospace" font-size="10" fill="#922b21" font-weight="700" text-anchor="middle">k=4 ★</text>
+        <!-- leyenda -->
+        <circle cx="30" cy="500" r="8" fill="#e74c3c"/>
+        <text x="44" y="500" font-family="'JetBrains Mono',monospace" font-size="10" fill="#69748a" dominant-baseline="central">Hub (k ≥ 4)</text>
+        <circle cx="160" cy="500" r="8" fill="#aed6f1" stroke="#2980b9" stroke-width="1.5"/>
+        <text x="174" y="500" font-family="'JetBrains Mono',monospace" font-size="10" fill="#69748a" dominant-baseline="central">Nodo normal</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="footer"><span>Hubs · percentil 75 · umbral k ≥ 4 · 3 de 9 nodos</span><span>06 / 10</span></div>
+</div></body></html>

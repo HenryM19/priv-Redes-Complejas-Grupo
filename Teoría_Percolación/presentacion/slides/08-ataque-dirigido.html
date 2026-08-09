@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Ataque dirigido</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1.4fr;gap:28px;margin-top:14px}
+  .def{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 17px;
+    margin-bottom:10px;box-shadow:var(--shadow-sm)}
+  .def .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600;margin-bottom:7px}
+  .def p{font-size:13px;color:var(--muted);line-height:1.55}.def p b{color:var(--ink)}
+  .order-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .nd{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .nd .circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700}
+  .nd .circle.hub{background:rgba(226,58,86,.15);border:2px solid var(--crit);color:var(--crit)}
+  .nd .circle.norm{background:rgba(47,107,255,.1);border:1.5px solid var(--blue);color:var(--blue)}
+  .nd .lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
+  .stat-row{display:flex;gap:12px;margin-top:10px}
+  .st{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:11px 13px;box-shadow:var(--shadow-sm);text-align:center}
+  .st .v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1}
+  .st .l{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);
+    letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
+  .arrow{font-size:18px;color:var(--line-2);display:flex;align-items:center;padding-top:8px}
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:18px 18px 14px;display:flex;flex-direction:column}
+  .chart-wrap .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--crit);font-weight:600;margin-bottom:10px}
+  svg.chart{width:100%;height:310px}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>08 · Ataque dirigido</span><span>Eliminación selectiva de hubs por grado descendente</span></div>
+
+  <div class="body">
+    <div>
+      <div class="def anim d1">
+        <div class="h" style="color:var(--crit)">¿Qué simula este análisis?</div>
+        <p>Un atacante <b>conoce la topología</b> y elimina nodos en orden de <b>mayor a menor grado</b>. Es determinístico: no hay aleatoriedad. Modela <b>ataques cibernéticos selectivos</b> o sabotaje de infraestructura crítica.</p>
+      </div>
+
+      <div class="def anim d2" style="background:rgba(226,58,86,.04);border-color:rgba(226,58,86,.25)">
+        <div class="h" style="color:var(--crit)">Orden de remoción</div>
+        <div class="order-row">
+          <div class="nd"><div class="circle hub">c</div><div class="lbl">k=5 · 1°</div></div>
+          <div class="arrow">→</div>
+          <div class="nd"><div class="circle hub">d</div><div class="lbl">k=4 · 2°</div></div>
+          <div class="arrow">→</div>
+          <div class="nd"><div class="circle hub">f</div><div class="lbl">k=4 · 3°</div></div>
+          <div class="arrow">→</div>
+          <div class="nd"><div class="circle norm">a</div><div class="lbl">k=3 · 4°</div></div>
+          <div class="arrow">→</div>
+          <div class="nd"><div class="circle norm">b</div><div class="lbl">k=3 · 5°</div></div>
+          <div class="arrow">→</div>
+          <div class="nd"><div class="circle norm">…</div><div class="lbl">g · 9°</div></div>
+        </div>
+      </div>
+
+      <div class="def anim d3" style="background:rgba(226,58,86,.06);border-color:rgba(226,58,86,.35);margin-top:2px">
+        <div class="h" style="color:var(--crit)">⚡ Caída abrupta en paso 4</div>
+        <p>Al eliminar el nodo <b>a</b> (4° en el orden), el GCC cae de <b>0.667 → 0.333</b>: <b>50% en un solo paso</b>. Los hubs c, d, f actuaban como puente; sin ellos, la red fragmenta bruscamente.</p>
+      </div>
+
+      <div class="stat-row anim d4">
+        <div class="st"><div class="v" style="color:var(--crit)">0.451</div><div class="l">AUC robustez</div></div>
+        <div class="st"><div class="v" style="color:var(--amber)">0.444</div><div class="l">f_c empírico</div></div>
+        <div class="st"><div class="v" style="color:var(--crit)">50%</div><div class="l">caída en 1 paso</div></div>
+      </div>
+    </div>
+
+    <div class="chart-wrap anim d2">
+      <div class="h">▸ P∞(f) — Ataque dirigido (determinístico)</div>
+      <svg class="chart" viewBox="0 0 480 310">
+        <!-- axes -->
+        <line x1="55" y1="270" x2="460" y2="270" stroke="var(--line-2)" stroke-width="1.5"/>
+        <line x1="55" y1="10" x2="55" y2="270" stroke="var(--line-2)" stroke-width="1.5"/>
+        <!-- grid -->
+        <line x1="55" y1="202.5" x2="460" y2="202.5" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="55" y1="135" x2="460" y2="135" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="55" y1="67.5" x2="460" y2="67.5" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <!-- y labels -->
+        <text x="48" y="273" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">0.0</text>
+        <text x="48" y="206" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">0.25</text>
+        <text x="48" y="138" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">0.50</text>
+        <text x="48" y="70.5" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">0.75</text>
+        <text x="48" y="13" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">1.00</text>
+        <!-- x labels -->
+        <text x="55" y="283" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">0</text>
+        <text x="95" y="283" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">1/9</text>
+        <text x="215" y="283" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">4/9</text>
+        <text x="460" y="283" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">1</text>
+        <text x="258" y="300" font-family="'JetBrains Mono',monospace" font-size="11" fill="var(--muted)" text-anchor="middle">fracción de fallos f</text>
+        <text x="14" y="140" font-family="'JetBrains Mono',monospace" font-size="11" fill="var(--muted)" text-anchor="middle" transform="rotate(-90,14,140)">P∞(f)</text>
+
+        <!-- fc line -->
+        <line x1="215" y1="10" x2="215" y2="270" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.7"/>
+        <text x="218" y="26" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--crit)">f_c≈0.444</text>
+        <line x1="55" y1="135" x2="460" y2="135" stroke="var(--crit)" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+
+        <!-- Data: Pinf=[1,0.8889,0.7778,0.6667,0.3333,0.3333,0.2222,0.2222,0.1111,0]
+             x=55+f*405, y=270-Pinf*260
+             f=0:x=55,y=270-260=10
+             f=1/9:x=95,y=270-0.8889*260=270-231.1=38.9
+             f=2/9:x=135,y=270-0.7778*260=270-202.2=67.8
+             f=3/9:x=175,y=270-0.6667*260=270-173.3=96.7
+             f=4/9:x=215,y=270-0.3333*260=270-86.7=183.3  ← DROP
+             f=5/9:x=255,y=270-0.3333*260=183.3
+             f=6/9:x=295,y=270-0.2222*260=270-57.8=212.2
+             f=7/9:x=335,y=270-0.2222*260=212.2
+             f=8/9:x=375,y=270-0.1111*260=270-28.9=241.1
+             f=1:x=460,y=270
+        -->
+        <!-- area fill -->
+        <polygon points="55,10 95,38.9 135,67.8 175,96.7 215,183.3 255,183.3 295,212.2 335,212.2 375,241.1 460,270 460,270 55,270"
+          fill="rgba(226,58,86,.08)" stroke="none"/>
+
+        <!-- drop arrow annotation -->
+        <line x1="195" y1="96.7" x2="195" y2="183.3" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <text x="170" y="140" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--amber)" text-anchor="middle">−50%</text>
+        <text x="170" y="150" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--amber)" text-anchor="middle">1 paso</text>
+
+        <!-- line (step function) -->
+        <polyline points="55,10 95,38.9 135,67.8 175,96.7 215,96.7 215,183.3 255,183.3 295,183.3 295,212.2 335,212.2 375,212.2 375,241.1 460,241.1 460,270"
+          fill="none" stroke="var(--crit)" stroke-width="2.8" stroke-linejoin="round"/>
+
+        <!-- data points -->
+        <circle cx="55" cy="10" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="95" cy="38.9" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="135" cy="67.8" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="175" cy="96.7" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="215" cy="183.3" r="5" fill="var(--amber)" stroke="white" stroke-width="1.5"/>
+        <circle cx="255" cy="183.3" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="295" cy="212.2" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="335" cy="212.2" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="375" cy="241.1" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="460" cy="270" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+
+        <!-- labels -->
+        <text x="55" y="7" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--crit)" text-anchor="middle">1.00</text>
+        <text x="175" y="93" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--crit)" text-anchor="middle">0.67</text>
+        <text x="255" y="180" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--amber)" text-anchor="middle">0.33</text>
+
+        <!-- hub removal labels -->
+        <text x="55" y="25" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--muted)" text-anchor="middle">c</text>
+        <text x="95" y="55" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--muted)" text-anchor="middle">d</text>
+        <text x="135" y="84" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--muted)" text-anchor="middle">f</text>
+        <text x="175" y="113" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--muted)" text-anchor="middle">a</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="footer"><span>Ataque dirigido · determinístico · caída abrupta en paso 4</span><span>08 / 10</span></div>
+</div></body></html>

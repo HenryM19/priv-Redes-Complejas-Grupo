@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Portada</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .slide{justify-content:center;padding:52px 64px}
+  .net{position:absolute;top:0;right:0;width:580px;height:720px;z-index:1;pointer-events:none;opacity:.55}
+  .wrap{position:relative;z-index:3;max-width:700px;margin-top:20px}
+  .year{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.34em;
+    color:var(--flow);font-weight:600;margin-bottom:18px}
+  h1{font-size:46px;line-height:1.08;letter-spacing:-.015em}
+  h1 .a{color:var(--blue)} h1 .c{color:var(--crit)}
+  .sub{font-size:17px;color:var(--muted);margin-top:20px;max-width:660px;line-height:1.55}
+  .sub b{color:var(--ink)}
+  .pills{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+  .p{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 16px;box-shadow:var(--shadow-sm)}
+  .p .k{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .p .v{font-size:20px;font-weight:700;margin-top:3px}
+  .brand{position:absolute;top:0;left:64px;right:64px;height:52px;display:flex;align-items:flex-end;
+    justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--muted);z-index:3}
+  /* nodos animados */
+  .nd{animation:floaty 6s ease-in-out infinite}
+  .nd.hub{fill:var(--crit);opacity:.9}
+  .nd.src{fill:var(--blue);opacity:.9}
+  .nd.snk{fill:var(--crit);opacity:.85}
+  .nd.mid{fill:var(--flow);opacity:.6}
+  .nd.gone{fill:var(--line-2);opacity:.35;animation:pulse 2.5s ease-in-out infinite}
+  .eg{stroke:var(--line-2);stroke-width:1.8;fill:none}
+  .eg.on{stroke:var(--blue);stroke-width:2.8;opacity:.65;
+    stroke-dasharray:6 10;animation:flowdash 8s linear infinite}
+  .eg.cut{stroke:var(--crit);stroke-width:2;opacity:.5;stroke-dasharray:4 7;animation:flowdash 4s linear infinite reverse}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+
+  <!-- Red ISP decorativa animada (versión no dirigida) -->
+  <svg class="net" viewBox="0 0 580 720">
+    <!-- aristas -->
+    <line class="eg" x1="60" y1="360" x2="180" y2="240"/>
+    <line class="eg" x1="60" y1="360" x2="180" y2="480"/>
+    <line class="eg" x1="60" y1="360" x2="300" y2="300"/>
+    <line class="eg on" x1="180" y1="240" x2="300" y2="300"/>
+    <line class="eg on" x1="180" y1="240" x2="380" y2="180"/>
+    <line class="eg" x1="180" y1="480" x2="300" y2="420"/>
+    <line class="eg" x1="180" y1="480" x2="380" y2="360"/>
+    <line class="eg" x1="300" y1="300" x2="300" y2="420"/>
+    <line class="eg on" x1="300" y1="300" x2="380" y2="180"/>
+    <line class="eg" x1="300" y1="300" x2="380" y2="360"/>
+    <line class="eg" x1="300" y1="420" x2="380" y2="360"/>
+    <line class="eg" x1="300" y1="420" x2="380" y2="500"/>
+    <line class="eg on" x1="380" y1="180" x2="490" y2="360"/>
+    <line class="eg on" x1="380" y1="360" x2="490" y2="360"/>
+    <line class="eg cut" x1="380" y1="500" x2="490" y2="360"/>
+    <!-- nodo removido (opaco) -->
+    <circle class="nd gone" cx="300" cy="300" r="16" style="animation-delay:.9s"/>
+    <!-- nodos normales -->
+    <circle class="nd src" cx="60" cy="360" r="18" style="animation-delay:0s"/>
+    <circle class="nd mid" cx="180" cy="240" r="13" style="animation-delay:.5s"/>
+    <circle class="nd mid" cx="180" cy="480" r="13" style="animation-delay:.3s"/>
+    <circle class="nd hub" cx="300" cy="420" r="15" style="animation-delay:.7s"/>
+    <circle class="nd mid" cx="380" cy="180" r="13" style="animation-delay:1.1s"/>
+    <circle class="nd mid" cx="380" cy="360" r="13" style="animation-delay:.8s"/>
+    <circle class="nd mid" cx="380" cy="500" r="13" style="animation-delay:1.4s"/>
+    <circle class="nd snk" cx="490" cy="360" r="17" style="animation-delay:1s"/>
+    <!-- etiquetas -->
+    <text x="60" y="390" font-family="'JetBrains Mono',monospace" font-size="12" fill="#69748a" text-anchor="middle">s</text>
+    <text x="490" y="390" font-family="'JetBrains Mono',monospace" font-size="12" fill="#69748a" text-anchor="middle">t</text>
+  </svg>
+
+  <div class="brand"><span>Redes Complejas · Posgrado</span><span>U. de Cuenca · 2026</span></div>
+
+  <div class="wrap">
+    <div class="year anim d1">PERCOLACIÓN · ROBUSTEZ Y VULNERABILIDAD</div>
+    <h1 class="anim d2">¿Cuánto daño<br>puede absorber<br>una <span class="a">red</span> antes de<br><span class="c">fragmentarse</span>?</h1>
+    <p class="sub anim d3">Aplicamos la <b>teoría de percolación de sitios</b> al backbone de un ISP regional para cuantificar su robustez ante <b>fallos aleatorios</b> y <b>ataques dirigidos</b> a los nodos más conectados.</p>
+    <div class="pills">
+      <div class="p anim d4"><div class="k">Umbral Molloy–Reed</div><div class="v c-flow">κ = 3.53</div></div>
+      <div class="p anim d5"><div class="k">Fracción crítica</div><div class="v c-blue">f_c = 0.605</div></div>
+      <div class="p anim d6"><div class="k">Hubs identificados</div><div class="v c-crit">3 nodos</div></div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Teoría de Percolación · Backbone ISP</span><span><b>Henry Maldonado</b> · 01 / 10</span></div>
+</div></body></html>

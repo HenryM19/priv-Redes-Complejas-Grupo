@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Robustez aleatoria</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1.4fr;gap:28px;margin-top:14px}
+  .def{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 17px;
+    margin-bottom:10px;box-shadow:var(--shadow-sm)}
+  .def .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600;margin-bottom:7px;color:var(--flow)}
+  .def p{font-size:13px;color:var(--muted);line-height:1.55}.def p b{color:var(--ink)}
+  .stat-row{display:flex;gap:12px;margin-top:10px}
+  .st{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:11px 13px;box-shadow:var(--shadow-sm);text-align:center}
+  .st .v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1}
+  .st .l{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);
+    letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
+  /* Chart */
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:18px 18px 14px;display:flex;flex-direction:column}
+  .chart-wrap .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:10px}
+  svg.chart{width:100%;height:320px}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>07 · Fallo aleatorio</span><span>Robustez ante perturbaciones estocásticas</span></div>
+
+  <div class="body">
+    <div>
+      <div class="def anim d1">
+        <div class="h">¿Qué simula este análisis?</div>
+        <p>Cada nodo falla con probabilidad <b>f</b> (independientemente). Para cada valor de f se realizan <b>R = 5000 repeticiones</b> y se promedia el tamaño del GCC. Modela <b>fallos espontáneos</b>: averías de hardware, cortes de energía, sobrecarga.</p>
+      </div>
+
+      <div class="def anim d2" style="background:rgba(8,145,201,.04);border-color:rgba(8,145,201,.25)">
+        <div class="h">Resultado principal</div>
+        <p>La red se degrada <b>gradualmente</b>. No hay colapso abrupto. El umbral empírico (P∞ &lt; 0.5) se alcanza en <b>f_c ≈ 0.444</b>, vs f_c teórico = 0.605 (efecto de tamaño finito).</p>
+      </div>
+
+      <div class="stat-row anim d3">
+        <div class="st"><div class="v" style="color:var(--flow)">5 000</div><div class="l">repeticiones / punto</div></div>
+        <div class="st"><div class="v" style="color:var(--blue)">10</div><div class="l">valores de f</div></div>
+        <div class="st"><div class="v" style="color:var(--green)">0.462</div><div class="l">AUC robustez</div></div>
+      </div>
+
+      <div class="def anim d4" style="margin-top:10px;background:rgba(15,163,107,.04);border-color:rgba(15,163,107,.25)">
+        <div class="h" style="color:var(--green)">Interpretación ISP</div>
+        <p>Fallos aleatorios de equipos dejan operativa más del <b>50% de la red</b> hasta que se pierdan ~4 de 9 nodos. La redundancia estructural <b>amortigua bien</b> este tipo de fallo.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap anim d2">
+      <div class="h">▸ P∞(f) — Fallo aleatorio · R=5000</div>
+      <svg class="chart" viewBox="0 0 480 320">
+        <!-- axes -->
+        <line x1="55" y1="280" x2="460" y2="280" stroke="var(--line-2)" stroke-width="1.5"/>
+        <line x1="55" y1="10" x2="55" y2="280" stroke="var(--line-2)" stroke-width="1.5"/>
+        <!-- grid y -->
+        <line x1="55" y1="226" x2="460" y2="226" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="55" y1="172" x2="460" y2="172" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="55" y1="118" x2="460" y2="118" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="55" y1="64" x2="460" y2="64" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <!-- y labels -->
+        <text x="48" y="283" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">0.0</text>
+        <text x="48" y="229" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">0.25</text>
+        <text x="48" y="175" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">0.50</text>
+        <text x="48" y="121" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">0.75</text>
+        <text x="48" y="67" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="end">1.00</text>
+        <!-- x labels -->
+        <text x="55" y="293" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">0</text>
+        <text x="95" y="293" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">1/9</text>
+        <text x="135" y="293" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">2/9</text>
+        <text x="215" y="293" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">4/9</text>
+        <text x="295" y="293" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">6/9</text>
+        <text x="460" y="293" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">1</text>
+        <!-- x axis label -->
+        <text x="258" y="310" font-family="'JetBrains Mono',monospace" font-size="11" fill="var(--muted)" text-anchor="middle">fracción de fallos f</text>
+        <!-- y axis label -->
+        <text x="14" y="145" font-family="'JetBrains Mono',monospace" font-size="11" fill="var(--muted)" text-anchor="middle" transform="rotate(-90,14,145)">P∞(f)</text>
+
+        <!-- fc threshold line -->
+        <line x1="215" y1="14" x2="215" y2="280" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.7"/>
+        <text x="218" y="30" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--crit)">f_c≈0.444</text>
+        <line x1="55" y1="172" x2="460" y2="172" stroke="var(--crit)" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+        <text x="462" y="175" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--crit)">0.5</text>
+
+        <!-- Data: f=[0,1/9,...,1], Pinf=[1,0.8889,0.7751,0.6402,0.4875,0.3536,0.2452,0.1586,0.1111,0]
+             x = 55 + f*405, y = 280 - Pinf*270 -->
+        <!-- f=0: x=55, y=280-270=10 -->
+        <!-- f=1/9: x=95, y=280-0.8889*270=280-240.0=40 -->
+        <!-- f=2/9: x=135, y=280-0.7751*270=280-209.3=70.7 -->
+        <!-- f=3/9: x=175, y=280-0.6402*270=280-172.9=107.1 -->
+        <!-- f=4/9: x=215, y=280-0.4875*270=280-131.6=148.4 -->
+        <!-- f=5/9: x=255, y=280-0.3536*270=280-95.5=184.5 -->
+        <!-- f=6/9: x=295, y=280-0.2452*270=280-66.2=213.8 -->
+        <!-- f=7/9: x=335, y=280-0.1586*270=280-42.8=237.2 -->
+        <!-- f=8/9: x=375, y=280-0.1111*270=280-30.0=250.0 -->
+        <!-- f=1: x=460, y=280 -->
+
+        <!-- area fill -->
+        <polygon points="55,10 95,40 135,70.7 175,107.1 215,148.4 255,184.5 295,213.8 335,237.2 375,250 460,280 460,280 55,280"
+          fill="rgba(8,145,201,.10)" stroke="none"/>
+
+        <!-- line -->
+        <polyline points="55,10 95,40 135,70.7 175,107.1 215,148.4 255,184.5 295,213.8 335,237.2 375,250 460,280"
+          fill="none" stroke="var(--flow)" stroke-width="2.8" stroke-linejoin="round"/>
+
+        <!-- data points -->
+        <circle cx="55" cy="10" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+        <circle cx="95" cy="40" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+        <circle cx="135" cy="70.7" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+        <circle cx="175" cy="107.1" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+        <circle cx="215" cy="148.4" r="5" fill="var(--crit)" stroke="white" stroke-width="1.5"/>
+        <circle cx="255" cy="184.5" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+        <circle cx="295" cy="213.8" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+        <circle cx="335" cy="237.2" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+        <circle cx="375" cy="250" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+        <circle cx="460" cy="280" r="5" fill="var(--flow)" stroke="white" stroke-width="1.5"/>
+
+        <!-- data labels (selected) -->
+        <text x="55" y="7" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--flow)" text-anchor="middle">1.00</text>
+        <text x="215" y="145" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--crit)" text-anchor="middle">0.49</text>
+        <text x="460" y="277" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--muted)" text-anchor="middle">0.00</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="footer"><span>Fallo aleatorio · R=5000 · AUC=0.462 · N=9 nodos</span><span>07 / 10</span></div>
+</div></body></html>

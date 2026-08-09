@@ -1,0 +1,10 @@
+nodo,grado,es_hub
+c,5,True
+d,4,True
+f,4,True
+s,3,False
+a,3,False
+b,3,False
+e,3,False
+t,3,False
+g,2,False

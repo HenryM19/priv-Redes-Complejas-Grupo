@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Componente gigante</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:30px;margin-top:14px}
+  .col{display:flex;flex-direction:column;gap:14px}
+  .def{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 20px;box-shadow:var(--shadow-sm)}
+  .def .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+  .def .h.green{color:var(--green)} .def .h.crit{color:var(--crit)} .def .h.blue{color:var(--blue)}
+  .def p{font-size:13.5px;color:var(--muted);line-height:1.55}.def p b{color:var(--ink)}
+  .anim-box{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 16px;box-shadow:var(--shadow-sm)}
+  .anim-box .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:10px}
+  .fval{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
+  .fval b{color:var(--ink)}
+  .ctrl{display:flex;gap:8px;margin-top:10px;justify-content:center}
+  .ctrl button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 14px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)}
+  .ctrl button:hover{background:var(--panel-2)}
+  .metric-row{display:flex;gap:14px;margin-top:4px}
+  .mt{text-align:center;flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .mt .n{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+  .mt .l{font-size:10.5px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;font-family:'JetBrains Mono',monospace}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>04 · El componente gigante</span><span>GCC · parámetro de orden · hubs</span></div>
+
+  <div class="body">
+    <div class="col">
+      <div class="def anim d1">
+        <div class="h green">Componente gigante (GCC)</div>
+        <p>El <b>mayor conjunto de nodos mutuamente alcanzables</b>: desde cualquier nodo del GCC existe un camino (directo o indirecto) hacia cualquier otro nodo del mismo conjunto.</p>
+        <p style="margin-top:8px">Si el GCC abarca una fracción no nula de la red, ésta está <b>"globalmente conectada"</b>. Cuando el GCC desaparece, la red está fragmentada en islas que no se comunican.</p>
+      </div>
+
+      <div class="def anim d2">
+        <div class="h blue">¿Cómo se mide?</div>
+        <p>Algoritmo BFS sobre el subgrafo de nodos activos:</p>
+        <p style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--panel-2);padding:10px;border-radius:8px;color:var(--ink)">
+          1. Remover ⌊f·N⌋ nodos<br>
+          2. BFS desde cada nodo no visitado<br>
+          3. GCC = componente más grande<br>
+          4. P∞ = |GCC| / N<br>
+          — Costo: O(V + E) por punto —
+        </p>
+      </div>
+
+      <div class="def anim d3" style="background:rgba(226,58,86,.05);border-color:rgba(226,58,86,.25)">
+        <div class="h crit">El rol de los hubs</div>
+        <p>Los nodos de <b>mayor grado</b> sostienen la conectividad global. Pocos nodos con grado alto elevan ⟨k²⟩ y por tanto κ, haciendo que el GCC sea más resistente. Pero su remoción deliberada lo destruye rápidamente.</p>
+      </div>
+    </div>
+
+    <!-- Animación interactiva -->
+    <div class="col">
+      <div class="anim-box anim d2">
+        <div class="h">▸ GCC en nuestra red · fallo paso a paso</div>
+        <svg id="g" viewBox="0 0 380 300" width="100%" height="240"></svg>
+        <div class="fval">Removidos: <b id="removed">0</b> nodos · P∞ = <b id="pinf">1.000</b> · GCC = <b id="gcc">9</b>/9</div>
+        <div class="ctrl">
+          <button onclick="step(-1)">◀ Anterior</button>
+          <button onclick="step(1)">Siguiente ▶</button>
+          <button onclick="reset()">↺ Reiniciar</button>
+        </div>
+      </div>
+
+      <div class="metric-row anim d4">
+        <div class="mt"><div class="n c-green" id="m1">9</div><div class="l">Nodos activos</div></div>
+        <div class="mt"><div class="n c-blue" id="m2">9</div><div class="l">GCC</div></div>
+        <div class="mt"><div class="n c-crit" id="m3">1.000</div><div class="l">P∞</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>GCC · BFS · O(V+E) por punto de la curva</span><span>04 / 10</span></div>
+</div>
+<script>
+// Red: nodos y posiciones
+const POS = {s:[30,150],a:[110,60],b:[110,240],c:[210,100],d:[210,200],e:[300,30],f:[300,150],g:[300,270],t:[370,150]};
+const EDGES = [['s','a'],['s','b'],['s','c'],['a','c'],['a','e'],['b','d'],['b','f'],
+               ['c','d'],['c','e'],['c','f'],['d','f'],['d','g'],['e','t'],['f','t'],['g','t']];
+const ORDER = ['c','d','f','a','b','e','s','t','g']; // orden de remoción (por grado desc)
+let step_i = 0;
+
+function getGCC(active){
+  const adj={};
+  active.forEach(n=>adj[n]=[]);
+  EDGES.forEach(([u,v])=>{if(active.includes(u)&&active.includes(v)){adj[u].push(v);adj[v].push(u);}});
+  let best=0,visited=new Set();
+  active.forEach(start=>{
+    if(visited.has(start))return;
+    const q=[start];visited.add(start);let cnt=0;
+    while(q.length){const n=q.shift();cnt++;(adj[n]||[]).forEach(nb=>{if(!visited.has(nb)){visited.add(nb);q.push(nb);}});}
+    best=Math.max(best,cnt);
+  });
+  return best;
+}
+
+function draw(active){
+  const svg=document.getElementById('g');
+  const W=380,H=300;
+  let html='';
+  // edges
+  EDGES.forEach(([u,v])=>{
+    const [x1,y1]=POS[u],[x2,y2]=POS[v];
+    const both=active.includes(u)&&active.includes(v);
+    html+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${both?'#2f6bff':'#e0e6f0'}" stroke-width="${both?2.4:1.4}" opacity="${both?0.8:0.3}"/>`;
+  });
+  // nodes
+  Object.entries(POS).forEach(([n,[x,y]])=>{
+    const on=active.includes(n);
+    let fill=on?(n==='s'?'#2980b9':n==='t'?'#e74c3c':n==='c'||n==='d'||n==='f'?'#e74c3c':'#aed6f1'):'#e0e6f0';
+    let r=n==='c'?16:n==='s'||n==='t'?14:11;
+    let op=on?1:0.3;
+    html+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" opacity="${op}" stroke="${on?'#fff':'#ccc'}" stroke-width="1.5"/>`;
+    html+=`<text x="${x}" y="${y}" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="${on?'white':'#aaa'}" text-anchor="middle" dominant-baseline="central" opacity="${op}">${n}</text>`;
+  });
+  svg.innerHTML=html;
+
+  const gcc=getGCC(active);
+  const pinf=(gcc/9).toFixed(3);
+  document.getElementById('removed').textContent=9-active.length;
+  document.getElementById('pinf').textContent=pinf;
+  document.getElementById('gcc').textContent=gcc;
+  document.getElementById('m1').textContent=active.length;
+  document.getElementById('m2').textContent=gcc;
+  document.getElementById('m3').textContent=pinf;
+}
+
+function step(dir){
+  step_i=Math.max(0,Math.min(9,step_i+dir));
+  const active=Object.keys(POS).filter((_,i)=>!ORDER.slice(0,step_i).includes(ORDER[i]||''));
+  const removed=ORDER.slice(0,step_i);
+  const act=Object.keys(POS).filter(n=>!removed.includes(n));
+  draw(act);
+}
+function reset(){step_i=0;draw(Object.keys(POS));}
+reset();
+</script>
+</body></html>

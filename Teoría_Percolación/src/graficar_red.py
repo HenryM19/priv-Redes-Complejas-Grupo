@@ -1,244 +1,166 @@
-"""
-graficar_red.py — Visualización de la red propia (backbone ISP).
-
-Genera una figura de alta calidad del dígrafo de flujo con:
-  - Nodos fuente (s) y sumidero (t) diferenciados por color.
-  - Etiquetas de capacidad sobre cada arco.
-  - Par antiparalelo c <-> d resaltado en morado.
-  - Cuello de botella e -> t resaltado en rojo.
-  - Arcos normales en gris oscuro.
-
-Salida: results/images/red_propia_topologia.png
-
-Ejecutar desde la raíz del proyecto:
-    python src/graficar_red.py
-"""
-
 # ============================================================
+# graficar_red.py
+# ============================================================
+#
+# DOCUMENTACIÓN GENERAL
+# ------------------------------------------------------------
+# Visualiza la red propia (backbone ISP) como un GRAFO NO
+# DIRIGIDO, que es la representación relevante para el análisis
+# de percolación de sitios.
+#
+# Para percolación solo importa la estructura de conectividad
+# (quién está conectado con quién), no las direcciones del
+# flujo ni las capacidades. El par antiparalelo c⇄d se
+# representa como una única arista no dirigida c–d.
+#
+# Salida:
+#   results/images/red_propia_topologia.png
+#
+# Ejecutar desde src/:
+#   python graficar_red.py
+
+# ------------------------------------------------------------
 # Carga de librerías
-# ============================================================
+# ------------------------------------------------------------
 import os
-import math
+import sys
+import networkx as nx
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import networkx as nx
+from matplotlib.patches import Patch
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from red_propia import construir_red_propia, get_posiciones
 
-
-# ============================================================
+# ------------------------------------------------------------
 # Definición de funciones
-# ============================================================
+# ------------------------------------------------------------
 
-def clasificar_arcos(G: nx.DiGraph) -> tuple:
+def construir_no_dirigida(G_dir: nx.DiGraph) -> nx.Graph:
     """
-    Separa los arcos del dígrafo en tres categorías para colorearlos.
+    Convierte el dígrafo de la red propia a un grafo no dirigido.
+    El par antiparalelo c⇄d queda como una sola arista c–d.
 
-    Arguments
-    ---------
-    G : nx.DiGraph
-        Dígrafo de la red propia.
+    Argumentos:
+        G_dir (nx.DiGraph): dígrafo original.
 
-    Returns
-    -------
-    normales : list[tuple]
-        Arcos que no son antiparalelos ni cuello de botella.
-    antiparalelos : list[tuple]
-        Par (c->d) y (d->c).
-    cuello : list[tuple]
-        Arco e->t (cuello de botella).
+    Salida:
+        nx.Graph: grafo no dirigido equivalente.
     """
-    antiparalelos = [("c", "d"), ("d", "c")]
-    cuello        = [("e", "t")]
-    normales = [
-        (u, v) for u, v in G.edges()
-        if (u, v) not in antiparalelos and (u, v) not in cuello
-    ]
-    return normales, antiparalelos, cuello
+    return nx.to_undirected(G_dir)
 
 
-def calcular_offset(pos: dict, u: str, v: str, delta: float = 0.08) -> tuple:
+def clasificar_nodos(G_ud: nx.Graph) -> dict:
     """
-    Calcula un vector de desplazamiento perpendicular al arco (u, v)
-    para separar visualmente los arcos antiparalelos.
+    Clasifica los nodos por su rol en la red ISP para asignar
+    colores diferenciados en la visualización.
 
-    Arguments
-    ---------
-    pos : dict
-        Diccionario {nodo: (x, y)}.
-    u : str
-        Nodo origen del arco.
-    v : str6
-        Nodo destino del arco.
-    delta : float
-        Magnitud del desplazamiento perpendicular (en unidades del grafo).
+    Argumentos:
+        G_ud (nx.Graph): grafo no dirigido.
 
-    Returns
-    -------
-    tuple[float, float]
-        Vector (dx, dy) de desplazamiento perpendicular.
+    Salida:
+        dict: {nodo: categoria} donde categoria es
+              "fuente", "sumidero" o "intermedio".
     """
-    x1, y1 = pos[u]
-    x2, y2 = pos[v]
-    dx, dy = x2 - x1, y2 - y1
-    length = math.hypot(dx, dy) or 1.0
-    # perpendicular normalizado
-    return (-dy / length * delta, dx / length * delta)
+    categorias = {}
+    for n in G_ud.nodes():
+        if n == "s":
+            categorias[n] = "fuente"
+        elif n == "t":
+            categorias[n] = "sumidero"
+        else:
+            categorias[n] = "intermedio"
+    return categorias
 
 
-def dibujar_etiquetas_arcos(ax, G: nx.DiGraph, pos: dict,
-                             lista_arcos: list, color: str,
-                             curvatura: float = 0.0,
-                             offset_perp: float = 0.0) -> None:
+def graficar_red(G_ud: nx.Graph, pos: dict, ruta: str) -> None:
     """
-    Dibuja las etiquetas de capacidad sobre un conjunto de arcos.
+    Dibuja y guarda la topología no dirigida de la red propia.
+    Los nodos se colorean según su rol (fuente, sumidero,
+    intermedio) y el tamaño refleja el grado.
 
-    Arguments
-    ---------
-    ax : matplotlib.axes.Axes
-        Ejes donde se dibuja.
-    G : nx.DiGraph
-        Dígrafo de la red.
-    pos : dict
-        Posiciones de los nodos.
-    lista_arcos : list[tuple]
-        Arcos cuyas etiquetas se van a dibujar.
-    color : str
-        Color del texto.
-    curvatura : float
-        Curvatura del arco (rad), usada para desplazar la etiqueta.
-    offset_perp : float
-        Desplazamiento perpendicular adicional para arcos curvos.
+    Argumentos:
+        G_ud (nx.Graph): grafo no dirigido.
+        pos (dict): {nodo: (x, y)} posiciones de los nodos.
+        ruta (str): ruta completa del PNG de salida.
 
-    Returns
-    -------
-    None
+    Salida:
+        None (guarda imagen en disco).
     """
-    for u, v in lista_arcos:
-        cap = G[u][v]["capacity"]
-        x1, y1 = pos[u]
-        x2, y2 = pos[v]
-        mx, my = (x1 + x2) / 2, (y1 + y2) / 2
-        if offset_perp:
-            ox, oy = calcular_offset(pos, u, v, delta=offset_perp)
-            mx += ox
-            my += oy
-        ax.text(mx, my, str(cap),
-                ha="center", va="center", fontsize=8.5,
-                color=color, fontweight="bold",
-                bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.75))
+    categorias = clasificar_nodos(G_ud)
+    grados = dict(G_ud.degree())
 
+    color_map = {"fuente": "#2980b9", "sumidero": "#e74c3c",
+                 "intermedio": "#d5d8dc"}
+    edge_map   = {"fuente": "#1a5276", "sumidero": "#922b21",
+                  "intermedio": "#717d7e"}
 
-def graficar_red(ruta_salida: str = "../results/images/red_propia_topologia.png") -> None:
-    """
-    Genera y guarda la figura de la red propia.
-
-    Arguments
-    ---------
-    ruta_salida : str
-        Ruta del archivo PNG de salida.
-
-    Returns
-    -------
-    None
-        Guarda la figura en ``ruta_salida``.
-    """
-    # --- Construir red y clasificar arcos ---
-    G, s, t = construir_red_propia()
-    pos = get_posiciones(G)
-    normales, antiparalelos, cuello = clasificar_arcos(G)
+    node_colors  = [color_map[categorias[n]]  for n in G_ud.nodes()]
+    node_edgecol = [edge_map[categorias[n]]   for n in G_ud.nodes()]
+    node_sizes   = [500 + 200 * grados[n]     for n in G_ud.nodes()]
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.set_aspect("equal")
-    ax.axis("off")
-    ax.set_title("Red propia — Backbone ISP\n"
-                 "9 nodos · 16 arcos · flujo máximo = 24 Gb/s",
-                 fontsize=13, fontweight="bold", pad=14)
 
-    # --- Colores de nodos ---
-    color_nodos = []
-    for n in G.nodes():
-        if n == s:
-            color_nodos.append("#3b82f6")   # azul — fuente
-        elif n == t:
-            color_nodos.append("#ef4444")   # rojo — sumidero
-        else:
-            color_nodos.append("#e2e8f0")   # gris claro — intermedios
-
-    # --- Dibujar arcos normales ---
     nx.draw_networkx_edges(
-        G, pos, edgelist=normales, ax=ax,
-        edge_color="#475569", width=1.8,
-        arrows=True, arrowsize=18,
-        connectionstyle="arc3,rad=0.0",
-        node_size=900,
+        G_ud, pos, ax=ax,
+        edge_color="#7f8c8d", width=2.0, alpha=0.8
     )
-
-    # --- Dibujar par antiparalelo (curvados) ---
-    nx.draw_networkx_edges(
-        G, pos, edgelist=antiparalelos, ax=ax,
-        edge_color="#7c3aed", width=2.2,
-        arrows=True, arrowsize=18,
-        connectionstyle="arc3,rad=0.35",
-        node_size=900, style="dashed",
-    )
-
-    # --- Dibujar cuello de botella ---
-    nx.draw_networkx_edges(
-        G, pos, edgelist=cuello, ax=ax,
-        edge_color="#dc2626", width=2.8,
-        arrows=True, arrowsize=20,
-        connectionstyle="arc3,rad=0.0",
-        node_size=900,
-    )
-
-    # --- Dibujar nodos ---
     nx.draw_networkx_nodes(
-        G, pos, ax=ax,
-        node_color=color_nodos,
-        node_size=900,
-        linewidths=2,
-        edgecolors=["white" if n in (s, t) else "#94a3b8" for n in G.nodes()],
+        G_ud, pos, ax=ax,
+        node_size=node_sizes,
+        node_color=node_colors,
+        edgecolors=node_edgecol,
+        linewidths=2.2
+    )
+    nx.draw_networkx_labels(
+        G_ud, pos, ax=ax,
+        font_size=11, font_weight="bold", font_color="white"
+    )
+    # Etiquetas de grado junto a cada nodo
+    grado_labels = {n: f"k={grados[n]}" for n in G_ud.nodes()}
+    offset_pos   = {n: (x, y - 0.28) for n, (x, y) in pos.items()}
+    nx.draw_networkx_labels(
+        G_ud, offset_pos, labels=grado_labels, ax=ax,
+        font_size=8, font_color="#555555"
     )
 
-    # --- Etiquetas de nodos ---
-    label_color = {n: "white" if n in (s, t) else "#1e293b" for n in G.nodes()}
-    for n, (x, y) in pos.items():
-        ax.text(x, y, n,
-                ha="center", va="center",
-                fontsize=11, fontweight="bold",
-                color=label_color[n])
-
-    # --- Etiquetas de capacidades ---
-    dibujar_etiquetas_arcos(ax, G, pos, normales,      "#334155", offset_perp=0.0)
-    dibujar_etiquetas_arcos(ax, G, pos, antiparalelos, "#7c3aed", offset_perp=0.18)
-    dibujar_etiquetas_arcos(ax, G, pos, cuello,        "#dc2626", offset_perp=0.0)
-
-    # --- Leyenda ---
     leyenda = [
-        mpatches.Patch(color="#3b82f6", label="s — fuente (peering)"),
-        mpatches.Patch(color="#ef4444", label="t — sumidero (data center)"),
-        mpatches.Patch(color="#e2e8f0", label="Enrutador intermedio",
-                       linewidth=1, edgecolor="#94a3b8"),
-        mpatches.Patch(color="#7c3aed", label="Par antiparalelo c ⇄ d",
-                       linestyle="dashed"),
-        mpatches.Patch(color="#dc2626", label="Cuello de botella e→t (cap=3)"),
+        Patch(facecolor="#2980b9", edgecolor="#1a5276", label="s — fuente (peering)"),
+        Patch(facecolor="#e74c3c", edgecolor="#922b21", label="t — sumidero (data center)"),
+        Patch(facecolor="#d5d8dc", edgecolor="#717d7e", label="Enrutador / agregador"),
     ]
-    ax.legend(handles=leyenda, loc="lower left", fontsize=8.5,
-              framealpha=0.9, edgecolor="#cbd5e1")
-
-    plt.tight_layout()
-    os.makedirs(os.path.dirname(ruta_salida), exist_ok=True)
-    plt.savefig(ruta_salida, dpi=180, bbox_inches="tight")
-    print(f"Figura guardada en: {ruta_salida}")
+    ax.legend(handles=leyenda, loc="upper left", fontsize=10)
+    ax.set_title(
+        "Red propia — Backbone ISP (versión no dirigida)\n"
+        f"{G_ud.number_of_nodes()} nodos · {G_ud.number_of_edges()} aristas",
+        fontsize=13, fontweight="bold"
+    )
+    ax.axis("off")
+    fig.tight_layout()
+    os.makedirs(os.path.dirname(ruta), exist_ok=True)
+    fig.savefig(ruta, dpi=180, bbox_inches="tight")
     plt.close(fig)
+    print(f"  [OK] Imagen guardada en {ruta}")
 
 
-# ============================================================
-# Código main
-# ============================================================
-if __name__ == "__main__":
-    # Guardar la figura de topología en results/images/
-    graficar_red("../results/images/red_propia_topologia.png")
+# ------------------------------------------------------------
+# CÓDIGO MAIN
+# ------------------------------------------------------------
+# 1) Construir el dígrafo original y convertir a no dirigido.
+# 2) Extraer posiciones de los nodos.
+# 3) Graficar y guardar la imagen de topología.
+
+BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+
+G_dir, s, t = construir_red_propia()
+G_ud = construir_no_dirigida(G_dir)
+pos  = get_posiciones(G_dir)
+
+print("Red no dirigida:")
+print(f"  Nodos  : {G_ud.number_of_nodes()}")
+print(f"  Aristas: {G_ud.number_of_edges()}")
+print(f"  Grados : { {n: k for n, k in sorted(G_ud.degree(), key=lambda x: -x[1])} }")
+
+graficar_red(G_ud, pos,
+    os.path.join(BASE, "results", "images", "red_propia_topologia.png"))
