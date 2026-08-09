@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Comparación</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1fr 1.35fr;gap:26px;margin-top:14px}
+  .def{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px;
+    margin-bottom:9px;box-shadow:var(--shadow-sm)}
+  .def .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600;margin-bottom:6px}
+  .def p{font-size:12.5px;color:var(--muted);line-height:1.5}.def p b{color:var(--ink)}
+  .metric-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:10px}
+  .mbox{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;text-align:center;box-shadow:var(--shadow-sm)}
+  .mbox .v{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;line-height:1}
+  .mbox .l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+    letter-spacing:.05em;text-transform:uppercase;margin-top:4px}
+  .vs-row{display:flex;gap:10px;align-items:stretch;margin-bottom:10px}
+  .vs-box{flex:1;border-radius:11px;padding:10px 12px;border:1.5px solid}
+  .vs-box.aleat{background:rgba(8,145,201,.06);border-color:rgba(8,145,201,.3)}
+  .vs-box.dirig{background:rgba(226,58,86,.06);border-color:rgba(226,58,86,.3)}
+  .vs-box .ht{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;font-weight:600;margin-bottom:5px}
+  .vs-box .ht.f{color:var(--flow)}.vs-box .ht.c{color:var(--crit)}
+  .vs-box li{font-size:12px;color:var(--muted);line-height:1.55;list-style:none;padding-left:0}
+  .vs-box li::before{content:'▸ ';color:inherit}
+  .vs-box li b{color:var(--ink)}
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);padding:16px 16px 12px;display:flex;flex-direction:column}
+  .chart-wrap .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:8px}
+  svg.chart{width:100%;height:290px}
+  .legend{display:flex;gap:16px;margin-top:8px;justify-content:center}
+  .leg{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;
+    font-size:10px;color:var(--muted)}
+  .leg span{display:inline-block;width:24px;height:3px;border-radius:2px}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>09 · Comparación de curvas</span><span>Fallo aleatorio vs. ataque dirigido</span></div>
+
+  <div class="body">
+    <div>
+      <div class="metric-grid anim d1">
+        <div class="mbox"><div class="v" style="color:var(--flow)">0.462</div><div class="l">AUC aleatorio</div></div>
+        <div class="mbox"><div class="v" style="color:var(--crit)">0.451</div><div class="l">AUC dirigido</div></div>
+        <div class="mbox"><div class="v" style="color:var(--amber)">2.5%</div><div class="l">brecha ΔAUC</div></div>
+      </div>
+
+      <div class="vs-row anim d2">
+        <div class="vs-box aleat">
+          <div class="ht f">Fallo aleatorio</div>
+          <ul>
+            <li>Degradación <b>suave y continua</b></li>
+            <li>Sin caídas abruptas</li>
+            <li>AUC = <b>0.462</b></li>
+            <li>f_c empírico = <b>0.444</b></li>
+          </ul>
+        </div>
+        <div class="vs-box dirig">
+          <div class="ht c">Ataque dirigido</div>
+          <ul>
+            <li>Caída abrupta <b>0.67→0.33</b></li>
+            <li>50% en un paso</li>
+            <li>AUC = <b>0.451</b></li>
+            <li>f_c empírico = <b>0.444</b></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="def anim d3" style="background:rgba(139,92,246,.05);border-color:rgba(139,92,246,.3)">
+        <div class="h" style="color:var(--purple)">Efecto de tamaño finito</div>
+        <p>Ambas curvas dan el mismo f_c empírico = 0.444 porque con N=9 la discretización domina. El f_c teórico (Molloy-Reed) es <b>0.605</b>. La diferencia es un <b>artefacto de red pequeña</b>, no una anomalía.</p>
+      </div>
+
+      <div class="def anim d4" style="background:rgba(226,58,86,.05);border-color:rgba(226,58,86,.25)">
+        <div class="h" style="color:var(--crit)">Conclusión clave</div>
+        <p>La ΔAUC del 2.5% es pequeña porque los hubs <b>ya estaban protegidos</b> estructuralmente. En redes scale-free grandes la brecha sería mucho mayor. El vector de riesgo real es la <b>caída abrupta</b>, no la diferencia de AUC.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap anim d2">
+      <div class="h">▸ Comparación P∞(f) — ambas estrategias</div>
+      <svg class="chart" viewBox="0 0 460 290">
+        <!-- axes -->
+        <line x1="50" y1="260" x2="445" y2="260" stroke="var(--line-2)" stroke-width="1.5"/>
+        <line x1="50" y1="10" x2="50" y2="260" stroke="var(--line-2)" stroke-width="1.5"/>
+        <!-- grid -->
+        <line x1="50" y1="135" x2="445" y2="135" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="50" y1="72.5" x2="445" y2="72.5" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="50" y1="197.5" x2="445" y2="197.5" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+        <!-- y labels -->
+        <text x="44" y="263" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="var(--muted)" text-anchor="end">0.0</text>
+        <text x="44" y="138" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="var(--muted)" text-anchor="end">0.5</text>
+        <text x="44" y="13" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="var(--muted)" text-anchor="end">1.0</text>
+        <!-- x labels -->
+        <text x="50" y="274" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="var(--muted)" text-anchor="middle">0</text>
+        <text x="203" y="274" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="var(--muted)" text-anchor="middle">4/9</text>
+        <text x="445" y="274" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="var(--muted)" text-anchor="middle">1</text>
+        <text x="248" y="288" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle">fracción de fallos f</text>
+        <text x="12" y="135" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--muted)" text-anchor="middle" transform="rotate(-90,12,135)">P∞(f)</text>
+
+        <!-- fc threshold -->
+        <line x1="203" y1="10" x2="203" y2="260" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.8"/>
+        <text x="206" y="24" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="var(--amber)">f_c=0.444</text>
+        <text x="206" y="35" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="var(--amber)">(empírico)</text>
+
+        <!-- AUC areas (semi-transparent) -->
+        <!-- Aleatorio: Pinf=[1,0.8889,0.7751,0.6402,0.4875,0.3536,0.2452,0.1586,0.1111,0]
+             x=50+f*395, y=260-Pinf*250
+             pts: 50,10 | 94,37.8 | 138,66.3 | 182,99.9 | 203(4/9 center is 203) ...
+             Actually f steps: 0,1/9,2/9,...,1 → x = 50 + i/9 * 395 -->
+        <!-- f=0:x=50, f=1:x=445, step=395/9=43.9 -->
+        <!-- Aleatorio y: 260-Pinf*250 -->
+        <!-- 1.0→10, 0.8889→37.8, 0.7751→66.3, 0.6402→99.9, 0.4875→138.1, 0.3536→171.6, 0.2452→198.7, 0.1586→220.4, 0.1111→232.2, 0→260 -->
+        <polygon points="50,10 93.9,37.8 137.8,66.3 181.7,99.9 225.6,138.1 269.4,171.6 313.3,198.7 357.2,220.4 401.1,232.2 445,260 445,260 50,260"
+          fill="rgba(8,145,201,.08)" stroke="none"/>
+        <!-- Dirigido step areas -->
+        <polygon points="50,10 93.9,37.8 137.8,67.8 181.7,96.8 225.6,96.8 225.6,176.3 269.4,176.3 313.3,176.3 313.3,205.3 357.2,205.3 401.1,205.3 401.1,232.2 445,232.2 445,260 50,260"
+          fill="rgba(226,58,86,.07)" stroke="none"/>
+
+        <!-- Aleatorio line -->
+        <polyline points="50,10 93.9,37.8 137.8,66.3 181.7,99.9 225.6,138.1 269.4,171.6 313.3,198.7 357.2,220.4 401.1,232.2 445,260"
+          fill="none" stroke="var(--flow)" stroke-width="2.5" stroke-linejoin="round"/>
+
+        <!-- Dirigido line (step) -->
+        <polyline points="50,10 93.9,37.8 137.8,67.8 181.7,96.8 225.6,96.8 225.6,176.3 269.4,176.3 313.3,176.3 313.3,205.3 357.2,205.3 401.1,205.3 401.1,232.2 445,232.2 445,260"
+          fill="none" stroke="var(--crit)" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="7 3"/>
+
+        <!-- dot points aleatorio -->
+        <circle cx="50" cy="10" r="4" fill="var(--flow)" stroke="white" stroke-width="1.3"/>
+        <circle cx="93.9" cy="37.8" r="4" fill="var(--flow)" stroke="white" stroke-width="1.3"/>
+        <circle cx="137.8" cy="66.3" r="4" fill="var(--flow)" stroke="white" stroke-width="1.3"/>
+        <circle cx="181.7" cy="99.9" r="4" fill="var(--flow)" stroke="white" stroke-width="1.3"/>
+        <circle cx="225.6" cy="138.1" r="4" fill="var(--flow)" stroke="white" stroke-width="1.3"/>
+        <circle cx="445" cy="260" r="4" fill="var(--flow)" stroke="white" stroke-width="1.3"/>
+        <!-- dot points dirigido -->
+        <circle cx="50" cy="10" r="4" fill="none" stroke="var(--crit)" stroke-width="2"/>
+        <circle cx="181.7" cy="96.8" r="4" fill="var(--crit)" stroke="white" stroke-width="1.3"/>
+        <circle cx="225.6" cy="176.3" r="5" fill="var(--amber)" stroke="white" stroke-width="1.5"/>
+        <circle cx="445" cy="260" r="4" fill="var(--crit)" stroke="white" stroke-width="1.3"/>
+
+        <!-- caída annotation -->
+        <line x1="225.6" y1="96.8" x2="225.6" y2="176.3" stroke="var(--amber)" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="232" y="136" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--amber)">caída</text>
+        <text x="232" y="147" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--amber)">abrupta</text>
+      </svg>
+      <div class="legend">
+        <div class="leg"><span style="background:var(--flow)"></span>Fallo aleatorio (AUC=0.462)</div>
+        <div class="leg"><span style="background:var(--crit);height:2px;border-top:2px dashed var(--crit)"></span>Ataque dirigido (AUC=0.451)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Comparación · ΔAUC=2.5% · f_c empírico igual (tamaño finito)</span><span>09 / 10</span></div>
+</div></body></html>

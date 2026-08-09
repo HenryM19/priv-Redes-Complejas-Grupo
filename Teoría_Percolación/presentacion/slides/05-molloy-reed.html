@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"><title>Molloy–Reed</title>
 <link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <style>
   .body{flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:28px;margin-top:12px}
-  .formula-box{background:#0f1626;border-radius:12px;padding:20px 24px;text-align:center;
-    font-family:'JetBrains Mono',monospace;color:#e8edf6;margin-bottom:14px}
-  .formula-box .big{font-size:26px;font-weight:700;line-height:1.3}
-  .formula-box .big .k{color:#5ad1a0} .formula-box .big .v{color:#ffd23f}
-  .formula-box small{font-size:11px;color:#7a8ca0;display:block;margin-top:6px;letter-spacing:.08em}
   .def{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 16px;margin-bottom:10px}
   .def .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-bottom:6px}
-  .def .h.green{color:var(--green)} .def .h.blue{color:var(--blue)} .def .h.purple{color:var(--purple)} .def .h.amber{color:var(--amber)}
+  .def .h.blue{color:var(--blue)} .def .h.purple{color:var(--purple)} .def .h.amber{color:var(--amber)}
   .def p{font-size:13px;color:var(--muted);line-height:1.5}.def p b{color:var(--ink)}
+  .eq-dark{background:#0f1626;border-radius:12px;padding:18px 24px;text-align:center;margin-bottom:14px}
+  .eq-dark .katex{color:#ffd23f;font-size:1.5em}
+  .eq-dark small{font-size:10.5px;color:#7a8ca0;display:block;margin-top:8px;letter-spacing:.06em;font-family:'JetBrains Mono',monospace}
+  .eq-inline-dark{background:#0f1626;border-radius:8px;padding:10px 14px;text-align:center;margin-bottom:8px}
+  .eq-inline-dark .katex{color:#ffd23f;font-size:1.2em}
   table.tbl2{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
   table.tbl2 th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
     color:var(--muted);padding:7px 10px;border-bottom:2px solid var(--line-2);text-align:left}
@@ -21,42 +22,41 @@
   .result-box{background:linear-gradient(100deg,rgba(15,163,107,.08),rgba(47,107,255,.06));
     border:1px solid rgba(15,163,107,.3);border-radius:12px;padding:16px 20px}
   .result-box .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:10px}
-  .nums{display:flex;gap:14px}
-  .nm{flex:1;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 8px}
-  .nm .n{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1}
-  .nm .l{font-size:10px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.05em;font-family:'JetBrains Mono',monospace}
+  .nums{display:flex;gap:10px}
+  .nm{flex:1;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 6px}
+  .nm .n{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;line-height:1}
+  .nm .l{font-size:9.5px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.05em;font-family:'JetBrains Mono',monospace}
+  .nm .l .katex{font-size:.85em;color:var(--muted)}
   .verdict{margin-top:12px;display:flex;align-items:center;gap:12px;
     background:rgba(15,163,107,.08);border:1px solid rgba(15,163,107,.3);border-radius:8px;padding:10px 14px}
-  .verdict .v{font-size:18px;font-weight:700;color:var(--green)}
-  .verdict p{font-size:13px;color:var(--txt)}.verdict p b{color:var(--ink)}
+  .verdict .v{font-size:17px;font-weight:700;color:var(--green);white-space:nowrap}
+  .verdict p{font-size:12.5px;color:var(--txt)}.verdict p b{color:var(--ink)}
 </style></head>
 <body><div class="slide">
   <div class="grid-bg"></div>
-  <div class="masthead"><span><span class="dot"></span>05 · Criterio de Molloy–Reed</span><span>κ · f_c · Cohen et al. 2000</span></div>
+  <div class="masthead"><span><span class="dot"></span>05 · Criterio de Molloy–Reed</span><span>Molloy &amp; Reed (1995) · Cohen et al. (2000)</span></div>
 
   <div class="body">
     <div>
-      <div class="formula-box anim d1">
-        <div class="big">κ = <span class="k">⟨k²⟩</span> / <span class="v">⟨k⟩</span> <span style="color:#e23a56"> > 2</span></div>
-        <small>Existe componente gigante si y solo si κ &gt; 2 · Molloy &amp; Reed (1995)</small>
+      <div class="eq-dark anim d1">
+        <div id="eq_kappa"></div>
+        <small>Molloy &amp; Reed (1995) — existe componente gigante si y solo si κ &gt; 2</small>
       </div>
 
       <div class="def anim d2">
         <div class="h blue">¿Qué mide κ?</div>
-        <p>El segundo momento ⟨k²⟩ pondera cuadráticamente los hubs: un nodo con k=5 contribuye 25, uno con k=2 contribuye apenas 4. Por eso κ captura si la red tiene suficientes hubs para sostener el GCC.</p>
+        <p>El segundo momento <span id="eq_k2i"></span> pondera cuadráticamente los nodos de alto grado: un nodo con <span id="eq_k5i"></span> contribuye 25, uno con <span id="eq_k2i2"></span> contribuye apenas 4. Por eso κ captura la heterogeneidad de la red y su capacidad de sostener el GCC.</p>
       </div>
 
       <div class="def anim d3">
-        <div class="h purple">Fracción crítica · Cohen et al. (2000)</div>
-        <div style="background:#0f1626;border-radius:8px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:16px;color:#ffd23f;text-align:center;margin-bottom:8px">
-          f<sub style="color:#5ad1a0">c</sub> = 1 − 1 / (κ<sub style="color:#5ad1a0">₀</sub> − 1)
-        </div>
-        <p>Máxima fracción de nodos que pueden fallar <b>aleatoriamente</b> antes de que el GCC desaparezca. Derivado directamente de κ₀ de la red original.</p>
+        <div class="h purple">Umbral de percolación — Cohen et al. (2000)</div>
+        <div class="eq-inline-dark anim d3"><div id="eq_fc"></div></div>
+        <p>Fracción crítica de nodos que pueden fallar <b>aleatoriamente</b> antes de que el GCC desaparezca. Se deriva directamente de κ de la red original.</p>
       </div>
 
       <div class="def anim d4">
         <div class="h amber">Efecto de tamaño finito</div>
-        <p>La fórmula es exacta para N → ∞. Con N=9 el umbral empírico se desplaza: la simulación muestra f_c ≈ 0.44 en lugar de 0.61. Es un efecto esperado en redes pequeñas.</p>
+        <p>La fórmula es exacta para <span id="eq_Ninf"></span>. Con <span id="eq_N9"></span> el umbral empírico se desplaza: la simulación arroja <span id="eq_fc_emp"></span> en lugar de 0.61 — comportamiento esperado en redes pequeñas.</p>
       </div>
     </div>
 
@@ -64,11 +64,11 @@
       <div class="anim d1" style="background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 16px;box-shadow:var(--shadow-sm);margin-bottom:14px">
         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:8px">▸ Distribución de grados</div>
         <table class="tbl2">
-          <tr><th>Nodo</th><th>Grado k</th><th>k²</th><th>Tipo</th></tr>
-          <tr class="hub"><td class="mono">c</td><td class="mono">5</td><td class="mono">25</td><td>HUB ★</td></tr>
-          <tr class="hub"><td class="mono">d</td><td class="mono">4</td><td class="mono">16</td><td>HUB ★</td></tr>
-          <tr class="hub"><td class="mono">f</td><td class="mono">4</td><td class="mono">16</td><td>HUB ★</td></tr>
-          <tr><td class="mono">s,a,b,e,t</td><td class="mono">3</td><td class="mono">9</td><td>normal</td></tr>
+          <tr><th>Nodo</th><th>Grado <span id="th_k"></span></th><th><span id="th_k2"></span></th><th>Tipo</th></tr>
+          <tr class="hub"><td class="mono">c</td><td class="mono">5</td><td class="mono">25</td><td>hub ★</td></tr>
+          <tr class="hub"><td class="mono">d</td><td class="mono">4</td><td class="mono">16</td><td>hub ★</td></tr>
+          <tr class="hub"><td class="mono">f</td><td class="mono">4</td><td class="mono">16</td><td>hub ★</td></tr>
+          <tr><td class="mono">s, a, b, e, t</td><td class="mono">3</td><td class="mono">9</td><td>normal</td></tr>
           <tr><td class="mono">g</td><td class="mono">2</td><td class="mono">4</td><td>normal</td></tr>
         </table>
       </div>
@@ -76,18 +76,44 @@
       <div class="result-box anim d2">
         <div class="h">Resultados sobre la red propia</div>
         <div class="nums">
-          <div class="nm"><div class="n c-blue">3.33</div><div class="l">⟨k⟩</div></div>
-          <div class="nm"><div class="n c-blue">11.78</div><div class="l">⟨k²⟩</div></div>
+          <div class="nm"><div class="n c-blue">3.33</div><div class="l"><span id="lb_k"></span></div></div>
+          <div class="nm"><div class="n c-blue">11.78</div><div class="l"><span id="lb_k2"></span></div></div>
           <div class="nm"><div class="n c-green">3.53</div><div class="l">κ</div></div>
-          <div class="nm"><div class="n c-purple">0.605</div><div class="l">f_c teórico</div></div>
+          <div class="nm"><div class="n c-purple">0.605</div><div class="l"><span id="lb_fc"></span> teórico</div></div>
         </div>
         <div class="verdict">
-          <div class="v">κ = 3.53 &gt; 2 ✓</div>
-          <p>La red <b>sí tiene componente gigante</b>. Puede perder teóricamente hasta el <b>60.5%</b> de sus nodos aleatoriamente antes de fragmentarse.</p>
+          <div class="v"><span id="v_kappa"></span> &gt; 2 ✓</div>
+          <p>La red <b>posee componente gigante</b>. Puede soportar teóricamente hasta el <b>60.5%</b> de fallos aleatorios antes de fragmentarse.</p>
         </div>
       </div>
     </div>
   </div>
 
   <div class="footer"><span>Molloy–Reed (1995) · Cohen et al. (2000)</span><span>05 / 10</span></div>
-</div></body></html>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script>
+const R = (id, tex, display=false) => katex.render(tex, document.getElementById(id), {throwOnError:false, displayMode:display});
+// Fórmula principal κ
+R('eq_kappa', '\\kappa = \\dfrac{\\langle k^2 \\rangle}{\\langle k \\rangle} > 2', true);
+// Inline
+R('eq_k2i', '\\langle k^2 \\rangle');
+R('eq_k5i', 'k=5');
+R('eq_k2i2', 'k=2');
+// f_c
+R('eq_fc', 'f_c = 1 - \\dfrac{1}{\\kappa_0 - 1}', true);
+// N
+R('eq_Ninf', 'N \\to \\infty');
+R('eq_N9', 'N = 9');
+R('eq_fc_emp', 'f_c \\approx 0.44');
+// tabla headers
+R('th_k', 'k');
+R('th_k2', 'k^2');
+// labels resultado
+R('lb_k', '\\langle k \\rangle');
+R('lb_k2', '\\langle k^2 \\rangle');
+R('lb_fc', 'f_c');
+// verdict
+R('v_kappa', '\\kappa = 3.53');
+</script>
+</body></html>

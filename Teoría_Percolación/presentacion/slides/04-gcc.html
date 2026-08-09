@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"><title>Componente gigante</title>
 <link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <style>
   .body{flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:30px;margin-top:14px}
   .col{display:flex;flex-direction:column;gap:14px}
   .def{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 20px;box-shadow:var(--shadow-sm)}
   .def .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-bottom:8px}
   .def .h.green{color:var(--green)} .def .h.crit{color:var(--crit)} .def .h.blue{color:var(--blue)}
-  .def p{font-size:13.5px;color:var(--muted);line-height:1.55}.def p b{color:var(--ink)}
+  .def p{font-size:13px;color:var(--muted);line-height:1.55}.def p b{color:var(--ink)}
   .anim-box{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 16px;box-shadow:var(--shadow-sm)}
   .anim-box .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--flow);font-weight:600;margin-bottom:10px}
   .fval{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
@@ -20,34 +21,61 @@
   .mt{text-align:center;flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px}
   .mt .n{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
   .mt .l{font-size:10.5px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;font-family:'JetBrains Mono',monospace}
+  /* Algoritmo */
+  .algo{background:#0f1626;border-radius:10px;padding:14px 18px;margin-top:8px}
+  .algo-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:9px}
+  .algo-step:last-child{margin-bottom:0}
+  .algo-step .num{flex:none;width:22px;height:22px;border-radius:6px;background:rgba(8,145,201,.3);
+    border:1px solid rgba(8,145,201,.5);display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#5ad1a0}
+  .algo-step .eq{flex:1;font-size:13.5px;color:#e8edf6;line-height:1.3}
+  .algo-step .eq .katex{color:#ffd23f}
+  .algo-step .comment{font-size:10.5px;color:#5a7a8a;font-family:'JetBrains Mono',monospace;margin-top:2px}
+  .cost{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#5a7a8a;text-align:center}
 </style></head>
 <body><div class="slide">
   <div class="grid-bg"></div>
-  <div class="masthead"><span><span class="dot"></span>04 · El componente gigante</span><span>GCC · parámetro de orden · hubs</span></div>
+  <div class="masthead"><span><span class="dot"></span>04 · El componente gigante</span><span>GCC · parámetro de orden P∞ · hubs</span></div>
 
   <div class="body">
     <div class="col">
       <div class="def anim d1">
         <div class="h green">Componente gigante (GCC)</div>
         <p>El <b>mayor conjunto de nodos mutuamente alcanzables</b>: desde cualquier nodo del GCC existe un camino (directo o indirecto) hacia cualquier otro nodo del mismo conjunto.</p>
-        <p style="margin-top:8px">Si el GCC abarca una fracción no nula de la red, ésta está <b>"globalmente conectada"</b>. Cuando el GCC desaparece, la red está fragmentada en islas que no se comunican.</p>
+        <p style="margin-top:8px">Cuando el GCC desaparece, la red se fragmenta en <b>islas aisladas</b> que no se comunican entre sí.</p>
       </div>
 
       <div class="def anim d2">
-        <div class="h blue">¿Cómo se mide?</div>
+        <div class="h blue">¿Cómo se computa?</div>
         <p>Algoritmo BFS sobre el subgrafo de nodos activos:</p>
-        <p style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--panel-2);padding:10px;border-radius:8px;color:var(--ink)">
-          1. Remover ⌊f·N⌋ nodos<br>
-          2. BFS desde cada nodo no visitado<br>
-          3. GCC = componente más grande<br>
-          4. P∞ = |GCC| / N<br>
-          — Costo: O(V + E) por punto —
-        </p>
+        <div class="algo">
+          <div class="algo-step">
+            <div class="num">1</div>
+            <div class="eq">
+              Remover <span id="eq1"></span> nodos aleatorios
+              <div class="comment">f = fracción de fallo, N = tamaño de la red</div>
+            </div>
+          </div>
+          <div class="algo-step">
+            <div class="num">2</div>
+            <div class="eq">BFS desde cada nodo no visitado → componentes</div>
+          </div>
+          <div class="algo-step">
+            <div class="num">3</div>
+            <div class="eq">GCC = componente más grande</div>
+          </div>
+          <div class="algo-step">
+            <div class="num">4</div>
+            <div class="eq"><span id="eq2"></span> — parámetro de orden</div>
+          </div>
+          <div class="cost">Complejidad: <span id="eq3"></span> por punto de la curva</div>
+        </div>
       </div>
 
       <div class="def anim d3" style="background:rgba(226,58,86,.05);border-color:rgba(226,58,86,.25)">
         <div class="h crit">El rol de los hubs</div>
-        <p>Los nodos de <b>mayor grado</b> sostienen la conectividad global. Pocos nodos con grado alto elevan ⟨k²⟩ y por tanto κ, haciendo que el GCC sea más resistente. Pero su remoción deliberada lo destruye rápidamente.</p>
+        <p>Los nodos de <b>mayor grado</b> sostienen la conectividad global. Su remoción deliberada destruye el GCC mucho más rápido que los fallos aleatorios.</p>
       </div>
     </div>
 
@@ -72,14 +100,20 @@
     </div>
   </div>
 
-  <div class="footer"><span>GCC · BFS · O(V+E) por punto de la curva</span><span>04 / 10</span></div>
+  <div class="footer"><span>GCC · BFS · parámetro de orden P∞</span><span>04 / 10</span></div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script>
+// Renderizar ecuaciones con KaTeX
+katex.render("\\lfloor f \\cdot N \\rfloor", document.getElementById('eq1'), {throwOnError:false, displayMode:false});
+katex.render("P_\\infty = \\frac{|\\text{GCC}|}{N}", document.getElementById('eq2'), {throwOnError:false, displayMode:false});
+katex.render("\\mathcal{O}(V + E)", document.getElementById('eq3'), {throwOnError:false, displayMode:false});
+
 // Red: nodos y posiciones
 const POS = {s:[30,150],a:[110,60],b:[110,240],c:[210,100],d:[210,200],e:[300,30],f:[300,150],g:[300,270],t:[370,150]};
 const EDGES = [['s','a'],['s','b'],['s','c'],['a','c'],['a','e'],['b','d'],['b','f'],
                ['c','d'],['c','e'],['c','f'],['d','f'],['d','g'],['e','t'],['f','t'],['g','t']];
-const ORDER = ['c','d','f','a','b','e','s','t','g']; // orden de remoción (por grado desc)
+const ORDER = ['c','d','f','a','b','e','s','t','g'];
 let step_i = 0;
 
 function getGCC(active){
@@ -98,15 +132,12 @@ function getGCC(active){
 
 function draw(active){
   const svg=document.getElementById('g');
-  const W=380,H=300;
   let html='';
-  // edges
   EDGES.forEach(([u,v])=>{
     const [x1,y1]=POS[u],[x2,y2]=POS[v];
     const both=active.includes(u)&&active.includes(v);
     html+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${both?'#2f6bff':'#e0e6f0'}" stroke-width="${both?2.4:1.4}" opacity="${both?0.8:0.3}"/>`;
   });
-  // nodes
   Object.entries(POS).forEach(([n,[x,y]])=>{
     const on=active.includes(n);
     let fill=on?(n==='s'?'#2980b9':n==='t'?'#e74c3c':n==='c'||n==='d'||n==='f'?'#e74c3c':'#aed6f1'):'#e0e6f0';
@@ -116,7 +147,6 @@ function draw(active){
     html+=`<text x="${x}" y="${y}" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="${on?'white':'#aaa'}" text-anchor="middle" dominant-baseline="central" opacity="${op}">${n}</text>`;
   });
   svg.innerHTML=html;
-
   const gcc=getGCC(active);
   const pinf=(gcc/9).toFixed(3);
   document.getElementById('removed').textContent=9-active.length;
@@ -129,7 +159,6 @@ function draw(active){
 
 function step(dir){
   step_i=Math.max(0,Math.min(9,step_i+dir));
-  const active=Object.keys(POS).filter((_,i)=>!ORDER.slice(0,step_i).includes(ORDER[i]||''));
   const removed=ORDER.slice(0,step_i);
   const act=Object.keys(POS).filter(n=>!removed.includes(n));
   draw(act);
