@@ -1,0 +1,18 @@
+============================================================
+ÍTEM 1 · MÉTRICAS BÁSICAS
+============================================================
+  Nodos (n)                     : 177
+  Aristas (m)                   : 209
+  Densidad                      : 0.013418
+  Componentes conexas           : 1
+  Tamaño de la mayor componente : 177
+
+  INTERPRETACIÓN:
+  La densidad es muy baja (~0.013), lo que es esperable en una
+  red de infraestructura jerárquica: cada equipo se conecta solo
+  a sus vecinos inmediatos en la jerarquía (core → agregación →
+  acceso), no a todos los demás. Una red completa tendría
+  densidad 1.0 y requeriría 15576 aristas.
+  El grafo es conexo (1 componente), confirmando que todos los
+  campus tienen al menos un camino hacia el resto de la red.
+============================================================

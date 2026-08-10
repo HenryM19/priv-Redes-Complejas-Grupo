@@ -1,0 +1,6 @@
+modelo,clustering,distancia_media,diametro,asortatividad
+Red real,0.0343,5.8304,11.0,-0.1468
+ER (media),0.0094,5.6314,13.47,-0.0387
+ER (std),0.0081,0.286,1.6276,0.0651
+CM (media),0.0193,4.2767,9.46,-0.1717
+CM (std),0.009,0.158,1.1351,0.0636

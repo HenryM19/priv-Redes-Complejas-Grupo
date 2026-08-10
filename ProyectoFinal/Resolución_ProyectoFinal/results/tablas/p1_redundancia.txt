@@ -1,0 +1,29 @@
+============================================================
+ÍTEM 6 · CONTRASTE CON EL INFORME TÉCNICO
+         Redundancia core–agregación por campus
+============================================================
+  Campus                                     Nodos agg Con red. Sin red. Redundancia
+  --------------------------------------------------------------------------------
+  Campus Balzay                                      5        4        1        SÍ ✓
+  Campus Central                                    14       13        1        SÍ ✓
+  Campus Hospitalidad                                1        0        1        NO ✗
+  Campus Paraiso                                     6        0        6        NO ✗
+  Campus Yanuncay                                    1        0        1        NO ✗
+  Sede Centro Historico                              0        0        0        NO ✗
+  Sede Museo                                         0        0        0        NO ✗
+
+  INTERPRETACIÓN:
+  Balzay: el informe afirma redundancia core–agregación. Los
+  datos deben confirmarla (switches de agregación conectados a
+  DT-0A-C12 Y DT-0A-C13 simultáneamente).
+
+  Paraíso: el informe también afirma redundancia, pero los
+  datos revelan un solo switch de core (CPAR-C10). Los dobles
+  enlaces de sus switches de agregación van ambos al MISMO
+  core → es agregación de puertos (LAG), no redundancia de
+  núcleo. La afirmación del informe es incorrecta.
+
+  Campus Central: el informe describe enlaces simples agg–core,
+  pero los datos muestran que los 13 switches CC-* están
+  doblemente conectados a DATCC-2A-C2 y DATCC-2A-C3.
+============================================================

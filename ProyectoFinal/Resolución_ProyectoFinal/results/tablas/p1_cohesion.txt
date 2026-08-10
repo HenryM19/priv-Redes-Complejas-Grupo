@@ -1,0 +1,25 @@
+============================================================
+ÍTEM 4 · CLUSTERING, DIÁMETRO, DISTANCIA MEDIA Y ASORTATIVIDAD
+============================================================
+  Clustering medio <C>          : 0.034329
+  Diámetro                      : 11
+  Distancia media               : 5.8304
+  Asortatividad por grado (r)   : -0.1468
+
+  INTERPRETACIÓN:
+  El clustering medio es muy bajo: en una red jerárquica los
+  equipos de acceso se conectan solo hacia arriba (a su switch
+  de agregación), no entre sí, por lo que hay muy pocos
+  triángulos. Las redes sociales, en cambio, tienen clustering
+  alto porque 'los amigos de mis amigos son mis amigos'.
+
+  La asortatividad negativa es la firma de una red jerárquica:
+  los nodos de alto grado (core) se conectan con nodos de bajo
+  grado (acceso), no entre sí. Esto implica que los hubs son
+  resistentes a fallos aleatorios pero vulnerables si se ataca
+  específicamente un switch de core o agregación.
+
+  El diámetro y la distancia media son relativamente bajos
+  gracias a la jerarquía: cualquier equipo llega a cualquier
+  otro en pocos saltos atravesando la cadena acceso→agg→core.
+============================================================

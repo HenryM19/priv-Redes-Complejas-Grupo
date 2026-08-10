@@ -1,0 +1,37 @@
+============================================================
+ÍTEM 5 · PUNTOS DE ARTICULACIÓN Y PUENTES
+============================================================
+  Total puntos de articulación  : 47
+  Total puentes                 : 141
+
+  Articulaciones por campus:
+    Campus Central                               23
+    Campus Paraiso                               14
+    Campus Balzay                                 6
+    Campus Yanuncay                               2
+    Campus Hospitalidad                           1
+    Nube MPLS                                     1
+
+  Articulaciones por capa:
+    agregacion             26
+    acceso                 17
+    wan                     3
+    core                    1
+
+  Puentes por campus:
+    Campus Central                               56
+    Campus Paraiso                               42
+    Campus Balzay                                25
+    Campus Yanuncay                              12
+    Campus Hospitalidad                           4
+    Nube MPLS                                     2
+
+  INTERPRETACIÓN:
+  Un punto de articulación es un nodo cuya falla desconecta
+  al menos a un subconjunto de la red. En una jerarquía sin
+  redundancia (un solo switch de agregación por edificio) ese
+  switch ES un punto de articulación. Los puentes son la
+  versión de arista: un único enlace que, si falla, aísla a
+  un segmento. Campus con muchos puentes carecen de caminos
+  alternativos y son más vulnerables a fallos de enlace.
+============================================================

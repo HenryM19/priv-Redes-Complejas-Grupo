@@ -1,0 +1,33 @@
+============================================================
+ÍTEM 2 · DISTRIBUCIÓN DE GRADO
+============================================================
+  Grado medio <k>  : 2.3616
+  Grado máximo     : 17
+  Grado mínimo     : 1
+
+  Frecuencias por grado:
+    k= 1 → 113 nodos
+    k= 2 →  22 nodos
+    k= 3 →   6 nodos
+    k= 4 →   7 nodos
+    k= 5 →   9 nodos
+    k= 6 →   7 nodos
+    k= 7 →   4 nodos
+    k= 8 →   3 nodos
+    k= 9 →   1 nodos
+    k=10 →   1 nodos
+    k=12 →   2 nodos
+    k=16 →   1 nodos
+    k=17 →   1 nodos
+
+  INTERPRETACIÓN:
+  La distribución muestra una cola derecha: unos pocos nodos
+  (switches de core y agregación) concentran la mayoría de
+  conexiones. Sin embargo, con solo 177 nodos, el rango de
+  grados (1–17) es insuficiente
+  para ajustar una ley de potencia P(k) ~ k^{-γ} con rigor.
+  Un test Kolmogorov-Smirnov o powerlaw (Clauset et al. 2009)
+  sería necesario antes de proclamar 'red libre de escala'.
+  Lo que sí se observa: nodos de grado 1 (hojas de acceso) son
+  la mayoría, y el nodo de mayor grado es un switch de core.
+============================================================

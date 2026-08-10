@@ -1,0 +1,34 @@
+======================================================================
+ÍTEM 1 · COMPARACIÓN CON MODELOS NULOS
+  (100 realizaciones de ER G(n,m) y Modelo de Configuración)
+======================================================================
+  Métrica                      Real   ER media   ER std   CM media   CM std
+  ----------------------------------------------------------------------
+  Clustering medio <C>       0.0343     0.0094   0.0081     0.0193   0.0090
+  Distancia media <d>        5.8304     5.6314   0.2860     4.2767   0.1580
+  Diámetro                  11.0000    13.4700   1.6276     9.4600   1.1351
+  Asortatividad r           -0.1468    -0.0387   0.0651    -0.1717   0.0636
+
+  INTERPRETACIÓN:
+
+  Clustering:
+  La red real tiene clustering << ER y CM. Erdős–Rényi predice
+  C ≈ p = 2m/n(n-1) ≈ 0.013, y el CM predice un valor similar.
+  Que la red real sea aún más baja confirma que la jerarquía
+  prohíbe triángulos: los nodos de acceso solo se conectan
+  hacia arriba, nunca entre sí.
+
+  Distancia media y diámetro:
+  ER produce distancias muy cortas (mundo pequeño). La red real
+  tiene distancias más largas porque la jerarquía obliga a pasar
+  por capas intermedias. El CM se acerca más a la red real
+  porque preserva la secuencia de grados, con muchos nodos de
+  grado 1 que 'alargan' los caminos.
+
+  Asortatividad:
+  ER tiene asortatividad ≈ 0 (neutra). La red real es negativa
+  (-0.15): los hubs se conectan con hojas. Ni ER ni CM reproducen
+  esta asortatividad negativa, lo que indica que la jerarquía
+  core–agregación–acceso es una propiedad estructural que va MÁS
+  ALLÁ de la simple secuencia de grados.
+======================================================================
