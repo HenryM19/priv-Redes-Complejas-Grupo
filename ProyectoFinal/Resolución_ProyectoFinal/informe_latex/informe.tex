@@ -1,0 +1,556 @@
+% ============================================================
+%  informe.tex — Plantilla de informe técnico UCuenca
+%  Módulo 1217 · Redes Complejas
+%  Estilo basado en el PDF de referencia del proyecto
+% ============================================================
+
+\documentclass[12pt, a4paper]{article}
+
+% ============================================================
+% Codificación y lenguaje
+% ============================================================
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-nodecimaldot]{babel}
+
+% ============================================================
+% Fuente — Palatino (cuerpo + matemáticas)
+% ============================================================
+\usepackage{mathpazo}
+\usepackage[scaled=0.92]{helvet}   % Helvetica para código inline si se desea
+\usepackage{microtype}             % Mejora el espaciado tipográfico
+
+% ============================================================
+% Geometría de página
+% ============================================================
+\usepackage[
+    a4paper,
+    left   = 2.6cm,
+    right  = 2.6cm,
+    top    = 3.0cm,
+    bottom = 3.0cm
+]{geometry}
+
+% ============================================================
+% Matemáticas
+% ============================================================
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}            % Negritas en matemáticas
+
+% ============================================================
+% Gráficos y figuras
+% ============================================================
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}    % Para subfiguras (a), (b)
+
+% ============================================================
+% Colores
+% ============================================================
+\usepackage{xcolor}
+
+%  Azul principal de secciones (igual al del PDF de referencia)
+\definecolor{azulsec}{RGB}{26, 88, 140}
+
+%  Fondo y borde del resumen
+\definecolor{grisfondo}{RGB}{245, 245, 245}
+\definecolor{borde}{RGB}{70, 70, 70}
+
+%  Encabezado de tablas
+\definecolor{tabhead}{RGB}{30, 70, 115}      % Azul oscuro → letras blancas
+\definecolor{tabfila}{RGB}{235, 241, 248}    % Azul muy claro → filas alternas
+
+%  Caja de aviso (naranja, como los boxes del PDF)
+\definecolor{naranja}{RGB}{230, 150, 0}
+\definecolor{naranjaFondo}{RGB}{255, 243, 210}
+
+% ============================================================
+% Tablas
+% ============================================================
+\usepackage{booktabs}      % \toprule, \midrule, \bottomrule
+\usepackage{colortbl}      % Colorear filas/columnas
+\usepackage{array}         % Tipos de columna extendidos
+\usepackage{tabularx}      % Columnas de ancho automático
+\usepackage{multirow}      % Celdas multifila
+\usepackage{makecell}      % Saltos de línea en celdas
+
+\renewcommand{\arraystretch}{1.35}   % Altura de filas
+
+% Tipo de columna centrado con ancho fijo
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+% Tipo de columna justificado con ancho fijo
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+% Tipo de columna derecha con ancho fijo
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+% Comando para la fila de encabezado de tabla:
+% Uso: \encabezado{col1} & \encabezado{col2} & ... \\
+\newcommand{\encabezado}[1]{%
+    \cellcolor{tabhead}\textcolor{white}{\textbf{#1}}}
+
+% ============================================================
+% Captions (pies de figura y tabla)
+% ============================================================
+\usepackage{caption}
+\captionsetup{
+    font        = small,
+    labelfont   = bf,
+    labelsep    = period,
+    justification = justified,
+    singlelinecheck = false
+}
+\captionsetup[figure]{
+    name       = Fig.,
+    justification = centering
+}
+\captionsetup[table]{
+    name       = Tabla,
+    position   = above,
+    justification = centering
+}
+
+% ============================================================
+% Formato de secciones — titlesec
+% ============================================================
+\usepackage{titlesec}
+
+%  Sección: número y título en azul, negrita, subrayado con línea
+\titleformat{\section}
+    {\color{azulsec}\large\bfseries}   % Formato del texto
+    {\thesection.}                      % Número + punto
+    {0.5em}                             % Separación número-título
+    {}                                  % Código antes del título
+    [\color{azulsec}\vspace{2pt}\rule{\linewidth}{0.7pt}]  % Regla debajo
+
+%  Subsección: número y título en azul, negrita, sin regla
+\titleformat{\subsection}
+    {\color{azulsec}\normalsize\bfseries}
+    {\thesubsection}
+    {0.5em}
+    {}
+
+%  Subsubsección: azul, normalsize, negrita itálica
+\titleformat{\subsubsection}
+    {\color{azulsec}\normalsize\bfseries\itshape}
+    {\thesubsubsection}
+    {0.5em}
+    {}
+
+%  Sección sin número (para Anexos, Referencias manuales, etc.)
+%  Uso: \section*{Anexos}
+\titleformat{name=\section, numberless}
+    {\color{azulsec}\large\bfseries}
+    {}
+    {0em}
+    {}
+    [\color{azulsec}\vspace{2pt}\rule{\linewidth}{0.7pt}]
+
+%  Espaciado antes/después de secciones
+\titlespacing{\section}    {0pt}{16pt}{6pt}
+\titlespacing{\subsection} {0pt}{10pt}{4pt}
+\titlespacing{\subsubsection}{0pt}{8pt}{3pt}
+
+% ============================================================
+% Entorno de Resumen con borde izquierdo y fondo gris
+% ============================================================
+\usepackage[framemethod=default]{mdframed}
+
+\newenvironment{resumen}{%
+    \begin{mdframed}[
+        backgroundcolor = grisfondo,
+        linecolor       = borde,
+        linewidth       = 0pt,
+        leftline        = true,
+        rightline       = false,
+        topline         = false,
+        bottomline      = false,
+        innerleftmargin = 10pt,
+        innerrightmargin= 10pt,
+        innertopmargin  = 8pt,
+        innerbottommargin = 8pt,
+        leftmargin      = 0pt,
+        rightmargin     = 0pt,
+        skipabove       = 10pt,
+        skipbelow       = 10pt,
+        leftmarginwidth = 4pt     % Grosor del borde izquierdo
+    ]
+    \small
+}{%
+    \end{mdframed}
+}
+
+% ============================================================
+% Caja de aviso / nota (borde naranja)
+% ============================================================
+\newenvironment{aviso}{%
+    \begin{mdframed}[
+        backgroundcolor = naranjaFondo,
+        linecolor       = naranja,
+        linewidth       = 1pt,
+        leftline        = true,
+        rightline       = true,
+        topline         = true,
+        bottomline      = true,
+        innerleftmargin = 8pt,
+        innerrightmargin= 8pt,
+        innertopmargin  = 5pt,
+        innerbottommargin = 5pt,
+        skipabove       = 6pt,
+        skipbelow       = 6pt
+    ]
+    \small
+}{%
+    \end{mdframed}
+}
+
+% ============================================================
+% Código (monoespaciado inline y en bloque)
+% ============================================================
+\usepackage{listings}
+\usepackage{upquote}
+
+\lstset{
+    basicstyle      = \small\ttfamily,
+    keywordstyle    = \color{azulsec}\bfseries,
+    commentstyle    = \color{gray}\itshape,
+    stringstyle     = \color{teal},
+    backgroundcolor = \color{grisfondo},
+    frame           = single,
+    framerule       = 0.4pt,
+    rulecolor       = \color{gray!40},
+    breaklines      = true,
+    breakatwhitespace = true,
+    showstringspaces = false,
+    numbers         = left,
+    numberstyle     = \tiny\color{gray},
+    numbersep       = 5pt,
+    tabsize         = 4,
+    captionpos      = b
+}
+
+% Código inline rápido: \code{texto}
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+% ============================================================
+% Listas
+% ============================================================
+\usepackage{enumitem}
+\setlist[itemize]{
+    leftmargin = 1.5em,
+    itemsep    = 2pt,
+    topsep     = 4pt
+}
+\setlist[enumerate]{
+    leftmargin = 1.5em,
+    itemsep    = 2pt,
+    topsep     = 4pt
+}
+
+% ============================================================
+% Párrafos — sin sangría, con espacio entre párrafos
+% ============================================================
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% ============================================================
+% Encabezado y pie de página
+% ============================================================
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[C]{\small\thepage}
+
+% ============================================================
+% Hipervínculos (cargar siempre al final)
+% ============================================================
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks  = true,
+    linkcolor   = azulsec,
+    citecolor   = azulsec,
+    urlcolor    = azulsec,
+    pdftitle    = {Informe Técnico},
+    pdfauthor   = {Universidad de Cuenca},
+    pdfsubject  = {Redes Complejas},
+    pdfkeywords = {redes complejas, UCuenca}
+}
+
+% ============================================================
+% Comandos auxiliares
+% ============================================================
+
+% Separador de autores (centrado, con punto medio)
+\newcommand{\autorsep}{\quad\textperiodcentered\quad}
+
+% Negrita en ecuaciones
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+
+% Promedio
+\newcommand{\prom}[1]{\langle #1 \rangle}
+
+% Norma
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+
+% ============================================================
+%  ██████████████████████████████████████████████████████████
+%  INICIO DEL DOCUMENTO
+%  ██████████████████████████████████████████████████████████
+% ============================================================
+\begin{document}
+
+% ------------------------------------------------------------
+% BLOQUE DE TÍTULO
+% Reemplaza los campos con los datos del proyecto
+% ------------------------------------------------------------
+\begin{center}
+    % Título principal (LARGE negrita, multilínea si es largo)
+    {\LARGE\bfseries
+        Título del informe aquí\\[0.3em]
+        Segunda línea del título si es necesaria%
+    }\\[0.8em]
+
+    % Subtítulo / descripción del proyecto
+    {\normalsize
+        Subtítulo o descripción del proyecto — Módulo 1217, Opción X%
+    }\\[0.8em]
+
+    % Autores separados por punto medio
+    {\normalsize
+        Autor Uno \autorsep Autor Dos \autorsep Autor Tres%
+    }\\[0.3em]
+
+    % Institución, correo y fecha
+    {\small
+        Universidad de Cuenca
+        \enspace---\enspace correo@ucuenca.edu.ec
+        \enspace---\enspace mes de 2026%
+    }
+\end{center}
+
+\vspace{0.4em}
+
+% ------------------------------------------------------------
+% RESUMEN
+% Comienza con \textbf{Resumen---} según el estilo del PDF
+% ------------------------------------------------------------
+\begin{resumen}
+\textbf{Resumen---} Escribir aquí el resumen del trabajo. Describir brevemente
+el contexto del problema, la metodología utilizada, los resultados principales
+obtenidos y la conclusión más relevante. Puede incluir valores numéricos
+destacados en \textbf{negrita}.
+\end{resumen}
+
+\vspace{0.2em}
+
+% ============================================================
+% SECCIONES — El usuario añade su contenido aquí
+% ============================================================
+
+% ------------------------------------------------------------
+\section{Introducción}
+% ------------------------------------------------------------
+
+Texto de la introducción. Se puede citar referencias con~\cite{ref1}.
+Texto en \textit{cursiva}, en \textbf{negrita} o en \code{monoespaciado}.
+
+Segundo párrafo de la introducción.
+
+% ------------------------------------------------------------
+\section{Descripción Metodológica}
+% ------------------------------------------------------------
+
+Texto introductorio de la sección.
+
+\subsection{Primera subsección}
+
+Texto de la subsección. Ejemplo de ecuación numerada:
+
+\begin{equation}
+    E_{\text{total}}(n_i) = E_{\text{line}} + E_{\text{turn}} + E_{\text{star}}
+    \label{eq:energia_total}
+\end{equation}
+
+Referencia a la ecuación: véase la ec.~\eqref{eq:energia_total}.
+
+\subsection{Segunda subsección}
+
+Ejemplo de ecuación sin número:
+
+\begin{equation*}
+    F(q_i) = G(q_i) + H(q_i)
+\end{equation*}
+
+Ejemplo de alineación de ecuaciones:
+
+\begin{align}
+    G(q_i) &= G(q_{i-1}) + E_{\text{total}}(n_i) \label{eq:G} \\
+    H(q_i) &= \left[\mu_r (M_{\text{car}} + m_{\text{load}}) g
+               + \frac{P_{\text{base}}}{v} \right]
+               \cdot \norm{p_{\text{goal}} - p_i}_2 \label{eq:H}
+\end{align}
+
+% ----  EJEMPLO DE TABLA ----
+\begin{table}[H]
+\centering
+\caption{Parámetros utilizados en el modelo (valores de ejemplo).}
+\label{tab:parametros}
+\begin{tabular}{lccc}
+    \toprule
+    \encabezado{Parámetro} &
+    \encabezado{Símbolo}   &
+    \encabezado{Valor A}   &
+    \encabezado{Valor B}   \\
+    \midrule
+    Primer parámetro  & $P_1$ & 1.0  & 0.5  \\
+    Segundo parámetro & $P_2$ & 2.0  & 1.5  \\
+    Tercer parámetro  & $P_3$ & 18 kg & 0.28 kg \\
+    Cuarto parámetro  & $P_4$ & 0--8 kg & 0--80 g \\
+    \bottomrule
+\end{tabular}
+\end{table}
+
+% ----  EJEMPLO DE TABLA CON FILAS ALTERNAS ----
+\begin{table}[H]
+\centering
+\caption{Resultados comparativos (filas alternas coloreadas).}
+\label{tab:resultados}
+\begin{tabularx}{\linewidth}{L{3.5cm} C{2.5cm} C{2.5cm} C{2.5cm}}
+    \toprule
+    \encabezado{Métrica} &
+    \encabezado{Método A} &
+    \encabezado{Método B} &
+    \encabezado{$\Delta$ (\%)} \\
+    \midrule
+    \rowcolor{tabfila}
+    Distancia (m)   & 34.02  & 35.31  & $+3.8\,\%$ \\
+    Giro (rad)      & 27.49  & 19.63  & $-28.6\,\%$ \\
+    \rowcolor{tabfila}
+    Energía (kJ)    & 3.42   & 3.03   & $-11.2\,\%$ \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+% ----  EJEMPLO DE FIGURA ----
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{images/figura1.png}
+    \caption{Descripción breve de la figura. Puede ocupar más de una
+             línea si la explicación es extensa.}
+    \label{fig:figura1}
+\end{figure}
+
+% ----  EJEMPLO DE SUBFIGURAS ----
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.47\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/figura2a.png}
+        \caption{Subfigura izquierda.}
+        \label{fig:fig2a}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/figura2b.png}
+        \caption{Subfigura derecha.}
+        \label{fig:fig2b}
+    \end{subfigure}
+    \caption{Título general de las dos subfiguras.}
+    \label{fig:figura2}
+\end{figure}
+
+\subsection{Tercera subsección con caja de aviso}
+
+Texto antes del aviso.
+
+\begin{aviso}
+\textbf{Nota:} Este es un cuadro de aviso con borde naranja, útil para
+señalar elementos pendientes, advertencias o notas importantes.
+\end{aviso}
+
+Texto después del aviso.
+
+% ------------------------------------------------------------
+\section{Análisis de Resultados}
+% ------------------------------------------------------------
+
+\subsection{Primera subsección de resultados}
+
+Texto de análisis de resultados. Se puede hacer referencia a la
+Tabla~\ref{tab:resultados} y a la Fig.~\ref{fig:figura1}.
+
+Ejemplo de lista con viñetas:
+
+\begin{itemize}
+    \item \textbf{Primer ítem:} descripción del ítem en negrita seguida
+          de texto explicativo que puede extenderse en múltiples líneas.
+    \item \textbf{Segundo ítem:} descripción correspondiente.
+    \item \textbf{Tercer ítem:} descripción correspondiente.
+\end{itemize}
+
+Ejemplo de lista numerada:
+
+\begin{enumerate}
+    \item Primer paso del procedimiento.
+    \item Segundo paso del procedimiento.
+    \item Tercer paso del procedimiento.
+\end{enumerate}
+
+% ------------------------------------------------------------
+\section{Conclusiones}
+% ------------------------------------------------------------
+
+\begin{itemize}
+    \item Primera conclusión principal obtenida del trabajo.
+    \item Segunda conclusión principal.
+    \item Tercera conclusión y trabajo futuro.
+\end{itemize}
+
+% ------------------------------------------------------------
+\section*{Referencias}
+% ------------------------------------------------------------
+
+% Estilo numerado entre corchetes [1], [2], etc.
+% Agrega {99} si hay más de 9 referencias (para alinear correctamente)
+\begin{thebibliography}{9}
+
+\bibitem{ref1}
+A. Apellido y B. Apellido,
+``Título del artículo de referencia,''
+\textit{IEEE Trans. Nombre Revista},
+vol.~X, n.\textsuperscript{o}~Y, pp.~Z--ZZ, mes año.
+
+\bibitem{ref2}
+C. Apellido \textit{et al.},
+``Título del segundo artículo,''
+en \textit{Proc. Nombre Conferencia},
+Ciudad, País, año, pp.~1--6.
+
+\bibitem{ref3}
+D. Apellido,
+\textit{Título del Libro}.
+Ciudad: Editorial, año.
+
+\end{thebibliography}
+
+% ------------------------------------------------------------
+\section*{Anexos}
+% ------------------------------------------------------------
+
+\textbf{A. Primer Anexo:} descripción del contenido del primer anexo.
+Puede incluir código fuente, tablas adicionales o figuras complementarias.
+
+\vspace{0.5em}
+\textbf{B. Código fuente:} repositorio disponible en
+\url{https://github.com/usuario/repositorio}.
+Instrucciones de instalación y reproducción en \code{INSTALACION.md}.
+
+\vspace{0.5em}
+\textbf{C. Resultados adicionales:} archivos \code{*.csv} y \code{*.png}
+disponibles en la carpeta \code{results/}.
+
+% ============================================================
+\end{document}
+% ============================================================

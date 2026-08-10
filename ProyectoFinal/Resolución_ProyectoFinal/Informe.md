@@ -119,16 +119,38 @@ $$\langle k \rangle = \frac{1}{n}\sum_{v \in V} k_v = \frac{2m}{n}$$
 
 ![Distribución de grado](results/imagenes/p1_distribucion_grado.png)
 
-#### Análisis — ¿Cola pesada? ¿Red libre de escala?
+#### Observaciones sobre la distribución de grado
 
-Una **red libre de escala** sigue $P(k) \sim k^{-\gamma}$ con $2 < \gamma < 3$. En el gráfico log-log esto aparece como una línea recta.
+La distribución empírica muestra un fuerte sesgo: **113 de 177 nodos (64%) tienen grado 1** (switches de acceso con un único enlace a su switch de agregación), mientras que el nodo de mayor grado es `DATCC-2A-C3` con $k = 17$.
 
-La distribución de UCuenca muestra una **cola derecha** clara: 113 de 177 nodos (64%) tienen grado 1 (switches de acceso conectados a un único switch de agregación), mientras que un único nodo tiene grado 17 (el switch de core `DATCC-2A-C3`).
+Estadísticas descriptivas:
 
-Sin embargo, **no es correcto afirmar** que la red es libre de escala porque:
-1. Con $n = 177$ nodos el rango de grados es solo $[1, 17]$: insuficiente para ajustar una ley de potencia con rigor estadístico.
-2. La cola no es producida por crecimiento preferencial sino por **diseño deliberado**: los switches de core tienen muchas conexiones porque el arquitecto de red así lo especificó.
-3. Un test formal (Kolmogorov-Smirnov, método de Clauset et al. 2009) sería necesario antes de proclamar libre de escala.
+| Estadístico | Valor |
+|-------------|-------|
+| Grado mínimo | 1 |
+| Grado máximo | 17 |
+| Grado medio $\langle k \rangle$ | 2.36 |
+| Grado mediano | 1 |
+
+El gráfico log-log no permite concluir visualmente el tipo de distribución. Para identificar formalmente si sigue una ley de potencia, exponencial, log-normal u otro modelo se realizará un ajuste por **máxima verosimilitud** con test de bondad de ajuste (análisis pendiente).
+
+#### ¿Es UCuenca una red libre de escala?
+
+Una **red libre de escala** (*scale-free*) es aquella cuya distribución de grado sigue una ley de potencia $P(k) \sim k^{-\gamma}$ con $2 < \gamma < 3$. En el gráfico log-log esto se manifiesta como una línea recta.
+
+> *Lectura:* $P(k)$ es la fracción de nodos con grado $k$. Si se grafica $\log P(k)$ vs $\log k$ y aparece una **línea recta**, la distribución es una ley de potencia con pendiente $-\gamma$. Hay poquísimos hubs con grado altísimo, pero existen. El nombre "libre de escala" indica que no existe un grado "típico" — la distribución no tiene una escala característica finita. En contraste, ER produce una campana de Poisson donde casi todos los nodos tienen grado similar.
+
+**No se puede afirmar** que UCuenca sea libre de escala por tres razones:
+
+1. Con $n = 177$ y rango de grados $[1, 17]$, la muestra es insuficiente para ajustar una ley de potencia con rigor estadístico.
+2. La asimetría de grados responde a **diseño deliberado** (el arquitecto asignó muchas conexiones al core), no a crecimiento preferencial.
+3. El gráfico log-log no muestra alineación recta de los puntos.
+
+**¿Qué se necesitaría para determinarlo formalmente?** El método estándar es el de **Clauset, Shalizi & Newman (2009)**:
+- Estimar $\gamma$ y $k_{\min}$ por máxima verosimilitud.
+- Calcular la distancia KS entre la ley de potencia ajustada y los datos empíricos.
+- Generar distribuciones sintéticas para obtener un p-valor: si $p > 0.1$, la ley de potencia no puede descartarse.
+- Comparar contra distribuciones alternativas (exponencial, log-normal) con el test de razón de verosimilitudes.
 
 ---
 
@@ -472,39 +494,995 @@ El modelo correcto para una red de este tipo sería un **árbol jerárquico $k$-
 
 ---
 
-## Preguntas del enunciado — Respuestas
+## Preguntas — Fase 1
 
-### P1 — Preguntas clave del enunciado
+### P1 · Medidas fundamentales
 
-**¿Por qué el clustering medio es tan bajo comparado con el de una red social?**
+> **¿Por qué el clustering medio de esta red es tan bajo comparado con el de una red social?**
 
-Porque la topología jerárquica en estrella prohíbe triángulos por diseño. En una red social si A conoce a B y A conoce a C, es probable que B y C también se conozcan. En UCuenca, si el switch A84 está conectado al switch de agregación D107, y el switch A85 también está conectado a D107, A84 y A85 **no** se conectan entre sí (eso crearía un ciclo indeseado en la capa de acceso). El enunciado lo advierte: el clustering bajo es la huella matemática de la estrella jerárquica.
+Porque la topología jerárquica en estrella prohíbe triángulos por diseño. En una red social si A conoce a B y A conoce a C, es probable que B y C también se conozcan. En UCuenca, si el switch A84 está conectado al switch de agregación D107, y el switch A85 también está conectado a D107, A84 y A85 **no** se conectan entre sí (eso crearía un ciclo indeseado en la capa de acceso). El clustering bajo es la huella matemática de la estrella jerárquica.
 
-**¿Por qué la asortatividad es negativa, y qué dice sobre la jerarquía?**
+> **¿Por qué la asortatividad por grado resulta negativa, y qué dice eso sobre la jerarquía core–agregación–acceso?**
 
 $r = -0.1468$ porque los hubs (grado 10–17: switches de core/agregación) se conectan exclusivamente con nodos de bajo grado (grado 1–3: switches de acceso). La jerarquía core–agregación–acceso impide la conexión directa entre dos nodos del mismo nivel, lo que matemáticamente produce disasortatividad. En redes sociales, los nodos de alto grado tienden a conectarse entre sí ($r > 0$: redes asortativas).
 
-**¿Coinciden los nodos más centrales por grado con los de intermediación?**
+> **¿Coinciden los nodos más centrales por grado con los más centrales por intermediación? Si no coinciden, ¿qué papel distinto juega cada grupo en la red?**
 
 Parcialmente. `DATCC-2A-C3` encabeza ambos rankings porque es el switch de core del Campus Central: más conexiones implica más caminos que lo atraviesan. Pero `CPAR-C10` (switch de core de Paraíso) tiene la segunda mayor betweenness con un grado relativo menor, porque **todos** los flujos que entran o salen de Paraíso pasan por él. La betweenness captura "cuello de botella estructural"; el grado captura "número de vecinos": no son lo mismo.
 
-**¿Se observa redundancia core–agregación en Balzay y Paraíso?**
+### P2 · Modelos nulos y visualización
 
-- **Balzay: SÍ.** 4 de 5 switches de agregación están doblemente conectados a `DT-0A-C12` y `DT-0A-C13`.
-- **Paraíso: NO.** El informe técnico afirma redundancia, pero los datos muestran un único switch de core (`CPAR-C10`). Los "dobles enlaces" son LAG (agregación de puertos), no redundancia de núcleo.
-- **Campus Central: SÍ**, y más de lo que el informe declara: 13/14 switches de agregación tienen doble enlace a `DATCC-2A-C2` y `DATCC-2A-C3`.
-
-### P2 — Preguntas clave del enunciado
-
-**¿Qué propiedades de la red UCuenca NO se explican por su secuencia de grados?**
+> **¿Qué propiedades de la red UCuenca NO se explican por su secuencia de grados?**
 
 El **clustering** y la **distancia media** no son reproducibles por el CM. La secuencia de grados explica la disasortatividad ($r$ del CM ≈ $r$ real) pero no la organización jerárquica que alarga las distancias ni la ausencia de triángulos que baja el clustering.
 
-**¿Por qué una red de infraestructura física se parece o no a un modelo BA?**
+> **¿Por qué una red de infraestructura física se parece o no a un modelo de crecimiento preferencial?**
 
-Se parece superficialmente (cola pesada, clustering bajo, asortatividad negativa) pero el mecanismo generativo es opuesto. BA es orgánico e incremental; UCuenca es planificada y jerárquica. La similitud en métricas es coincidencia, no evidencia de crecimiento preferencial.
+Se parece superficialmente (distribución sesgada, clustering bajo, asortatividad negativa) pero el mecanismo generativo es opuesto. BA es orgánico e incremental; UCuenca es planificada y jerárquica. La similitud en métricas es coincidencia, no evidencia de crecimiento preferencial.
+
+> **¿Qué algoritmo de disposición (layout) se usó y por qué?**
+
+- **Spring / Fruchterman-Reingold** para la visualización por campus: distribuye los nodos minimizando una energía de resortes, lo que agrupa nodos muy conectados entre sí. Revela los clústeres por campus sin forzar ninguna geometría.
+- **Kamada-Kawai** para la visualización por betweenness: asigna distancias ideales proporcionales a la distancia en el grafo. Coloca los cuellos de botella en el centro geométrico, haciendo visualmente evidente qué nodos dominan los caminos más cortos.
 
 ---
 
-*Documento generado automáticamente a partir de los scripts `src/problema1.py` y `src/problema2.py`.*  
-*Última actualización: Fase 1 completa.*
+## Fase 2 — Recorrido y Partición
+
+> *Peso: 5 puntos | Contenidos 2.1–2.4 del sílabo*
+
+---
+
+## P3 — BFS y DFS sobre la Red *(2.5 puntos)*
+
+### Ítem 1 · BFS y DFS desde cero
+
+#### Definiciones matemáticas
+
+**BFS (Búsqueda en Anchura):** dado un nodo origen $s$, explora el grafo por niveles de distancia creciente. Usa una cola FIFO.
+
+$$d(s, v) = \min\{|P| : P \text{ es camino de } s \text{ a } v\}$$
+
+> *Lectura:* la distancia $d(s,v)$ que BFS encuentra es el número mínimo de aristas para ir de $s$ a $v$. BFS garantiza que cuando visita $v$ por primera vez, ya encontró el camino más corto. La cola FIFO asegura que se procesan primero los nodos más cercanos al origen.
+
+**DFS (Búsqueda en Profundidad):** explora cada rama hasta el fondo antes de retroceder. Usa una pila (implícita en la recursión).
+
+En grafos no dirigidos, las aristas se clasifican en:
+- **Aristas de árbol:** aristas $(u,v)$ donde $v$ se descubre por primera vez desde $u$.
+- **Aristas de retroceso:** aristas $(u,v)$ donde $v$ ya fue visitado y es ancestro de $u$ → indican un **ciclo**.
+
+**Complejidad de ambos algoritmos:**
+
+$$T(n, m) = O(n + m), \qquad S(n) = O(n)$$
+
+> *Lectura:* tanto BFS como DFS visitan cada nodo una vez y cada arista a lo sumo dos veces (una por cada extremo), de ahí el $O(n+m)$. El espacio adicional es $O(n)$ para el conjunto de nodos visitados y la cola/pila.
+
+**Número ciclomático** (número de ciclos independientes de un grafo conexo):
+
+$$\mu = m - n + 1$$
+
+> *Lectura:* un árbol de $n$ nodos tiene exactamente $n-1$ aristas y cero ciclos. Cada arista adicional sobre ese árbol crea exactamente un ciclo nuevo. En UCuenca: $\mu = 209 - 177 + 1 = 33$. Hay 33 ciclos independientes, que corresponden a los 33 enlaces redundantes de la red.
+
+### Ítem 2 · Perfil de profundidad BFS desde el core
+
+**Origen:** `DATCC-2A-C3` (switch de core del Campus Central, grado = 17)
+
+| Distancia | Nodos | Capa dominante |
+|-----------|-------|----------------|
+| 0 | 1 | core |
+| 1 | 17 | agregacion |
+| 2 | 50 | acceso |
+| 3 | 19 | acceso |
+| 4 | 13 | acceso |
+| 5 | 40 | acceso |
+| 6 | 29 | acceso |
+| 7 | 8 | acceso |
+
+![Perfiles BFS](results/imagenes/p3_perfil_profundidad.png)
+
+#### Análisis
+
+El perfil confirma la jerarquía de tres capas declarada en el informe técnico:
+- **Distancia 1:** los 17 vecinos directos son casi todos switches de agregación del Campus Central, más los nodos WAN hacia otros campus.
+- **Distancia 2–7:** dominados completamente por switches de acceso. La presencia de nodos de agregación/core a distancias 3–4 corresponde a otros campus (Paraíso, Balzay) que se alcanzan a través de la nube MPLS.
+
+La jerarquía declarada **sí se refleja** en las distancias: core → agregación → acceso se corresponde con los niveles 0 → 1 → 2 del BFS desde el core.
+
+### Ítem 3 · Perfil BFS desde la nube MPLS
+
+**Origen:** `INTERNET-MPLS` (grado = 8)
+
+| Distancia | Nodos | Campus más representados |
+|-----------|-------|--------------------------|
+| 0 | 1 | Nube MPLS |
+| 1 | 8 | Central (3), Balzay (2), Hospitalidad (1), Paraíso (1), Yanuncay (1) |
+| 2 | 13 | Central (4), Hospitalidad (4), Paraíso (2), Balzay (2) |
+| 3 | 38 | Central (14), Yanuncay (11), Balzay (6), Paraíso (6) |
+| 4 | 97 | Central (43), Paraíso (28), Balzay (23) |
+| 5 | 18 | Central (10), Paraíso (7) |
+| 6 | 2 | Central (1), Balzay (1) |
+
+#### Análisis — ¿Qué campus quedan más lejos?
+
+Desde MPLS, los campus más "lejanos" (mayor concentración a distancias 4–6) son **Campus Central** y **Campus Paraíso**. Esto se explica porque ambos tienen más nodos en la capa de acceso (muchos switches de acceso que están 2–3 saltos más allá de su core), mientras que campus más pequeños como Yanuncay u Hospitalidad tienen menos capas y se agotan a distancias menores.
+
+**Campus Yanuncay** aparece muy temprano (distancia 3) a pesar de ser campus pequeño: tiene pocos nodos de acceso, por lo que se "agota" rápido.
+
+### Ítem 4 · Ciclos detectados con DFS
+
+| Métrica | Valor |
+|---------|-------|
+| Número ciclomático $\mu = m - n + 1$ | **33** |
+| Aristas de retroceso (DFS) | **33** ✓ |
+| Ciclos en Campus Central | 21 |
+| Ciclos en Campus Balzay | 9 |
+| Ciclos en Nube MPLS | 3 |
+
+![Ciclos DFS](results/imagenes/p3_ciclos.png)
+
+#### Análisis
+
+Los 33 ciclos del grafo corresponden exactamente a los 33 enlaces redundantes: las 12 aristas de rol `respaldo` y las 5 de rol `secundario` (12 + 5 = 17) más los ciclos en la nube MPLS y los LAG que se modelaron como aristas paralelas colapsadas.
+
+La **ausencia de ciclos en Paraíso, Yanuncay y Hospitalidad** (0 aristas de retroceso en esos campus) confirma el hallazgo del P1: esos campus no tienen redundancia real en la capa core–agregación — toda su topología es un árbol, vulnerable a cualquier fallo de enlace o nodo.
+
+### Ítem 5 · BFS vs DFS para inspección física
+
+**Conclusión:** DFS modela mejor la inspección física de armarios.
+
+| Algoritmo | Orden de visita | Desplazamiento físico |
+|-----------|----------------|-----------------------|
+| **BFS** | Todos los switches de core → todos los de agregación → todos los de acceso | El técnico va de edificio en edificio en cada nivel: muchos desplazamientos |
+| **DFS** | Core → un edificio completo (agg → acceso → acceso → ...) → siguiente edificio | El técnico termina un edificio antes de moverse al siguiente: eficiente |
+
+Los primeros 10 nodos de DFS ilustran esto: `DATCC-2A-C3` (core) → `DATCC-2A-C2` (core) → `CC-AETUC-D30` (agg) → `AETUC-0A-A76` (acceso) → `AETUCCF-2A-A79` (acceso) → `AETUC-0A-A97` (acceso) → `CC-ARQUITECTURA-D107` (agg) → `ARQ-0A-A85` (acceso)...
+
+DFS baja toda la rama de un edificio antes de pasar al siguiente switch de agregación.
+
+---
+
+## P4 — Comunidades y Modularidad *(2.5 puntos)*
+
+### Ítem 1 · Louvain con 5 semillas
+
+#### Definición matemática
+
+La **modularidad** $Q$ mide qué tan bien una partición $\mathcal{C}$ separa la red respecto a un modelo nulo aleatorio:
+
+$$Q = \frac{1}{2m} \sum_{c \in \mathcal{C}} \sum_{u,v \in c} \left[A_{uv} - \frac{k_u k_v}{2m}\right]$$
+
+donde $A_{uv}$ es la matriz de adyacencia, $k_u$ y $k_v$ los grados, y $m$ el número de aristas.
+
+> *Lectura:* para cada par de nodos $(u,v)$ en la misma comunidad, se compara la arista real $A_{uv}$ con la probabilidad esperada en un grafo aleatorio con los mismos grados $\frac{k_u k_v}{2m}$. Si hay más conexiones dentro de las comunidades de lo que el azar esperaría, $Q > 0$. El algoritmo Louvain maximiza $Q$ de forma greedy en dos fases iterativas (reasignación local + contracción de grafo). $Q \in [-1, 1]$; valores > 0.3 indican estructura comunitaria significativa.
+
+#### Resultados
+
+| Semilla | Comunidades | Modularidad Q |
+|---------|-------------|---------------|
+| 0 | 14 | **0.7632** |
+| 7 | 15 | 0.7615 |
+| 13 | 13 | 0.7587 |
+| 42 | 15 | 0.7590 |
+| 99 | 15 | 0.7312 |
+
+**Mejor partición:** semilla 0 → 14 comunidades, Q = 0.7632.
+
+#### Análisis — Estabilidad
+
+$Q$ varía entre 0.73 y 0.76 según la semilla (rango de ~0.03), y el número de comunidades entre 13 y 15. El resultado **no es perfectamente estable**, lo que indica que el paisaje de optimización de $Q$ tiene múltiples óptimos locales casi equivalentes. Sin embargo, la variación es pequeña: las particiones son estructuralmente similares. $Q = 0.76$ es un valor muy alto, indicando estructura comunitaria fuerte.
+
+### Ítem 2 · Comparación con partición por campus (NMI y ARI)
+
+#### Definiciones
+
+**NMI (Información Mutua Normalizada):**
+
+$$\text{NMI}(\mathcal{C}, \mathcal{X}) = \frac{2\, I(\mathcal{C}; \mathcal{X})}{H(\mathcal{C}) + H(\mathcal{X})} \in [0, 1]$$
+
+> *Lectura:* mide cuánta información comparten dos particiones. $\text{NMI} = 1$ significa que conocer la comunidad de un nodo determina perfectamente su campus (y viceversa). $\text{NMI} = 0$ significa que son independientes. Aquí NMI = 0.618: las comunidades Louvain capturan el 62% de la información de la partición por campus.
+
+**ARI (Índice de Rand Ajustado):**
+
+$$\text{ARI} \in [-1, 1], \quad \text{ARI} = 1 \iff \text{particiones idénticas}$$
+
+> *Lectura:* compara par a par todos los nodos: ¿los nodos que Louvain pone en la misma comunidad también están en el mismo campus? ARI = 0.33 indica coincidencia moderada, corrigiendo por el azar.
+
+#### Resultados
+
+| Métrica | Valor |
+|---------|-------|
+| NMI | **0.618** |
+| ARI | **0.327** |
+
+![Matriz de confusión](results/imagenes/p4_confusion_campus.png)
+
+#### Análisis
+
+La matriz de confusión muestra que varias comunidades se corresponden bien con un único campus (comunidades 0, 1, 10 con Campus Central/Yanuncay/Paraíso respectivamente). Pero la **comunidad 9** mezcla nodos de Balzay, Central, Hospitalidad, Paraíso, Yanuncay y MPLS: son los nodos de la capa WAN/interconexión que Louvain agrupa porque están estructuralmente cerca entre sí (todos conectados a través de la nube MPLS), aunque geográficamente pertenecen a campus distintos.
+
+### Ítem 3 · Nodos discrepantes
+
+**83 de 177 nodos** (47%) son asignados por Louvain a una comunidad distinta de la mayoritaria de su campus.
+
+#### Análisis
+
+Los patrones de discrepancia son reveladores:
+- **Nodos WAN/interconexión** (`PE1-BALZAY`, `PE2-CENTRAL`, routers de campus): agrupados todos en la comunidad 9 junto con `INTERNET-MPLS`. Louvain los pone juntos porque están interconectados a través de la nube MPLS, independientemente del campus físico. Esto es **correcto desde la perspectiva de ingeniería**: esos equipos pertenecen a la capa de interconexión, no a ningún campus específico.
+- **Switches de acceso de Campus Paraíso** (comunidades 10–13): Louvain divide Paraíso en 4 comunidades distintas según el switch de agregación al que están conectados. Cada edificio de Paraíso forma una subcomunidad propia, lo que refleja la topología en estrella: los switches de acceso de un edificio solo se conectan a través de su switch de agregación.
+- **Edificio de Arquitectura** (comunidad 2): `CC-ARQUITECTURA-D107` y sus switches de acceso forman comunidad propia, a pesar de estar en Campus Central. La razón: `CC-ARQUITECTURA-D107` tiene grado 10, creando una subestructura densa que Louvain separa del resto del campus.
+
+### Ítem 4 · k-means espectral (Laplaciano)
+
+#### Definición matemática
+
+El **Laplaciano normalizado** del grafo:
+
+$$L_{\text{sym}} = D^{-1/2}(D - A)D^{-1/2}$$
+
+> *Lectura:* $D$ es la matriz diagonal de grados y $A$ la matriz de adyacencia. Los vectores propios de $L_{\text{sym}}$ con menores valores propios capturan la estructura de conectividad del grafo: los nodos que están bien conectados entre sí tienen coordenadas similares en el espacio espectral. k-means sobre esas coordenadas agrupa nodos por su posición espectral, que refleja conectividad más que geometría euclídea.
+
+#### Resultados
+
+| Métrica | Valor |
+|---------|-------|
+| k-means vs campus: NMI | **0.640** |
+| k-means vs campus: ARI | **0.423** |
+| k-means vs Louvain: NMI | **0.860** |
+
+![k-means vs Louvain](results/imagenes/p4_kmeans_vs_louvain.png)
+
+#### Análisis
+
+k-means espectral supera ligeramente a Louvain en NMI y ARI respecto al campus real (0.64 vs 0.62 y 0.42 vs 0.33). Ambos métodos coinciden en un 86% de la información mutua (NMI k-means vs Louvain = 0.86), lo que indica que ambos descubren una estructura comunitaria similar.
+
+**¿Por qué k-means espectral puede ser más preciso?** Louvain optimiza $Q$ con una heurística greedy susceptible a óptimos locales. k-means espectral opera en un espacio de baja dimensión más rico en información geométrica, sin el sesgo de resolución de la modularidad.
+
+### Ítem 5 · Limitación de resolución de la modularidad
+
+#### Análisis
+
+La modularidad $Q$ tiene una **escala de resolución intrínseca**: comunidades con pocas aristas internas pueden no ser detectadas como comunidades separadas si el grafo es grande. El umbral aproximado es:
+
+$$|E_c| \lesssim \sqrt{2m} \approx \sqrt{418} \approx 20 \text{ aristas}$$
+
+En UCuenca, los campus pequeños (Hospitalidad con ~5 nodos, Museo con 2, Centro Histórico con 1) tienen muy pocas aristas internas. La comunidad 9 los absorbe porque Louvain prefiere fusionarlos con la comunidad WAN antes que mantenerlos como comunidades independientes de 1–5 nodos.
+
+**Consecuencia:** Louvain detecta 14 comunidades, pero la partición "real" por campus tiene 8. El exceso (14 vs 8) se explica porque Louvain subdivide los campus grandes (Central en 8–9 sub-comunidades, Paraíso en 4) mientras fusiona los campus pequeños con la nube MPLS. Esto refleja que la estructura comunitaria de UCuenca es **más fina que el campus**: los edificios individuales forman comunidades topológicamente bien definidas.
+
+---
+
+## Preguntas — Fase 2
+
+### P3 · BFS y DFS
+
+> **¿La jerarquía declarada en el informe técnico se refleja en las distancias BFS?**
+
+Sí. El perfil de profundidad desde `DATCC-2A-C3` muestra: distancia 0 = core, distancia 1 = casi exclusivamente agregación, distancia 2+ = acceso. Los tres niveles jerárquicos se corresponden directamente con los primeros tres niveles del BFS. La presencia de nodos de otros campus a distancias 3–4 refleja la ruta core → MPLS → core remoto → agregación remota.
+
+> **¿Qué campus quedan más lejos del resto de la institución (desde MPLS)?**
+
+**Campus Central** y **Campus Paraíso** concentran la mayoría de nodos a distancias 4–6 desde `INTERNET-MPLS`. Son los campus más grandes (más switches de acceso), por lo que tienen mayor "profundidad" interna. Campus Yanuncay y Hospitalidad se "agotan" a distancias 2–3 por tener menos nodos.
+
+> **¿Dónde están los ciclos? ¿Coinciden con los enlaces redundantes del informe?**
+
+Los 33 ciclos se concentran en **Campus Central** (21) y **Campus Balzay** (9), exactamente los dos campus que el informe declara con redundancia core–agregación. Paraíso, Yanuncay y Hospitalidad tienen 0 ciclos, confirmando la ausencia de redundancia real en esos campus.
+
+> **¿BFS o DFS modela mejor la inspección física de armarios?**
+
+**DFS**. Un técnico que recorre físicamente los armarios prefiere terminar un edificio completo antes de desplazarse al siguiente. DFS hace exactamente eso: profundiza por una rama (edificio) hasta agotar todos sus switches de acceso antes de retroceder al switch de agregación y pasar al siguiente edificio. BFS obligaría a visitar todos los switches de agregación de todos los edificios primero, multiplicando los desplazamientos.
+
+### P4 · Comunidades y modularidad
+
+> **¿Qué propiedades no se explican por la secuencia de grados y qué dice la modularidad sobre la jerarquía?**
+
+La modularidad $Q = 0.763$ es muy alta, indicando que la red tiene estructura comunitaria fuerte **más allá** de lo que su secuencia de grados explicaría. Las comunidades Louvain corresponden aproximadamente a los campus físicos (NMI = 0.62), pero son más finas: cada edificio dentro de un campus tiende a formar su propia subcomunidad, reflejando la topología en estrella donde los switches de acceso de un edificio solo se conectan a través de un único switch de agregación.
+
+> **¿Qué significa que un equipo etiquetado en un campus quede agrupado con otro?**
+
+Los nodos discrepantes más importantes son los **routers WAN e interconexión** (PE1-BALZAY, PE2-CENTRAL, INTERNET-MPLS, routers de campus): Louvain los agrupa en la comunidad 9 independientemente de su campus físico. Esto es correcto desde la perspectiva de ingeniería: esos equipos pertenecen a la capa de interconexión MPLS, no a ningún campus en particular. Su comunidad natural es la nube WAN, no el edificio donde físicamente están ubicados.
+
+> **¿Podría Louvain estar fusionando bloques que un administrador consideraría separados?**
+
+Sí, por la limitación de resolución. Los campus pequeños (Hospitalidad, Museo, Centro Histórico) son absorbidos en la comunidad WAN (comunidad 9) porque sus pocos nodos no generan suficiente $Q$ interno para justificar una comunidad propia. Un administrador de red los consideraría entidades separadas, pero Louvain los trata como periféricos del backbone MPLS.
+
+---
+
+## Fase 3 — Optimización en Redes
+
+> *Peso: 6 puntos | Contenidos 3.1–3.5 del sílabo*
+
+---
+
+## P5 — Caminos Mínimos con Múltiples Métricas de Peso *(2 puntos)*
+
+### Ítem 1 · Tres modelos de peso
+
+Se definen tres funciones de peso sobre las aristas de la red:
+
+**Modelo 1 — Saltos (topológico):**
+
+$$w_{\text{saltos}}(u,v) = 1 \quad \forall (u,v) \in E$$
+
+> *Lectura:* todos los enlaces valen lo mismo. La distancia entre dos equipos es simplemente la cantidad de "saltos" (equipos intermedios) necesarios. Es el modelo más simple: ideal para contar hops en traceroute.
+>
+> *En palabras simples:* cada cable cuenta como 1 paso, sin importar si es un cable de fibra de 10 Gbps o un enlace de 100 Mbps. Se usa para saber cuántos equipos hay entre el origen y el destino.
+
+**Modelo 2 — Latencia:**
+
+$$w_{\text{lat}}(u,v) = \alpha + \frac{\beta}{c(u,v)}$$
+
+con $\alpha = 0.1\ \text{ms}$ (latencia de propagación fija) y $\beta = 1000\ \text{Mbps·ms}$.
+
+> *Lectura:* el retardo de un enlace tiene dos componentes: uno fijo ($\alpha$, latencia mínima de propagación) y uno que disminuye a medida que la capacidad $c(u,v)$ aumenta. Un enlace de 10 000 Mbps tiene retardo adicional $1000/10000 = 0.1$ ms; uno de 100 Mbps tiene $1000/100 = 10$ ms. Caminos de alto ancho de banda son "más baratos" para este modelo.
+>
+> *En palabras simples:* un cable más ancho (mayor capacidad) tarda menos en enviar el mismo paquete. Este modelo elige rutas por cables rápidos aunque tengan más saltos.
+
+**Modelo 3 — Carga:**
+
+$$w_{\text{carga}}(u,v) = \frac{b(u,v)}{c(u,v)}$$
+
+donde $b(u,v)$ es el tráfico medido en Mbps y $c(u,v)$ la capacidad estimada.
+
+> *Lectura:* es la **utilización** del enlace: fracción de su capacidad que ya está siendo usada. Un enlace al 90% de su capacidad tiene $w = 0.9$ (saturado); uno al 5% tiene $w = 0.05$ (holgado). El camino de carga mínima evita los cuellos de botella actuales.
+>
+> *En palabras simples:* si el camino más corto en saltos pasa por un cable ya congestionado, este modelo busca una ruta alternativa con cables más libres. Es como usar Waze para evitar el tráfico.
+
+### Ítem 2 · Dijkstra desde cero
+
+Implementación propia con cola de prioridad (`heapq`), complejidad $O((n+m)\log n)$:
+
+$$\text{dist}[v] = \min_{P: s \to v} \sum_{(u,w) \in P} w(u,w)$$
+
+> *Lectura:* Dijkstra mantiene la distancia mínima conocida $\text{dist}[v]$ desde el origen $s$ a cada nodo $v$. En cada paso extrae el nodo no procesado de menor distancia y "relaja" sus aristas vecinas: si $\text{dist}[u] + w(u,v) < \text{dist}[v]$, actualiza $\text{dist}[v]$. La cola de prioridad (montículo mínimo) hace que cada extracción cueste $O(\log n)$ y la relajación total $O(m \log n)$.
+>
+> *En palabras simples:* Dijkstra es como buscar la ruta más corta en un mapa de manera sistemática. Siempre procesa primero el nodo más cercano que aún no ha revisado, garantizando encontrar el camino mínimo. No funciona con pesos negativos.
+
+### Ítem 3 · Floyd-Warshall
+
+Implementación triple bucle anidado, complejidad $O(n^3)$:
+
+$$D[i][j] \leftarrow \min(D[i][j],\ D[i][k] + D[k][j]) \quad \forall k \in V$$
+
+> *Lectura:* para cada posible nodo intermedio $k$, se actualiza la distancia entre todo par $(i,j)$: ¿es más corto ir de $i$ a $j$ directamente, o pasando por $k$? Tras iterar sobre todos los $k$, la matriz $D$ contiene las distancias mínimas entre todos los pares. Ventaja: una sola ejecución da todas las distancias. Desventaja: $O(n^3)$ es prohibitivo para redes grandes.
+>
+> *En palabras simples:* Floyd-Warshall pregunta repetidamente "¿existe un atajo por el nodo $k$?". Después de preguntar esto para cada posible punto intermedio, tiene todas las distancias óptimas. Para 177 nodos esto implica $177^3 ≈ 5.5$ millones de operaciones, ejecutable en menos de 1 segundo.
+
+### Ítem 4 · Verificación Dijkstra vs Floyd-Warshall
+
+| Modelo | Pares verificados | Coincidencias | Dijkstra×n (s) | Floyd-Warshall (s) |
+|--------|-----------------|---------------|----------------|---------------------|
+| Saltos | 20 | 20/20 ✓ | ~0.09 | ~0.7 |
+| Latencia | 20 | 20/20 ✓ | ~0.11 | ~0.9 |
+| Carga | 20 | 20/20 ✓ | ~0.08 | ~0.6 |
+
+Los dos algoritmos producen resultados idénticos. Dijkstra×$n$ (ejecutar Dijkstra una vez por nodo) es 7–10× más rápido que Floyd-Warshall para este grafo.
+
+### Ítem 5 · Closeness y par más distante
+
+**Closeness ponderada** (top-3 por modelo):
+
+| Modelo | Nodo | $C_{\text{close}}$ |
+|--------|------|-------------------|
+| Saltos | DATCC-2A-C3 | 0.3725 |
+| Saltos | DATCC-2A-C2 | 0.3578 |
+| Saltos | INTERNET-MPLS | 0.3145 |
+| Latencia | DATCC-2A-C3 | 1.1138 |
+| Latencia | DATCC-2A-C2 | 1.0429 |
+| Latencia | PE2-CENTRAL | 0.9986 |
+| Carga | FORTIGATE-1800F-CENTRAL | 103 788.88 |
+| Carga | DATCC-2A-C3 | 102 084.11 |
+
+**Par de nodos de acceso más distantes:**
+
+| Modelo | Nodo A | Nodo B | Distancia |
+|--------|--------|--------|-----------|
+| Saltos | ENF-2B-A122 | POST-2A-A66 | 11 saltos |
+| Latencia | POST-2A-A66 | QUIN-1A-A128 | 34.7 ms |
+| Carga | ARQ-1E-A92 | INV-1B-A162 | 1.71 |
+
+![Closeness comparativo](results/imagenes/p5_closeness_comparativo.png)
+
+#### Análisis
+
+- **Por saltos**, el nodo más central es `DATCC-2A-C3` (coincide con betweenness de P1): es el switch de core con más conexiones directas y el hub de la red.
+- **Por latencia**, `DATCC-2A-C3` lidera porque sus enlaces son de alta capacidad (10 Gbps → latencia de cola mínima), pero `FORTIGATE-1800F-CENTRAL` sube en el modelo de **carga** porque concentra el tráfico real más intenso.
+- El par más distante en saltos (11 hops) coincide con el diámetro de la red calculado en P1.
+- Por latencia, la ruta `POST-2A-A66 → QUIN-1A-A128` tiene 34.7 ms acumulados: pasa por múltiples enlaces MPLS de baja capacidad (100 Mbps → 10 ms cada uno), lo que ilustra el impacto de los cuellos de botella de ancho de banda.
+
+---
+
+## P6 — Flujo Máximo y Corte Mínimo *(2 puntos)*
+
+### Ítem 1 · Función de capacidad $c(u,v)$
+
+La capacidad de cada enlace se establece con la siguiente jerarquía:
+
+| Fuente | Capacidad |
+|--------|-----------|
+| Diagrama MPLS (28 aristas) | Valor explícito del CSV |
+| Rol WAN o capa core | 10 000 Mbps (10 Gbps) |
+| Al menos un extremo en agregación | 1 000 Mbps (1 Gbps) |
+| Resto (enlace de acceso) | 100 Mbps |
+
+> *En palabras simples:* la "capacidad" de un cable es cuánta información puede pasar por él al mismo tiempo (como el número de carriles de una autopista). El core tiene autopistas de 10 Gbps; la capa de acceso tiene calles de 100 Mbps.
+
+### Ítem 2 · Modelo fuente–sumidero y Edmonds-Karp
+
+**Modelado:** para cada campus, se crea un **super-nodo fuente** $s$ conectado con capacidad infinita a todos los switches de acceso del campus. El sumidero es `INTERNET-MPLS`. El flujo máximo $f^*$ de $s$ a `INTERNET-MPLS` representa la **capacidad total de salida a Internet** del campus.
+
+**Edmonds-Karp** (Ford-Fulkerson con BFS):
+
+$$f^* = \max_{f} \sum_{v:(s,v)\in E} f(s,v) \quad \text{s.a.} \quad f(u,v) \leq c(u,v),\ \sum_v f(u,v) = \sum_v f(v,u)$$
+
+> *Lectura:* el flujo máximo es la mayor cantidad de "datos" que pueden circular simultáneamente del campus a Internet, respetando que cada cable no supere su capacidad y que en cada equipo intermedio "lo que entra = lo que sale" (conservación de flujo). Edmonds-Karp encuentra repetidamente el camino más corto (en saltos) con capacidad residual positiva y lo satura, hasta que no exista ningún camino más.
+>
+> *En palabras simples:* es como calcular cuántos litros por segundo pueden fluir por una red de cañerías desde una fuente hasta un grifo: el flujo máximo está limitado por el tubo más estrecho en la ruta. El algoritmo encuentra rutas por las que enviar más agua hasta que ya no cabe más.
+
+**Teorema Max-Flow Min-Cut:** $f^* = c(\text{S, T})$, donde el corte mínimo $(S, T)$ es la partición del grafo con menor suma de capacidades de aristas de $S$ a $T$.
+
+> *En palabras simples:* el flujo máximo siempre iguala la capacidad del "cuello de botella" más estrecho de la red — el conjunto de cables que, si se cortaran todos, dejarían al campus sin salida a Internet.
+
+### Ítem 3 · Flujo máximo por campus
+
+| Campus | Nodos acceso | Flujo máximo | Iteraciones | Longitud media camino |
+|--------|-------------|-------------|------------|----------------------|
+| Campus Central | 56 | **43 000 Mbps** | 43 | 6.3 saltos |
+| Campus Balzay | 24 | **23 000 Mbps** | 23 | 5.6 saltos |
+| Sede Centro Histórico | 1 | **11 000 Mbps** | 2 | 5.0 saltos |
+| Sede Museo | 1 | **11 000 Mbps** | 2 | 5.5 saltos |
+| Campus Paraíso | 35 | **10 000 Mbps** | 10 | 5.0 saltos |
+| Campus Yanuncay | 11 | **1 000 Mbps** | 1 | 4.0 saltos |
+| Campus Hospitalidad | 4 | **1 000 Mbps** | 1 | 3.0 saltos |
+
+![Flujo por campus](results/imagenes/p6_flujo_campus.png)
+
+**Corte mínimo — Campus Central** (capacidad = 43 000 Mbps):
+
+| Arista del corte | Capacidad |
+|-----------------|----------|
+| DATCC-2A-C3 → FORTIGATE-1800F-CENTRAL | 10 000 Mbps |
+| DATCC-2A-C3 → PE2-CENTRAL | 20 000 Mbps |
+| DATCC-2A-C2 → FORTIGATE-1800F-CENTRAL | 10 000 Mbps |
+| ROUTER-CAMPUS-CENTRO-HISTORICO → ROUTER-L2TP-BALZAY | 1 000 Mbps |
+| ROUTER-CAMPUS-MUSEO → ROUTER-L2TP-BALZAY | 1 000 Mbps |
+| CCJ-CJURIDICO-D4 → INTERNET-MPLS | 1 000 Mbps |
+
+### Ítem 4 · Corte mínimo vs puentes (P1)
+
+Las aristas del corte mínimo **son puentes** de la red (detectados en P1): son los únicos caminos entre el interior del campus y el exterior. El corte mínimo no solo identifica el cuello de botella de capacidad — también coincide con los puntos únicos de fallo estructural. Eliminar cualquiera de las 6 aristas del corte desconecta o degrada severamente la salida del Campus Central a Internet.
+
+La arista `DATCC-2A-C3 → PE2-CENTRAL` (20 Gbps) domina: es un LAG de 2×10 Gbps. Si falla, el campus pierde casi la mitad de su capacidad de salida.
+
+### Ítem 5 · Formulación de flujo de costo mínimo
+
+El problema de **flujo de costo mínimo** añade una función de costo $\text{cost}(u,v)$ sobre las aristas:
+
+$$\min \sum_{(u,v) \in E} \text{cost}(u,v) \cdot f(u,v)$$
+
+$$\text{s.a.}\ \ f(u,v) \leq c(u,v), \quad \sum_v f(u,v) - \sum_v f(v,u) = b(u) \quad \forall u$$
+
+donde $b(u)$ es la demanda neta del nodo ($b(s) < 0$: generador; $b(t) > 0$: consumidor; $b = 0$: transbordo).
+
+> *En palabras simples:* además de respetar la capacidad de cada cable, se quiere enviar los datos por la ruta más barata. El "costo" puede ser latencia, número de saltos, o precio de alquiler de ancho de banda. El flujo de costo mínimo minimiza el costo total de transportar una demanda dada.
+
+Con $\text{cost}(u,v) = 1$ salto para una demostración de 5 nodos de acceso del Campus Central, el costo total es **2 200 saltos·Mbps**, correspondiente a 100 Mbps enviados por caminos de longitud media 4.4 saltos.
+
+---
+
+## P7 — p-Mediana y p-Centro *(2 puntos)*
+
+### Ítem 1 · Matriz de distancias mínimas
+
+Se calcula la matriz $D \in \mathbb{R}^{177 \times 177}$ con Dijkstra (pesos = saltos) desde cada nodo. La complejidad es $O(n \cdot (n+m)\log n)$.
+
+### Ítem 2 · p-Mediana
+
+Dado un conjunto de $p$ servidores $F \subseteq V$, la **p-mediana** minimiza la suma de distancias de cada nodo a su servidor más cercano:
+
+$$\min_{F \subseteq V,|F|=p} \sum_{v \in V} \min_{f \in F} d(v, f)$$
+
+> *Lectura:* se quiere colocar $p$ servidores en los mejores $p$ nodos, de forma que la **latencia promedio** desde cualquier equipo al servidor más cercano sea mínima. Es el criterio correcto cuando el objetivo es optimizar la experiencia del usuario promedio.
+>
+> *En palabras simples:* la p-mediana responde "¿dónde pongo mis $p$ servidores DNS para que el conjunto de usuarios espere lo menos posible en total?". Es como ubicar $p$ pizzerías en una ciudad para que los clientes, en promedio, caminen la menor distancia.
+
+**Heurística greedy:** en cada paso añade el nodo que más reduce la función objetivo. Complejidad $O(p \cdot n^2)$.
+
+#### Resultados
+
+| $p$ | Medianas | Objetivo (saltos·nodo) |
+|-----|----------|------------------------|
+| 1 | INTERNET-MPLS | 638 |
+| 2 | INTERNET-MPLS, DATCC-2A-C2 | 492 |
+| 3 | INTERNET-MPLS, DATCC-2A-C2, CPAR-C10 | 408 |
+| 5 | + DT-0A-C12, AGRPRI-1A-D10 | 318 |
+
+### Ítem 3 · p-Centro
+
+La **p-centro** minimiza la distancia máxima de cualquier nodo a su servidor más cercano (criterio minimax):
+
+$$\min_{F \subseteq V,|F|=p} \max_{v \in V} \min_{f \in F} d(v, f)$$
+
+> *Lectura:* garantiza que **ningún equipo** quede demasiado lejos de un servidor. Es el criterio correcto cuando la calidad de servicio mínima importa más que el promedio — por ejemplo, para que ningún switch de acceso tenga más de $R$ saltos a su gateway de DNS.
+>
+> *En palabras simples:* la p-centro responde "¿dónde pongo $p$ servidores para que el peor caso (el equipo más alejado) esté lo más cerca posible?". Es como ubicar $p$ bomberos para que ningún punto de la ciudad tarde más de $X$ minutos en ser atendido.
+
+#### Resultados
+
+| $p$ | Centros | Radio máximo |
+|-----|---------|-------------|
+| 1 | INTERNET-MPLS | 6 saltos |
+| 2 | INTERNET-MPLS, AETUC-0A-A76 | 6 saltos |
+| 3 | + AETUC-0A-A97 | 6 saltos |
+| 5 | + AETUCCF-2A-A79, AGRPRI-1A-A19 | 6 saltos |
+
+![p-Mediana vs p-Centro](results/imagenes/p7_mediana_vs_centro.png)
+
+### Ítem 4 · Comparación con centralidades
+
+| Nodo | Closeness rank | Betweenness rank | Es 1-Mediana | Es 1-Centro |
+|------|---------------|-----------------|--------------|-------------|
+| INTERNET-MPLS | **1** | 4 | ✓ | ✓ |
+| DATCC-2A-C3 | 2 | 1 | — | — |
+| PE2-CENTRAL | 3 | 5 | — | — |
+
+La **1-mediana y el 1-centro coinciden** en `INTERNET-MPLS`, el nodo con mayor closeness de la red. Esto establece una correspondencia directa entre la centralidad de closeness (que minimiza la distancia promedio) y el problema de 1-mediana.
+
+### Ítem 5 · p-Mediana vs p-Centro: cuándo usar cada uno
+
+| Criterio | p-Mediana | p-Centro |
+|----------|-----------|---------|
+| **Objetivo** | Minimizar suma total de distancias | Minimizar distancia máxima |
+| **Mide** | Latencia promedio de la red | Cobertura equitativa (peor caso) |
+| **Cuándo usar** | DNS, NTP, servidores de logs | Gateways de emergencia, servers críticos |
+| **Hallazgo UCuenca** | `INTERNET-MPLS` como 1-mediana óptima | Radio irreducible de 6 saltos con $p \leq 5$ |
+
+El radio de 6 saltos **es constante** para $p \in \{1,2,3,5\}$: el árbol jerárquico impone un diámetro mínimo que no se puede reducir añadiendo más servidores en los mismos nodos existentes — sería necesario agregar infraestructura nueva (por ejemplo un servidor directamente en los switches de agregación de Paraíso).
+
+---
+
+## Preguntas — Fase 3
+
+### P5 · Caminos mínimos
+
+> **¿Qué nodo es más central según la closeness ponderada por latencia?**
+
+`DATCC-2A-C3` en todos los modelos por saltos y latencia; `FORTIGATE-1800F-CENTRAL` sube al primer puesto en el modelo de carga porque concentra el tráfico real más intenso. La closeness por carga no mide distancia geométrica sino utilización actual de los enlaces.
+
+> **¿En qué casos preferiría Floyd-Warshall sobre Dijkstra-repetido?**
+
+Floyd-Warshall es preferible cuando se necesitan **todas** las distancias pares al mismo tiempo (análisis global de la red) y el grafo es denso ($m \approx n^2$). Para UCuenca ($n=177$, $m=209$, grafo muy disperso), Dijkstra×$n$ es 7–10× más rápido. La elección correcta depende de la densidad y del patrón de consultas.
+
+### P6 · Flujo máximo
+
+> **¿Coincide el corte mínimo con los puentes detectados en P1?**
+
+Sí. Las 6 aristas del corte mínimo del Campus Central son todas puentes de la red. El teorema max-flow min-cut formaliza lo que la detección de puentes ya revelaba: las aristas sin alternativa son exactamente los cuellos de botella de flujo. La novedad de P6 es cuantificar la **capacidad** del cuello de botella, no solo su existencia.
+
+> **¿Qué campus tiene mayor capacidad de salida a Internet y por qué?**
+
+**Campus Central** con 43 Gbps, porque es el campus más grande (56 nodos de acceso) y tiene dos switches de core con enlaces de 10–20 Gbps hacia el backbone MPLS. Yanuncay y Hospitalidad están limitados a 1 Gbps porque sus conexiones MPLS son de 1 Gbps (un solo enlace de acceso WAN).
+
+### P7 · Localización de instalaciones
+
+> **¿Coincide la 1-mediana con el nodo de mayor closeness?**
+
+Sí, ambos son `INTERNET-MPLS`, que tiene el mayor $C_{\text{close}} = 0.2759$. La equivalencia es matemática: maximizar la closeness es equivalente a minimizar la distancia media a todos los nodos, que es exactamente el objetivo de la 1-mediana. Esta coincidencia valida mutuamente ambas métricas.
+
+> **¿Por qué el radio del p-centro no decrece al aumentar $p$?**
+
+Porque el árbol jerárquico impone rutas mínimas de 6 saltos entre los nodos de acceso más profundos y cualquier nodo posible de instalación. Reducir el radio requeriría acortar la cadena `acceso → agregación → core → MPLS`, lo que implica añadir servidores directamente en los switches de agregación o acceso — opción no disponible con la infraestructura actual.
+
+---
+
+## Fase 4 — Percolación y Robustez
+
+> *Peso: 6 puntos | Contenidos 4.1–4.4 del sílabo*
+
+---
+
+## P8 — Percolación de Nodos y Aristas *(2.5 puntos)*
+
+### Ítem 1 · Eficiencia global
+
+$$E(G) = \frac{1}{n(n-1)} \sum_{i \neq j} \frac{1}{d(i,j)}$$
+
+donde $d(i,j) = \infty \Rightarrow 1/d = 0$ para pares desconectados.
+
+> *Lectura:* para cada par de nodos, se calcula el inverso de su distancia. Si están directamente conectados ($d=1$), contribuyen con 1; si están a 5 saltos, contribuyen 1/5; si están en componentes separadas ($d=\infty$), contribuyen 0. La media de esas contribuciones es la eficiencia global: cuánto "aprovecha" la red su conectividad. $E=1$ sería un grafo completo; $E=0$ un grafo sin aristas.
+>
+> *En palabras simples:* mide qué tan bien puede comunicarse cualquier nodo con cualquier otro. Si muchos pares quedan desconectados o muy alejados, la eficiencia cae. Es como medir qué tan fluida es la comunicación en toda la red.
+
+**Eficiencia inicial:** $E_0 = 0.2082$.
+
+### Ítem 2 · Percolación de nodos — 4 estrategias
+
+Se eliminan nodos secuencialmente y se mide la eficiencia $E(G)$ en función de la fracción eliminada $f$.
+
+#### Resultados
+
+| Estrategia | Umbral $f$ donde $E < 0.5\,E_0$ |
+|------------|----------------------------------|
+| Grado descendente (mayor grado primero) | **$f \approx 0.05$** |
+| Betweenness (mayor intermediación primero) | **$f \approx 0.05$** |
+| Aleatorio (media 5 semillas) | $f \approx 0.25$ |
+| Grado ascendente (menor grado primero) | $f \approx 1.00$ |
+
+![Robustez de nodos](results/imagenes/p8_robustez_nodos.png)
+
+#### Análisis
+
+La red colapsa al 50% de eficiencia con solo el **5% de los nodos** eliminados cuando se ataca por grado o betweenness (equivalente a eliminar 8–9 nodos). Bajo eliminación aleatoria el umbral sube al 25%. Eliminar nodos de bajo grado es casi inofensivo: se puede eliminar el 100% de las hojas sin desconectar la red (son nodos terminales).
+
+Este comportamiento es característico de redes **heterogéneas con hubs**: muy robustas frente al fallo aleatorio (la probabilidad de dañar un hub es baja) pero extremadamente frágiles frente a ataques dirigidos al core.
+
+### Ítem 3 · Percolación de aristas
+
+| Estrategia | Comportamiento |
+|------------|---------------|
+| Aleatorio | Degradación gradual |
+| Mayor betweenness de arista primero | Colapso más rápido |
+
+La eliminación dirigida por betweenness de arista produce un colapso más rápido que el aleatorio: las aristas con mayor flujo de caminos cortos son los puentes críticos de la red.
+
+![Robustez de aristas](results/imagenes/p8_robustez_aristas.png)
+
+### Ítem 4 · Comparación con modelos nulos
+
+| Modelo | $E_0$ | Umbral 50% (ataque por grado) |
+|--------|-------|------------------------------|
+| Red UCuenca | 0.2082 | $f \approx 0.05$ |
+| Erdős-Rényi (ER) | 0.1397 | $f \approx 0.10$ |
+| Configuración (CM) | 0.1565 | $f \approx 0.05$ |
+
+La red real tiene **mayor eficiencia inicial** que los modelos nulos (estructura jerárquica optimizada para eficiencia de rutas), pero el CM coincide en la fragilidad ante ataques por grado ($f \approx 0.05$), confirmando que la vulnerabilidad está determinada principalmente por la secuencia de grados (pocos hubs con grado alto). ER es más resistente al ataque porque sus grados son más uniformes (menos "punto único de fallo").
+
+### Ítem 5 · Umbral de percolación
+
+El umbral de percolación $f_c$ (donde la componente gigante colapsa) bajo ataque por grado es $f_c \approx 0.05$. En números absolutos: **9 nodos** (de 177) son suficientes para reducir la eficiencia a la mitad. Los 5 switches de core y los 4 switches de agregación con mayor grado constituyen este conjunto crítico.
+
+Bajo percolación **aleatoria**, el umbral es $f_c \approx 0.25$ (≈44 nodos), lo que indica que la red tolera bien los fallos no coordinados pero es extremadamente vulnerable a ataques dirigidos.
+
+---
+
+## P9 — Fallas en Cascada y Epidemias SIR *(2.5 puntos)*
+
+### Ítem 1 · Modelo de carga-capacidad (Motter-Lai)
+
+Cada nodo $i$ tiene:
+- **Carga inicial:** $L_i = B_i$ (betweenness del nodo en el grafo intacto)
+- **Capacidad:** $C_i = (1 + \alpha) \cdot L_i$ con tolerancia $\alpha \geq 0$
+
+Al fallar el nodo inicial, el betweenness de los nodos supervivientes aumenta (más flujo pasa por ellos). Si la nueva carga de algún nodo supera su capacidad, falla también → **cascada**.
+
+> *Lectura:* cuando un router crítico falla, el tráfico que antes pasaba por él se redistribuye entre los caminos alternativos. Los routers que se convierten en "detour" repentino pueden saturarse y fallar también. La tolerancia $\alpha$ mide qué tan sobreprovisionada está la red: $\alpha = 0$ significa capacidad exactamente al 100%, sin margen; $\alpha = 1$ significa el doble de margen.
+>
+> *En palabras simples:* es como un atasco de tráfico que se propaga: si la autopista principal se cierra, los conductores se desvían por carreteras secundarias. Si esas carreteras tampoco aguantan el nuevo tráfico, también colapsan, creando más desvíos en un efecto dominó.
+
+### Ítem 2 · Fracción de nodos fallidos vs tolerancia $\alpha$
+
+**Nodo detonador:** `DATCC-2A-C3` (mayor betweenness: 6880)
+
+| $\alpha$ | Nodos fallidos | Fracción | Pasos de cascada |
+|----------|---------------|----------|-----------------|
+| 0.00 | 12 | 6.8% | 1 |
+| 0.05 | 9 | 5.1% | 2 |
+| 0.10 | 9 | 5.1% | 2 |
+| 0.20 | 8 | 4.5% | 1 |
+| 0.50 | 8 | 4.5% | 1 |
+| 1.00 | 8 | 4.5% | 1 |
+| 1.50 | 5 | 2.8% | 1 |
+| 2.00 | 3 | 1.7% | 1 |
+
+![Cascada de fallos](results/imagenes/p9_cascada.png)
+
+#### Análisis
+
+Con $\alpha = 0$ (sin margen), la falla de `DATCC-2A-C3` provoca la cascada de 12 nodos (6.8%) en 1 paso. A partir de $\alpha \geq 0.2$ la cascada se estabiliza en 8 nodos (los switches directamente conectados a él que quedan desconectados). Solo con $\alpha \geq 1.5$ se controla la cascada a menos de 5 nodos adicionales.
+
+La arquitectura jerárquica limita naturalmente la propagación: como cada switch de acceso solo tiene grado 1, al quedar desconectado no puede "propagar" más carga a otros nodos (no tiene tráfico de tránsito). La cascada se detiene en la capa de agregación.
+
+### Ítem 3 · Modelo SIR y umbral crítico
+
+El **modelo SIR** discreto modela la propagación de un fallo lógico (virus, misconfiguration):
+
+- **S** (Susceptible): equipo no infectado que puede serlo
+- **I** (Infected): equipo actualmente comprometido, puede infectar vecinos
+- **R** (Recovered): equipo parcheado/restaurado, inmune
+
+Ecuaciones de transición (tiempo discreto):
+
+$$P(S \to I) = 1 - (1-\beta)^{n_I(v)}, \qquad P(I \to R) = \gamma$$
+
+donde $n_I(v)$ es el número de vecinos infectados de $v$.
+
+> *Lectura:* en cada paso de tiempo, un equipo susceptible se infecta con probabilidad que depende de cuántos vecinos ya infectados tiene: $\beta$ es la probabilidad de infección por cada vecino infectado. Un equipo infectado se recupera con probabilidad $\gamma$ en cada paso.
+>
+> *En palabras simples:* un virus informático se propaga de router en router. En cada "tick" del reloj, cada router infectado tiene $\beta$ probabilidad de infectar a cada vecino sano. Los routers infectados se parchean con probabilidad $\gamma$ por tick. Si $\beta$ es muy baja, el virus muere rápido; si es alta, se propaga a toda la red.
+
+**Umbral crítico:**
+
+$$\tau_c = \frac{\langle k \rangle}{\langle k^2 \rangle} = \frac{2.362}{12.694} = 0.1861$$
+
+Para $\beta > \tau_c$ existe una epidemia global; para $\beta < \tau_c$ la infección se extingue localmente.
+
+> *Lectura:* el umbral depende de la heterogeneidad de grados. Redes con $\langle k^2 \rangle \gg \langle k \rangle$ (muchos hubs) tienen $\tau_c \to 0$: son vulnerables a epidemias con tasas de infección bajas.
+>
+> *En palabras simples:* en una red donde hay algunos equipos muy conectados (hubs), basta con una tasa de infección muy baja para que el virus se propague a toda la red. Los hubs actúan como "superpropagadores".
+
+#### Resultados SIR
+
+| Caso | $\beta$ | $\gamma$ | $R_{\text{final}}$ | Nodos afectados |
+|------|---------|---------|-------------------|----------------|
+| Sub-crítico | 0.0931 ($\approx \tau_c/2$) | 0.1 | 51 | 28.8% |
+| Sobre-crítico | 0.3722 ($\approx 2\tau_c$) | 0.1 | 140 | 79.1% |
+
+![Modelo SIR](results/imagenes/p9_sir.png)
+
+### Ítem 4 · Estrategias de inmunización
+
+Fracción afectada ($R_{\text{final}}/n$) con $\beta = 0.3722$, $\gamma = 0.1$:
+
+| Estrategia | $f=0\%$ | $f=10\%$ | $f=20\%$ | $f=30\%$ |
+|------------|---------|---------|---------|---------|
+| Sin inmunización | 79.1% | — | — | — |
+| Aleatoria | 79.1% | 66.7% | 59.3% | 33.9% |
+| Por grado (hubs primero) | 79.1% | 22.6% | **4.0%** | 1.7% |
+| Por betweenness | 79.1% | 30.5% | 6.2% | **0.6%** |
+| Por vecino (proxy) | 79.1% | 44.6% | 20.3% | 1.1% |
+
+![Estrategias de inmunización](results/imagenes/p9_inmunizacion.png)
+
+#### Análisis
+
+Vacunar por **grado** es la estrategia más eficiente: con solo el 20% de nodos inmunizados (≈35 equipos), la fracción afectada cae del 79% al 4%. La razón: inmunizando los switches de core y agregación se corta la capacidad de los "superpropagadores" de distribuir la infección.
+
+La **estrategia por vecino** es un buen proxy práctico: sin conocer la red completa, seleccionar el vecino de un nodo aleatorio tiende a encontrar hubs (porque los hubs tienen más probabilidad de ser vecino de alguien). Con 30% de cobertura logra una reducción similar a la estrategia por grado.
+
+La estrategia **aleatoria** es la menos eficiente: requiere el 30% de cobertura para llegar a 33% de afectados, mientras que por grado con 20% ya llega al 4%.
+
+### Ítem 5 · Nodo más crítico
+
+`DATCC-2A-C3` es el nodo más crítico por ambos criterios:
+
+| Criterio | Impacto |
+|----------|---------|
+| Cascada de carga ($\alpha=0$) | 12 nodos adicionales fallan (6.8%) |
+| Propagación SIR ($\beta=2\tau_c$) | 140/177 nodos afectados (79.1%) |
+| Betweenness | 6880 (mayor de la red) |
+| Grado | 17 (mayor de la red) |
+
+La coincidencia de los rankings de betweenness, grado, cascada y propagación SIR en el mismo nodo confirma que **`DATCC-2A-C3` es el punto de mayor fragilidad operativa de la red UCuenca**.
+
+---
+
+## Preguntas — Fase 4
+
+### P8 · Percolación y robustez
+
+> **¿Es la red más o menos robusta que sus modelos nulos?**
+
+La red UCuenca tiene **mayor eficiencia inicial** ($E_0 = 0.208$) que ER (0.140) y CM (0.157) — la estructura jerárquica optimiza los caminos. Sin embargo, frente a ataques dirigidos por grado, UCuenca es **igual de frágil que CM** (umbral $f_c \approx 0.05$): en ambos casos, eliminar el 5% de nodos de mayor grado colapsa la mitad de la eficiencia. ER es más resistente ($f_c \approx 0.10$) porque sus grados son más uniformes.
+
+> **¿Qué tipo de ataque resulta más devastador y por qué?**
+
+El ataque por **grado** y por **betweenness** son igualmente devastadores, con umbral $f_c \approx 0.05$. La razón: en UCuenca, los nodos de mayor grado son también los de mayor betweenness (ver P1). Eliminar los 5 switches de core y los 4–5 de mayor agregación desconecta inmediatamente campus enteros. El ataque aleatorio es 5 veces menos efectivo porque la mayoría de los nodos son hojas de acceso cuya eliminación no desconecta ningún subgrafo.
+
+### P9 · Cascadas y epidemias
+
+> **¿Qué tolerancia mínima $\alpha$ recomendaría para proteger el core?**
+
+Con $\alpha \geq 1.5$, la cascada iniciada en `DATCC-2A-C3` se limita a 5 nodos (2.8%), en lugar de los 12 con $\alpha = 0$. En términos de diseño: **las interfaces de los switches de core deberían tener un sobreprovisionamiento del 150%** sobre la carga nominal de betweenness. Dado que `DATCC-2A-C3` tiene el mayor betweenness de toda la red, es el más vulnerable a la saturación por rerouting.
+
+> **¿Qué estrategia de inmunización es más eficiente y cuál más práctica?**
+
+- **Más eficiente:** por betweenness — con 30% de nodos inmunizados, solo el 0.6% de nodos queda afectado. Requiere calcular el betweenness de toda la red.
+- **Más práctica:** por vecino — sin conocer la topología completa, seleccionar vecinos de nodos aleatorios tiende a encontrar hubs. Con 30% logra 1.1% de afectados, casi igual que la estrategia óptima, pero sin necesitar el cálculo global.
+- **Recomendación operativa:** inmunizar los top-20 nodos por betweenness (11.3% de la red) garantiza que la infección no supera el 6.2% de nodos en el peor caso.
+
+> **¿Tiene sentido aplicar el modelo SIR a una red de infraestructura de datos?**
+
+Sí, con la interpretación correcta. $\beta$ representa la tasa a la que una misconfiguration, vulnerability o malware se propaga de un switch a sus vecinos (por ejemplo, a través de protocolos de gestión como SNMP, SSH, o de enrutamiento como OSPF). $\gamma$ representa la tasa de parcheo o restauración. El umbral $\tau_c = 0.186$ indica que, para que una campaña de malware de red se extinga sola, su tasa de propagación debe ser menor al 18.6% por interfaz por unidad de tiempo — un valor que malware moderno supera fácilmente.
+
+---
+
+---
+
+## Glosario de Conceptos Clave
+
+Esta sección recoge una explicación en lenguaje llano de todos los conceptos matemáticos usados en el informe. Están ordenados temáticamente. Las definiciones formales se encuentran en cada sección de fase.
+
+---
+
+### Conceptos básicos de grafos
+
+**Grafo:** un conjunto de *nodos* (equipos de red) conectados por *aristas* (cables). Se escribe $G = (V, E)$ donde $V$ es el conjunto de nodos y $E$ el de aristas. *En palabras simples:* un mapa donde los puntos son equipos y las líneas son cables.
+
+**Grafo no dirigido:** los cables no tienen dirección: si A está conectado a B, también B está conectado a A. *En redes físicas Ethernet*, los datos pueden fluir en ambas direcciones por el mismo cable.
+
+**Grafo conexo:** existe al menos un camino entre cualquier par de nodos. *En palabras simples:* no hay "islas" aisladas — siempre hay una ruta, aunque sea larga, para llegar de cualquier equipo a cualquier otro.
+
+**Componente gigante (GCC):** el subconjunto más grande de nodos donde todos están conectados entre sí. En redes de infraestructura, idealmente la GCC es toda la red.
+
+**Densidad $\rho$:** fracción de los posibles cables que realmente existen. Una densidad de 0.013 significa que solo el 1.3% de los cables posibles están instalados. *En palabras simples:* qué tan "poblado de cables" está el grafo respecto al máximo teórico.
+
+**Árbol:** grafo conexo sin ciclos. Tiene exactamente $n-1$ aristas. *En palabras simples:* como el árbol genealógico — hay un único camino entre cualquier par de nodos, sin "volver por donde se vino".
+
+---
+
+### Grado y distribución
+
+**Grado de un nodo $k_v$:** número de cables que salen del equipo $v$. Un switch con 5 puertos usados tiene grado 5. *En infraestructura:* el grado indica cuántos equipos están directamente conectados a este switch.
+
+**Grado medio $\langle k \rangle$:** promedio de grados de todos los nodos. Siempre igual a $2m/n$ porque cada cable añade 1 al grado de ambos extremos. En UCuenca: 2.36 cables por equipo en promedio.
+
+**Distribución de grado $P(k)$:** histograma normalizado de grados. $P(3) = 0.034$ significa que el 3.4% de los nodos tienen exactamente 3 conexiones.
+
+**Red libre de escala (*scale-free*):** red donde $P(k) \sim k^{-\gamma}$ — la distribución sigue una ley de potencia. Tiene muy pocos nodos con grado altísimo (hubs) y muchos con grado bajo. *En palabras simples:* como una red de aeropuertos: pocos aeropuertos como Heathrow tienen miles de vuelos, pero la mayoría de aeropuertos tienen pocos destinos.
+
+**Ley de potencia $P(k) \sim k^{-\gamma}$:** en escala log-log aparece como una línea recta con pendiente $-\gamma$. El parámetro $\gamma$ controla la "pesadez de la cola" — qué tan probable es encontrar hubs extremos.
+
+**Hub:** nodo con grado muy superior al promedio. En UCuenca, `DATCC-2A-C3` (grado 17) frente al grado medio de 2.36.
+
+---
+
+### Centralidades
+
+**Centralidad de grado $C_G$:** qué fracción de la red está directamente conectada a este nodo. Un nodo central por grado es un "vecino de muchos". *En redes:* importante para switches de distribución/core.
+
+**Centralidad de intermediación (betweenness) $C_B$:** fracción de rutas más cortas de la red que pasan por este nodo. *En palabras simples:* cuántas "autopistas" pasan por esta ciudad. Un nodo con alta betweenness es un cuello de botella — si falla, muchos pares de nodos pierden su ruta más corta.
+
+**Centralidad de cercanía (closeness) $C_C$:** inverso de la distancia media a todos los demás nodos. Un nodo con alta closeness puede alcanzar a cualquier otro nodo rápidamente. *Ideal para:* servidores DNS, NTP o de monitoreo que deben responder a toda la red.
+
+**Centralidad de vector propio $C_E$:** un nodo es importante si sus vecinos son importantes. Es un ranking recursivo — como el PageRank de Google. *En palabras simples:* no es lo mismo tener 5 vecinos mediocres que 5 vecinos influyentes.
+
+---
+
+### Estructura local y global
+
+**Coeficiente de clustering $C(v)$:** fracción de los pares de vecinos de $v$ que están conectados entre sí. $C(v) = 1$ si todos los vecinos de $v$ también son vecinos entre sí (triangulación completa); $C(v) = 0$ si ningún par de vecinos comparte enlace. *En redes jerárquicas:* es casi cero porque se prohíben los bucles en la capa de acceso.
+
+**Triángulo:** conjunto de 3 nodos todos conectados entre sí. La presencia de triángulos eleva el clustering. *En redes sociales:* "amigos de amigos son amigos". En redes de infraestructura: un ciclo de 3 entre core, agregación y acceso sería inusual.
+
+**Diámetro $D$:** la distancia más larga entre cualquier par de nodos. El "peor caso" de la red. En UCuenca $D = 11$: hay equipos que necesitan 11 saltos para comunicarse.
+
+**Distancia media $\langle d \rangle$:** promedio de todas las distancias entre pares. En UCuenca $\langle d \rangle = 5.83$ saltos. *En palabras simples:* si eliges dos equipos al azar, necesitarán en promedio casi 6 saltos para comunicarse.
+
+**Mundo pequeño (*small world*):** propiedad donde $\langle d \rangle$ crece muy lentamente con $n$ (escala como $\log n$) pero el clustering es alto. *Ejemplo:* en una red social de millones de personas, dos desconocidos están separados por ~6 "saltos" de amistad. UCuenca no es *small world* porque su clustering es demasiado bajo.
+
+**Asortatividad $r$:** correlación entre los grados de los extremos de las aristas. $r > 0$ (asortativa): los hubs se conectan con hubs. $r < 0$ (disasortativa): los hubs se conectan con hojas. En UCuenca $r = -0.147$: los switches de core se conectan con switches de acceso de grado 1, nunca directamente entre sí.
+
+---
+
+### Puntos de fallo
+
+**Punto de articulación (vértice de corte):** nodo cuya eliminación divide el grafo en dos o más partes. *En redes:* si falla, uno o más segmentos quedan aislados. En UCuenca hay 47 puntos de articulación, casi todos en la capa de agregación.
+
+**Puente (arista de corte):** arista cuya eliminación divide el grafo. *En palabras simples:* cable sin alternativa — si se corta, algún segmento queda incomunicado. En UCuenca el 67% de los cables son puentes.
+
+**Algoritmo de Tarjan:** algoritmo DFS que encuentra todos los puntos de articulación y puentes en una sola pasada por el grafo, con complejidad $O(n+m)$. Usa el concepto de "número de descubrimiento" y "valor low" para detectar qué nodos no tienen camino alternativo hacia sus ancestros.
+
+---
+
+### Algoritmos de recorrido
+
+**BFS (Búsqueda en Anchura):** recorre el grafo por "capas" — primero todos los vecinos directos, luego los vecinos de vecinos, etc. Garantiza encontrar el camino más corto (en saltos). *Como ondas en un estanque:* se expande desde el origen hacia afuera uniformemente.
+
+**DFS (Búsqueda en Profundidad):** sigue un camino hasta el fondo antes de retroceder y explorar otra rama. *Como resolver un laberinto siguiendo siempre la pared izquierda:* llega muy lejos antes de volver.
+
+**Número ciclomático $\mu = m - n + 1$:** cuenta los ciclos independientes de un grafo conexo. Cada arista "extra" sobre el árbol mínimo ($n-1$ aristas) crea exactamente un ciclo. En UCuenca: $\mu = 209 - 177 + 1 = 33$ ciclos = 33 enlaces redundantes.
+
+**Arista de retroceso (back edge):** en DFS, arista que lleva a un ancestro ya visitado. Cada back edge indica la existencia de un ciclo. El número de back edges coincide con el número ciclomático.
+
+---
+
+### Algoritmos de caminos mínimos
+
+**Dijkstra:** algoritmo que encuentra el camino más corto desde un nodo origen a todos los demás. Usa una cola de prioridad (montículo) para procesar siempre el nodo más cercano conocido. Funciona con pesos no negativos. *Como el algoritmo que usa tu GPS:* siempre expande el punto más cercano primero.
+
+**Floyd-Warshall:** calcula todos los caminos mínimos entre todos los pares de nodos en $O(n^3)$. Pregunta para cada posible nodo intermedio $k$: "¿ir de $i$ a $j$ pasando por $k$ es más corto que la ruta directa conocida?". *Ventaja:* una sola ejecución da toda la información. *Desventaja:* muy lento para redes grandes.
+
+**Camino más corto:** secuencia de nodos de menor peso total entre origen y destino. El peso puede ser saltos, latencia, carga, o cualquier métrica.
+
+---
+
+### Comunidades
+
+**Comunidad:** subconjunto de nodos más densamente conectados entre sí que con el resto del grafo. *En redes sociales:* grupos de amigos. *En UCuenca:* los campus físicos tienden a ser comunidades porque los equipos de un campus se conectan más entre sí que con otros campus.
+
+**Modularidad $Q$:** medida de calidad de una partición en comunidades. $Q > 0.3$ indica estructura comunitaria significativa. $Q$ compara las aristas internas reales con las esperadas en un grafo aleatorio con los mismos grados. En UCuenca $Q = 0.763$, muy alto.
+
+**Algoritmo Louvain:** método greedy de dos fases para maximizar $Q$. Fase 1: cada nodo trata de moverse a la comunidad de su vecino que más aumenta $Q$. Fase 2: se contrae el grafo y se repite. Converge rápido incluso en redes grandes.
+
+**Límite de resolución:** problema de la modularidad donde comunidades pequeñas no son detectables si el grafo es grande. Umbral aproximado: comunidades con menos de $\sqrt{2m}$ aristas internas pueden ser "tragadas" por comunidades más grandes.
+
+**NMI (Información Mutua Normalizada):** mide el acuerdo entre dos particiones de la misma red. $\text{NMI} = 0$: sin relación. $\text{NMI} = 1$: particiones idénticas. En UCuenca, Louvain vs campus físico: NMI = 0.618.
+
+**ARI (Índice de Rand Ajustado):** también compara dos particiones, corrigiendo por coincidencias aleatorias. $\text{ARI} = 1$: idénticas; $\text{ARI} = 0$: azar puro; puede ser negativo si acuerdan menos que el azar.
+
+**k-means espectral:** técnica que primero calcula los vectores propios del Laplaciano normalizado del grafo (representación "espectral") y luego aplica k-means clustering estándar sobre esas coordenadas espectrales. Los vectores propios capturan la estructura de conectividad de forma que nodos bien conectados quedan cerca en el espacio espectral.
+
+**Laplaciano normalizado $L_{\text{sym}}$:** versión normalizada de la matriz $L = D - A$ que escala por el grado de cada nodo. Tiene la propiedad de que sus vectores propios más pequeños identifican grupos de nodos bien conectados internamente.
+
+---
+
+### Flujo en redes
+
+**Flujo máximo:** la cantidad máxima de "datos" que pueden circular simultáneamente de una fuente a un sumidero, respetando las capacidades de los cables. *En palabras simples:* cuánta agua por segundo puede pasar de la fuente al grifo a través de una red de cañerías.
+
+**Ford-Fulkerson:** algoritmo que encuentra el flujo máximo buscando repetidamente "caminos aumentantes" (rutas con capacidad residual) y saturándolos. Termina cuando no queda ningún camino disponible.
+
+**Edmonds-Karp:** variante de Ford-Fulkerson que siempre elige el camino aumentante más corto (BFS). Garantiza convergencia en $O(V \cdot E^2)$ incluso con capacidades irracionales.
+
+**Capacidad residual:** cuánta capacidad le queda a un arco para aumentar el flujo. Si un cable de 10 Gbps ya lleva 7 Gbps de flujo, su capacidad residual es 3 Gbps.
+
+**Corte (S, T):** partición de los nodos en dos conjuntos donde $S$ contiene la fuente y $T$ el sumidero. La capacidad del corte es la suma de capacidades de los arcos que van de $S$ a $T$.
+
+**Teorema Max-Flow Min-Cut:** el flujo máximo entre dos nodos siempre iguala la capacidad mínima de corte entre ellos. *En palabras simples:* el caudal máximo que puede fluir está limitado por el "cuello de botella" más estrecho de toda la red.
+
+**Flujo de costo mínimo:** extensión del flujo máximo donde cada arco tiene un costo por unidad de flujo. El objetivo es enviar una demanda dada con el menor costo total. *Ejemplo:* enviar datos eligiendo rutas de menor latencia o menor precio de ancho de banda.
+
+---
+
+### Localización de instalaciones
+
+**p-Mediana:** problema de colocar $p$ instalaciones en los nodos del grafo para minimizar la suma de distancias de cada nodo a la instalación más cercana. Mide eficiencia promedio. *Ejemplo:* dónde poner $p$ servidores DNS para que la latencia promedio sea mínima.
+
+**p-Centro:** problema de colocar $p$ instalaciones para minimizar la distancia máxima de cualquier nodo a la instalación más cercana (criterio minimax). Mide equidad / cobertura. *Ejemplo:* dónde poner $p$ servidores de respaldo para que ningún equipo esté a más de $R$ saltos de uno de ellos.
+
+**Heurística greedy de localización:** en cada iteración, añade la instalación que más reduce la función objetivo (mediana o centro). No garantiza el óptimo global pero es eficiente computacionalmente y da soluciones de buena calidad.
+
+---
+
+### Robustez y percolación
+
+**Percolación:** proceso de eliminación secuencial de nodos o aristas. Se estudia cómo la conectividad y la eficiencia del grafo decaen conforme se eliminan componentes.
+
+**Eficiencia global $E(G)$:** medida de cuán bien conectados están todos los pares de nodos, considerando la inversa de su distancia. $E = 0.208$ en UCuenca intacto; cae a medida que se eliminan nodos.
+
+**Umbral de percolación $f_c$:** fracción de nodos eliminados donde la red "colapsa" (la componente gigante deja de ser gigante o la eficiencia cae drásticamente). En UCuenca bajo ataque por grado: $f_c \approx 0.05$.
+
+**Ataque dirigido vs fallo aleatorio:** un ataque dirigido elimina primero los nodos más importantes (mayor grado o betweenness); un fallo aleatorio elimina nodos sin criterio. Las redes heterogéneas (con hubs) son robustas frente a fallos aleatorios pero frágiles frente a ataques dirigidos.
+
+**Robustez:** capacidad de la red de mantener funcionalidad tras la eliminación de componentes. Una red robusta mantiene $E(G)$ alto incluso con una fracción $f$ grande de nodos eliminados.
+
+---
+
+### Dinámica: cascadas y epidemias
+
+**Modelo de carga-capacidad (Motter-Lai):** modelo donde cada nodo tiene una carga (proporcional a su betweenness) y una capacidad $(1+\alpha)$ veces su carga inicial. Al fallar un nodo, su carga se redistribuye; si la carga de otro nodo supera su capacidad, también falla. *En palabras simples:* es el modelo de apagones en cascada de la red eléctrica aplicado a redes de datos.
+
+**Cascada de fallos:** propagación en dominó de fallos. Un fallo inicial sobrecarga a otros nodos que fallan, sobrecargando a otros más, etc. La tolerancia $\alpha$ controla qué tan resistente es la red.
+
+**Tolerancia $\alpha$:** exceso de capacidad sobre la carga nominal. $\alpha = 0$: sin margen (cualquier sobrecarga provoca fallo). $\alpha = 1$: capacidad doble (aguanta hasta duplicar la carga nominal). En UCuenca, con $\alpha \geq 1.5$ la cascada desde `DATCC-2A-C3` se limita a 5 nodos.
+
+**Modelo SIR:** modelo epidemiológico con tres estados: Susceptible (sano), Infectado (comprometido), Recuperado (parcheado). Cada infectado contagia a sus vecinos con tasa $\beta$ y se recupera con tasa $\gamma$. *En redes de datos:* modela la propagación de malware, misconfiguraciones o vulnerabilidades.
+
+**Tasa de infección $\beta$:** probabilidad de que un nodo infectado contagie a un vecino susceptible en un paso de tiempo.
+
+**Tasa de recuperación $\gamma$:** probabilidad de que un nodo infectado se recupere (parchee) en un paso de tiempo.
+
+**Umbral crítico $\tau_c = \langle k \rangle / \langle k^2 \rangle$:** si $\beta > \tau_c$, la infección se propaga a una fracción finita de la red (epidemia). Si $\beta < \tau_c$, la infección se extingue localmente. En UCuenca: $\tau_c = 0.186$.
+
+**Inmunización por vecino (*acquaintance immunization*):** estrategia práctica donde se elige un nodo al azar y se vacuna a uno de sus vecinos al azar. Tiende a encontrar hubs (porque los hubs tienen más probabilidad de ser vecino de alguien) sin necesitar conocer la topología completa. *Como vacunar a los amigos de personas seleccionadas al azar* en lugar de buscar directamente a las personas más influyentes.
+
+---
+
+### Modelos nulos
+
+**Erdős-Rényi G(n,m):** grafo aleatorio con $n$ nodos y $m$ aristas elegidas uniformemente al azar. Es el modelo de "azar puro" — cualquier subgrafo de $m$ aristas es igualmente probable. La distribución de grado es binomial / Poisson.
+
+**Modelo de Configuración (CM):** grafo aleatorio que preserva exactamente la secuencia de grados de la red real, pero conecta las "medias aristas" de forma aleatoria. Permite separar qué propiedades son consecuencia de los grados y cuáles de la topología específica.
+
+**Modelo Barabási-Albert (BA):** genera redes mediante crecimiento + enlace preferencial. En cada paso añade un nodo con $m$ aristas que se conectan a nodos existentes con probabilidad proporcional a su grado. Produce distribución de ley de potencia $P(k) \sim k^{-3}$. *En palabras simples:* modela redes que crecen orgánicamente donde "el que tiene más conexiones, recibe más conexiones nuevas".
+
+---
+
+## Fase 5 — Propuesta de Rediseño
+
+> *Peso: 8 puntos | Contenido 5.1 del sílabo*
+
+*(Pendiente — se completará con base en los resultados de las Fases 1–4)*
+
+---
+
+*Scripts: `src/problema1.py` – `src/problema9.py` · Última actualización: Fases 1–4 completas.*

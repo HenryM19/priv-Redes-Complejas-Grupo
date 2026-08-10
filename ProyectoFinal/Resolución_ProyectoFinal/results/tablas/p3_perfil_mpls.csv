@@ -1,0 +1,8 @@
+distancia,n_nodos,campus_counts
+0,1,{'Nube MPLS': 1}
+1,8,"{'Campus Central': 3, 'Campus Balzay': 2, 'Campus Hospitalidad': 1, 'Campus Paraiso': 1, 'Campus Yanuncay': 1}"
+2,13,"{'Campus Central': 4, 'Campus Hospitalidad': 4, 'Campus Paraiso': 2, 'Campus Balzay': 2, 'Campus Yanuncay': 1}"
+3,38,"{'Campus Central': 14, 'Campus Yanuncay': 11, 'Campus Balzay': 6, 'Campus Paraiso': 6, 'Sede Centro Historico': 1}"
+4,97,"{'Campus Central': 43, 'Campus Paraiso': 28, 'Campus Balzay': 23, 'Sede Museo': 2, 'Sede Centro Historico': 1}"
+5,18,"{'Campus Central': 10, 'Campus Paraiso': 7, 'Campus Balzay': 1}"
+6,2,"{'Campus Central': 1, 'Campus Balzay': 1}"

@@ -1,0 +1,9 @@
+distancia,n_nodos,capas,capa_dominante
+0,1,{'core': 1},core
+1,17,"{'agregacion': 13, 'core': 1, 'interconexion': 1, 'wan': 1, 'acceso': 1}",agregacion
+2,50,"{'acceso': 44, 'wan': 5, 'interconexion': 1}",acceso
+3,19,"{'acceso': 10, 'wan': 5, 'agregacion': 2, 'core': 2}",acceso
+4,13,"{'acceso': 7, 'agregacion': 5, 'core': 1}",acceso
+5,40,"{'acceso': 33, 'agregacion': 7}",acceso
+6,29,{'acceso': 29},acceso
+7,8,{'acceso': 8},acceso
