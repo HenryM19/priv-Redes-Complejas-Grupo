@@ -1491,40 +1491,89 @@ En términos prácticos: si la red solo necesita cursar 10 000 Mbps hacia Intern
 
 ## P7 — p-Mediana y p-Centro *(2 puntos)*
 
-### Ítem 1 · Matriz de distancias mínimas
+### Ítem 1 · Formulación matemática de ambos modelos
 
-Se calcula la matriz $D \in \mathbb{R}^{177 \times 177}$ con Dijkstra (pesos = saltos) desde cada nodo. La complejidad es $O(n \cdot (n+m)\log n)$.
+La institución quiere instalar $p$ colectores de telemetría en nodos de la red $G=(V,E)$ de modo que ningún equipo quede demasiado lejos de uno. La matriz de distancias mínimas $D \in \mathbb{R}^{n \times n}$ se precalcula con Dijkstra (peso = saltos) desde cada nodo. Complejidad: $O(n \cdot (n+m)\log n)$.
 
-### Ítem 2 · p-Mediana
+Se definen las **variables de decisión** comunes a ambos modelos:
 
-Dado un conjunto de $p$ servidores $F \subseteq V$, la **p-mediana** minimiza la suma de distancias de cada nodo a su servidor más cercano:
+$$y_j \in \{0,1\} \quad \forall j \in V \qquad \text{(1 si se instala un colector en el nodo } j\text{)}$$
+$$x_{ij} \in \{0,1\} \quad \forall i,j \in V \qquad \text{(1 si el nodo } i \text{ es atendido por el colector en } j\text{)}$$
 
-$$\min_{F \subseteq V,|F|=p} \sum_{v \in V} \min_{f \in F} d(v, f)$$
+#### Modelo 1 — p-Mediana (minimizar distancia media)
 
-> *Lectura:* se quiere colocar $p$ servidores en los mejores $p$ nodos, de forma que la **latencia promedio** desde cualquier equipo al servidor más cercano sea mínima. Es el criterio correcto cuando el objetivo es optimizar la experiencia del usuario promedio.
->
-> *En palabras simples:* la p-mediana responde "¿dónde pongo mis $p$ servidores DNS para que el conjunto de usuarios espere lo menos posible en total?". Es como ubicar $p$ pizzerías en una ciudad para que los clientes, en promedio, caminen la menor distancia.
+El objetivo es minimizar la suma total de distancias de cada nodo a su colector más cercano:
 
-**Heurística greedy:** en cada paso añade el nodo que más reduce la función objetivo. Complejidad $O(p \cdot n^2)$.
+$$\min \sum_{i \in V} \sum_{j \in V} d_{ij} \cdot x_{ij}$$
 
-#### Resultados
+sujeto a:
 
-| $p$ | Medianas | Objetivo (saltos·nodo) |
-|-----|----------|------------------------|
+$$\sum_{j \in V} x_{ij} = 1 \qquad \forall i \in V \tag{cada nodo tiene exactamente un colector asignado}$$
+
+$$x_{ij} \leq y_j \qquad \forall i,j \in V \tag{solo se puede asignar a nodos con colector instalado}$$
+
+$$\sum_{j \in V} y_j = p \tag{exactamente $p$ colectores}$$
+
+$$x_{ij}, y_j \in \{0,1\} \tag{variables binarias}$$
+
+> *En palabras simples:* busca los $p$ nodos donde instalar colectores de modo que la **suma total de saltos** de todos los equipos a su colector más cercano sea mínima. Optimiza el promedio — acepta que algún equipo quede lejos si la mayoría queda cerca.
+
+#### Modelo 2 — p-Centro (minimizar distancia máxima)
+
+Se introduce una variable auxiliar $R$ que representa el radio máximo (peor caso):
+
+$$\min\ R$$
+
+sujeto a:
+
+$$\sum_{j \in V} d_{ij} \cdot x_{ij} \leq R \qquad \forall i \in V \tag{ningún nodo supera el radio $R$}$$
+
+$$\sum_{j \in V} x_{ij} = 1 \qquad \forall i \in V \tag{cada nodo tiene exactamente un colector asignado}$$
+
+$$x_{ij} \leq y_j \qquad \forall i,j \in V \tag{solo se puede asignar a nodos con colector instalado}$$
+
+$$\sum_{j \in V} y_j = p \tag{exactamente $p$ colectores}$$
+
+$$x_{ij}, y_j \in \{0,1\},\ R \geq 0 \tag{variables}$$
+
+> *En palabras simples:* busca los $p$ nodos donde instalar colectores de modo que el equipo **más lejano** de todos esté lo más cerca posible. Optimiza el peor caso — garantiza que nadie quede a más de $R^*$ saltos de un colector.
+
+#### Diferencia clave entre ambos modelos
+
+| | p-Mediana | p-Centro |
+|---|---|---|
+| Función objetivo | $\min \sum d_{ij} x_{ij}$ | $\min R$ (radio máximo) |
+| Criterio | Distancia promedio | Peor caso |
+| Privilegia | Al usuario promedio | Al usuario más lejano |
+| Aplicación | Servidores DNS, caché | Seguridad, SLA estrictos |
+
+Ambos son problemas NP-difíciles en general (requieren explorar $\binom{n}{p}$ subconjuntos). Para $n=177$ y $p \leq 5$ se resuelven con **heurística voraz** en tiempo $O(p \cdot n^2)$.
+
+### Ítem 2 · Resultados de la heurística voraz para p ∈ {1, 2, 3, 5}
+
+En este ítem se evalúa en qué nodos **ya existentes** de la red UCuenca conviene instalar el software de telemetría (colector NetFlow/SNMP), de forma que el conjunto de colectores cubra lo mejor posible los 177 equipos. Se analiza para $p \in \{1, 2, 3, 5\}$ colectores: con $p=1$ se busca el único nodo que mejor cubre toda la red, con $p=2$ se busca la mejor pareja de nodos, y así hasta $p=5$. En cada caso se evalúa qué combinación de nodos minimiza el objetivo según el modelo — suma total de saltos para la p-Mediana, o distancia máxima para el p-Centro. Como explorar todas las combinaciones posibles ($\binom{177}{5} \approx 34$ millones para $p=5$) sería inviable, se usa una **heurística voraz**: se fija un colector a la vez eligiendo siempre el nodo que más mejora el objetivo, hasta completar los $p$ colectores.
+
+#### p-Mediana
+
+**Heurística:** en cada paso añade el nodo $j^* = \arg\min_{j \notin F} \sum_i \min(d_{ij}, \text{dist actual}_i)$ que más reduce la suma total.
+
+| $p$ | Colectores instalados | Objetivo (saltos·nodo) |
+|-----|----------------------|------------------------|
 | 1 | INTERNET-MPLS | 638 |
 | 2 | INTERNET-MPLS, DATCC-2A-C2 | 492 |
 | 3 | INTERNET-MPLS, DATCC-2A-C2, CPAR-C10 | 408 |
 | 5 | + DT-0A-C12, AGRPRI-1A-D10 | 318 |
 
-### Ítem 3 · p-Centro
+#### p-Centro
 
-La **p-centro** minimiza la distancia máxima de cualquier nodo a su servidor más cercano (criterio minimax):
+**Heurística:** en cada paso añade el nodo que minimiza $\max_i \min_{j \in F} d_{ij}$ (radio máximo resultante).
 
-$$\min_{F \subseteq V,|F|=p} \max_{v \in V} \min_{f \in F} d(v, f)$$
-
-> *Lectura:* garantiza que **ningún equipo** quede demasiado lejos de un servidor. Es el criterio correcto cuando la calidad de servicio mínima importa más que el promedio — por ejemplo, para que ningún switch de acceso tenga más de $R$ saltos a su gateway de DNS.
->
-> *En palabras simples:* la p-centro responde "¿dónde pongo $p$ servidores para que el peor caso (el equipo más alejado) esté lo más cerca posible?". Es como ubicar $p$ bomberos para que ningún punto de la ciudad tarde más de $X$ minutos en ser atendido.
+| $p$ | Centros | Radio máximo |
+|-----|---------|-------------|
+| 1 | INTERNET-MPLS | 6 saltos |
+| 2 | INTERNET-MPLS, AETUC-0A-A76 | 6 saltos |
+| 3 | + AETUC-0A-A97 | 6 saltos |
+| 5 | + AETUCCF-2A-A79, AGRPRI-1A-A19 | 6 saltos |
 
 #### Resultados
 
@@ -1537,26 +1586,77 @@ $$\min_{F \subseteq V,|F|=p} \max_{v \in V} \min_{f \in F} d(v, f)$$
 
 ![p-Mediana vs p-Centro](results/imagenes/p7_mediana_vs_centro.png)
 
-### Ítem 4 · Comparación con centralidades
+### Ítem 3 · Comparación con centralidades de P1
 
-| Nodo | Closeness rank | Betweenness rank | Es 1-Mediana | Es 1-Centro |
-|------|---------------|-----------------|--------------|-------------|
-| INTERNET-MPLS | **1** | 4 | ✓ | ✓ |
-| DATCC-2A-C3 | 2 | 1 | — | — |
-| PE2-CENTRAL | 3 | 5 | — | — |
+Los resultados a continuación provienen de ejecutar `problema7.py` sobre la red real (177 nodos, 209 aristas). Los rankings de betweenness y closeness son los calculados en `problema1.py`.
 
-La **1-mediana y el 1-centro coinciden** en `INTERNET-MPLS`, el nodo con mayor closeness de la red. Esto establece una correspondencia directa entre la centralidad de closeness (que minimiza la distancia promedio) y el problema de 1-mediana.
+#### Nodos seleccionados vs. top-5 de P1
 
-### Ítem 5 · p-Mediana vs p-Centro: cuándo usar cada uno
+| Ranking P1 | Nodo | Betweenness | Closeness | En p-Mediana (p=5) | En p-Centro (p=5) |
+|-----------|------|------------|----------|---------------------|-------------------|
+| btw #1 | DATCC-2A-C3 | 0.4468 | 0.2683 | — | — |
+| btw #2 | CPAR-C10 | 0.4043 | 0.2146 | ✓ (rank_clo=23) | — |
+| btw #3 | ROUTER-CAMPUS-HUAYNA-CAPAC | 0.3663 | 0.2421 | — | — |
+| btw #4 / clo #1 | **INTERNET-MPLS** | 0.3657 | **0.2759** | ✓ | ✓ |
+| clo #2 | DATCC-2A-C3 | 0.4468 | 0.2683 | — | — |
+| clo #3 | PE2-CENTRAL | 0.2881 | 0.2667 | — | — |
 
-| Criterio | p-Mediana | p-Centro |
-|----------|-----------|---------|
-| **Objetivo** | Minimizar suma total de distancias | Minimizar distancia máxima |
-| **Mide** | Latencia promedio de la red | Cobertura equitativa (peor caso) |
-| **Cuándo usar** | DNS, NTP, servidores de logs | Gateways de emergencia, servers críticos |
+#### Ubicaciones completas obtenidas por el algoritmo
+
+| Nodo | rank_btw | rank_clo | En p-Mediana | En p-Centro |
+|------|---------|---------|-------------|------------|
+| INTERNET-MPLS | 4 | **1** | ✓ | ✓ |
+| DATCC-2A-C2 | 8 | 7 | ✓ | — |
+| CPAR-C10 | **2** | 23 | ✓ | — |
+| DT-0A-C12 | 18 | 31 | ✓ | — |
+| AGRPRI-1A-D10 | 12 | 40 | ✓ | — |
+| AETUC-0A-A76 | 49 | 80 | — | ✓ |
+| AETUC-0A-A97 | 73 | 89 | — | ✓ |
+| AETUCCF-2A-A79 | 72 | 166 | — | ✓ |
+| AGRPRI-1A-A19 | 70 | 124 | — | ✓ |
+
+#### ¿Coinciden con los nodos más centrales?
+
+**Parcialmente, y de forma asimétrica según el modelo:**
+
+- **p-Mediana coincide con closeness, no con betweenness.** `INTERNET-MPLS` (clo #1) aparece en las dos soluciones. `DATCC-2A-C2` (clo #7) y `CPAR-C10` (btw #2) también son elegidos. Pero `DATCC-2A-C3` (btw #1, clo #2) —el más central de toda la red— **no aparece en ninguna solución**, porque está físicamente cerca de `DATCC-2A-C2` y añadir ambos sería redundante: el algoritmo greedy ya cubrió esa zona con `DATCC-2A-C2`.
+
+- **p-Centro no coincide con los nodos centrales.** Los cuatro nodos adicionales (AETUC-0A-A76, AETUC-0A-A97, AETUCCF-2A-A79, AGRPRI-1A-A19) tienen rankings de betweenness entre 49 y 73, y closeness entre 80 y 166 — son nodos periféricos. El radio de 6 saltos no mejora al añadir colectores centrales: el equipo más lejano siempre está a 6 saltos porque está en el extremo de la jerarquía de acceso. Para reducirlo, el colector debe instalarse **cerca de esos equipos periféricos**, no en el centro de la red.
+
+#### ¿Por qué «el nodo más central» no es siempre la mejor ubicación?
+
+Hay tres razones concretas observadas en esta red:
+
+1. **Redundancia geográfica.** `DATCC-2A-C3` (btw #1) y `DATCC-2A-C2` (btw #8) están a 1 salto entre sí. Instalar colectores en ambos cubre exactamente la misma zona. La p-mediana elige solo uno y usa el segundo slot para cubrir una zona diferente (Campus Paraíso con `CPAR-C10`).
+
+2. **Betweenness mide tránsito, no cobertura.** `ROUTER-CAMPUS-HUAYNA-CAPAC` (btw #3) tiene alta intermediación porque todos los caminos entre Campus Central y Campus Huayna Capac pasan por él. Pero si se instala un colector ahí, solo cubre bien los equipos de ese campus; el resto de la red sigue lejos.
+
+3. **El peor caso no está en el centro.** Para el p-centro, lo que importa es el equipo más alejado. Ese siempre es un switch de acceso en el extremo de una rama larga. Ningún nodo de core tiene visibilidad directa sobre él: para reducir su distancia al colector más cercano hay que bajar en la jerarquía, no subir.
+
+### Ítem 4 · Restricciones prácticas omitidas por el modelo
+
+Los modelos de p-mediana y p-centro son matemáticamente elegantes pero simplifican la realidad: solo consideran la distancia en saltos entre nodos e ignoran completamente las condiciones físicas, económicas y operativas de la red real. En este ítem se identifican las restricciones prácticas más importantes que el modelo no considera — como el espacio físico disponible en los armarios de red, la disponibilidad de energía eléctrica, la seguridad del lugar, el costo de licencias de software y la capacidad de procesamiento de cada colector — y se muestra cómo cada una de ellas podría incorporarse formalmente al modelo matemático como una restricción adicional:
+
+| Restricción | Por qué importa | Cómo incorporarla al modelo |
+|-------------|-----------------|----------------------------|
+| **Espacio en rack** | Los switches de acceso no tienen slot físico para tarjetas adicionales | Filtrar el conjunto candidato: $y_j = 0$ si $j \in V_{\text{sin\_rack}}$ |
+| **Energía** | No todos los armarios tienen UPS ni potencia suficiente | Añadir restricción $\sum_j \text{potencia}_j \cdot y_j \leq P_{\max}$ |
+| **Seguridad física** | Un colector en sala pública puede ser comprometido | Restringir candidatos a nodos en sala de servidores controlada |
+| **Costo de licencias** | NetFlow/SNMP tienen costo por dispositivo | Añadir término de costo fijo: $\min \sum d_{ij} x_{ij} + \sum c_j y_j$ |
+| **Capacidad de procesamiento** | Un colector no puede procesar el tráfico de más de $K$ nodos | $\sum_i x_{ij} \leq K \cdot y_j \quad \forall j$ |
+| **Alta disponibilidad** | Si cae el colector, su zona queda sin monitoreo | Exigir que cada nodo tenga al menos 2 colectores asignados: $\sum_j x_{ij} \geq 2$ |
+
+Con estas restricciones, el modelo pasa de ser una p-mediana pura a un **problema de localización de instalaciones con capacidad** (Capacitated Facility Location Problem, CFLP), que sigue siendo NP-difícil pero es resoluble con solvers de programación entera mixta (PuLP/scipy en Python, JuMP en Julia) para instancias del tamaño de esta red ($n=177$).
+
+#### p-Mediana vs p-Centro: cuándo usar cada uno
+
+| | p-Mediana | p-Centro |
+|---|---|---|
+| **Objetivo** | Minimizar distancia media | Minimizar distancia máxima |
+| **Cuándo usar** | DNS, NTP, servidores de logs | Gateways de emergencia, SLA estrictos |
 | **Hallazgo UCuenca** | `INTERNET-MPLS` como 1-mediana óptima | Radio irreducible de 6 saltos con $p \leq 5$ |
 
-El radio de 6 saltos **es constante** para $p \in \{1,2,3,5\}$: el árbol jerárquico impone un diámetro mínimo que no se puede reducir añadiendo más servidores en los mismos nodos existentes — sería necesario agregar infraestructura nueva (por ejemplo un servidor directamente en los switches de agregación de Paraíso).
+El radio de 6 saltos es **constante** para $p \in \{1,2,3,5\}$: el árbol jerárquico impone un diámetro mínimo que no se puede reducir añadiendo colectores en los nodos existentes — reduciría el radio solo instalar colectores directamente en los switches de agregación de los campus periféricos.
 
 ---
 
@@ -1597,6 +1697,41 @@ Porque el árbol jerárquico impone rutas mínimas de 6 saltos entre los nodos d
 ## Fase 4 — Percolación y Robustez
 
 > *Peso: 6 puntos | Contenidos 4.1–4.4 del sílabo*
+
+### ¿Qué es la percolación en redes?
+
+La **percolación** estudia qué le pasa a una red cuando se le van quitando elementos — nodos o aristas — de forma gradual. La pregunta central es: ¿a partir de qué fracción de fallos la red deja de funcionar como un todo conectado?
+
+Imagina que vas apagando switches de la red UCuenca uno por uno. Al principio la red sigue funcionando: los equipos restantes todavía pueden comunicarse entre sí por rutas alternativas. Pero llegado cierto punto crítico, la red se "rompe" en pedazos aislados y la mayoría de equipos pierde conectividad con el resto. Ese punto crítico se llama **umbral de percolación** $f_c$.
+
+#### Componente gigante y umbral de percolación
+
+Se define $S(f)$ como el **tamaño relativo de la componente conexa más grande** (componente gigante) cuando se ha eliminado una fracción $f$ de nodos o aristas. Al inicio ($f=0$) toda la red es una sola componente, así que $S(0) \approx 1$. A medida que $f$ crece, $S(f)$ decrece. El umbral $f_c$ es el valor donde $S(f)$ colapsa hacia cero: la red ya no tiene una componente dominante.
+
+$$S(f) = \frac{|\text{componente gigante tras eliminar fracción } f|}{n}$$
+
+$$f_c = \min\{f : S(f) \approx 0\}$$
+
+#### Fallos aleatorios vs. ataques dirigidos
+
+No todos los fallos son iguales. Hay dos escenarios extremos:
+
+- **Fallo aleatorio:** un switch falla por error de hardware, corte de luz o mantenimiento imprevisto. El nodo eliminado es elegido al azar, sin importar su importancia en la red. Las redes con distribución de grado heterogénea (como las redes libres de escala) son muy resistentes a esto: la probabilidad de dañar un hub central es muy baja.
+
+- **Ataque dirigido:** un actor malicioso o un fallo en cascada elimina primero los nodos más importantes — los de mayor grado o mayor betweenness. Este escenario es mucho más destructivo: eliminar unos pocos hubs desconecta inmediatamente grandes porciones de la red.
+
+La diferencia entre ambas curvas $S(f)$ revela qué tan vulnerable es la red ante una amenaza inteligente vs. un fallo fortuito.
+
+#### Robustez
+
+La **robustez** es la capacidad de la red de mantener su funcionalidad (conectividad, eficiencia de rutas) ante la eliminación de elementos. Se mide de dos formas complementarias:
+
+- **Tamaño de la componente gigante $S(f)$:** mide si los nodos siguen conectados entre sí.
+- **Eficiencia global $E(f)$:** mide qué tan rápido pueden comunicarse los nodos que sí siguen conectados:
+
+$$E(f) = \frac{1}{n(n-1)} \sum_{i \neq j} \frac{1}{d_{ij}}$$
+
+donde $d_{ij}$ es la distancia más corta entre $i$ y $j$ (se define $1/d_{ij} = 0$ si no hay camino). La eficiencia puede degradarse significativamente **antes** de que la componente gigante se rompa, porque los caminos se vuelven más largos aunque la red siga conectada.
 
 ---
 
