@@ -1,0 +1,9 @@
+Flujo de costo mínimo
+  Campus fuente  : Campus Central, Campus Balzay
+  Demanda total  : 10,000 Mbps
+  Costo total    : 38,000 saltos·Mbps
+  Saltos medio   : 3.80
+
+Flujo máximo puro
+  Campus Central : 43,000 Mbps  (saltos medio 6.30)
+  Campus Balzay  : 23,000 Mbps  (saltos medio 5.61)

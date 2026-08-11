@@ -60,8 +60,90 @@ def _crear_dirs():
 # ============================================================
 
 # ------------------------------------------------------------
+# Ítem 2 — Ford-Fulkerson con DFS (versión clásica)
+# ------------------------------------------------------------
+# FUENTE: adaptado de codigo_referencia/ford-fulkerson/ford_fulkerson.jl
+# (Dr. Fabián Astudillo-Salinas, Módulo 1217 — Redes Complejas).
+# La implementación original en Julia usa buscar_camino_dfs() con una
+# pila explícita; aquí se porta a Python manteniendo la misma lógica.
+
+def ford_fulkerson_dfs(grafo_cap: dict, fuente: str, sumidero: str) -> dict:
+    """
+    Ford-Fulkerson con búsqueda DFS de caminos aumentantes.
+    Complejidad: O(E · f*) donde f* es el flujo máximo (puede ser grande
+    si las capacidades son altas). No garantiza caminos mínimos.
+
+    Argumentos:
+        grafo_cap (dict): {u: {v: capacidad}} — grafo de capacidades.
+        fuente    (str) : nodo fuente.
+        sumidero  (str) : nodo sumidero.
+
+    Salida:
+        dict:
+            'flujo_maximo'  — valor del flujo máximo
+            'flujo_red'     — {u: {v: flujo}} flujo en cada arco
+            'n_iteraciones' — número de caminos aumentantes encontrados
+            'long_caminos'  — lista de longitudes de cada camino aumentante
+    """
+    flujo_red: dict = {u: {v: 0 for v in grafo_cap[u]} for u in grafo_cap}
+    for u in grafo_cap:
+        for v in grafo_cap[u]:
+            if v not in flujo_red:
+                flujo_red[v] = {}
+            if u not in flujo_red[v]:
+                flujo_red[v][u] = 0
+
+    flujo_total  = 0
+    n_iter       = 0
+    long_caminos = []
+
+    def _dfs_camino():
+        """DFS iterativo para encontrar un camino aumentante (cualquiera)."""
+        visitado = {fuente}
+        pila     = [(fuente, [fuente])]
+        while pila:
+            u, camino = pila.pop()
+            for v in grafo_cap.get(u, {}):
+                cap_res = grafo_cap[u][v] - flujo_red[u].get(v, 0)
+                if v not in visitado and cap_res > 0:
+                    visitado.add(v)
+                    nuevo = camino + [v]
+                    if v == sumidero:
+                        return nuevo
+                    pila.append((v, nuevo))
+        return None
+
+    while True:
+        camino = _dfs_camino()
+        if camino is None:
+            break
+        cuello = min(
+            grafo_cap[camino[i]][camino[i+1]] - flujo_red[camino[i]].get(camino[i+1], 0)
+            for i in range(len(camino)-1)
+        )
+        for i in range(len(camino)-1):
+            u, v = camino[i], camino[i+1]
+            flujo_red[u][v] = flujo_red[u].get(v, 0) + cuello
+            flujo_red[v][u] = flujo_red[v].get(u, 0) - cuello
+        flujo_total  += cuello
+        n_iter       += 1
+        long_caminos.append(len(camino) - 1)
+
+    return {
+        "flujo_maximo"  : flujo_total,
+        "flujo_red"     : flujo_red,
+        "n_iteraciones" : n_iter,
+        "long_caminos"  : long_caminos,
+    }
+
+
+# ------------------------------------------------------------
 # Ítem 2 — Edmonds-Karp (Ford-Fulkerson con BFS)
 # ------------------------------------------------------------
+# FUENTE: adaptado de codigo_referencia/edmonds-karp/edmonds_karp.jl
+# (Dr. Fabián Astudillo-Salinas, Módulo 1217 — Redes Complejas).
+# La implementación original registra niveles BFS y árbol de exploración
+# para animación; aquí se porta a Python conservando la lógica central.
 
 def edmonds_karp(grafo_cap: dict, fuente: str, sumidero: str) -> dict:
     """
@@ -319,14 +401,49 @@ if __name__ == "__main__":
     nodos_df   = _leer_csv("red_ucuenca_nodes.csv")
     aristas_df = _leer_csv("red_ucuenca_edges.csv")
 
-    # Ítem 3: flujo por campus
-    print("[Ítem 3] Flujo máximo por campus")
-    df_flujo = flujo_por_campus(G, nodos_df, aristas_df)
+    # Ítem 2 + 3: comparación Ford-Fulkerson (DFS) vs Edmonds-Karp (BFS)
+    print("[Ítem 2] Comparación Ford-Fulkerson (DFS) vs Edmonds-Karp (BFS)")
+    print(f"  {'Campus':35s}  {'FF-DFS iter':>11}  {'EK-BFS iter':>11}  "
+          f"{'Flujo (Mbps)':>12}  {'Long.media DFS':>14}  {'Long.media BFS':>14}")
+    print("  " + "-"*97)
+
+    campus_list = sorted(
+        nodos_df["campus"].dropna().unique(),
+        key=lambda c: len(nodos_df[nodos_df["campus"]==c]), reverse=True)
+
+    filas_comp = []
+    for campus in campus_list:
+        gc, fuente, sumidero = construir_grafo_flujo(G, nodos_df, aristas_df, campus)
+        if gc is None:
+            continue
+        res_ff  = ford_fulkerson_dfs(gc, fuente, sumidero)
+        res_ek  = edmonds_karp(gc, fuente, sumidero)
+        lm_ff   = round(sum(res_ff["long_caminos"]) / max(len(res_ff["long_caminos"]), 1), 2)
+        lm_ek   = round(sum(res_ek["long_caminos"]) / max(len(res_ek["long_caminos"]), 1), 2)
+        n_acc   = len(nodos_df[(nodos_df["campus"]==campus) & (nodos_df["capa"]=="acceso")])
+        print(f"  {campus:35s}  {res_ff['n_iteraciones']:>11d}  {res_ek['n_iteraciones']:>11d}  "
+              f"{res_ek['flujo_maximo']:>12.0f}  {lm_ff:>14.2f}  {lm_ek:>14.2f}")
+        filas_comp.append({
+            "campus": campus, "n_acceso": n_acc,
+            "flujo_max_mbps": res_ek["flujo_maximo"],
+            "iter_ff_dfs": res_ff["n_iteraciones"], "long_media_ff": lm_ff,
+            "iter_ek_bfs": res_ek["n_iteraciones"], "long_media_ek": lm_ek,
+            "sumidero": sumidero,
+        })
+
+    df_comp = pd.DataFrame(filas_comp)
+    df_comp.to_csv(os.path.join(DIR_TAB, "p6_comparacion_ff_ek.csv"), index=False)
+    print(f"\n  [OK] {os.path.join(DIR_TAB, 'p6_comparacion_ff_ek.csv')}")
+
+    # Ítem 3: flujo por campus (resumen)
+    print("\n[Ítem 3] Flujo máximo por campus")
+    df_flujo = df_comp[["campus","n_acceso","flujo_max_mbps","iter_ek_bfs","long_media_ek","sumidero"]].copy()
+    df_flujo.columns = ["campus","n_acceso","flujo_max_mbps","n_iter","long_media_camino","sumidero"]
     df_flujo.to_csv(os.path.join(DIR_TAB, "p6_flujo_por_campus.csv"), index=False)
-    print(f"\n  [OK] {os.path.join(DIR_TAB, 'p6_flujo_por_campus.csv')}")
+    print(f"  [OK] {os.path.join(DIR_TAB, 'p6_flujo_por_campus.csv')}")
     print(df_flujo.to_string(index=False))
 
-    # Ítem 3 extra: corte mínimo del campus más grande
+    # Corte mínimo del campus más grande
     campus_principal = "Campus Central"
     gc, fuente, sumidero = construir_grafo_flujo(
         G, nodos_df, aristas_df, campus_principal)
@@ -350,36 +467,103 @@ if __name__ == "__main__":
 
     graficar_flujo(df_flujo)
 
-    # Ítem 5: flujo de costo mínimo (formulación)
-    print("\n[Ítem 5] Flujo de costo mínimo — formulación")
-    print("  Costo por unidad de flujo proporcional al número de saltos:")
-    print("  cost(u,v) = 1 salto. Minimizar Σ cost(u,v)·flujo(u,v)")
-    print("  sujeto a: flujo(u,v) ≤ c(u,v), conservación en nodos intermedios.")
-    # NetworkX tiene min_cost_flow
+    # Ítem 5: flujo de costo mínimo — dos campus, comparación con flujo máximo puro
+    print("\n[Ítem 5] Flujo de costo mínimo — dos campus hacia Internet")
+    print("  Campus fuente: Campus Central + Campus Balzay")
+    print("  Demanda fija : 5 000 Mbps por campus (total 10 000 Mbps)")
+    print("  Costo        : weight = 1 por salto (rutas cortas son más baratas)\n")
+
     try:
-        # Construir digrafo con costos para Campus Central
-        DG = nx.DiGraph()
         cap_dict = capacidad_estimada(G, nodos_df, aristas_df)
+        DEMANDA_POR_CAMPUS = 5_000   # Mbps
+        CAMPUS_FUENTE = ["Campus Central", "Campus Balzay"]
+        SUMIDERO = "INTERNET-MPLS"
+
+        # ── Construir digrafo con capacidades y costo=1 por salto ──
+        DG = nx.DiGraph()
         for u, v in G.edges():
-            c = int(cap_dict.get(frozenset([u,v]), 100))
+            c = int(cap_dict.get(frozenset([u, v]), 100))
             DG.add_edge(u, v, capacity=c, weight=1)
             DG.add_edge(v, u, capacity=c, weight=1)
 
-        # Demanda: Campus Central acceso → INTERNET-MPLS
-        acceso_cc = nodos_df[
-            (nodos_df["campus"]=="Campus Central") & (nodos_df["capa"]=="acceso")
-        ]["id"].tolist()[:5]  # primeros 5 para demo
+        # Super-nodo fuente por campus
+        demanda_total = 0
+        for campus in CAMPUS_FUENTE:
+            super_s = f"SUPER_{campus.upper().replace(' ','_')}"
+            acceso = nodos_df[
+                (nodos_df["campus"] == campus) & (nodos_df["capa"] == "acceso")
+            ]["id"].tolist()
+            # Conectar super-nodo a todos los accesos con capacidad suficiente
+            for nodo in acceso:
+                DG.add_edge(super_s, nodo, capacity=DEMANDA_POR_CAMPUS, weight=0)
+            DG.nodes[super_s]["demand"] = -DEMANDA_POR_CAMPUS
+            demanda_total += DEMANDA_POR_CAMPUS
 
-        demanda = 100  # Mbps por nodo de acceso
-        for n in acceso_cc:
-            DG.nodes[n]["demand"] = -demanda
-        if "INTERNET-MPLS" in DG.nodes():
-            DG.nodes["INTERNET-MPLS"]["demand"] = demanda * len(acceso_cc)
+        # El sumidero absorbe toda la demanda
+        DG.nodes[SUMIDERO]["demand"] = demanda_total
 
-        flujo_min_cost = nx.min_cost_flow(DG)
-        costo_total = nx.cost_of_flow(DG, flujo_min_cost)
-        print(f"  Costo total (saltos·Mbps) para demo {len(acceso_cc)} nodos: {costo_total}")
+        # ── Flujo de costo mínimo ──
+        flujo_mcf = nx.min_cost_flow(DG)
+        costo_mcf = nx.cost_of_flow(DG, flujo_mcf)
+
+        # Calcular longitud media de las rutas usadas (aproximación: costo/flujo)
+        flujo_enviado = sum(
+            flujo_mcf.get(SUMIDERO, {}).get(v, 0)
+            + flujo_mcf.get(v, {}).get(SUMIDERO, 0)
+            for v in DG.predecessors(SUMIDERO)
+        )
+        saltos_medio_mcf = costo_mcf / demanda_total if demanda_total > 0 else 0
+
+        print(f"  [Costo Mínimo]  Flujo enviado: {demanda_total:,} Mbps  "
+              f"Costo total: {costo_mcf:,} saltos·Mbps  "
+              f"Saltos medio: {saltos_medio_mcf:.2f}")
+
+        # ── Flujo máximo puro (sin restricción de demanda) ──
+        # Construir grafo de capacidades para EK (mismos dos campus)
+        gc_combinado: dict = {}
+        for u in DG.nodes():
+            gc_combinado[u] = {}
+        for u, v, data in DG.edges(data=True):
+            gc_combinado[u][v] = data["capacity"]
+
+        res_fm = edmonds_karp(gc_combinado,
+                              f"SUPER_CAMPUS_CENTRAL", SUMIDERO)
+        flujo_maximo_cc = res_fm["flujo_maximo"]
+        res_fm2 = edmonds_karp(gc_combinado,
+                               f"SUPER_CAMPUS_BALZAY", SUMIDERO)
+        flujo_maximo_bal = res_fm2["flujo_maximo"]
+
+        lm_cc  = (sum(res_fm["long_caminos"]) / len(res_fm["long_caminos"])
+                  if res_fm["long_caminos"] else 0)
+        lm_bal = (sum(res_fm2["long_caminos"]) / len(res_fm2["long_caminos"])
+                  if res_fm2["long_caminos"] else 0)
+
+        print(f"  [Flujo Máximo]  Campus Central: {flujo_maximo_cc:,} Mbps  "
+              f"Saltos medio: {lm_cc:.2f}")
+        print(f"  [Flujo Máximo]  Campus Balzay : {flujo_maximo_bal:,} Mbps  "
+              f"Saltos medio: {lm_bal:.2f}")
+
+        print(f"\n  Comparación:")
+        print(f"    Costo mínimo envía {demanda_total:,} Mbps con saltos medio {saltos_medio_mcf:.2f}")
+        print(f"    Flujo máximo podría enviar hasta {flujo_maximo_cc+flujo_maximo_bal:,} Mbps")
+        print(f"    pero lo haría con saltos medio {(lm_cc+lm_bal)/2:.2f} (rutas más largas al saturar toda la red)")
+
+        # Guardar resumen
+        resumen_item5 = (
+            f"Flujo de costo mínimo\n"
+            f"  Campus fuente  : {', '.join(CAMPUS_FUENTE)}\n"
+            f"  Demanda total  : {demanda_total:,} Mbps\n"
+            f"  Costo total    : {costo_mcf:,} saltos·Mbps\n"
+            f"  Saltos medio   : {saltos_medio_mcf:.2f}\n\n"
+            f"Flujo máximo puro\n"
+            f"  Campus Central : {flujo_maximo_cc:,} Mbps  (saltos medio {lm_cc:.2f})\n"
+            f"  Campus Balzay  : {flujo_maximo_bal:,} Mbps  (saltos medio {lm_bal:.2f})\n"
+        )
+        with open(os.path.join(DIR_TAB, "p6_costo_minimo.txt"), "w", encoding="utf-8") as f:
+            f.write(resumen_item5)
+        print(f"  [OK] {os.path.join(DIR_TAB, 'p6_costo_minimo.txt')}")
+
     except Exception as e:
-        print(f"  (Flujo de costo mínimo — infeasible con capacidades estimadas: {e})")
+        print(f"  Error en flujo de costo mínimo: {e}")
 
     print("\n=== P6 completado ===\n")

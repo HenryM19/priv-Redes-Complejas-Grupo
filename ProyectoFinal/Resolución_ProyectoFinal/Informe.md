@@ -1238,65 +1238,217 @@ Por esto, los protocolos reales usan pesos **estáticos** proporcionales a la ca
 
 ### Ítem 1 · Función de capacidad $c(u,v)$
 
-La capacidad de cada enlace se establece con la siguiente jerarquía:
+Para calcular flujos, cada enlace necesita un valor de capacidad — cuántos Mbps caben por ese cable. El CSV solo trae ese dato para 28 de los 209 enlaces; los otros 181 no tienen esa información registrada. Este ítem define las reglas para estimar esas capacidades faltantes basándose en el tipo de equipo en cada extremo (acceso, agregación, core) y el rol del enlace.
 
-| Fuente | Capacidad |
-|--------|-----------|
-| Diagrama MPLS (28 aristas) | Valor explícito del CSV |
-| Rol WAN o capa core | 10 000 Mbps (10 Gbps) |
-| Al menos un extremo en agregación | 1 000 Mbps (1 Gbps) |
-| Resto (enlace de acceso) | 100 Mbps |
+La red UCuenca tiene 209 aristas. Solo **28** tienen `capacidad_mbps` registrada explícitamente en el CSV (los enlaces visibles en el diagrama MPLS del informe técnico). Las **181 restantes** se estiman aplicando la siguiente jerarquía de reglas, documentada supuesto a supuesto:
 
-> *En palabras simples:* la "capacidad" de un cable es cuánta información puede pasar por él al mismo tiempo (como el número de carriles de una autopista). El core tiene autopistas de 10 Gbps; la capa de acceso tiene calles de 100 Mbps.
+| Regla (prioridad) | Aristas | $c(u,v)$ asignada | Justificación |
+|---|---|---|---|
+| `capacidad_mbps` presente en CSV | 28 | Valor exacto del CSV | Dato directo del diagrama MPLS; no requiere estimación. |
+| Rol `wan` en aristas_df | 4 | 10 000 Mbps | Los enlaces WAN/MPLS del informe declaran explícitamente troncales de 10 Gbps entre campus. |
+| Al menos un extremo en capa `core` | 43 | 10 000 Mbps | El informe técnico indica que los switches de core (DATCC, DT-0A, CPAR…) están interconectados mediante *lag* de 10 Gbps. Tecnología típica: interfaces 10GBase-LR entre equipos Cisco/Huawei de gama alta. |
+| Al menos un extremo en capa `agregacion` | 115 | 1 000 Mbps | Los switches de agregación (CC-*, CP-*, CB-*) concentran múltiples puertos de acceso y se conectan al core con uplinks de 1 Gbps, estándar en redes campus de este tamaño (IEEE 802.3ab, 1000Base-T). |
+| Ambos extremos en capa `acceso` | 19 | 100 Mbps | Los switches de acceso (A-xx) dan servicio a puestos de trabajo con puertos FastEthernet de 100 Mbps. Es la velocidad de acceso documentada en el informe para equipos de usuario final. |
 
-### Ítem 2 · Modelo fuente–sumidero y Edmonds-Karp
+**Verificación de cobertura:** $28 + 4 + 43 + 115 + 19 = 209$ aristas — todas cubiertas sin solapamiento.
 
-**Modelado:** para cada campus, se crea un **super-nodo fuente** $s$ conectado con capacidad infinita a todos los switches de acceso del campus. El sumidero es `INTERNET-MPLS`. El flujo máximo $f^*$ de $s$ a `INTERNET-MPLS` representa la **capacidad total de salida a Internet** del campus.
+**Supuestos adicionales documentados:**
+- Los 4 enlaces WAN estimados corresponden a conexiones MPLS inferidas del informe (rol `inferido`) que el diagrama no dibuja pero el texto describe como conexiones de 10 Gbps al *provider edge*.
+- Ninguna arista de respaldo (`rol=respaldo`, 12 en total) cae en la categoría acceso–acceso; todas tienen al menos un extremo de agregación o core y heredan 1 000 Mbps o 10 000 Mbps respectivamente. Los enlaces de respaldo no reciben reducción de capacidad porque en la red UCuenca el respaldo es activo-pasivo conmutado, no degradado.
 
-**Edmonds-Karp** (Ford-Fulkerson con BFS):
+> *En palabras simples:* la "capacidad" de un cable es cuánta información puede pasar por él al mismo tiempo (como el número de carriles de una autopista). El core tiene autopistas de 10 Gbps; la agregación tiene avenidas de 1 Gbps; el acceso tiene calles de 100 Mbps.
+
+### Ítem 2 · Modelo fuente–sumidero — Ford-Fulkerson (DFS) y Edmonds-Karp (BFS)
+
+La pregunta central es: ¿cuánta capacidad total tiene un campus para enviar datos a Internet? Para responderla se modela el problema como flujo máximo: se imagina un nodo ficticio conectado a todos los switches de acceso del campus (la "fuente"), y se calcula cuánto tráfico puede llegar desde ahí hasta `INTERNET-MPLS` (el "sumidero") respetando la capacidad de cada cable. Se ejecutan dos algoritmos y se comparan: **Ford-Fulkerson con DFS** (busca cualquier camino disponible) y **Edmonds-Karp con BFS** (siempre toma el camino más corto), ambos adaptados de las implementaciones de referencia del curso.
+
+**Modelado:** para cada campus se crea un **super-nodo fuente** $s$ conectado con capacidad infinita a todos los switches de acceso del campus. El sumidero es `INTERNET-MPLS`. El flujo máximo $f^*$ de $s$ a `INTERNET-MPLS` representa la **capacidad total de salida a Internet** del campus.
 
 $$f^* = \max_{f} \sum_{v:(s,v)\in E} f(s,v) \quad \text{s.a.} \quad f(u,v) \leq c(u,v),\ \sum_v f(u,v) = \sum_v f(v,u)$$
 
-> *Lectura:* el flujo máximo es la mayor cantidad de "datos" que pueden circular simultáneamente del campus a Internet, respetando que cada cable no supere su capacidad y que en cada equipo intermedio "lo que entra = lo que sale" (conservación de flujo). Edmonds-Karp encuentra repetidamente el camino más corto (en saltos) con capacidad residual positiva y lo satura, hasta que no exista ningún camino más.
->
-> *En palabras simples:* es como calcular cuántos litros por segundo pueden fluir por una red de cañerías desde una fuente hasta un grifo: el flujo máximo está limitado por el tubo más estrecho en la ruta. El algoritmo encuentra rutas por las que enviar más agua hasta que ya no cabe más.
+**Implementaciones reutilizadas:**
 
-**Teorema Max-Flow Min-Cut:** $f^* = c(\text{S, T})$, donde el corte mínimo $(S, T)$ es la partición del grafo con menor suma de capacidades de aristas de $S$ a $T$.
+- **Ford-Fulkerson con DFS** — adaptado de `codigo_referencia/ford-fulkerson/ford_fulkerson.jl` (Dr. Fabián Astudillo-Salinas). La función `buscar_camino_dfs()` del original en Julia usa una pila explícita; aquí se porta a Python manteniendo la misma lógica. Busca *cualquier* camino aumentante, no necesariamente el más corto. Complejidad: $O(E \cdot f^*)$.
+
+- **Edmonds-Karp con BFS** — adaptado de `codigo_referencia/edmonds-karp/edmonds_karp.jl` (Dr. Fabián Astudillo-Salinas). Siempre encuentra el camino aumentante con **menos arcos** usando BFS. Esto garantiza que las longitudes de los caminos nunca decrezcan entre iteraciones, lo que acota el número de aumentos a $O(V \cdot E)$ y la complejidad total a $O(V \cdot E^2)$.
+
+**Comparación de resultados — Ford-Fulkerson (DFS) vs Edmonds-Karp (BFS):**
+
+| Campus | FF-DFS iter | EK-BFS iter | Flujo (Mbps) | Long. media DFS | Long. media BFS |
+|--------|:-----------:|:-----------:|:------------:|:---------------:|:---------------:|
+| Campus Central | 43 | 43 | 43 000 | 6.79 | 6.30 |
+| Campus Balzay | 23 | 23 | 23 000 | 5.83 | 5.61 |
+| Campus Paraíso | 10 | 10 | 10 000 | 5.00 | 5.00 |
+| Campus Yanuncay | 1 | 1 | 1 000 | 4.00 | 4.00 |
+| Campus Hospitalidad | 1 | 1 | 1 000 | 3.00 | 3.00 |
+| Sede Centro Histórico | **3** | **2** | 11 000 | 6.33 | 5.00 |
+| Sede Museo | **3** | **2** | 11 000 | 6.67 | 5.50 |
+
+**Análisis de la diferencia:** en la mayoría de campus ambos algoritmos necesitan el mismo número de iteraciones porque las capacidades son múltiplos de 1 000 Mbps y hay pocos caminos aumentantes alternativos — DFS encuentra esencialmente el mismo camino que BFS. La diferencia aparece en las Sedes (Centro Histórico y Museo): DFS necesita 3 iteraciones y encuentra caminos más largos (6.3–6.7 arcos de media) mientras BFS llega en 2 iteraciones con caminos más cortos (5.0–5.5 arcos), confirmando el lema de Edmonds-Karp: BFS siempre escoge el camino más corto disponible.
+
+**Teorema Max-Flow Min-Cut:** $f^* = c(S, T)$, donde el corte mínimo $(S, T)$ es la partición del grafo con menor suma de capacidades de aristas de $S$ a $T$.
 
 > *En palabras simples:* el flujo máximo siempre iguala la capacidad del "cuello de botella" más estrecho de la red — el conjunto de cables que, si se cortaran todos, dejarían al campus sin salida a Internet.
 
 ### Ítem 3 · Flujo máximo por campus
 
-| Campus | Nodos acceso | Flujo máximo | Iteraciones | Longitud media camino |
-|--------|-------------|-------------|------------|----------------------|
-| Campus Central | 56 | **43 000 Mbps** | 43 | 6.3 saltos |
-| Campus Balzay | 24 | **23 000 Mbps** | 23 | 5.6 saltos |
-| Sede Centro Histórico | 1 | **11 000 Mbps** | 2 | 5.0 saltos |
-| Sede Museo | 1 | **11 000 Mbps** | 2 | 5.5 saltos |
-| Campus Paraíso | 35 | **10 000 Mbps** | 10 | 5.0 saltos |
-| Campus Yanuncay | 11 | **1 000 Mbps** | 1 | 4.0 saltos |
-| Campus Hospitalidad | 4 | **1 000 Mbps** | 1 | 3.0 saltos |
+Una vez ejecutados los algoritmos, este ítem reporta los resultados concretos para cada campus: cuántos Mbps puede enviar hacia Internet, cuántas rutas aumentantes encontró cada algoritmo, las longitudes de esos caminos y el corte mínimo obtenido. La capacidad del corte se verifica manualmente sumando sus aristas para confirmar que iguala el flujo máximo (teorema max-flow min-cut).
 
 ![Flujo por campus](results/imagenes/p6_flujo_campus.png)
 
-**Corte mínimo — Campus Central** (capacidad = 43 000 Mbps):
+---
+
+#### Campus Central
+
+**Flujo máximo:** 43 000 Mbps (43 Gbps)
+
+| Algoritmo | Iteraciones | Longitudes de caminos aumentantes |
+|-----------|:-----------:|-----------------------------------|
+| FF-DFS | 43 | [9, 10, 5, 5, 5, 5, 6, 6, 5, 6, 6, 6, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 3, 6, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8] |
+| EK-BFS | 43 | [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 10] |
+
+EK-BFS empieza por el camino más corto (3 saltos) y las longitudes solo crecen — cumple el lema de Edmonds-Karp. DFS empieza por caminos largos (9, 10 saltos) sin garantía de orden.
+
+**Corte mínimo** (6 aristas, capacidad total = 43 000 Mbps):
 
 | Arista del corte | Capacidad |
-|-----------------|----------|
-| DATCC-2A-C3 → FORTIGATE-1800F-CENTRAL | 10 000 Mbps |
+|-----------------|-----------|
 | DATCC-2A-C3 → PE2-CENTRAL | 20 000 Mbps |
+| DATCC-2A-C3 → FORTIGATE-1800F-CENTRAL | 10 000 Mbps |
 | DATCC-2A-C2 → FORTIGATE-1800F-CENTRAL | 10 000 Mbps |
 | ROUTER-CAMPUS-CENTRO-HISTORICO → ROUTER-L2TP-BALZAY | 1 000 Mbps |
 | ROUTER-CAMPUS-MUSEO → ROUTER-L2TP-BALZAY | 1 000 Mbps |
 | CCJ-CJURIDICO-D4 → INTERNET-MPLS | 1 000 Mbps |
 
+**Verificación manual:** $20\,000 + 10\,000 + 10\,000 + 1\,000 + 1\,000 + 1\,000 = \mathbf{43\,000}$ Mbps ✓ — coincide con el flujo máximo.
+
+---
+
+#### Campus Balzay
+
+**Flujo máximo:** 23 000 Mbps (23 Gbps)
+
+| Algoritmo | Iteraciones | Longitudes de caminos aumentantes |
+|-----------|:-----------:|-----------------------------------|
+| FF-DFS | 23 | [10, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 6] |
+| EK-BFS | 23 | [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7] |
+
+**Corte mínimo** (23 aristas, capacidad total = 23 000 Mbps): el corte está formado por los 23 enlaces de acceso del campus, todos de 1 000 Mbps. El cuello de botella no es la salida WAN sino la capa de acceso — hay más capacidad WAN disponible que uplinks de acceso agregados.
+
+**Verificación manual:** $23 \times 1\,000 = \mathbf{23\,000}$ Mbps ✓
+
+---
+
+#### Campus Paraíso
+
+**Flujo máximo:** 10 000 Mbps (10 Gbps)
+
+| Algoritmo | Iteraciones | Longitudes de caminos aumentantes |
+|-----------|:-----------:|-----------------------------------|
+| FF-DFS | 10 | [5, 5, 5, 5, 5, 5, 5, 5, 5, 5] |
+| EK-BFS | 10 | [5, 5, 5, 5, 5, 5, 5, 5, 5, 5] |
+
+**Corte mínimo** (1 arista): `CPAR-C10 → ROUTER-CAMPUS-HUAYNA-CAPAC` (10 000 Mbps). Un único enlace de salida — si falla, el campus queda sin Internet.
+
+**Verificación manual:** $10\,000 = \mathbf{10\,000}$ Mbps ✓
+
+---
+
+#### Campus Yanuncay
+
+**Flujo máximo:** 1 000 Mbps (1 Gbps)
+
+| Algoritmo | Iteraciones | Longitudes de caminos aumentantes |
+|-----------|:-----------:|-----------------------------------|
+| FF-DFS | 1 | [4] |
+| EK-BFS | 1 | [4] |
+
+**Corte mínimo** (1 arista): `AGRPRI-1A-D10 → ROUTER-CAMPUS-YANUNCAY` (1 000 Mbps). Un solo camino de salida; 1 iteración es suficiente para saturarlo.
+
+**Verificación manual:** $1\,000 = \mathbf{1\,000}$ Mbps ✓
+
+---
+
+#### Campus Hospitalidad
+
+**Flujo máximo:** 1 000 Mbps (1 Gbps)
+
+| Algoritmo | Iteraciones | Longitudes de caminos aumentantes |
+|-----------|:-----------:|-----------------------------------|
+| FF-DFS | 1 | [3] |
+| EK-BFS | 1 | [3] |
+
+**Corte mínimo** (1 arista): `HOS-0A-D05 → INTERNET-MPLS` (1 000 Mbps). El campus conecta directamente al MPLS por un único enlace.
+
+**Verificación manual:** $1\,000 = \mathbf{1\,000}$ Mbps ✓
+
+---
+
+#### Sede Centro Histórico
+
+**Flujo máximo:** 11 000 Mbps (11 Gbps)
+
+| Algoritmo | Iteraciones | Longitudes de caminos aumentantes |
+|-----------|:-----------:|-----------------------------------|
+| FF-DFS | 3 | [9, 4, 6] |
+| EK-BFS | 2 | [4, 6] |
+
+DFS comienza por un camino largo innecesario (9 saltos) que EK-BFS evita. EK-BFS encuentra primero el camino corto (4 saltos) y luego el alternativo (6 saltos), terminando en 2 iteraciones.
+
+**Corte mínimo** (2 aristas): `SW-ARUBA-CENTRO-HISTORICO → DATCC-2A-C3` (10 000 Mbps) + `ROUTER-CAMPUS-CENTRO-HISTORICO → ROUTER-L2TP-BALZAY` (1 000 Mbps).
+
+**Verificación manual:** $10\,000 + 1\,000 = \mathbf{11\,000}$ Mbps ✓
+
+---
+
+#### Sede Museo
+
+**Flujo máximo:** 11 000 Mbps (11 Gbps)
+
+| Algoritmo | Iteraciones | Longitudes de caminos aumentantes |
+|-----------|:-----------:|-----------------------------------|
+| FF-DFS | 3 | [8, 5, 7] |
+| EK-BFS | 2 | [5, 6] |
+
+**Corte mínimo** (2 aristas): `SW-ARUBA-MUSEO → DATCC-2A-C2` (10 000 Mbps) + `ROUTER-CAMPUS-MUSEO → ROUTER-L2TP-BALZAY` (1 000 Mbps).
+
+**Verificación manual:** $10\,000 + 1\,000 = \mathbf{11\,000}$ Mbps ✓
+
 ### Ítem 4 · Corte mínimo vs puentes (P1)
 
-Las aristas del corte mínimo **son puentes** de la red (detectados en P1): son los únicos caminos entre el interior del campus y el exterior. El corte mínimo no solo identifica el cuello de botella de capacidad — también coincide con los puntos únicos de fallo estructural. Eliminar cualquiera de las 6 aristas del corte desconecta o degrada severamente la salida del Campus Central a Internet.
+El corte mínimo identifica los enlaces "imprescindibles" desde el punto de vista del flujo — los que limitan la capacidad total. Este ítem conecta ese resultado con los **puentes** encontrados en P1 (enlaces cuya eliminación desconecta el grafo) y con los enlaces descritos como no redundantes en el informe técnico, para ver si el análisis de flujo y el análisis estructural señalan los mismos puntos críticos.
 
-La arista `DATCC-2A-C3 → PE2-CENTRAL` (20 Gbps) domina: es un LAG de 2×10 Gbps. Si falla, el campus pierde casi la mitad de su capacidad de salida.
+La comparación revela que **corte mínimo y puentes no siempre coinciden** — cada herramienta mide una cosa distinta:
+
+| Campus | Arista del corte mínimo | ¿Puente en P1? | Explicación |
+|--------|------------------------|:--------------:|-------------|
+| Campus Central | DATCC-2A-C3 → PE2-CENTRAL (20 Gbps) | **No** | Hay rutas alternativas en el core; no es puente estructuralmente, pero concentra la mayor capacidad de salida. |
+| Campus Central | DATCC-2A-C3 → FORTIGATE-1800F-CENTRAL (10 Gbps) | **No** | Mismo razonamiento: el core tiene redundancia estructural, pero el corte de capacidad pasa por aquí. |
+| Campus Central | DATCC-2A-C2 → FORTIGATE-1800F-CENTRAL (10 Gbps) | **No** | Ídem. |
+| Campus Central | ROUTER-CAMPUS-CENTRO-HISTORICO → ROUTER-L2TP-BALZAY (1 Gbps) | **No** | Tiene ruta alternativa por el core de Central. |
+| Campus Central | ROUTER-CAMPUS-MUSEO → ROUTER-L2TP-BALZAY (1 Gbps) | **No** | Ídem. |
+| Campus Central | CCJ-CJURIDICO-D4 → INTERNET-MPLS (1 Gbps) | **Sí ✓** | Único camino de salida de ese nodo — coincide con P1. |
+| Campus Paraíso | CPAR-C10 → ROUTER-CAMPUS-HUAYNA-CAPAC (10 Gbps) | **Sí ✓** | Único enlace de salida del campus. |
+| Campus Yanuncay | AGRPRI-1A-D10 → ROUTER-CAMPUS-YANUNCAY (1 Gbps) | **Sí ✓** | Único enlace de salida del campus. |
+| Campus Hospitalidad | HOS-0A-D05 → INTERNET-MPLS (1 Gbps) | **Sí ✓** | Único enlace de salida del campus. |
+| Campus Balzay | 23 enlaces de acceso (cada uno 1 Gbps) | **Sí ✓** (todos) | Cada switch de acceso conecta al agregador por un único cable — todos son puentes. |
+| Sedes C. Histórico y Museo | SW-ARUBA → core + ROUTER → MPLS | **No** | Tienen rutas alternativas, pero ambas rutas juntas forman el cuello de botella de capacidad. |
+
+**¿Por qué no siempre coinciden?**
+
+Un **puente** (P1) es un enlace cuya eliminación *desconecta* el grafo — es una vulnerabilidad **estructural**. El **corte mínimo** es el conjunto de enlaces que limita la *capacidad* del flujo — es una vulnerabilidad **de rendimiento**. Son conceptos distintos:
+
+- En Campus Central el core tiene redundancia estructural (no hay puentes), pero la capacidad está muy concentrada en pocos enlaces de alta velocidad. El corte mínimo refleja esa concentración, no la ausencia de rutas alternativas.
+- En los campus pequeños (Paraíso, Yanuncay, Hospitalidad) sí coinciden porque tienen un único enlace de salida: ese enlace es a la vez el único camino posible (puente) y el cuello de botella de capacidad (corte mínimo).
+- En Balzay el corte cae en la capa de acceso: cada switch de acceso está conectado por un único cable (puente estructural), y la suma de esos cables es el límite de capacidad del campus.
+
+**Coincidencia con los enlaces no redundantes del informe técnico:**
+
+El informe técnico describe como no redundantes los enlaces de acceso hacia agregación y las conexiones WAN de campus pequeños — exactamente los que aparecen como puentes en P1 y como cortes mínimos en los campus con menos infraestructura (Yanuncay, Hospitalidad, Paraíso). En Campus Central el informe reconoce que el core tiene redundancia (los switches DATCC están interconectados), lo que explica que las aristas del core no sean puentes aunque sí formen el corte de capacidad.
 
 ### Ítem 5 · Formulación de flujo de costo mínimo
+
+El flujo máximo responde "¿cuánto puedo enviar?", pero no se preocupa por qué tan caro o eficiente es el camino elegido. El **flujo de costo mínimo** agrega esa dimensión: cada enlace tiene además un costo por unidad de flujo (puede ser latencia, número de saltos, precio del ancho de banda, etc.), y el objetivo es enviar una demanda fija desde dos campus hacia Internet pagando el menor costo total posible. Este ítem formula ese problema y compara su solución con la del flujo máximo puro.
 
 El problema de **flujo de costo mínimo** añade una función de costo $\text{cost}(u,v)$ sobre las aristas:
 
@@ -1308,7 +1460,32 @@ donde $b(u)$ es la demanda neta del nodo ($b(s) < 0$: generador; $b(t) > 0$: con
 
 > *En palabras simples:* además de respetar la capacidad de cada cable, se quiere enviar los datos por la ruta más barata. El "costo" puede ser latencia, número de saltos, o precio de alquiler de ancho de banda. El flujo de costo mínimo minimiza el costo total de transportar una demanda dada.
 
-Con $\text{cost}(u,v) = 1$ salto para una demostración de 5 nodos de acceso del Campus Central, el costo total es **2 200 saltos·Mbps**, correspondiente a 100 Mbps enviados por caminos de longitud media 4.4 saltos.
+#### Configuración del experimento
+
+Se seleccionaron **dos campus** con distinto tamaño y topología:
+
+| Campus | Nodos de acceso | Flujo máximo posible |
+|--------|----------------|----------------------|
+| Campus Central | 56 | 43 000 Mbps |
+| Campus Balzay | 24 | 23 000 Mbps |
+
+**Demanda fija:** 5 000 Mbps por campus (total 10 000 Mbps). Un super-nodo por campus agrega todos los equipos de acceso.  
+**Costo:** $\text{cost}(u,v) = 1$ salto, por lo que el objetivo es minimizar el total de saltos·Mbps cursados.  
+**Comparación:** se corre también Edmonds-Karp en modo flujo máximo (sin restricción de demanda) para verificar qué caminos elegiría si solo buscara maximizar el volumen.
+
+#### Resultados medidos
+
+| Métrica | Flujo de costo mínimo | Flujo máximo puro (EK) |
+|---------|----------------------|------------------------|
+| Flujo enviado | **10 000 Mbps** (demanda fija) | **66 000 Mbps** (saturación total) |
+| Costo total | **38 000 saltos·Mbps** | no aplica (sin restricción de demanda) |
+| Saltos medio por Mbps | **3.80** | **5.96** (media Campus Central + Balzay) |
+
+#### Interpretación
+
+El flujo de costo mínimo elige rutas **37 % más cortas** (3.80 saltos vs 5.96) que el flujo máximo puro. La razón es estructural: el flujo máximo, al necesitar saturar toda la red, termina usando caminos indirectos y rutas de respaldo más largas. El flujo de costo mínimo, en cambio, concentra los 10 000 Mbps en los caminos más directos (típicamente acceso → agregación → core → MPLS en 3–4 saltos) porque añadir un salto extra tiene un costo real en la función objetivo.
+
+En términos prácticos: si la red solo necesita cursar 10 000 Mbps hacia Internet (muy por debajo de los 66 000 Mbps posibles), el flujo de costo mínimo produce un plan de enrutamiento con menor latencia y menor uso de recursos intermedios que el flujo máximo sin restricción de demanda.
 
 ---
 
