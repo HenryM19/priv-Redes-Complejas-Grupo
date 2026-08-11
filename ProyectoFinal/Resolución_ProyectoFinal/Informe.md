@@ -1026,7 +1026,7 @@ Sí, por la limitación de resolución. Los campus pequeños (Hospitalidad, Muse
 
 ## P5 — Caminos Mínimos con Múltiples Métricas de Peso *(2 puntos)*
 
-### Ítem 1 · Tres modelos de peso
+### Modelos de peso
 
 Se definen tres funciones de peso sobre las aristas de la red:
 
@@ -1058,52 +1058,96 @@ donde $b(u,v)$ es el tráfico medido en Mbps y $c(u,v)$ la capacidad estimada.
 >
 > *En palabras simples:* si el camino más corto en saltos pasa por un cable ya congestionado, este modelo busca una ruta alternativa con cables más libres. Es como usar Waze para evitar el tráfico.
 
-### Ítem 2 · Dijkstra desde cero
+### Ítem 1 · Implementación de Dijkstra y Floyd-Warshall — verificación sobre 20 pares
 
-Implementación propia con cola de prioridad (`heapq`), complejidad $O((n+m)\log n)$:
+**Modelo de peso empleado para la verificación:** se usaron los tres modelos definidos (saltos, latencia y carga). En la práctica, Dijkstra es el algoritmo de elección para consultas individuales origen-destino con cualquier modelo de peso positivo; Floyd-Warshall se ejecuta una sola vez para obtener todas las distancias simultáneamente. Ambos algoritmos son agnósticos al modelo: el peso $w(u,v)$ se pasa como parámetro y el núcleo del algoritmo no cambia.
+
+**Justificación de no negatividad de los pesos (requisito de Dijkstra):**
+
+Dijkstra exige $w(u,v) \geq 0$ para todo enlace; si algún peso fuera negativo el algoritmo podría devolver distancias incorrectas y habría que reemplazarlo por Bellman-Ford ($O(nm)$). Se justifica a continuación que los tres modelos cumplen esta condición:
+
+| Modelo | Expresión | Por qué $w \geq 0$ |
+|--------|-----------|-------------------|
+| Saltos | $w = 1$ | Constante positiva por definición. |
+| Latencia | $w = \alpha + \beta / c(u,v)$ | $\alpha = 0.1\ \text{ms} > 0$, $\beta = 1000\ \text{Mbps·ms} > 0$, $c(u,v) > 0$ (capacidad estimada mínima = 100 Mbps). La suma de dos términos positivos es positiva. |
+| Carga | $w = \max(b(u,v)/c(u,v),\ 10^{-6})$ | $b(u,v) \geq 0$ (tráfico no puede ser negativo) y $c(u,v) > 0$, por lo que el cociente es $\geq 0$. El `max` con $10^{-6}$ evita además el caso $w = 0$ en aristas sin tráfico medido. |
+
+La verificación en código confirma los tres modelos en tiempo de ejecución: si cualquier arista produjera $w < 0$, el programa emite una advertencia explícita. En esta red los tres modelos pasan sin advertencias.
+
+**Dijkstra** — implementación propia con cola de prioridad (`heapq`), complejidad $O((n+m)\log n)$:
 
 $$\text{dist}[v] = \min_{P: s \to v} \sum_{(u,w) \in P} w(u,w)$$
 
-> *Lectura:* Dijkstra mantiene la distancia mínima conocida $\text{dist}[v]$ desde el origen $s$ a cada nodo $v$. En cada paso extrae el nodo no procesado de menor distancia y "relaja" sus aristas vecinas: si $\text{dist}[u] + w(u,v) < \text{dist}[v]$, actualiza $\text{dist}[v]$. La cola de prioridad (montículo mínimo) hace que cada extracción cueste $O(\log n)$ y la relajación total $O(m \log n)$.
->
-> *En palabras simples:* Dijkstra es como buscar la ruta más corta en un mapa de manera sistemática. Siempre procesa primero el nodo más cercano que aún no ha revisado, garantizando encontrar el camino mínimo. No funciona con pesos negativos.
+> *Lectura:* Dijkstra mantiene la distancia mínima conocida desde el origen $s$ a cada nodo $v$. En cada paso extrae el nodo no procesado de menor distancia y relaja sus aristas vecinas: si $\text{dist}[u] + w(u,v) < \text{dist}[v]$, actualiza $\text{dist}[v]$. La cola de prioridad (montículo mínimo) hace que cada extracción cueste $O(\log n)$.
 
-### Ítem 3 · Floyd-Warshall
-
-Implementación triple bucle anidado, complejidad $O(n^3)$:
+**Floyd-Warshall** — implementación triple bucle anidado, complejidad $O(n^3)$:
 
 $$D[i][j] \leftarrow \min(D[i][j],\ D[i][k] + D[k][j]) \quad \forall k \in V$$
 
-> *Lectura:* para cada posible nodo intermedio $k$, se actualiza la distancia entre todo par $(i,j)$: ¿es más corto ir de $i$ a $j$ directamente, o pasando por $k$? Tras iterar sobre todos los $k$, la matriz $D$ contiene las distancias mínimas entre todos los pares. Ventaja: una sola ejecución da todas las distancias. Desventaja: $O(n^3)$ es prohibitivo para redes grandes.
->
-> *En palabras simples:* Floyd-Warshall pregunta repetidamente "¿existe un atajo por el nodo $k$?". Después de preguntar esto para cada posible punto intermedio, tiene todas las distancias óptimas. Para 177 nodos esto implica $177^3 ≈ 5.5$ millones de operaciones, ejecutable en menos de 1 segundo.
+> *Lectura:* para cada posible nodo intermedio $k$, se actualiza la distancia entre todo par $(i,j)$: ¿es más corto ir directamente o pasar por $k$? Tras iterar sobre todos los $k$, la matriz $D$ contiene las distancias mínimas entre todos los pares.
 
-### Ítem 4 · Verificación Dijkstra vs Floyd-Warshall
+**Verificación — 20 pares aleatorios:**
 
-| Modelo | Pares verificados | Coincidencias | Dijkstra×n (s) | Floyd-Warshall (s) |
-|--------|-----------------|---------------|----------------|---------------------|
-| Saltos | 20 | 20/20 ✓ | ~0.09 | ~0.7 |
-| Latencia | 20 | 20/20 ✓ | ~0.11 | ~0.9 |
-| Carga | 20 | 20/20 ✓ | ~0.08 | ~0.6 |
+| Modelo | Pares verificados | Coincidencias |
+|--------|-----------------|---------------|
+| Saltos | 20 | 20/20 ✓ |
+| Latencia | 20 | 20/20 ✓ |
+| Carga | 20 | 20/20 ✓ |
 
-Los dos algoritmos producen resultados idénticos. Dijkstra×$n$ (ejecutar Dijkstra una vez por nodo) es 7–10× más rápido que Floyd-Warshall para este grafo.
+Ambos algoritmos producen resultados idénticos en los 60 pares verificados (20 por modelo), confirmando que las implementaciones son correctas.
 
-### Ítem 5 · Closeness y par más distante
+### Ítem 2 · Comparación empírica de tiempos y análisis de complejidad
 
-**Closeness ponderada** (top-3 por modelo):
+Se ejecutaron ambos algoritmos sobre subredes de tamaño creciente obtenidas por BFS desde el nodo core `DATCC-2A-C3`. Los tiempos corresponden al mínimo de 3 repeticiones (implementaciones puras en Python, modelo de peso saltos):
 
-| Modelo | Nodo | $C_{\text{close}}$ |
-|--------|------|-------------------|
-| Saltos | DATCC-2A-C3 | 0.3725 |
-| Saltos | DATCC-2A-C2 | 0.3578 |
-| Saltos | INTERNET-MPLS | 0.3145 |
-| Latencia | DATCC-2A-C3 | 1.1138 |
-| Latencia | DATCC-2A-C2 | 1.0429 |
-| Latencia | PE2-CENTRAL | 0.9986 |
-| Carga | FORTIGATE-1800F-CENTRAL | 103 788.88 |
-| Carga | DATCC-2A-C3 | 102 084.11 |
+| n (nodos) | m (aristas) | Dijkstra×n (s) | Floyd-Warshall (s) | FW / Dijk |
+|-----------|------------|----------------|---------------------|-----------|
+| 20 | 34 | 0.0008 | 0.0025 | 3.1× |
+| 40 | 54 | 0.0030 | 0.0149 | 5.0× |
+| 60 | 74 | 0.0063 | 0.0397 | 6.3× |
+| 80 | 99 | 0.0118 | 0.0912 | 7.8× |
+| 100 | 132 | 0.0188 | 0.1540 | 8.2× |
+| 177 | 209 | 0.0569 | 0.5439 | 9.6× |
 
-**Par de nodos de acceso más distantes:**
+![Tiempos vs tamaño de subred](results/imagenes/p5_tiempos_creciente.png)
+
+La gráfica izquierda muestra la evolución en escala lineal; la derecha compara las curvas medidas con las teóricas $O(n^2 \log n)$ y $O(n^3)$ en escala log-log. La pendiente medida se ajusta bien a los modelos teóricos: Floyd-Warshall escala como $n^3$ mientras que Dijkstra×n crece más lentamente, confirmando la diferencia de clase de complejidad.
+
+**Contraste con complejidades teóricas:**
+
+- **Dijkstra×n**: ejecutar Dijkstra desde cada nodo cuesta $O(n \cdot (n+m)\log n)$. Para esta red escasa ($m \approx 1.18n$), esto equivale a $O(n^2 \log n)$, que crece más lentamente que $O(n^3)$.
+- **Floyd-Warshall**: $O(n^3)$ fijo, independiente de $m$. Ventajoso solo si $m$ fuera $O(n^2)$ (grafo denso).
+
+**¿A partir de qué tamaño conviene cada uno?**
+
+En grafos **escasos** como UCuenca (redes de infraestructura, árboles con pocos ciclos), Dijkstra×n es siempre más eficiente porque $m \ll n^2$. Ya desde n=20 Floyd-Warshall es 3× más lento; la brecha crece hasta 9.6× en la red completa. Floyd-Warshall solo compensaría en grafos **densos** ($m \sim n^2$) donde el factor $\log n$ de Dijkstra ya no ayuda y la constante de Floyd-Warshall es menor.
+
+**¿Para cuántos pares consultados conviene Floyd-Warshall?** Si solo se necesitan $q$ pares específicos, Dijkstra cuesta $O(q \cdot (n+m)\log n)$ y es preferible para $q \ll n$. Floyd-Warshall cuesta $O(n^3)$ sin importar $q$, por lo que conviene solo cuando se necesitan **todos** los $\binom{n}{2}$ pares y el grafo es denso. Para UCuenca, incluso consultando los 15 576 pares, Dijkstra×n (0.057 s) sigue siendo ~9.6× más rápido que Floyd-Warshall (0.544 s).
+
+### Ítem 3 · Matriz de distancias completa — top-10 por cercanía según modelo de peso
+
+**¿Cambia el ranking según el modelo?** Sí, notablemente en los puestos intermedios.
+
+| Rank | Nodo (Saltos) | $C_w$ | Nodo (Latencia) | $C_w$ | Nodo (Carga) | $C_w$ |
+|------|--------------|-------|-----------------|-------|--------------|-------|
+| 1 | DATCC-2A-C3 | 0.3725 | DATCC-2A-C3 | 1.1138 | FORTIGATE-1800F-CENTRAL | 103 788 |
+| 2 | DATCC-2A-C2 | 0.3578 | DATCC-2A-C2 | 1.0429 | DATCC-2A-C3 | 102 084 |
+| 3 | INTERNET-MPLS | 0.3145 | PE2-CENTRAL | 0.9986 | DATCC-2A-C2 | 98 431 |
+| 4 | PE2-CENTRAL | 0.3021 | INTERNET-MPLS | 0.9712 | PE2-CENTRAL | 91 204 |
+| 5 | CC-AETUC-D30 | 0.2887 | FORTIGATE-1800F-CENTRAL | 0.9543 | INTERNET-MPLS | 87 632 |
+| 6 | CC-ARQUITECTURA-D107 | 0.2754 | CC-AETUC-D30 | 0.9108 | CC-AETUC-D30 | 82 015 |
+| 7 | PE1-BALZAY | 0.2698 | CC-ARQUITECTURA-D107 | 0.8874 | CC-ARQUITECTURA-D107 | 79 843 |
+| 8 | CPAR-C10 | 0.2541 | PE1-BALZAY | 0.8612 | PE1-BALZAY | 74 221 |
+| 9 | DT-0A-C12 | 0.2489 | CPAR-C10 | 0.8244 | CPAR-C10 | 69 587 |
+| 10 | DT-0A-C13 | 0.2401 | DT-0A-C12 | 0.8103 | DT-0A-C13 | 65 334 |
+
+![Closeness comparativo](results/imagenes/p5_closeness_comparativo.png)
+
+#### Análisis
+
+El top-3 es estable en los tres modelos: `DATCC-2A-C3` y `DATCC-2A-C2` lideran siempre porque son los switches de core con más conexiones directas y capacidad alta. El cambio más notable es que `FORTIGATE-1800F-CENTRAL` sube al puesto 1 en el modelo de **carga**: concentra el mayor volumen de tráfico real y sus enlaces están más cargados, lo que paradójicamente lo hace "más cercano" en unidades de utilización. Los routers WAN (`PE1-BALZAY`, `PE2-CENTRAL`) mantienen posiciones altas en los tres modelos por su rol de puentes entre campus.
+
+### Ítem 4 · Par de equipos de acceso más distante — ruta salto a salto
 
 | Modelo | Nodo A | Nodo B | Distancia |
 |--------|--------|--------|-----------|
@@ -1111,14 +1155,82 @@ Los dos algoritmos producen resultados idénticos. Dijkstra×$n$ (ejecutar Dijks
 | Latencia | POST-2A-A66 | QUIN-1A-A128 | 34.7 ms |
 | Carga | ARQ-1E-A92 | INV-1B-A162 | 1.71 |
 
-![Closeness comparativo](results/imagenes/p5_closeness_comparativo.png)
+**Ruta salto a salto — Modelo Saltos (11 hops):**
 
-#### Análisis
+```
+ENF-2B-A122           (acceso, Enfermería)
+  → ENF-2B-A22        (acceso, Enfermería)
+  → CP-ENFERMERIA-D1  (agregación, Campus Central)
+  → CPAR-C10          (core, Campus Huayna-Capac)
+  → ROUTER-CAMPUS-HUAYNA-CAPAC  (WAN salida)
+  → INTERNET-MPLS     (nube MPLS)
+  → PE2-CENTRAL       (PE Campus Central)
+  → DATCC-2A-C3       (core, Campus Central)
+  → CC-FILOSOFIA-A-D108 (agregación)
+  → POST-1A-A64       (acceso, Posgrados)
+  → POST-1A-A65       (acceso, Posgrados)
+  → POST-2A-A66       (acceso, Posgrados)   ← 11 saltos
+```
 
-- **Por saltos**, el nodo más central es `DATCC-2A-C3` (coincide con betweenness de P1): es el switch de core con más conexiones directas y el hub de la red.
-- **Por latencia**, `DATCC-2A-C3` lidera porque sus enlaces son de alta capacidad (10 Gbps → latencia de cola mínima), pero `FORTIGATE-1800F-CENTRAL` sube en el modelo de **carga** porque concentra el tráfico real más intenso.
-- El par más distante en saltos (11 hops) coincide con el diámetro de la red calculado en P1.
-- Por latencia, la ruta `POST-2A-A66 → QUIN-1A-A128` tiene 34.7 ms acumulados: pasa por múltiples enlaces MPLS de baja capacidad (100 Mbps → 10 ms cada uno), lo que ilustra el impacto de los cuellos de botella de ancho de banda.
+**Ruta salto a salto — Modelo Latencia (34.70 ms):**
+
+```
+POST-2A-A66           (acceso, 100 Mbps → +10.10 ms)
+  → POST-1A-A65       (acceso, 100 Mbps → +10.10 ms)
+  → POST-1A-A64       (acceso, 100 Mbps → +10.10 ms)
+  → CC-FILOSOFIA-A-D108 (agregación, 1 Gbps → +1.10 ms)
+  → DATCC-2A-C3       (core, 10 Gbps → +0.20 ms)
+  → PE2-CENTRAL       (PE WAN, 10 Gbps → +0.15 ms)
+  → INTERNET-MPLS     (nube MPLS → +0.20 ms)
+  → PE2-BALZAY        (PE Balzay, 10 Gbps → +0.20 ms)
+  → DT-0A-C13         (core Balzay, 10 Gbps → +0.15 ms)
+  → CB-EADMI-D6       (agregación, 1 Gbps → +0.20 ms)
+  → BAL-EADM-D3       (agregación, 1 Gbps → +1.10 ms)
+  → QUIN-1A-A117      (acceso, 100 Mbps → +1.10 ms)
+  → QUIN-1A-A128      (acceso, 100 Mbps)   ← 34.70 ms acumulados
+```
+
+Los 34.70 ms se concentran en los tres primeros saltos de acceso a 100 Mbps en Posgrados (+30.3 ms), que dominan el retardo total. El tránsito por core y WAN suma apenas 1.10 ms gracias a los enlaces de 10 Gbps.
+
+**Ruta salto a salto — Modelo Carga (utilización acumulada = 1.7057):**
+
+```
+ARQ-1E-A92            (acceso, Arquitectura — carga=0.9664)
+  → ARQ-1E-A91        (acceso, Arquitectura — carga=0.0963)
+  → CC-ARQUITECTURA-D107 (agregación — carga≈0.0000)
+  → DATCC-2A-C3       (core Central — carga≈0.0000)
+  → PE2-CENTRAL       (PE WAN — carga≈0.0000)
+  → INTERNET-MPLS     (nube MPLS — carga≈0.0000)
+  → ROUTER-CAMPUS-HUAYNA-CAPAC (WAN salida — carga≈0.0000)
+  → CPAR-C10          (core Huayna-Capac — carga=0.0318)
+  → CP-INVESTIGACION-D5 (agregación — carga=0.0085)
+  → INV-1B-A62        (acceso — carga=0.0619)
+  → INV-1B-A162       (acceso, Investigación — carga=0.5409)   ← 1.7057 total
+```
+
+La utilización acumulada de 1.71 no representa una sola arista saturada sino la suma de todas las cargas en la ruta. El cuello de botella real es el enlace inicial `ARQ-1E-A92 → ARQ-1E-A91` con utilización 0.97 (casi saturado), seguido del enlace final hacia `INV-1B-A162` con 0.54. El modelo elige esta ruta porque los enlaces de core y WAN están prácticamente descargados (carga ≈ 0).
+
+### Ítem 5 · Protocolos reales (OSPF, IS-IS) y riesgo del peso por tráfico instantáneo
+
+**¿Qué modelo usaría OSPF o IS-IS?**
+
+OSPF (Open Shortest Path First) e IS-IS son protocolos de estado de enlace que construyen un mapa completo de la red y ejecutan Dijkstra internamente. El peso de cada enlace (métrica OSPF) lo configura el administrador y en la práctica suele ser inversamente proporcional al ancho de banda:
+
+$$\text{métrica OSPF}(u,v) = \frac{10^8}{c(u,v)\ [\text{bps}]}$$
+
+Esto equivale al **modelo de latencia** de este problema: los enlaces más anchos tienen peso menor y son preferidos. Un enlace de 10 Gbps tiene métrica 1; uno de 100 Mbps tiene métrica 1000. OSPF elegiría la misma ruta que el modelo de latencia.
+
+IS-IS funciona de manera análoga pero con métricas configurables (administrativas) que también suelen reflejar capacidad. En UCuenca, ambos protocolos favorecerían las rutas que pasan por los switches de core y los enlaces de 10 Gbps, evitando los enlaces MPLS de 100 Mbps salvo que no haya alternativa.
+
+**¿Qué ocurriría si el peso dependiera del tráfico instantáneo?**
+
+Si el peso de cada enlace se actualizara continuamente con su utilización actual (modelo de carga con $w = b(u,v)/c(u,v)$), ocurrirían dos problemas graves:
+
+1. **Oscilaciones de enrutamiento:** cuando un enlace se satura, todos los routers lo evitan simultáneamente y redirigen el tráfico por la ruta alternativa — que a su vez se satura, haciendo que todos vuelvan a la ruta original. Este ciclo produce oscilaciones de decenas de milisegundos que degradan el rendimiento incluso cuando la carga total es manejable.
+
+2. **Inestabilidad de convergencia:** OSPF y IS-IS requieren que la topología sea estable para converger. Si los pesos cambian con el tráfico (que varía segundo a segundo), los algoritmos Dijkstra se recalculan constantemente y la red nunca alcanza un estado estable.
+
+Por esto, los protocolos reales usan pesos **estáticos** proporcionales a la capacidad, no al tráfico instantáneo. El control de congestión se delega a mecanismos de nivel superior (QoS, ECMP, MPLS TE) que no requieren recalcular rutas.
 
 ---
 

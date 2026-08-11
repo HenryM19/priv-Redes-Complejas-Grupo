@@ -480,6 +480,18 @@ if __name__ == "__main__":
     grafos = construir_grafos_pesados(G, nodos_df, aristas_df)
     print(f"  Grafos construidos: {list(grafos.keys())}")
 
+    # Verificación: pesos no negativos (requisito de Dijkstra)
+    for modelo, Gm in grafos.items():
+        pesos_neg = [(u, v, Gm[u][v]["weight"])
+                     for u, v in Gm.edges() if Gm[u][v]["weight"] < 0]
+        if pesos_neg:
+            print(f"  [ADVERTENCIA] Modelo '{modelo}': {len(pesos_neg)} aristas con peso negativo")
+            for u, v, w in pesos_neg[:5]:
+                print(f"    {u} — {v} : {w:.6f}")
+        else:
+            print(f"  [OK] Modelo '{modelo}': no se encontraron pesos negativos "
+                  f"(Dijkstra puede aplicarse)")
+
     # Ítem 2: verificación 20 pares
     print("\n[Ítem 2] Verificación 20 pares aleatorios (modelo saltos)")
     df_ver = verificar_coincidencia(grafos["saltos"])
