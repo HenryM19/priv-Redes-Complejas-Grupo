@@ -104,11 +104,12 @@ def _orden_nodos(G: nx.Graph, estrategia: str, semilla: int = 42) -> list:
 
     Argumentos:
         G          (nx.Graph): grafo actual.
-        estrategia (str)     : 'aleatorio'|'grado_desc'|'betweenness'|'grado_asc'.
+        estrategia (str)     : 'aleatorio'|'grado_desc'|'betweenness'|'btw_recalc'.
         semilla    (int)     : semilla para aleatoriedad.
 
     Salida:
-        list: nodos en orden de eliminación.
+        list: nodos en orden de eliminación (para estrategias estáticas).
+              Para 'btw_recalc' devuelve lista vacía (orden se recalcula en línea).
     """
     nodos = list(G.nodes())
     if estrategia == "aleatorio":
@@ -120,8 +121,8 @@ def _orden_nodos(G: nx.Graph, estrategia: str, semilla: int = 42) -> list:
     elif estrategia == "betweenness":
         btw = nx.betweenness_centrality(G)
         return sorted(nodos, key=lambda n: btw[n], reverse=True)
-    elif estrategia == "grado_asc":
-        return sorted(nodos, key=lambda n: G.degree(n))
+    elif estrategia == "btw_recalc":
+        return []   # orden se decide dinámicamente tras cada eliminación
     else:
         raise ValueError(f"Estrategia desconocida: {estrategia}")
 
@@ -129,12 +130,12 @@ def _orden_nodos(G: nx.Graph, estrategia: str, semilla: int = 42) -> list:
 def percolacion_nodos(G: nx.Graph, estrategia: str,
                       semilla: int = 42, pasos: int = 30) -> pd.DataFrame:
     """
-    Simula la percolación de nodos eliminando secuencialmente
-    según la estrategia, midiendo la eficiencia global.
+    Simula la percolación de nodos eliminando secuencialmente según la estrategia.
+    Para 'btw_recalc', recalcula betweenness tras cada eliminación (ataque adaptativo).
 
     Argumentos:
         G          (nx.Graph): grafo original.
-        estrategia (str)     : estrategia de eliminación.
+        estrategia (str)     : 'aleatorio'|'grado_desc'|'betweenness'|'btw_recalc'.
         semilla    (int)     : semilla para estrategia aleatoria.
         pasos      (int)     : número de puntos de muestreo.
 
@@ -143,13 +144,10 @@ def percolacion_nodos(G: nx.Graph, estrategia: str,
     """
     Gc = G.copy()
     n_total = Gc.number_of_nodes()
-    # Para estrategia estática, ordenamos el grafo original
-    if estrategia != "aleatorio":
-        orden = _orden_nodos(G, estrategia, semilla)
-    else:
-        orden = _orden_nodos(G, estrategia, semilla)
+    orden = _orden_nodos(G, estrategia, semilla)
 
     muestras = np.linspace(0, 1, pasos + 1)
+    fracs_objetivo = [int(f * n_total) for f in muestras]
     filas = []
     eliminados = 0
 
@@ -161,15 +159,20 @@ def percolacion_nodos(G: nx.Graph, estrategia: str,
         "tamanio_cgc"       : max(len(c) for c in nx.connected_components(Gc)),
     })
 
-    for i, frac in enumerate(muestras[1:], 1):
-        objetivo = int(frac * n_total)
-        while eliminados < objetivo and eliminados < len(orden):
-            nodo = orden[eliminados]
-            if nodo in Gc:
+    for frac, objetivo in zip(muestras[1:], fracs_objetivo[1:]):
+        while eliminados < objetivo and Gc.number_of_nodes() > 0:
+            if estrategia == "btw_recalc":
+                # Recalcula betweenness en el grafo actual
+                btw = nx.betweenness_centrality(Gc)
+                nodo = max(btw, key=btw.get)
+            else:
+                nodo = orden[eliminados] if eliminados < len(orden) else None
+            if nodo and nodo in Gc:
                 Gc.remove_node(nodo)
             eliminados += 1
+
         if Gc.number_of_nodes() == 0:
-            filas.append({"fraccion_eliminada": frac, "eficiencia": 0.0,
+            filas.append({"fraccion_eliminada": round(frac, 4), "eficiencia": 0.0,
                            "n_componentes": 0, "tamanio_cgc": 0})
             continue
         comps = list(nx.connected_components(Gc))
@@ -182,24 +185,26 @@ def percolacion_nodos(G: nx.Graph, estrategia: str,
     return pd.DataFrame(filas)
 
 
-def percolacion_aleatoria_media(G: nx.Graph, n_semillas: int = 5,
-                                 pasos: int = 30) -> pd.DataFrame:
+def percolacion_aleatoria_media(G: nx.Graph, n_semillas: int = 100,
+                                 pasos: int = 30) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Promedia la percolación aleatoria sobre varias semillas para reducir
-    la varianza estadística.
+    Promedia la percolación aleatoria sobre 100 realizaciones y calcula
+    la desviación estándar por fracción, como exige la guía.
 
     Argumentos:
-        G         (nx.Graph): grafo.
-        n_semillas (int)    : número de semillas.
-        pasos      (int)    : puntos de muestreo.
+        G          (nx.Graph): grafo.
+        n_semillas (int)     : número de realizaciones (mínimo 100).
+        pasos      (int)     : puntos de muestreo.
 
     Salida:
-        pd.DataFrame: promedio de eficiencias por fracción.
+        tuple: (df_media, df_std) — DataFrames con media y std por fracción.
     """
     dfs = [percolacion_nodos(G, "aleatorio", semilla=s, pasos=pasos)
            for s in range(n_semillas)]
-    df_concat = pd.concat(dfs).groupby("fraccion_eliminada").mean().reset_index()
-    return df_concat
+    df_concat = pd.concat(dfs)
+    df_media = df_concat.groupby("fraccion_eliminada").mean().reset_index()
+    df_std   = df_concat.groupby("fraccion_eliminada").std().reset_index()
+    return df_media, df_std
 
 
 # ------------------------------------------------------------
@@ -213,12 +218,16 @@ def percolacion_aristas(G: nx.Graph, estrategia: str = "aleatorio",
 
     Argumentos:
         G          (nx.Graph): grafo original.
-        estrategia (str)     : 'aleatorio' | 'betweenness_arista'.
+        estrategia (str)     : 'aleatorio' | 'betweenness_arista' | 'puentes_primero'.
         semilla    (int)     : semilla aleatoria.
         pasos      (int)     : puntos de muestreo.
 
     Salida:
         pd.DataFrame con [fraccion_eliminada, eficiencia, n_componentes, tamanio_cgc].
+
+    Nota 'puentes_primero': elimina primero los puentes identificados en P1
+    (aristas cuya eliminación desconecta la red), luego el resto aleatoriamente.
+    Modela un ataque dirigido a los enlaces más críticos estructuralmente.
     """
     Gc = G.copy()
     aristas = list(G.edges())
@@ -228,6 +237,24 @@ def percolacion_aristas(G: nx.Graph, estrategia: str = "aleatorio",
         rng = random.Random(semilla)
         rng.shuffle(aristas)
         orden_aristas = aristas
+    elif estrategia == "puentes_primero":
+        # Puentes de P1: aristas cuya eliminación desconecta la red
+        puentes = set(nx.bridges(G))
+        puentes_norm = set()
+        for u, v in puentes:
+            puentes_norm.add((u, v))
+            puentes_norm.add((v, u))
+        # Ordenar puentes por betweenness de arista (más críticos primero)
+        btw_e = nx.edge_betweenness_centrality(G)
+        lista_puentes = sorted(
+            [(u, v) for u, v in aristas if (u, v) in puentes_norm or (v, u) in puentes_norm],
+            key=lambda e: btw_e.get(e, btw_e.get((e[1], e[0]), 0)), reverse=True
+        )
+        resto = [e for e in aristas if (e[0], e[1]) not in puentes_norm
+                 and (e[1], e[0]) not in puentes_norm]
+        rng = random.Random(semilla)
+        rng.shuffle(resto)
+        orden_aristas = lista_puentes + resto
     else:
         btw_e = nx.edge_betweenness_centrality(G)
         orden_aristas = sorted(aristas, key=lambda e: btw_e.get(e, btw_e.get((e[1],e[0]),0)),
@@ -305,31 +332,45 @@ def generar_modelo_nulo(G: nx.Graph, modelo: str, semilla: int = 42) -> nx.Graph
 # Visualizaciones
 # ------------------------------------------------------------
 
-def graficar_robustez_nodos(resultados: dict) -> None:
-    """Curvas de eficiencia global vs fracción de nodos eliminados."""
+def graficar_robustez_nodos(resultados: dict, df_std: pd.DataFrame = None) -> None:
+    """
+    Curvas de E(f) y S(f) vs fracción de nodos eliminados para las 4 estrategias.
+    Incluye banda de ±1 std para la estrategia aleatoria (100 realizaciones).
+
+    Argumentos:
+        resultados (dict)        : {estrategia: df_media}.
+        df_std     (pd.DataFrame): std de la estrategia aleatoria.
+    """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
-    colores = {"aleatorio": "steelblue", "grado_desc": "red",
-               "betweenness": "darkorange", "grado_asc": "green"}
-    etiquetas = {"aleatorio": "Aleatorio (media)", "grado_desc": "Mayor grado primero",
-                 "betweenness": "Mayor betweenness", "grado_asc": "Menor grado primero"}
+    colores   = {"aleatorio": "steelblue", "grado_desc": "red",
+                 "betweenness": "darkorange", "btw_recalc": "purple"}
+    etiquetas = {"aleatorio"  : "Fallo aleatorio (media ± std, 100 realiz.)",
+                 "grado_desc" : "(b) Ataque por grado descendente",
+                 "betweenness": "(c) Ataque por betweenness (estático)",
+                 "btw_recalc" : "(d) Ataque por betweenness recalculada"}
 
     for est, df in resultados.items():
+        c = colores.get(est, "gray")
+        lbl = etiquetas.get(est, est)
         ax1.plot(df["fraccion_eliminada"], df["eficiencia"],
-                 color=colores.get(est, "gray"), label=etiquetas.get(est, est), linewidth=2)
-        ax2.plot(df["fraccion_eliminada"], df["tamanio_cgc"] / df["tamanio_cgc"].iloc[0],
-                 color=colores.get(est, "gray"), label=etiquetas.get(est, est), linewidth=2)
+                 color=c, label=lbl, linewidth=2)
+        ax2.plot(df["fraccion_eliminada"],
+                 df["tamanio_cgc"] / df["tamanio_cgc"].iloc[0],
+                 color=c, label=lbl, linewidth=2)
 
-    ax1.set_xlabel("Fracción de nodos eliminados (f)")
-    ax1.set_ylabel("Eficiencia global E(G)")
-    ax1.set_title("Eficiencia global")
-    ax1.legend(fontsize=8)
-    ax1.grid(alpha=0.3)
+    # Banda ±std para aleatoria
+    if df_std is not None and "aleatorio" in resultados:
+        df_m = resultados["aleatorio"]
+        ax1.fill_between(df_m["fraccion_eliminada"],
+                         df_m["eficiencia"] - df_std["eficiencia"].fillna(0),
+                         df_m["eficiencia"] + df_std["eficiencia"].fillna(0),
+                         alpha=0.2, color="steelblue")
 
-    ax2.set_xlabel("Fracción de nodos eliminados (f)")
-    ax2.set_ylabel("Fracción tamaño CGC")
-    ax2.set_title("Tamaño de la componente gigante")
-    ax2.legend(fontsize=8)
-    ax2.grid(alpha=0.3)
+    for ax in (ax1, ax2):
+        ax.set_xlabel("Fracción de nodos eliminados (f)")
+        ax.legend(fontsize=7); ax.grid(alpha=0.3)
+    ax1.set_ylabel("Eficiencia global E(f)"); ax1.set_title("Eficiencia global E(f)")
+    ax2.set_ylabel("S(f) = tamaño relativo CGC"); ax2.set_title("Componente gigante S(f)")
 
     plt.suptitle("P8 · Percolación de nodos — Red UCuenca", fontweight="bold")
     plt.tight_layout()
@@ -338,18 +379,37 @@ def graficar_robustez_nodos(resultados: dict) -> None:
     print(f"  [OK] {ruta}")
 
 
-def graficar_robustez_aristas(res_aleat: pd.DataFrame,
-                               res_btw: pd.DataFrame) -> None:
-    """Curvas de eficiencia vs fracción de aristas eliminadas."""
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.plot(res_aleat["fraccion_eliminada"], res_aleat["eficiencia"],
-            "b-", linewidth=2, label="Aristas aleatorio")
-    ax.plot(res_btw["fraccion_eliminada"], res_btw["eficiencia"],
-            "r--", linewidth=2, label="Mayor betweenness de arista")
-    ax.set_xlabel("Fracción de aristas eliminadas (q)")
-    ax.set_ylabel("Eficiencia global E(G)")
-    ax.set_title("P8 · Percolación de aristas — Red UCuenca", fontweight="bold")
-    ax.legend(); ax.grid(alpha=0.3)
+def graficar_robustez_aristas(res_aleat: pd.DataFrame, res_btw: pd.DataFrame,
+                               res_puentes: pd.DataFrame) -> None:
+    """
+    Curvas de E(f) y S(f) vs fracción de aristas eliminadas.
+    Incluye ataque a puentes de P1.
+
+    Argumentos:
+        res_aleat   (pd.DataFrame): percolación aleatoria de aristas.
+        res_btw     (pd.DataFrame): ataque por betweenness de arista.
+        res_puentes (pd.DataFrame): ataque dirigido a puentes de P1 primero.
+    """
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+    for ax in (ax1, ax2):
+        ax.plot(res_aleat["fraccion_eliminada"],
+                res_aleat["eficiencia"] if ax == ax1
+                else res_aleat["tamanio_cgc"] / res_aleat["tamanio_cgc"].iloc[0],
+                "b-", linewidth=2, label="Aleatorio")
+        ax.plot(res_btw["fraccion_eliminada"],
+                res_btw["eficiencia"] if ax == ax1
+                else res_btw["tamanio_cgc"] / res_btw["tamanio_cgc"].iloc[0],
+                "r--", linewidth=2, label="Mayor betweenness de arista")
+        ax.plot(res_puentes["fraccion_eliminada"],
+                res_puentes["eficiencia"] if ax == ax1
+                else res_puentes["tamanio_cgc"] / res_puentes["tamanio_cgc"].iloc[0],
+                "g:", linewidth=2, label="Puentes de P1 primero")
+        ax.set_xlabel("Fracción de aristas eliminadas (q)")
+        ax.legend(fontsize=8); ax.grid(alpha=0.3)
+    ax1.set_ylabel("Eficiencia global E(q)"); ax1.set_title("Eficiencia global E(q)")
+    ax2.set_ylabel("S(q) = tamaño relativo CGC"); ax2.set_title("Componente gigante S(q)")
+
+    plt.suptitle("P8 · Percolación de aristas — Red UCuenca", fontweight="bold")
     plt.tight_layout()
     ruta = os.path.join(DIR_IMG, "p8_robustez_aristas.png")
     fig.savefig(ruta, dpi=150, bbox_inches="tight"); plt.close(fig)
@@ -368,66 +428,88 @@ if __name__ == "__main__":
     E0 = eficiencia_global(G)
     print(f"  Eficiencia global inicial E₀ = {E0:.4f}\n")
 
-    PASOS = 20  # suficiente resolución para la curva
+    PASOS = 20  # resolución de la curva
 
-    # Ítem 2: percolación de nodos
-    print("[Ítem 2] Percolación de nodos...")
-    df_aleat  = percolacion_aleatoria_media(G, n_semillas=5, pasos=PASOS)
-    print("  [OK] aleatorio")
-    df_gdesc  = percolacion_nodos(G, "grado_desc", pasos=PASOS)
+    # ── Ítem 1: percolación de nodos — 4 estrategias ──────────────────
+    print("[Ítem 1] Percolación de nodos — 4 estrategias...")
+    print("  (a) Fallo aleatorio — 100 realizaciones...")
+    df_aleat, df_std = percolacion_aleatoria_media(G, n_semillas=100, pasos=PASOS)
+    print(f"      std media eficiencia: {df_std['eficiencia'].mean():.5f}")
+    print("  [OK] aleatorio (100 realizaciones, std reportada)")
+
+    print("  (b) Ataque por grado descendente...")
+    df_gdesc = percolacion_nodos(G, "grado_desc", pasos=PASOS)
     print("  [OK] grado_desc")
-    df_btw    = percolacion_nodos(G, "betweenness", pasos=PASOS)
+
+    print("  (c) Ataque por betweenness (estático)...")
+    df_btw   = percolacion_nodos(G, "betweenness", pasos=PASOS)
     print("  [OK] betweenness")
-    df_gasc   = percolacion_nodos(G, "grado_asc", pasos=PASOS)
-    print("  [OK] grado_asc")
+
+    print("  (d) Ataque por betweenness recalculada tras cada eliminación...")
+    df_btwR  = percolacion_nodos(G, "btw_recalc", pasos=PASOS)
+    print("  [OK] btw_recalc")
 
     resultados_nodos = {
-        "aleatorio" : df_aleat,
-        "grado_desc": df_gdesc,
+        "aleatorio"  : df_aleat,
+        "grado_desc" : df_gdesc,
         "betweenness": df_btw,
-        "grado_asc" : df_gasc,
+        "btw_recalc" : df_btwR,
     }
 
-    # Guardar
-    df_todos_nodos = pd.concat(
-        [df.assign(estrategia=k) for k, df in resultados_nodos.items()]
-    )
-    df_todos_nodos.to_csv(os.path.join(DIR_TAB, "p8_percolacion_nodos.csv"), index=False)
+    # Guardar CSV con media + std
+    df_todos = pd.concat([df.assign(estrategia=k) for k, df in resultados_nodos.items()])
+    df_std_save = df_std.assign(estrategia="aleatorio_std")
+    pd.concat([df_todos, df_std_save]).to_csv(
+        os.path.join(DIR_TAB, "p8_percolacion_nodos.csv"), index=False)
 
-    graficar_robustez_nodos(resultados_nodos)
+    graficar_robustez_nodos(resultados_nodos, df_std)
 
-    # Umbral aproximado (f tal que eficiencia cae al 50%)
+    # ── Ítem 2: estimar fc (fracción donde S(f) < 0.05) ──────────────
+    print("\n  Umbral de percolación fc (S(f) < 5% de la CGC inicial):")
+    n0 = G.number_of_nodes()
     for est, df in resultados_nodos.items():
-        e_norm = df["eficiencia"] / df["eficiencia"].iloc[0]
+        cgc0 = df["tamanio_cgc"].iloc[0]
+        fc = None
         for _, row in df.iterrows():
-            if row["eficiencia"] / df["eficiencia"].iloc[0] < 0.5:
-                print(f"  Umbral 50% E — {est:15s}: f ≈ {row['fraccion_eliminada']:.2f}")
-                break
+            if row["tamanio_cgc"] / cgc0 < 0.05:
+                fc = row["fraccion_eliminada"]; break
+        f_e50 = None
+        for _, row in df.iterrows():
+            if df["eficiencia"].iloc[0] > 0 and \
+               row["eficiencia"] / df["eficiencia"].iloc[0] < 0.5:
+                f_e50 = row["fraccion_eliminada"]; break
+        print(f"    {est:15s}: fc(S<5%)≈{fc if fc else '>1.0':>4}  "
+              f"f(E<50%)≈{f_e50 if f_e50 else '>1.0'}")
 
-    # Ítem 3: percolación de aristas
+    # ── Ítem 3: percolación de aristas ───────────────────────────────
     print("\n[Ítem 3] Percolación de aristas...")
-    df_ar_aleat = percolacion_aristas(G, "aleatorio", pasos=PASOS)
-    print("  [OK] aristas aleatorio")
-    df_ar_btw   = percolacion_aristas(G, "betweenness_arista", pasos=PASOS)
-    print("  [OK] aristas betweenness")
+    df_ar_aleat   = percolacion_aristas(G, "aleatorio", pasos=PASOS)
+    print("  [OK] aleatorio")
+    df_ar_btw     = percolacion_aristas(G, "betweenness_arista", pasos=PASOS)
+    print("  [OK] betweenness de arista")
+    n_puentes = len(list(nx.bridges(G)))
+    df_ar_puentes = percolacion_aristas(G, "puentes_primero", pasos=PASOS)
+    print(f"  [OK] puentes primero ({n_puentes} puentes de P1 eliminados al inicio)")
 
-    pd.concat([df_ar_aleat.assign(estrategia="aleatorio"),
-               df_ar_btw.assign(estrategia="betweenness_arista")
+    pd.concat([
+        df_ar_aleat.assign(estrategia="aleatorio"),
+        df_ar_btw.assign(estrategia="betweenness_arista"),
+        df_ar_puentes.assign(estrategia="puentes_primero"),
     ]).to_csv(os.path.join(DIR_TAB, "p8_percolacion_aristas.csv"), index=False)
 
-    graficar_robustez_aristas(df_ar_aleat, df_ar_btw)
+    graficar_robustez_aristas(df_ar_aleat, df_ar_btw, df_ar_puentes)
 
-    # Ítem 4: comparación con modelos nulos
-    print("\n[Ítem 4] Comparación con modelos nulos (ER, CM)...")
+    # ── Ítem 4-5: comparación con modelos nulos ───────────────────────
+    print("\n[Ítem 5] Comparación con modelos nulos (ER, CM) — ataque por grado...")
     for modelo in ["ER", "CM"]:
-        H = generar_modelo_nulo(G, modelo)
-        e_h = eficiencia_global(H)
-        df_hn = percolacion_nodos(H, "grado_desc", pasos=PASOS)
-        # Umbral
-        for _, row in df_hn.iterrows():
-            if df_hn["eficiencia"].iloc[0] > 0 and \
-               row["eficiencia"] / df_hn["eficiencia"].iloc[0] < 0.5:
-                print(f"  Modelo {modelo}: E₀={e_h:.4f}  umbral 50%≈f={row['fraccion_eliminada']:.2f}")
-                break
+        H    = generar_modelo_nulo(G, modelo)
+        e_h  = eficiencia_global(H)
+        df_h = percolacion_nodos(H, "grado_desc", pasos=PASOS)
+        cgc0 = df_h["tamanio_cgc"].iloc[0] if df_h["tamanio_cgc"].iloc[0] > 0 else 1
+        fc_h = next((row["fraccion_eliminada"] for _, row in df_h.iterrows()
+                     if row["tamanio_cgc"] / cgc0 < 0.05), ">1.0")
+        print(f"  Modelo {modelo}: E₀={e_h:.4f}  fc(S<5%)≈{fc_h}")
+
+    print(f"  Red UCuenca:    E₀={E0:.4f}  (ver tabla arriba)")
 
     print("\n=== P8 completado ===\n")

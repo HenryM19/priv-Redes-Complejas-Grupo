@@ -1737,65 +1737,120 @@ donde $d_{ij}$ es la distancia más corta entre $i$ y $j$ (se define $1/d_{ij} =
 
 ## P8 — Percolación de Nodos y Aristas *(2.5 puntos)*
 
-### Ítem 1 · Eficiencia global
+### Ítem 1 · Percolación de nodos bajo cuatro estrategias
 
-$$E(G) = \frac{1}{n(n-1)} \sum_{i \neq j} \frac{1}{d(i,j)}$$
+En este ítem se implementa la percolación de nodos: se eliminan nodos de la red uno a uno siguiendo cuatro criterios distintos, y tras cada eliminación se mide cómo evoluciona la componente gigante $S(f)$ y la eficiencia global $E(f)$. Las cuatro estrategias permiten comparar el efecto de un fallo accidental frente a distintos tipos de ataque dirigido.
 
-donde $d(i,j) = \infty \Rightarrow 1/d = 0$ para pares desconectados.
+Las cuatro estrategias implementadas son:
 
-> *Lectura:* para cada par de nodos, se calcula el inverso de su distancia. Si están directamente conectados ($d=1$), contribuyen con 1; si están a 5 saltos, contribuyen 1/5; si están en componentes separadas ($d=\infty$), contribuyen 0. La media de esas contribuciones es la eficiencia global: cuánto "aprovecha" la red su conectividad. $E=1$ sería un grafo completo; $E=0$ un grafo sin aristas.
->
-> *En palabras simples:* mide qué tan bien puede comunicarse cualquier nodo con cualquier otro. Si muchos pares quedan desconectados o muy alejados, la eficiencia cae. Es como medir qué tan fluida es la comunicación en toda la red.
+- **(a) Fallo aleatorio:** los nodos se eliminan en orden aleatorio, simulando fallos de hardware sin patrón. Se promedia sobre **100 realizaciones** (semillas 0–99) para obtener una curva estable y se reporta la desviación estándar.
+- **(b) Ataque por grado descendente:** se elimina primero el nodo con más conexiones. El orden se calcula una sola vez al inicio sobre el grafo original.
+- **(c) Ataque por intermediación descendente:** se elimina primero el nodo con mayor betweenness centrality. El orden se calcula una sola vez al inicio.
+- **(d) Ataque por intermediación recalculada:** tras cada eliminación se recalcula la betweenness del grafo resultante y se elimina el nuevo nodo más crítico. Es el ataque más costoso computacionalmente y el más destructivo, porque adapta la estrategia al estado actual de la red.
 
-**Eficiencia inicial:** $E_0 = 0.2082$.
+#### Resultados medidos
 
-### Ítem 2 · Percolación de nodos — 4 estrategias
+| Estrategia | $f_c$ (S < 5%) | $f$ (E < 50% $E_0$) | Descripción |
+|------------|---------------|---------------------|-------------|
+| (a) Fallo aleatorio | **0.75** | 0.30 | Hay que eliminar el 75% de los nodos para colapsar la red |
+| (b) Grado descendente | **0.15** | 0.05 | Con el 15% de los nodos más conectados eliminados, la red colapsa |
+| (c) Betweenness estático | **0.15** | 0.05 | Similar al anterior; betweenness y grado se solapan en los hubs |
+| (d) Betweenness recalculada | **0.10** | 0.05 | El más destructivo: basta eliminar el 10% (≈18 nodos) |
 
-Se eliminan nodos secuencialmente y se mide la eficiencia $E(G)$ en función de la fracción eliminada $f$.
+**Desviación estándar del fallo aleatorio (100 realizaciones):** $\sigma_E = 0.0204$ — la curva aleatoria es estable; la variabilidad entre realizaciones es baja porque la red tiene muchos nodos de acceso intercambiables.
 
-#### Resultados
+#### Interpretación
 
-| Estrategia | Umbral $f$ donde $E < 0.5\,E_0$ |
-|------------|----------------------------------|
-| Grado descendente (mayor grado primero) | **$f \approx 0.05$** |
-| Betweenness (mayor intermediación primero) | **$f \approx 0.05$** |
-| Aleatorio (media 5 semillas) | $f \approx 0.25$ |
-| Grado ascendente (menor grado primero) | $f \approx 1.00$ |
+El contraste entre $f_c = 0.75$ (aleatorio) y $f_c = 0.10$ (btw recalculada) revela la naturaleza jerárquica de la red UCuenca: **es muy robusta ante fallos accidentales** (132 de 177 nodos son switches de acceso con grado 1–2, cuya pérdida no afecta la conectividad global) pero **extremadamente vulnerable ante un ataque inteligente** que apunte al core. Eliminar los 18 nodos más centrales — todos switches de core y agregación — es suficiente para fragmentar la red completamente.
+
+La diferencia entre (c) y (d) muestra el coste de recalcular: la betweenness estática subestima el daño porque no contempla que al eliminar un nodo, los nodos adyacentes se vuelven más críticos. La versión recalculada captura ese efecto y produce un colapso un 33% más rápido ($f_c = 0.10$ vs $0.15$).
+
+### Ítem 2 · Gráfica S(f) y estimación de $f_c$
 
 ![Robustez de nodos](results/imagenes/p8_robustez_nodos.png)
 
-#### Análisis
+La figura muestra en el panel izquierdo la eficiencia global $E(f)$ y en el panel derecho el tamaño relativo de la componente gigante $S(f)$, ambos en función de la fracción de nodos eliminados $f$. La banda azul en la curva aleatoria corresponde a ±1 desviación estándar sobre las 100 realizaciones.
 
-La red colapsa al 50% de eficiencia con solo el **5% de los nodos** eliminados cuando se ataca por grado o betweenness (equivalente a eliminar 8–9 nodos). Bajo eliminación aleatoria el umbral sube al 25%. Eliminar nodos de bajo grado es casi inofensivo: se puede eliminar el 100% de las hojas sin desconectar la red (son nodos terminales).
-
-Este comportamiento es característico de redes **heterogéneas con hubs**: muy robustas frente al fallo aleatorio (la probabilidad de dañar un hub es baja) pero extremadamente frágiles frente a ataques dirigidos al core.
+Los valores de $f_c$ estimados (donde $S(f) < 0.05$) confirman que la estrategia más dañina es la betweenness recalculada ($f_c = 0.10$), mientras que el fallo aleatorio requiere eliminar tres cuartas partes de la red para producir el mismo efecto.
 
 ### Ítem 3 · Percolación de aristas
 
-| Estrategia | Comportamiento |
-|------------|---------------|
-| Aleatorio | Degradación gradual |
-| Mayor betweenness de arista primero | Colapso más rápido |
+Se repite el análisis eliminando **aristas** en lugar de nodos, bajo tres estrategias: aleatoria, por mayor betweenness de arista, y atacando primero los **141 puentes** identificados en P1.
 
-La eliminación dirigida por betweenness de arista produce un colapso más rápido que el aleatorio: las aristas con mayor flujo de caminos cortos son los puentes críticos de la red.
+| Estrategia | Descripción |
+|------------|------------|
+| Aleatoria | Aristas eliminadas en orden aleatorio — degradación gradual |
+| Mayor betweenness de arista | Las aristas que más caminos cortos transportan se eliminan primero |
+| Puentes de P1 primero | Se eliminan primero los 141 puentes (aristas cuya eliminación desconecta la red), luego el resto aleatoriamente |
+
+El ataque a puentes es especialmente destructivo desde el inicio: los 141 puentes de la red son exactamente las aristas sin redundancia — eliminar cualquiera de ellos aísla inmediatamente un subgrafo. Tras agotar los puentes (fracción $q = 141/209 \approx 0.67$), el resto de las aristas puede eliminarse sin producir desconexiones adicionales porque forman parte de ciclos.
 
 ![Robustez de aristas](results/imagenes/p8_robustez_aristas.png)
 
-### Ítem 4 · Comparación con modelos nulos
+### Ítem 4 · Eficiencia global E(f) y su degradación anticipada
 
-| Modelo | $E_0$ | Umbral 50% (ataque por grado) |
-|--------|-------|------------------------------|
-| Red UCuenca | 0.2082 | $f \approx 0.05$ |
-| Erdős-Rényi (ER) | 0.1397 | $f \approx 0.10$ |
-| Configuración (CM) | 0.1565 | $f \approx 0.05$ |
+$$E(G) = \frac{1}{n(n-1)} \sum_{i \neq j} \frac{1}{d(i,j)}$$
 
-La red real tiene **mayor eficiencia inicial** que los modelos nulos (estructura jerárquica optimizada para eficiencia de rutas), pero el CM coincide en la fragilidad ante ataques por grado ($f \approx 0.05$), confirmando que la vulnerabilidad está determinada principalmente por la secuencia de grados (pocos hubs con grado alto). ER es más resistente al ataque porque sus grados son más uniformes (menos "punto único de fallo").
+donde $d(i,j) = \infty \Rightarrow 1/d = 0$ para pares desconectados. **Eficiencia inicial: $E_0 = 0.2082$.**
 
-### Ítem 5 · Umbral de percolación
+> *En palabras simples:* mide qué tan bien se comunican todos los pares de nodos. Si dos nodos están a 1 salto contribuyen 1; si están a 5 saltos contribuyen 1/5; si están desconectados contribuyen 0. Cuando la red se fragmenta o los caminos se alargan, $E$ cae.
 
-El umbral de percolación $f_c$ (donde la componente gigante colapsa) bajo ataque por grado es $f_c \approx 0.05$. En números absolutos: **9 nodos** (de 177) son suficientes para reducir la eficiencia a la mitad. Los 5 switches de core y los 4 switches de agregación con mayor grado constituyen este conjunto crítico.
+La eficiencia se degrada **mucho antes** de que $S(f)$ colapse porque son métricas distintas:
 
-Bajo percolación **aleatoria**, el umbral es $f_c \approx 0.25$ (≈44 nodos), lo que indica que la red tolera bien los fallos no coordinados pero es extremadamente vulnerable a ataques dirigidos.
+- $S(f)$ solo detecta cuando la componente gigante se rompe en piezas separadas — hasta ese momento cuenta todos los nodos como "conectados".
+- $E(f)$ detecta también cuando los caminos se **alargan**: aunque la red siga siendo una sola componente, si los caminos más cortos pasan ahora por rutas indirectas (porque se eliminaron los hubs centrales), $E$ ya cae.
+
+En la red UCuenca: bajo ataque por grado, $E$ cae al 50% con $f = 0.05$ (9 nodos eliminados), pero $S$ no colapsa hasta $f = 0.15$ (27 nodos). Durante esa ventana la red aparece "conectada" pero las rutas son tan largas que la comunicación efectiva ya está severamente dañada.
+
+### Ítem 5 · Comparación con modelos nulos de P2
+
+| Modelo | $E_0$ | $f_c$ bajo ataque por grado |
+|--------|-------|----------------------------|
+| **Red UCuenca** | **0.2082** | **0.15** |
+| Erdős-Rényi (ER) | 0.1397 | 0.35 |
+| Configuración (CM) | 0.1565 | 0.20 |
+
+La red UCuenca tiene **mayor eficiencia inicial** que ambos modelos nulos — la topología jerárquica optimiza los caminos cortos. Sin embargo, ante ataques por grado es **más frágil** que ER ($f_c = 0.15$ vs $0.35$) y ligeramente más frágil que CM ($f_c = 0.15$ vs $0.20$).
+
+Esto responde directamente la pregunta de la guía: **la red UCuenca es menos robusta de lo que su secuencia de grados haría esperar.** El modelo de configuración, que preserva exactamente la misma secuencia de grados pero con conexiones aleatorias, es más resistente ($f_c = 0.20$). La diferencia se explica porque la red real concentra los hubs en una jerarquía estricta (core → agregación → acceso): eliminar el nivel de core desconecta simultáneamente todos los campus, algo que no ocurre en el CM donde los nodos de alto grado están distribuidos sin estructura geográfica.
+
+Bajo percolación **aleatoria**, el umbral es $f_c \approx 0.75$ (≈133 nodos), lo que indica que la red tolera bien los fallos no coordinados pero es extremadamente vulnerable a ataques dirigidos.
+
+### La paradoja de la robustez
+
+Las redes con distribución de grado heterogénea — donde pocos nodos tienen muchas conexiones y la mayoría tiene pocas — exhiben un comportamiento paradójico: son muy resistentes a fallos aleatorios pero muy frágiles ante ataques dirigidos. La red UCuenca confirma exactamente este patrón.
+
+#### Verificación del comportamiento paradójico
+
+| Escenario | $f_c$ | Interpretación |
+|-----------|-------|---------------|
+| Fallo aleatorio | **0.75** | Hay que perder el 75% de los nodos para colapsar la red |
+| Ataque por grado | **0.15** | Con solo el 15% de los nodos más conectados, la red colapsa |
+| Ataque btw recalculada | **0.10** | El atacante más inteligente colapsa la red con solo 18 nodos |
+
+La ratio entre ambos umbrales es 7.5:1 — la red es 7.5 veces más resistente ante fallos accidentales que ante ataques dirigidos. Esto es la paradoja de la robustez en su forma más clara.
+
+La razón estructural: 132 de 177 nodos son switches de acceso con grado 1 o 2. Un fallo aleatorio tiene probabilidad 132/177 ≈ 75% de caer en un nodo de acceso, cuya pérdida aísla solo 1 equipo. Un ataque dirigido ignora esos 132 nodos y va directamente a los 5 switches de core y 27 de agregación, cuya pérdida aísla campus enteros.
+
+#### Consecuencia operativa para un plan de mantenimiento
+
+El mantenimiento programado es esencialmente un **fallo aleatorio controlado**: se apaga un switch, se hace el trabajo, se vuelve a encender. Los resultados dicen que la red tolera bien esto — se puede poner fuera de servicio cualquier nodo de acceso sin afectar al resto, e incluso nodos de agregación tienen respaldo en varios casos.
+
+Sin embargo, el plan de mantenimiento debe **prohibir intervenir simultáneamente** en más de un switch de core o en el nodo `DATCC-2A-C3` (btw #1). Una ventana de mantenimiento mal planificada que deje dos switches de core fuera de servicio a la vez coloca a la red en la zona frágil del umbral de ataque — el equivalente a un f=0.11, ya por encima del fc del ataque más destructivo.
+
+Recomendación práctica: establecer una lista de **nodos de mantenimiento restringido** (los top-10 por betweenness: DATCC-2A-C3, CPAR-C10, ROUTER-CAMPUS-HUAYNA-CAPAC, INTERNET-MPLS, PE2-CENTRAL...) que requieran aprobación especial y ventana nocturna con plan de respaldo activo antes de cualquier intervención.
+
+#### Consecuencia operativa para un plan de respuesta ante incidentes de seguridad
+
+Un atacante que conozca la topología de la red — o que simplemente use `nmap` y calcule betweenness — puede colapsar la red UCuenca comprometiendo **18 dispositivos** (10% de 177). Peor aún, con la estrategia de betweenness recalculada, cada compromiso le da información sobre el siguiente objetivo más crítico.
+
+El plan de respuesta ante incidentes debe priorizar dos medidas:
+
+1. **Detección temprana en los nodos críticos.** Los switches de core y los routers WAN (DATCC-2A-C3, CPAR-C10, INTERNET-MPLS) deben tener monitoreo continuo con alertas en tiempo real. Un ataque que llegue al tercer o cuarto nodo sin ser detectado ya ha reducido la eficiencia de la red al 50%.
+
+2. **Aislamiento rápido antes que recuperación.** Ante un incidente de seguridad en un nodo de core, la prioridad no es restaurarlo — es aislarlo antes de que el atacante use ese nodo comprometido para pivotar hacia el siguiente hub crítico. Dado que la red colapsa con 18 nodos, cada hub comprometido que no se aísla acelera el siguiente paso del ataque.
+
+La paradoja tiene una implicación directa: **los mismos nodos que hacen la red eficiente son los que la hacen vulnerable.** No es posible eliminar esa tensión sin añadir redundancia (más aristas entre campus, rutas alternativas al backbone MPLS), que es exactamente lo que los modelos nulos ER y CM tienen y la red real no.
 
 ---
 
