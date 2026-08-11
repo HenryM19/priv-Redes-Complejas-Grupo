@@ -257,6 +257,21 @@ def nodos_discrepantes(
 # ------------------------------------------------------------
 # Ítem 4 — k-means espectral (Laplaciano)
 # ------------------------------------------------------------
+# FUENTE: adaptado de codigo_referencia/kmeans/ejemplo1.jl
+# (Dr. Fabián Astudillo-Salinas, Módulo 1217 — Redes Complejas).
+# El código original implementa k-means desde cero en Julia con:
+#   · init_plusplus()      → inicialización K-means++ (distancia²)
+#   · assign_clusters()    → paso de asignación O(n·K·d)
+#   · update_centroids()   → recálculo de centroides como media aritmética
+#   · wcss()               → Within-Cluster Sum of Squares (métrica de convergencia)
+#   · my_kmeans()          → bucle principal: asignar → actualizar → convergencia
+# La adaptación a Python reemplaza el bucle manual por sklearn.cluster.KMeans,
+# que implementa los mismos pasos internamente con inicialización K-means++
+# (equivalente a init_plusplus) y criterio de convergencia por tolerancia en
+# desplazamiento de centroides (equivalente al norm(μ_new - μ_old) < tol del original).
+# El embedding espectral (vectores propios del Laplaciano) es la adaptación
+# al dominio de grafos: sustituye los datos numéricos del ejemplo de pingüinos
+# por coordenadas espectrales derivadas de la estructura topológica de la red.
 
 def kmeans_espectral(G: nx.Graph, k: int, semilla: int = 42) -> dict:
     """
@@ -267,26 +282,36 @@ def kmeans_espectral(G: nx.Graph, k: int, semilla: int = 42) -> dict:
     la geometría espectral del grafo. Sus vectores propios de menor valor
     propio forman el embedding donde k-means opera.
 
+    Adaptado de: codigo_referencia/kmeans/ejemplo1.jl
+    (Módulo 1217 — Redes Complejas, Dr. Fabián Astudillo-Salinas)
+
     Argumentos:
         G      (nx.Graph): grafo no dirigido.
         k      (int)     : número de clusters (igual al número de comunidades Louvain).
-        semilla (int)    : semilla para k-means.
+        semilla (int)    : semilla para k-means (equivalente a Random.seed! del original).
 
     Salida:
         dict con claves:
-            'etiquetas'   — {nodo: cluster}
-            'k'           — número de clusters
+            'etiquetas'       — {nodo: cluster}
+            'k'               — número de clusters
             'valores_propios' — primeros k valores propios del Laplaciano
     """
     nodos = list(G.nodes())
+    # Construir Laplaciano normalizado L_sym = D^{-1/2}(D-A)D^{-1/2}
     L = nx.normalized_laplacian_matrix(G, nodelist=nodos).toarray()
 
+    # Calcular vectores propios (equivalente a eigen(L) del original en Julia)
     valores, vectores = np.linalg.eigh(L)
-    # Usar los k vectores propios de menor valor propio (excluir el primero ≈ 0)
+
+    # Embedding espectral: k vectores propios de menor valor propio
+    # (los k primeros capturan la estructura comunitaria del grafo)
     embedding = vectores[:, :k]
+    # Normalización L2 por fila (estabiliza k-means en el espacio espectral)
     embedding = normalize(embedding, norm="l2")
 
-    km = KMeans(n_clusters=k, random_state=semilla, n_init=20)
+    # K-means con inicialización K-means++ (equivalente a init_plusplus del original)
+    # n_init=20 replica múltiples inicializaciones para evitar óptimos locales
+    km = KMeans(n_clusters=k, random_state=semilla, n_init=20, init="k-means++")
     etiquetas_array = km.fit_predict(embedding)
 
     etiquetas = {n: int(etiquetas_array[i]) for i, n in enumerate(nodos)}

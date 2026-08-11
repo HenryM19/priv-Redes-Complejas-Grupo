@@ -457,67 +457,149 @@ def modelo_barabasi_albert(G_real: nx.Graph, semilla: int = 42) -> nx.Graph:
 
 def visualizacion_campus(G: nx.Graph, nodos_df: pd.DataFrame) -> None:
     """
-    Produce una visualización de la red coloreada por campus usando
-    el algoritmo de disposición spring (Fruchterman-Reingold).
+    Visualización BFS radial de la red UCuenca partiendo desde INTERNET-MPLS.
 
-    Se elige spring porque distribuye los nodos maximizando la
-    separación y minimizando el cruce de aristas, sin imponer
-    coordenadas fijas. Para redes medianas (~200 nodos) produce
-    una disposición legible donde los campus tienden a agruparse.
+    Se usa nx.bfs_layout con la raíz en el nodo de salida a internet.
+    El árbol se despliega horizontalmente: el gateway queda a la izquierda
+    y los switches de acceso a la derecha. Las posiciones se escalan para
+    maximizar la separación entre nodos. Los nodos se colorean por campus
+    y su tamaño es proporcional al grado.
 
     Argumentos:
         G        (nx.Graph)    : grafo de la red UCuenca.
-        nodos_df (pd.DataFrame): tabla de nodos con columnas id y campus.
+        nodos_df (pd.DataFrame): tabla de nodos con columnas id, campus, capa.
 
     Salida: None (guarda imagen en disco).
     """
-    # Paleta de campus
-    campus_lista = sorted(nodos_df["campus"].unique())
-    paleta = [
-        "#2980b9", "#e74c3c", "#27ae60", "#f39c12",
-        "#8e44ad", "#16a085", "#d35400", "#2c3e50",
-    ]
-    campus_color = {c: paleta[i % len(paleta)]
-                    for i, c in enumerate(campus_lista)}
+    rng = np.random.default_rng(42)
 
     nodo_campus = dict(zip(nodos_df["id"], nodos_df["campus"]))
+    nodo_capa   = dict(zip(nodos_df["id"], nodos_df["capa"]))
+
+    # Raíz = nodo gateway
+    raiz = "INTERNET-MPLS"
+    if raiz not in G.nodes():
+        raiz = next((n for n in G.nodes() if nodo_capa.get(n) == "wan"),
+                    list(G.nodes())[0])
+
+    # BFS layout: align="horizontal" → raíz a la izquierda, hojas a la derecha
+    pos_raw = nx.bfs_layout(G, raiz, align="horizontal")
+
+    # Re-espaciar por profundidad BFS:
+    # cada nivel (fila) ocupa el ancho total del canvas, ordenando
+    # los nodos por campus dentro de cada fila para agrupar colores.
+    bfs_depth = nx.single_source_shortest_path_length(G, raiz)
+    depth_nodes = {}
+    for n, d in bfs_depth.items():
+        depth_nodes.setdefault(d, []).append(n)
+
+    W = 28.0   # ancho total del canvas
+    max_depth = max(depth_nodes.keys())
+    # Y: raíz abajo (depth 0 → y=0), acceso arriba (depth máx → y=alto)
+    H_POR_NIVEL = 2.8
+
+    pos = {}
+    for depth, nodos_nivel in depth_nodes.items():
+        y = depth * H_POR_NIVEL
+        # Ordenar por campus para agrupar colores dentro de la fila
+        nodos_nivel_sorted = sorted(
+            nodos_nivel,
+            key=lambda n: (nodo_campus.get(n, ""), nodo_capa.get(n, ""), n)
+        )
+        n_row = len(nodos_nivel_sorted)
+        # Espacio entre nodos proporcional al ancho disponible
+        paso = W / (n_row + 1)
+        for i, nd in enumerate(nodos_nivel_sorted):
+            x = (i + 1) * paso + rng.uniform(-paso * 0.25, paso * 0.25)
+            pos[nd] = (x, y + rng.uniform(-0.25, 0.25))
+
+    # Paleta por campus
+    campus_orden = [
+        "Campus Central", "Campus Balzay", "Campus Paraiso",
+        "Campus Yanuncay", "Campus Hospitalidad",
+        "Nube MPLS", "Sede Centro Historico", "Sede Museo",
+    ]
+    paleta = ["#e74c3c", "#2980b9", "#f39c12",
+              "#8e44ad", "#27ae60", "#16a085", "#d35400", "#2c3e50"]
+    campus_color = {c: paleta[i % len(paleta)]
+                    for i, c in enumerate(campus_orden)}
+
     node_colors = [campus_color.get(nodo_campus.get(n, ""), "#aaaaaa")
                    for n in G.nodes()]
+    grados    = dict(G.degree())
 
-    # Disposición spring: semilla fija para reproducibilidad
-    pos = nx.spring_layout(G, seed=7, k=0.55, iterations=80)
+    # Tamaños diferenciados por capa: core/wan grandes, acceso pequeño
+    def _size(n):
+        capa = nodo_capa.get(n, "acceso")
+        base = {"wan": 600, "core": 450, "interconexion": 300,
+                "agregacion": 180, "acceso": 80}
+        return base.get(capa, 80) + grados[n] * 15
 
-    fig, ax = plt.subplots(figsize=(14, 10))
-    ax.set_facecolor("#f8f9fa")
-    fig.patch.set_facecolor("#f8f9fa")
+    node_size = [_size(n) for n in G.nodes()]
 
-    # Aristas
+    # Figura grande + alta resolución
+    fig, ax = plt.subplots(figsize=(26, max_depth * 1.6 + 3))
+    fig.set_dpi(130)
+    ax.set_facecolor("#f4f6f8")
+    fig.patch.set_facecolor("#f4f6f8")
+
+    # Aristas — más finas para no tapar nodos
     nx.draw_networkx_edges(G, pos, ax=ax,
-                           edge_color="#bdc3c7", width=0.7, alpha=0.6)
+                           edge_color="#c5cdd5", width=0.6, alpha=0.45)
 
     # Nodos
     nx.draw_networkx_nodes(G, pos, ax=ax,
                            node_color=node_colors,
-                           node_size=120,
-                           edgecolors="#2c3e50",
-                           linewidths=0.5)
+                           node_size=node_size,
+                           edgecolors="#2c3e50", linewidths=0.5)
 
-    # Leyenda de campus
+    # Etiquetas — solo core, wan e interconexión, fuente legible
+    etiq_core = {n: (n[:18] + "…" if len(n) > 18 else n)
+                 for n in G.nodes()
+                 if nodo_capa.get(n, "") in ("core", "wan")}
+    etiq_inter = {n: (n[:14] + "…" if len(n) > 14 else n)
+                  for n in G.nodes()
+                  if nodo_capa.get(n, "") == "interconexion"}
+
+    nx.draw_networkx_labels(G, pos, labels=etiq_core, ax=ax,
+                            font_size=7, font_color="#1a1a2e",
+                            font_weight="bold")
+    nx.draw_networkx_labels(G, pos, labels=etiq_inter, ax=ax,
+                            font_size=6, font_color="#2c3e50",
+                            font_weight="bold")
+
+    # Leyenda grande y legible
     leyenda = [mpatches.Patch(color=campus_color[c], label=c)
-               for c in campus_lista]
-    ax.legend(handles=leyenda, loc="upper left", fontsize=8,
-              framealpha=0.9, title="Campus", title_fontsize=9)
+               for c in campus_orden if c in campus_color]
+    ax.legend(handles=leyenda, loc="upper right", fontsize=10,
+              framealpha=0.95, title="Campus", title_fontsize=11,
+              ncol=1, markerscale=1.4)
+
+    # Anotación de la raíz
+    rx, ry = pos[raiz]
+    ax.annotate("Gateway · INTERNET-MPLS",
+                xy=(rx, ry), xytext=(rx + 1.5, ry - 0.9),
+                fontsize=9, color="#1a4a7a", fontweight="bold",
+                arrowprops=dict(arrowstyle="->", color="#1a4a7a", lw=1.4))
+
+    # Leyenda de capas (tamaño de nodo)
+    handles_capa = [
+        mpatches.Patch(color="#888888", label="○ grande = core/WAN"),
+        mpatches.Patch(color="#888888", label="○ medio  = agregación"),
+        mpatches.Patch(color="#888888", label="○ pequeño = acceso"),
+    ]
+    ax.legend(handles=leyenda, loc="upper right", fontsize=10,
+              framealpha=0.95, title="Campus", title_fontsize=11, ncol=1)
 
     ax.set_title(
-        "Red UCuenca — Visualización por campus\n"
-        "Disposición: Spring (Fruchterman-Reingold, k=0.55, 80 iter.)",
-        fontsize=12, fontweight="bold", pad=12
+        "Red UCuenca — Layout BFS desde INTERNET-MPLS\n"
+        "Izquierda = gateway · Derecha = switches de acceso   ·   color = campus   ·   tamaño ∝ capa jerárquica",
+        fontsize=13, fontweight="bold", pad=14
     )
     ax.axis("off")
     fig.tight_layout()
     _guardar_figura(fig, "p2_visualizacion_campus.png")
-    print("  Algoritmo spring elegido porque distribuye los nodos sin")
-    print("  coordenadas fijas, favoreciendo la separación visual de campus.")
+    print(f"  BFS radial desde {raiz} — nodos escalados por capa.")
 
 
 def visualizacion_betweenness(G: nx.Graph, nodos_df: pd.DataFrame) -> None:
@@ -542,7 +624,7 @@ def visualizacion_betweenness(G: nx.Graph, nodos_df: pd.DataFrame) -> None:
 
     # Tamaño proporcional a betweenness (escala para visibilidad)
     b_vals   = np.array([between[n] for n in G.nodes()])
-    tam_min, tam_max = 50, 1800
+    tam_min, tam_max = 40, 1200
     if b_vals.max() > 0:
         node_sizes = tam_min + (b_vals / b_vals.max()) * (tam_max - tam_min)
     else:
@@ -560,10 +642,13 @@ def visualizacion_betweenness(G: nx.Graph, nodos_df: pd.DataFrame) -> None:
     node_colors = [paleta_capa.get(nodo_capa.get(n, "acceso"), "#aaaaaa")
                    for n in G.nodes()]
 
-    # Disposición Kamada-Kawai
-    pos = nx.kamada_kawai_layout(G)
+    # Kamada-Kawai + escalar posiciones para mayor separación
+    pos_raw = nx.kamada_kawai_layout(G)
+    # Escalar coordenadas: multiplicar por factor para separar nodos
+    SCALE = 3.5
+    pos = {n: (xy[0] * SCALE, xy[1] * SCALE) for n, xy in pos_raw.items()}
 
-    fig, ax = plt.subplots(figsize=(14, 10))
+    fig, ax = plt.subplots(figsize=(18, 14))
     ax.set_facecolor("#1a1a2e")
     fig.patch.set_facecolor("#1a1a2e")
 

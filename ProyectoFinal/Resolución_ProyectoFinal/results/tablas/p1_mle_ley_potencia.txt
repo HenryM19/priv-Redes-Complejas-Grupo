@@ -1,0 +1,17 @@
+============================================================
+ÍTEM 2b · MLE — LEY DE POTENCIA (Clauset et al. 2009)
+============================================================
+  k_min óptimo     : 6
+  γ MLE            : 3.6509
+  Estadístico KS   : 0.0570
+  Nodos en la cola : 20 / 177
+  log R (PL vs Exp): -0.0005  (favorece Exponencial)
+
+  INTERPRETACIÓN:
+  Con k_min=6 y γ=3.651 el KS mínimo es 0.0570.
+  Un KS > 0.10 con n < 50 nodos en la cola indica que la ley
+  de potencia no es un buen ajuste estadístico.
+  La red UCuenca NO es scale-free en sentido estricto: la
+  topología jerárquica (acceso→agregación→core) impone grados
+  típicos por capa, incompatibles con una cola de potencia pura.
+============================================================

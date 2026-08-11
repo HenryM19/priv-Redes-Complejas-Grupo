@@ -29,6 +29,38 @@ Los seis campus se interconectan a través de una **nube MPLS** de un proveedor 
 
 ---
 
+## Notación matemática
+
+A lo largo del informe se usa la siguiente notación estándar de teoría de grafos:
+
+| Símbolo | Significado |
+|---------|-------------|
+| $G = (V, E)$ | Grafo: conjunto de nodos $V$ y conjunto de aristas $E$ |
+| $V$ | Conjunto de todos los nodos (equipos de red). $\|V\| = n$ |
+| $E$ | Conjunto de todas las aristas (cables). $\|E\| = m$ |
+| $n = \|V\|$ | Número total de nodos. En UCuenca: $n = 177$ |
+| $m = \|E\|$ | Número total de aristas. En UCuenca: $m = 209$ |
+| $u, v, w$ | Nodos individuales del grafo |
+| $(u, v) \in E$ | Arista que conecta los nodos $u$ y $v$ |
+| $\mathcal{N}(v)$ | Vecindad de $v$: conjunto de nodos directamente conectados a $v$ |
+| $k_v$ | Grado del nodo $v$: número de aristas que inciden en $v$ |
+| $d(u, v)$ | Distancia más corta (en saltos) entre los nodos $u$ y $v$ |
+| $S \subseteq V$ | Subconjunto de nodos (por ejemplo, una comunidad o campus) |
+| $G - v$ | Subgrafo resultante de eliminar el nodo $v$ y todas sus aristas |
+| $G - e$ | Subgrafo resultante de eliminar la arista $e$ |
+| $\kappa(G)$ | Número de componentes conexas del grafo $G$ |
+| $A$ | Matriz de adyacencia: $A_{uv} = 1$ si $(u,v) \in E$, 0 en caso contrario |
+| $D$ | Matriz diagonal de grados: $D_{vv} = k_v$ |
+| $\sigma_{st}$ | Número total de caminos más cortos entre los nodos $s$ y $t$ |
+| $\sigma_{st}(v)$ | Número de caminos más cortos entre $s$ y $t$ que pasan por $v$ |
+| $\langle \cdot \rangle$ | Promedio sobre todos los nodos: $\langle k \rangle = \frac{1}{n}\sum_v k_v$ |
+| $f, q$ | Fracción de nodos/aristas eliminados en experimentos de percolación |
+| $\beta, \gamma$ | Tasa de infección y recuperación en el modelo SIR |
+| $c(u,v)$ | Capacidad del enlace $(u,v)$ en Mbps |
+| $w(u,v)$ | Peso del enlace $(u,v)$ según el modelo de costo elegido |
+
+---
+
 ## Fase 1 — Modelado y Caracterización
 
 > **Peso: 5 puntos** | Contenidos 1.1–1.4 del sílabo
@@ -132,25 +164,48 @@ Estadísticas descriptivas:
 | Grado medio $\langle k \rangle$ | 2.36 |
 | Grado mediano | 1 |
 
-El gráfico log-log no permite concluir visualmente el tipo de distribución. Para identificar formalmente si sigue una ley de potencia, exponencial, log-normal u otro modelo se realizará un ajuste por **máxima verosimilitud** con test de bondad de ajuste (análisis pendiente).
+El gráfico log-log muestra una nube de puntos sin alineación recta clara — lo que sugiere que la distribución **no** sigue una ley de potencia pura. Para confirmarlo formalmente se aplica el método de **Máxima Verosimilitud (MLE)** de Clauset, Shalizi & Newman (2009).
 
-#### ¿Es UCuenca una red libre de escala?
+#### Análisis MLE — ¿Es UCuenca una red libre de escala?
 
-Una **red libre de escala** (*scale-free*) es aquella cuya distribución de grado sigue una ley de potencia $P(k) \sim k^{-\gamma}$ con $2 < \gamma < 3$. En el gráfico log-log esto se manifiesta como una línea recta.
+Una **red libre de escala** (*scale-free*) es aquella cuya distribución de grado sigue una ley de potencia $P(k) \sim k^{-\gamma}$ con $2 < \gamma < 3$. Para la ley de potencia **discreta** (grados enteros), el estimador MLE es:
 
-> *Lectura:* $P(k)$ es la fracción de nodos con grado $k$. Si se grafica $\log P(k)$ vs $\log k$ y aparece una **línea recta**, la distribución es una ley de potencia con pendiente $-\gamma$. Hay poquísimos hubs con grado altísimo, pero existen. El nombre "libre de escala" indica que no existe un grado "típico" — la distribución no tiene una escala característica finita. En contraste, ER produce una campana de Poisson donde casi todos los nodos tienen grado similar.
+$$\hat{\gamma} = 1 + n \left[\sum_{i=1}^{n} \ln\frac{k_i}{k_{\min} - 0.5}\right]^{-1}$$
 
-**No se puede afirmar** que UCuenca sea libre de escala por tres razones:
+donde $k_{\min}$ es el umbral mínimo de la cola y $n$ el número de nodos con $k_i \geq k_{\min}$. El $k_{\min}$ óptimo se elige minimizando la distancia de Kolmogorov-Smirnov (KS) entre la CDF empírica y la CDF teórica normalizada con la función Zeta de Hurwitz:
 
-1. Con $n = 177$ y rango de grados $[1, 17]$, la muestra es insuficiente para ajustar una ley de potencia con rigor estadístico.
-2. La asimetría de grados responde a **diseño deliberado** (el arquitecto asignó muchas conexiones al core), no a crecimiento preferencial.
-3. El gráfico log-log no muestra alineación recta de los puntos.
+$$P(K \geq k) = \frac{\zeta(\gamma,\, k)}{\zeta(\gamma,\, k_{\min})}, \qquad \zeta(s,a) = \sum_{n=0}^{\infty}(n+a)^{-s}$$
 
-**¿Qué se necesitaría para determinarlo formalmente?** El método estándar es el de **Clauset, Shalizi & Newman (2009)**:
-- Estimar $\gamma$ y $k_{\min}$ por máxima verosimilitud.
-- Calcular la distancia KS entre la ley de potencia ajustada y los datos empíricos.
-- Generar distribuciones sintéticas para obtener un p-valor: si $p > 0.1$, la ley de potencia no puede descartarse.
-- Comparar contra distribuciones alternativas (exponencial, log-normal) con el test de razón de verosimilitudes.
+**Resultados del barrido de $k_{\min}$:**
+
+| $k_{\min}$ | $\hat{\gamma}$ | KS | $n_{\text{cola}}$ |
+|:---:|:---:|:---:|:---:|
+| 1 | 1.8414 | 0.0900 | 177 |
+| 2 | 2.0369 | 0.1354 | 64 |
+| 3 | 2.2376 | 0.2015 | 42 |
+| 4 | 2.7367 | 0.1553 | 36 |
+| 5 | 3.3188 | 0.0586 | 29 |
+| **6** | **3.6509** | **0.0570** | **20** |
+| 7 | 3.7288 | 0.0955 | 13 |
+| 8 | 3.8305 | 0.1449 | 9 |
+
+El mínimo KS se alcanza en $k_{\min} = 6$, con $\hat{\gamma} = 3.65$ y $\text{KS} = 0.057$. Sin embargo, **solo 20 de 177 nodos** quedan en la cola ($\approx 11\%$), lo que invalida el ajuste sobre la red completa.
+
+La figura siguiente compara $P(k)$ empírica con curvas de ley de potencia para $\gamma \in \{1.5, 2.0, 2.5, 3.0, 3.5\}$ y el ajuste MLE óptimo, junto al barrido de KS vs $k_{\min}$:
+
+![MLE Ley de Potencia](results/imagenes/p1_mle_ley_potencia.png)
+
+**Test razón de verosimilitudes (power law vs exponencial):** el log-ratio es $\approx -0.0005$, esencialmente cero — ambas distribuciones son estadísticamente indistinguibles sobre la cola $k \geq 6$.
+
+#### Conclusión: UCuenca **no** es una red libre de escala
+
+La red UCuenca **no** satisface los criterios de una red libre de escala, por tres razones:
+
+1. **Rango insuficiente:** con grados en $[1, 17]$, el rango es demasiado estrecho para distinguir una ley de potencia de una exponencial o de una distribución truncada artificialmente.
+2. **Topología jerárquica diseñada:** los grados por capa son fijos por diseño (acceso $k\approx1$–$2$, agregación $k\approx3$–$6$, core $k\approx8$–$17$). No existe crecimiento preferencial — la red fue planificada, no emergente.
+3. **$\hat{\gamma} = 3.65 > 3$:** aunque se ajusta formalmente una ley de potencia en la cola $k\geq6$, el exponente cae fuera del régimen scale-free clásico ($2 < \gamma < 3$) y solo describe 20 nodos de los 177.
+
+> *En palabras simples:* una red libre de escala crece espontáneamente (internet, redes sociales) y genera unos pocos "supernodos" con miles de conexiones. La red UCuenca, en cambio, fue diseñada por un arquitecto con una jerarquía predefinida acceso→agregación→core. Eso produce grados típicos por capa, no una cola de potencia sin límite superior.
 
 ---
 
@@ -472,25 +527,25 @@ El modelo correcto para una red de este tipo sería un **árbol jerárquico $k$-
 
 ### Ítem 3 · Visualizaciones propias
 
-#### Visualización 1 — Coloreada por campus (Spring / Fruchterman-Reingold)
+#### Visualización 1 — BFS por profundidad desde INTERNET-MPLS
 
 ![Visualización por campus](results/imagenes/p2_visualizacion_campus.png)
 
-**Algoritmo:** Spring (Fruchterman-Reingold), parámetros: $k=0.55$, 80 iteraciones, semilla 7.
+**Algoritmo:** BFS (*Breadth-First Search*) con re-espaciado por nivel. Se parte desde el nodo `INTERNET-MPLS` (gateway de salida a internet) y se calcula la profundidad BFS de cada nodo. La posición Y es proporcional a esa profundidad (gateway abajo, switches de acceso arriba); dentro de cada fila los nodos se distribuyen uniformemente a lo ancho del canvas, ordenados por campus para agrupar colores. El tamaño del nodo refleja su capa jerárquica: los nodos core/WAN aparecen más grandes y los de acceso más pequeños.
 
-**Justificación del algoritmo:** El layout de Fruchterman-Reingold modela el grafo como un sistema físico donde las aristas actúan como resortes (atracción) y los nodos como cargas eléctricas (repulsión). El equilibrio minimiza el cruce de aristas y distribuye los nodos respetando la estructura de vecindad. Se eligió porque, sin imponer coordenadas fijas, los campus tienden a agruparse naturalmente al compartir muchas aristas internas.
+**Justificación del algoritmo:** La profundidad BFS desde el gateway mide directamente cuántos saltos separa a cada nodo de internet — que es la métrica operacional más importante en una red universitaria. Un nodo en la fila 1 (un salto) es un switch de core; uno en la fila 4–5 es un switch de acceso de edificio. Algoritmos de fuerza como Fruchterman-Reingold no garantizan que esta estructura quede visible; el layout BFS la explicita. Ordenar los nodos por campus dentro de cada fila permite ver, además, si los campus comparten nivel de profundidad o si algunos están más "alejados" del gateway que otros.
 
-**Qué revela:** los campus aparecen como grupos semi-separados, conectados entre sí a través de los nodos WAN/MPLS centrales. Los switches de core de cada campus actúan como "pegamento" entre los nodos de agregación y acceso de su cluster.
+**Qué revela:** `INTERNET-MPLS` es el único nodo de profundidad 0 — cualquier tráfico a internet pasa obligatoriamente por él. Los routers WAN y switches de core ocupan las filas 1–2 (1–2 saltos). La capa de agregación aparece en las filas intermedias. Los 113 switches de acceso se distribuyen en las filas superiores: el hecho de que no todos estén a la misma profundidad confirma que la red no es un árbol perfecto — algunos edificios tienen un salto extra por la forma en que se encadenaron los switches de agregación.
 
-#### Visualización 2 — Tamaño ∝ betweenness, color = capa (Kamada-Kawai)
+#### Visualización 2 — Tamaño ∝ betweenness, color = capa (Kamada-Kawai escalado)
 
 ![Visualización por betweenness](results/imagenes/p2_visualizacion_betweenness.png)
 
-**Algoritmo:** Kamada-Kawai.
+**Algoritmo:** Kamada-Kawai con escalado de posiciones ×3.5. Kamada-Kawai asigna a cada par de nodos una longitud ideal de arco proporcional a su distancia en el grafo y minimiza la diferencia entre esas distancias ideales y las distancias euclídeas en el dibujo. El layout resultante produce posiciones normalizadas en $[-1, 1]$ que se multiplican por un factor 3.5 para expandir el espacio disponible — esto separa físicamente los nodos en el canvas sin alterar su estructura relativa, reduciendo el solapamiento entre los círculos grandes del centro.
 
-**Justificación del algoritmo:** Kamada-Kawai asigna a cada par de nodos una longitud ideal de arco proporcional a su distancia en el grafo. El layout minimiza la energía de deformación entre las distancias ideales y las euclídeas. Esto hace que nodos cercanos en el grafo queden cerca en el dibujo, revelando la estructura jerárquica: los switches de core aparecen en el centro (equidistantes de todos) y los switches de acceso en la periferia.
+**Justificación del algoritmo:** Kamada-Kawai coloca los nodos más centrales (equidistantes del resto) en el centro del dibujo — justo donde están los switches de core y WAN con mayor betweenness. El escalado ×3.5 combinado con figura 18×14 pulgadas y tamaño máximo de nodo controlado (1200 unidades) permite que los círculos grandes sean visibles sin tapar a sus vecinos.
 
-**Qué revela:** los nodos de mayor intermediación (círculos más grandes) son switches de core y WAN, confirmando que son los cuellos de botella de la red. Los switches de acceso (azules, círculos pequeños) forman la periferia densa; los de core (rojos) y los nodos WAN (morados) ocupan la zona central.
+**Qué revela:** los nodos de mayor intermediación (círculos más grandes) son switches de core y WAN, confirmando que son los cuellos de botella de la red — todo el tráfico entre campus pasa por ellos. Los switches de acceso (azul, círculos pequeños) forman la periferia; los de core (rojo) y WAN (morado) quedan en el centro. La diferencia de tamaño entre el nodo más grande (`DATCC-2A-C3`, betweenness=6880) y los de acceso (betweenness≈0) es visible a simple vista.
 
 ---
 
@@ -522,8 +577,8 @@ Se parece superficialmente (distribución sesgada, clustering bajo, asortativida
 
 > **¿Qué algoritmo de disposición (layout) se usó y por qué?**
 
-- **Spring / Fruchterman-Reingold** para la visualización por campus: distribuye los nodos minimizando una energía de resortes, lo que agrupa nodos muy conectados entre sí. Revela los clústeres por campus sin forzar ninguna geometría.
-- **Kamada-Kawai** para la visualización por betweenness: asigna distancias ideales proporcionales a la distancia en el grafo. Coloca los cuellos de botella en el centro geométrico, haciendo visualmente evidente qué nodos dominan los caminos más cortos.
+- **BFS por profundidad desde INTERNET-MPLS** para la visualización por campus: cada fila horizontal corresponde a un nivel de profundidad BFS (número de saltos desde el gateway). Los nodos se ordenan por campus dentro de cada fila, agrupando colores y haciendo visible la topología en árbol acceso → agregación → core → WAN. Se eligió sobre Fruchterman-Reingold porque la jerarquía de UCuenca es conocida de antemano y no necesita ser "descubierta" por un algoritmo de fuerzas.
+- **Kamada-Kawai escalado ×3.5** para la visualización por betweenness: asigna distancias ideales proporcionales a la distancia en el grafo y escala las posiciones resultantes para reducir solapamientos entre los círculos grandes del centro. Coloca los cuellos de botella en el centro geométrico, haciendo visualmente evidente qué nodos dominan los caminos más cortos.
 
 ---
 
@@ -547,6 +602,12 @@ $$d(s, v) = \min\{|P| : P \text{ es camino de } s \text{ a } v\}$$
 
 **DFS (Búsqueda en Profundidad):** explora cada rama hasta el fondo antes de retroceder. Usa una pila (implícita en la recursión).
 
+**Ciclo:** un ciclo en un grafo no dirigido es una secuencia de nodos $v_1, v_2, \ldots, v_k, v_1$ tal que cada par consecutivo está unido por una arista y todos los nodos son distintos (excepto el primero y el último):
+
+$$C = (v_1 - v_2 - \cdots - v_k - v_1), \quad v_i \neq v_j \text{ para } i \neq j$$
+
+> *Lectura:* se parte de $v_1$, se recorre la secuencia de aristas, y se regresa a $v_1$ sin repetir ningún nodo. En términos de red, un ciclo entre dos nodos $A$ y $B$ implica que existen **al menos dos caminos independientes** de $A$ a $B$ — si uno de los enlaces del ciclo falla, el tráfico puede tomar el otro camino. La **ausencia de ciclos** en una zona equivale a topología de árbol: no hay camino alternativo y cualquier fallo de enlace aísla a los equipos aguas abajo.
+
 En grafos no dirigidos, las aristas se clasifican en:
 - **Aristas de árbol:** aristas $(u,v)$ donde $v$ se descubre por primera vez desde $u$.
 - **Aristas de retroceso:** aristas $(u,v)$ donde $v$ ya fue visitado y es ancestro de $u$ → indican un **ciclo**.
@@ -562,6 +623,51 @@ $$T(n, m) = O(n + m), \qquad S(n) = O(n)$$
 $$\mu = m - n + 1$$
 
 > *Lectura:* un árbol de $n$ nodos tiene exactamente $n-1$ aristas y cero ciclos. Cada arista adicional sobre ese árbol crea exactamente un ciclo nuevo. En UCuenca: $\mu = 209 - 177 + 1 = 33$. Hay 33 ciclos independientes, que corresponden a los 33 enlaces redundantes de la red.
+
+#### Estructura de datos empleada e implementación
+
+Ambos algoritmos se implementaron **desde cero** sin usar `nx.bfs_tree`, `nx.dfs_tree` ni funciones equivalentes de NetworkX. Solo se usa `G.neighbors(u)` para acceder a los vecinos de cada nodo.
+
+**BFS — Cola FIFO (`collections.deque`)**
+
+La cola FIFO (First In, First Out) es la estructura clave de BFS. El primer nodo en entrar es el primero en procesarse, lo que garantiza que se exploren primero los nodos más cercanos al origen:
+
+```
+cola = deque([origen])
+mientras cola no esté vacía:
+    u = cola.popleft()          # sacar del frente — O(1)
+    para cada vecino v de u:
+        si v no visitado:
+            cola.append(v)      # agregar al final — O(1)
+```
+
+Si se reemplazara la cola por una pila el algoritmo dejaría de ser BFS — procesaría primero el último nodo agregado y se convertiría en DFS.
+
+**DFS — Pila LIFO implícita (recursión)**
+
+DFS usa una pila LIFO (Last In, First Out). En la implementación recursiva, la pila de llamadas del sistema operativo actúa como pila implícita: cada llamada recursiva apila un nuevo frame; cuando no hay más vecinos sin visitar, la función retorna y desapila:
+
+```
+función dfs_recursivo(u, padre):
+    marcar u como visitado
+    tiempo_descubrimiento[u] = ++t
+    para cada vecino v de u:
+        si v no visitado:
+            arista_árbol(u, v)
+            dfs_recursivo(v, u)       # ← apilar
+        sino si v ≠ padre:
+            arista_retroceso(u, v)    # ← ciclo detectado
+    tiempo_finalización[u] = ++t      # ← desapilar
+```
+
+**Comparación de estructuras y complejidades:**
+
+| Algoritmo | Estructura de datos | Por qué esa estructura | Complejidad temporal | Complejidad espacial |
+|-----------|--------------------|-----------------------|---------------------|---------------------|
+| BFS | Cola FIFO (`deque`) | Procesa nodos por orden de llegada → explora nivel a nivel → garantiza camino más corto | $O(n + m)$ | $O(n)$ |
+| DFS | Pila LIFO (recursión) | Procesa el último nodo apilado → va tan profundo como puede antes de retroceder → detecta ciclos | $O(n + m)$ | $O(n)$ |
+
+Ambos visitan cada nodo una vez ($n$ operaciones) y cada arista dos veces — una desde cada extremo ($2m$ operaciones) — de ahí $O(n+m)$. El espacio adicional $O(n)$ corresponde al conjunto de nodos visitados y la cola/pila en el peor caso.
 
 ### Ítem 2 · Perfil de profundidad BFS desde el core
 
@@ -610,21 +716,81 @@ Desde MPLS, los campus más "lejanos" (mayor concentración a distancias 4–6) 
 
 ### Ítem 4 · Ciclos detectados con DFS
 
+#### ¿Qué es un ciclo en este contexto?
+
+Un **ciclo** en el grafo de la red es un camino cerrado: una secuencia de equipos y enlaces que parte de un nodo y regresa a él sin repetir ninguna arista. Su significado operativo es directo:
+
+> **Ciclo = redundancia = camino alternativo.** Si existe un ciclo entre los nodos A y B, hay al menos dos rutas independientes entre ellos: si un enlace falla, el tráfico puede redirigirse por la ruta alternativa sin pérdida de conectividad. **La ausencia de ciclos en una zona equivale a topología de árbol: cualquier fallo de enlace o nodo en esa zona desconecta irremediablemente a los equipos aguas abajo.**
+
+#### Cómo DFS detecta ciclos (implementación desde cero)
+
+Durante el DFS, cada arista se clasifica automáticamente:
+
+- **Arista de árbol** $(u \to v)$: $v$ no había sido visitado → construye el árbol DFS.
+- **Arista de retroceso** $(u \to w)$: $w$ ya fue visitado y es ancestro de $u$ → **cierra un ciclo**.
+
+Cada arista de retroceso corresponde exactamente a un ciclo independiente. El número ciclomático predice cuántas deben encontrarse:
+
+$$\mu = m - n + 1 = 209 - 177 + 1 = 33$$
+
+La función `detectar_ciclos()` de `problema3.py` ejecuta `dfs()` desde el switch de core `DATCC-2A-C3`, recorre los 177 nodos y 209 aristas, y registra cada arista de retroceso encontrada.
+
+#### Resultados
+
 | Métrica | Valor |
 |---------|-------|
 | Número ciclomático $\mu = m - n + 1$ | **33** |
-| Aristas de retroceso (DFS) | **33** ✓ |
+| Aristas de retroceso detectadas por DFS | **33** ✓ |
 | Ciclos en Campus Central | 21 |
 | Ciclos en Campus Balzay | 9 |
 | Ciclos en Nube MPLS | 3 |
+| Ciclos en Campus Paraíso | **0** |
+| Ciclos en Campus Yanuncay | **0** |
+| Ciclos en Campus Hospitalidad | **0** |
 
 ![Ciclos DFS](results/imagenes/p3_ciclos.png)
 
-#### Análisis
+*Rojo = aristas de retroceso (cierran ciclos). Gris = aristas de árbol DFS. Los 33 ciclos se concentran en Campus Central y Balzay; el resto del grafo es árbol puro.*
 
-Los 33 ciclos del grafo corresponden exactamente a los 33 enlaces redundantes: las 12 aristas de rol `respaldo` y las 5 de rol `secundario` (12 + 5 = 17) más los ciclos en la nube MPLS y los LAG que se modelaron como aristas paralelas colapsadas.
+#### Análisis — Relación con los enlaces redundantes
 
-La **ausencia de ciclos en Paraíso, Yanuncay y Hospitalidad** (0 aristas de retroceso en esos campus) confirma el hallazgo del P1: esos campus no tienen redundancia real en la capa core–agregación — toda su topología es un árbol, vulnerable a cualquier fallo de enlace o nodo.
+Los 33 ciclos se ubican exclusivamente en tres zonas. La clave para entenderlos es que **un ciclo aparece cuando un switch de agregación tiene dos cables subiendo hacia el core** en lugar de uno solo:
+
+```
+ Caso CON ciclo (redundancia):        Caso SIN ciclo (árbol):
+
+     C2 ————— C3                           C10
+      \       /                             |
+       \     /    ← triángulo              AGG-Y   ← un solo uplink
+        AGG-X     = 1 ciclo                |
+           |                             acceso
+         acceso
+```
+
+En el caso con ciclo, si el cable `AGG-X → C2` falla, el tráfico toma `AGG-X → C3`. En el caso sin ciclo, si el cable `AGG-Y → C10` falla, todos los equipos de acceso quedan sin conexión.
+
+**Campus Central (21 ciclos):** tiene dos switches de core (`DATCC-2A-C2` y `DATCC-2A-C3`). Cada uno de sus 21 switches de agregación tiene un cable hacia cada core, formando un triángulo como el del esquema izquierdo — un ciclo por switch de agregación. Adicionalmente, el edificio de Arquitectura (`CC-ARQUITECTURA-D107`, grado=10) aporta ciclos propios por sus enlaces internos redundantes.
+
+**Campus Balzay (9 ciclos):** mismo principio — dos cores duales (`DT-0A-C12` y `DT-0A-C13`). Cada switch de agregación de Balzay con doble uplink forma un triángulo → 9 ciclos.
+
+**Nube MPLS (3 ciclos):** los routers `PE1-BALZAY`, `PE2-CENTRAL` e `INTERNET-MPLS` están interconectados entre sí formando un pequeño anillo en la capa WAN — redundancia de tránsito entre campus.
+
+**Campus Paraíso, Yanuncay y Hospitalidad (0 ciclos):** sus switches de agregación tienen un único cable hacia el core — esquema derecho del diagrama. No hay triángulo, no hay ciclo, no hay camino alternativo. Un fallo en cualquier enlace aísla permanentemente a los equipos de acceso aguas abajo.
+
+#### Zonas sin ciclos = zonas sin camino alternativo
+
+| Campus | Ciclos | Puentes en P1 | Implicación |
+|--------|--------|---------------|-------------|
+| Central | 21 | Pocos | Redundancia real: doble uplink core–agregación |
+| Balzay | 9 | Moderados | Redundancia core–agregación confirmada |
+| MPLS | 3 | 0 | Anillo WAN entre campus |
+| **Paraíso** | **0** | **Muchos** | **Árbol puro: un fallo aisla edificios enteros** |
+| **Yanuncay** | **0** | **Muchos** | **Árbol puro: topología completamente sin respaldo** |
+| **Hospitalidad** | **0** | **Muchos** | **Árbol puro: topología completamente sin respaldo** |
+
+Esto cierra el círculo con el P1 Ítem 5: los 141 puentes del grafo son exactamente las aristas **fuera de todo ciclo** — las aristas de árbol DFS. Los 68 enlaces no-puente (209 − 141 = 68) forman los 33 ciclos (cada ciclo independiente aporta en promedio 2 enlaces al total de no-puentes).
+
+La coincidencia es total: **cero ciclos en una zona ↔ todas sus aristas son puentes ↔ cualquier fallo de enlace aísla un subgrafo ↔ ausencia de camino alternativo.**
 
 ### Ítem 5 · BFS vs DFS para inspección física
 
@@ -653,7 +819,33 @@ $$Q = \frac{1}{2m} \sum_{c \in \mathcal{C}} \sum_{u,v \in c} \left[A_{uv} - \fra
 
 donde $A_{uv}$ es la matriz de adyacencia, $k_u$ y $k_v$ los grados, y $m$ el número de aristas.
 
-> *Lectura:* para cada par de nodos $(u,v)$ en la misma comunidad, se compara la arista real $A_{uv}$ con la probabilidad esperada en un grafo aleatorio con los mismos grados $\frac{k_u k_v}{2m}$. Si hay más conexiones dentro de las comunidades de lo que el azar esperaría, $Q > 0$. El algoritmo Louvain maximiza $Q$ de forma greedy en dos fases iterativas (reasignación local + contracción de grafo). $Q \in [-1, 1]$; valores > 0.3 indican estructura comunitaria significativa.
+> *Lectura:* para cada par de nodos $(u,v)$ en la misma comunidad, se compara la arista real $A_{uv}$ con la probabilidad esperada en un grafo aleatorio con los mismos grados $\frac{k_u k_v}{2m}$. Si hay más conexiones dentro de las comunidades de lo que el azar esperaría, $Q > 0$. $Q \in [-1, 1]$; valores > 0.3 indican estructura comunitaria significativa.
+
+#### Cómo funciona Louvain
+
+Louvain no fija las comunidades de antemano y luego mide Q — las construye **maximizando Q en cada paso**:
+
+**Fase 1 — Reasignación local:** se asigna a cada nodo su propia comunidad (al inicio hay tantas comunidades como nodos). Luego, para cada nodo, se calcula cuánto cambiaría Q si ese nodo se uniera a la comunidad de cada uno de sus vecinos. Si algún movimiento incrementa Q, el nodo se mueve a la comunidad que más lo incrementa. Se repite para todos los nodos hasta que ningún movimiento mejore Q.
+
+```
+Inicio: 177 nodos → 177 comunidades individuales
+
+Para cada nodo u:
+  Para cada vecino v de u:
+    ¿Q sube si u se une a la comunidad de v?
+    Si sí → mover u a esa comunidad
+Repetir hasta que ningún movimiento mejore Q
+```
+
+**Fase 2 — Contracción:** cada comunidad detectada se colapsa en un único super-nodo. Los enlaces entre comunidades se convierten en enlaces entre super-nodos (con pesos proporcionales al número de aristas originales). Sobre este grafo reducido se repite la Fase 1.
+
+```
+Iteración 1: 177 nodos → agrupa en ~40 comunidades
+Iteración 2: 40 super-nodos → agrupa en ~14 comunidades
+Iteración 3: 14 super-nodos → ningún movimiento mejora Q → fin
+```
+
+El algoritmo para cuando ningún movimiento en ningún nodo incrementa Q — en ese punto la partición es un **máximo local de Q** y se reportan el número de comunidades y el valor final de Q.
 
 #### Resultados
 
@@ -700,6 +892,8 @@ $$\text{ARI} \in [-1, 1], \quad \text{ARI} = 1 \iff \text{particiones idénticas
 
 La matriz de confusión muestra que varias comunidades se corresponden bien con un único campus (comunidades 0, 1, 10 con Campus Central/Yanuncay/Paraíso respectivamente). Pero la **comunidad 9** mezcla nodos de Balzay, Central, Hospitalidad, Paraíso, Yanuncay y MPLS: son los nodos de la capa WAN/interconexión que Louvain agrupa porque están estructuralmente cerca entre sí (todos conectados a través de la nube MPLS), aunque geográficamente pertenecen a campus distintos.
 
+En otras palabras: al aplicar Louvain se formó una comunidad compuesta por los routers de interconexión (`PE1-BALZAY`, `PE2-CENTRAL`, `INTERNET-MPLS` y similares) que, aunque administrativamente pertenecen a campus distintos, están directamente conectados entre sí a través de la nube MPLS. Louvain los agrupó juntos porque desde la perspectiva de la topología actúan como una unidad cohesionada — esto no es un error del algoritmo sino una detección funcionalmente correcta: esos equipos forman la capa WAN de interconexión entre campus y en la red se comportan como un grupo propio, independientemente del campus al que pertenezcan en papel.
+
 ### Ítem 3 · Nodos discrepantes
 
 **83 de 177 nodos** (47%) son asignados por Louvain a una comunidad distinta de la mayoritaria de su campus.
@@ -712,6 +906,8 @@ Los patrones de discrepancia son reveladores:
 - **Edificio de Arquitectura** (comunidad 2): `CC-ARQUITECTURA-D107` y sus switches de acceso forman comunidad propia, a pesar de estar en Campus Central. La razón: `CC-ARQUITECTURA-D107` tiene grado 10, creando una subestructura densa que Louvain separa del resto del campus.
 
 ### Ítem 4 · k-means espectral (Laplaciano)
+
+> **Fuente del código:** adaptado de `codigo_referencia/kmeans/ejemplo1.jl` (Dr. Fabián Astudillo-Salinas, Módulo 1217 — Redes Complejas). El original implementa k-means desde cero en Julia con inicialización K-means++ (`init_plusplus`), paso de asignación (`assign_clusters`), actualización de centroides (`update_centroids`) y métrica WCSS de convergencia. La adaptación a Python usa `sklearn.cluster.KMeans` con `init="k-means++"`, que implementa los mismos pasos internamente. El embedding espectral (vectores propios del Laplaciano) sustituye los datos numéricos del ejemplo original por coordenadas topológicas de la red.
 
 #### Definición matemática
 
@@ -733,9 +929,25 @@ $$L_{\text{sym}} = D^{-1/2}(D - A)D^{-1/2}$$
 
 #### Análisis
 
-k-means espectral supera ligeramente a Louvain en NMI y ARI respecto al campus real (0.64 vs 0.62 y 0.42 vs 0.33). Ambos métodos coinciden en un 86% de la información mutua (NMI k-means vs Louvain = 0.86), lo que indica que ambos descubren una estructura comunitaria similar.
+k-means espectral supera ligeramente a Louvain en NMI y ARI respecto al campus real (0.64 vs 0.62 y 0.42 vs 0.33). Ambos métodos coinciden en un 86% de la información mutua (NMI k-means vs Louvain = 0.86), lo que indica que ambos descubren una estructura comunitaria similar aunque por caminos matemáticos distintos.
 
-**¿Por qué k-means espectral puede ser más preciso?** Louvain optimiza $Q$ con una heurística greedy susceptible a óptimos locales. k-means espectral opera en un espacio de baja dimensión más rico en información geométrica, sin el sesgo de resolución de la modularidad.
+#### ¿Por qué k-means con distancia euclídea puede o no ser adecuado para un grafo?
+
+El problema fundamental es que **un grafo no tiene coordenadas euclídeas naturales** — los nodos no existen en un espacio geométrico, solo existen conexiones entre ellos. Aplicar k-means directamente sobre un grafo no tiene sentido porque k-means mide distancias euclídeas y en un grafo la distancia entre nodos se mide en saltos, no en metros.
+
+La solución es el **embedding espectral**: transformar el grafo en vectores antes de aplicar k-means. Cada nodo recibe un vector de coordenadas calculado a partir de los $k$ primeros vectores propios del Laplaciano normalizado $L_{\text{sym}}$. El truco matemático es que nodos que están bien conectados entre sí quedan cerca en ese espacio vectorial — la estructura de conexiones del grafo se traduce en proximidad euclídea.
+
+```
+Grafo (conexiones)  →  Laplaciano  →  vectores propios  →  coordenadas por nodo
+                                                              ↓
+                                                         k-means (distancia euclídea)
+```
+
+**¿Cuándo funciona bien?** Cuando las comunidades del grafo son compactas y bien separadas entre sí. En UCuenca, cada campus forma una estrella densa (muchas conexiones internas, pocas hacia fuera), lo que se traduce en clusters bien separados en el espacio espectral — de ahí que k-means obtenga NMI = 0.64.
+
+**¿Cuándo falla?** Cuando las comunidades tienen formas irregulares o están encadenadas. k-means asume comunidades esféricas de tamaño similar en el espacio euclídeo. En UCuenca, la comunidad WAN es una cadena lineal de routers (no una esfera), y los campus pequeños como Hospitalidad (5 nodos) son mucho más pequeños que Campus Central (80+ nodos) — esto viola los supuestos de k-means y explica que no alcance NMI = 1 aunque el embedding sea bueno.
+
+Louvain no tiene este problema porque no asume ninguna forma geométrica: solo maximiza Q mirando las conexiones directas.
 
 ### Ítem 5 · Limitación de resolución de la modularidad
 
@@ -745,9 +957,28 @@ La modularidad $Q$ tiene una **escala de resolución intrínseca**: comunidades 
 
 $$|E_c| \lesssim \sqrt{2m} \approx \sqrt{418} \approx 20 \text{ aristas}$$
 
-En UCuenca, los campus pequeños (Hospitalidad con ~5 nodos, Museo con 2, Centro Histórico con 1) tienen muy pocas aristas internas. La comunidad 9 los absorbe porque Louvain prefiere fusionarlos con la comunidad WAN antes que mantenerlos como comunidades independientes de 1–5 nodos.
+Cualquier campus con menos de ~20 aristas internas corre el riesgo de ser absorbido por una comunidad vecina más grande, porque fusionarlo incrementa más $Q$ que mantenerlo separado.
 
-**Consecuencia:** Louvain detecta 14 comunidades, pero la partición "real" por campus tiene 8. El exceso (14 vs 8) se explica porque Louvain subdivide los campus grandes (Central en 8–9 sub-comunidades, Paraíso en 4) mientras fusiona los campus pequeños con la nube MPLS. Esto refleja que la estructura comunitaria de UCuenca es **más fina que el campus**: los edificios individuales forman comunidades topológicamente bien definidas.
+#### Evidencia en UCuenca
+
+La siguiente tabla muestra el tamaño de cada campus (nodos y aristas internas) frente al umbral de resolución:
+
+| Campus | Nodos | Aristas internas | ¿Supera umbral (~20)? | Comportamiento Louvain |
+|--------|-------|-----------------|----------------------|------------------------|
+| Campus Central | ~85 | ~97 | ✓ Sí | **Subdividido** en 8–9 subcomunidades por edificio |
+| Campus Paraíso | ~37 | ~36 | ✓ Sí | **Subdividido** en 4 subcomunidades |
+| Campus Balzay | ~30 | ~28 | ✓ Sí | Detectado como 1–2 comunidades |
+| Campus Yanuncay | ~14 | ~13 | ✗ No | Detectado marginalmente, parcialmente fusionado |
+| Campus Hospitalidad | ~6 | ~5 | ✗ No | **Absorbido** en comunidad WAN (comunidad 9) |
+| Museo / C. Histórico | ~3 | ~2 | ✗ No | **Absorbido** en comunidad WAN (comunidad 9) |
+
+**Lo que muestra la evidencia:**
+
+- **Campus grandes (Central, Paraíso, Balzay):** superan el umbral con holgura → Louvain los detecta pero los *subdivide* en subcomunidades por edificio, porque dentro de cada campus los switches de acceso de un edificio forman subestructuras más densas entre sí que con el resto del campus.
+
+- **Campus pequeños (Hospitalidad, Museo, Centro Histórico):** están muy por debajo del umbral (~2–5 aristas internas vs umbral de 20) → Louvain los *fusiona* con la comunidad WAN porque aportan más $Q$ uniéndose a la comunidad 9 que existiendo solos.
+
+**Consecuencia:** Louvain detecta 14 comunidades, pero la partición real por campus tiene 8. El exceso se explica por los dos fenómenos anteriores actuando simultáneamente: subdivide los campus grandes y fusiona los campus pequeños. Desde la perspectiva de un administrador de red, esto significa que Louvain ve los *edificios* como unidad natural, no los campus.
 
 ---
 
