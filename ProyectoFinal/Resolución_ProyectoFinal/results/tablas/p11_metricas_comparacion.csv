@@ -1,0 +1,5 @@
+variante,n_aristas,n_puentes,n_articulacion,dist_media,eficiencia_global
+Original,209,141,47,5.8304,0.20821
+Propuesta ICC,214,137,46,4.9756,0.23295
+Alt. A (grado),214,138,45,4.5213,0.25237
+Alt. B (btw),214,140,46,4.9655,0.23389

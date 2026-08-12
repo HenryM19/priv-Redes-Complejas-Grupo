@@ -1856,6 +1856,8 @@ La paradoja tiene una implicación directa: **los mismos nodos que hacen la red 
 
 ## P9 — Fallas en Cascada y Epidemias SIR *(2.5 puntos)*
 
+Este problema estudia cómo se propagan eventos negativos a través de la red bajo dos modelos dinámicos distintos. El primero es un modelo de **cascada de fallos por sobrecarga** (Motter-Lai): cuando un switch cae, su tráfico se redistribuye entre los demás, y si alguno de ellos se satura también cae, generando un efecto dominó. El segundo es un modelo **epidémico SIR**: simula cómo un malware o una mala configuración se contagia de equipo en equipo, y evalúa qué estrategia de parcheo detiene el brote más eficientemente con el menor número de equipos intervenidos. Ambos modelos buscan responder la misma pregunta desde ángulos distintos: **¿cuán vulnerable es la red UCuenca ante un evento que se propaga internamente?**
+
 ### Ítem 1 · Modelo de carga-capacidad (Motter-Lai)
 
 Cada nodo $i$ tiene:
@@ -1868,12 +1870,29 @@ Al fallar el nodo inicial, el betweenness de los nodos supervivientes aumenta (m
 >
 > *En palabras simples:* es como un atasco de tráfico que se propaga: si la autopista principal se cierra, los conductores se desvían por carreteras secundarias. Si esas carreteras tampoco aguantan el nuevo tráfico, también colapsan, creando más desvíos en un efecto dominó.
 
-### Ítem 2 · Fracción de nodos fallidos vs tolerancia $\alpha$
+#### Algoritmo implementado
 
-**Nodo detonador:** `DATCC-2A-C3` (mayor betweenness: 6880)
+El modelo se ejecuta de la siguiente forma para cada nodo disparador:
 
-| $\alpha$ | Nodos fallidos | Fracción | Pasos de cascada |
-|----------|---------------|----------|-----------------|
+1. **Inicialización:** calcular el betweenness $B_i$ de todos los nodos en la red intacta. Asignar $C_i = (1+\alpha) \cdot B_i$ como capacidad máxima de cada nodo.
+2. **Fallo inicial:** eliminar el nodo disparador del grafo.
+3. **Redistribución:** recalcular el betweenness de todos los nodos restantes — los caminos que antes pasaban por el nodo caído ahora pasan por rutas alternativas, aumentando la carga de esos nodos.
+4. **Detección de nuevos fallos:** identificar todos los nodos cuyo nuevo betweenness supera su capacidad $C_i$.
+5. **Propagación:** eliminar esos nodos del grafo y volver al paso 3.
+6. **Criterio de parada:** la cascada termina cuando ningún nodo activo supera su capacidad, o cuando no quedan nodos.
+
+El resultado de cada ejecución es el conjunto total de nodos fallidos (disparador + caídos en cascada) y el número de pasos que tomó la propagación. Se repite para todo $\alpha \in \{0, 0.05, 0.10, 0.20, 0.50, 1.00, 1.50, 2.00\}$ y para cada nodo posible como disparador, para identificar los más peligrosos.
+
+### Ítem 2 · Margen crítico $\tau_c$ y nodos disparadores más peligrosos
+
+La guía define $\tau_c$ como el margen por debajo del cual la falla de un único nodo provoca una cascada que afecta a más del **20% de la red** (>35 nodos de 177).
+
+#### Resultado principal: la cascada nunca alcanza el 20%
+
+El barrido de $\alpha \in \{0, 0.05, \ldots, 2.0\}$ iniciado desde el nodo más peligroso muestra:
+
+| $\alpha$ | Nodos fallidos | Fracción | Pasos |
+|----------|---------------|----------|-------|
 | 0.00 | 12 | 6.8% | 1 |
 | 0.05 | 9 | 5.1% | 2 |
 | 0.10 | 9 | 5.1% | 2 |
@@ -1883,13 +1902,28 @@ Al fallar el nodo inicial, el betweenness de los nodos supervivientes aumenta (m
 | 1.50 | 5 | 2.8% | 1 |
 | 2.00 | 3 | 1.7% | 1 |
 
+**$\tau_c$ no existe para esta red**: incluso con $\alpha = 0$ (capacidad exactamente igual a la carga nominal, sin ningún margen), la cascada máxima alcanza solo el **6.8%** de los nodos — muy por debajo del umbral del 20%. Esto se debe a la topología jerárquica: los 132 switches de acceso tienen grado 1, por lo que al quedar desconectados no redistribuyen carga hacia otros nodos y la cascada se detiene en la capa de agregación.
+
+Este es un resultado positivo: **la red UCuenca es estructuralmente resistente a las cascadas de carga**, a diferencia de las redes de transmisión eléctrica donde la redistribución de carga puede propagarse a través de múltiples niveles de la jerarquía.
+
 ![Cascada de fallos](results/imagenes/p9_cascada.png)
 
-#### Análisis
+#### Nodos disparadores más peligrosos ($\alpha = 0.1$)
 
-Con $\alpha = 0$ (sin margen), la falla de `DATCC-2A-C3` provoca la cascada de 12 nodos (6.8%) en 1 paso. A partir de $\alpha \geq 0.2$ la cascada se estabiliza en 8 nodos (los switches directamente conectados a él que quedan desconectados). Solo con $\alpha \geq 1.5$ se controla la cascada a menos de 5 nodos adicionales.
+Se corrió el modelo desde cada uno de los 177 nodos para identificar los más peligrosos:
 
-La arquitectura jerárquica limita naturalmente la propagación: como cada switch de acceso solo tiene grado 1, al quedar desconectado no puede "propagar" más carga a otros nodos (no tiene tráfico de tránsito). La cascada se detiene en la capa de agregación.
+| Rank | Nodo disparador | Nodos fallidos | Fracción | Betweenness |
+|------|----------------|---------------|----------|-------------|
+| 1 | FORTIGATE-1800F-BALZAY | 11 | 6.2% | 2 295 |
+| 2 | FORTIGATE-1800F-CENTRAL | 10 | 5.6% | 2 869 |
+| 3 | INTERNET-MPLS | 10 | 5.6% | 5 631 |
+| 4 | DATCC-2A-C3 | 9 | 5.1% | 6 880 |
+| 5 | DT-0A-C13 | 6 | 3.4% | 3 442 |
+| 6 | PE2-CENTRAL | 6 | 3.4% | 4 437 |
+| 7 | PE2-BALZAY | 6 | 3.4% | 2 249 |
+| 8 | DATCC-2A-C2 | 6 | 3.4% | 2 627 |
+
+El nodo más peligroso para cascadas **no es el de mayor betweenness** (`DATCC-2A-C3`, rank 4) sino `FORTIGATE-1800F-BALZAY` (rank 1). La razón: el Fortigate de Balzay conecta dos zonas relativamente independientes de la red; su fallo fuerza que todo el tráfico de Balzay pase por una única ruta alternativa, saturando los nodos intermedios. `DATCC-2A-C3` tiene más betweenness pero sus vecinos tienen mayor capacidad de absorber la redistribución.
 
 ### Ítem 3 · Modelo SIR y umbral crítico
 
@@ -1915,20 +1949,28 @@ $$\tau_c = \frac{\langle k \rangle}{\langle k^2 \rangle} = \frac{2.362}{12.694} 
 
 Para $\beta > \tau_c$ existe una epidemia global; para $\beta < \tau_c$ la infección se extingue localmente.
 
-> *Lectura:* el umbral depende de la heterogeneidad de grados. Redes con $\langle k^2 \rangle \gg \langle k \rangle$ (muchos hubs) tienen $\tau_c \to 0$: son vulnerables a epidemias con tasas de infección bajas.
+> *Lectura de la notación:* $\langle k \rangle$ se lee "promedio de k" — es el grado medio de todos los nodos (cuántas conexiones tiene cada nodo en promedio; para UCuenca: 2.362). $\langle k^2 \rangle$ se lee "promedio de k al cuadrado" — se eleva el grado de cada nodo al cuadrado y se promedia (para UCuenca: 12.694). Este segundo valor es mucho mayor que el primero porque los hubs, al tener grado alto, inflan enormemente el promedio cuando se elevan al cuadrado. $\langle k^2 \rangle \gg \langle k \rangle$ significa "el promedio de k cuadrado es mucho mayor que el promedio de k", lo que ocurre cuando la red tiene hubs. Como el denominador de $\tau_c$ es grande, el umbral resulta pequeño ($\tau_c = 0.186$): la red es vulnerable a virus poco contagiosos.
 >
-> *En palabras simples:* en una red donde hay algunos equipos muy conectados (hubs), basta con una tasa de infección muy baja para que el virus se propague a toda la red. Los hubs actúan como "superpropagadores".
+> *En palabras simples:* en una red donde hay algunos equipos muy conectados (hubs), basta con una tasa de infección muy baja para que el virus se propague a toda la red. Los hubs actúan como "superpropagadores": cualquier virus que los alcance se distribuye de golpe a todos sus vecinos.
 
-#### Resultados SIR
+#### Resultados SIR y comparación con la predicción de campo medio
 
-| Caso | $\beta$ | $\gamma$ | $R_{\text{final}}$ | Nodos afectados |
-|------|---------|---------|-------------------|----------------|
-| Sub-crítico | 0.0931 ($\approx \tau_c/2$) | 0.1 | 51 | 28.8% |
-| Sobre-crítico | 0.3722 ($\approx 2\tau_c$) | 0.1 | 140 | 79.1% |
+La predicción teórica de campo medio establece $\tau_c = \langle k \rangle / \langle k^2 \rangle = 0.1861$. Para verificarla, el código fija $\gamma = 0.1$ (probabilidad de recuperación por paso) y elige dos valores de $\beta$ a ambos lados del umbral: $\beta_{\text{sub}} = \tau_c / 2$ y $\beta_{\text{sup}} = 2\tau_c$. Estos son **parámetros de diseño del experimento**, no propiedades de la red — su propósito es mostrar los dos regímenes contrastantes:
+
+| Caso | $\beta$ (elegido) | $\gamma$ (fijo) | Relación con $\tau_c = 0.1861$ | $R_{\text{final}}$ | Nodos afectados |
+|------|------------------|----------------|-------------------------------|-------------------|----------------|
+| Sub-crítico | 0.0931 | 0.1 | $\beta = \tau_c / 2$ → por debajo del umbral | 51 | 28.8% |
+| Sobre-crítico | 0.3722 | 0.1 | $\beta = 2\tau_c$ → por encima del umbral | 140 | 79.1% |
+
+**Comparación con campo medio:** la predicción teórica establece que para $\beta < \tau_c$ la infección debería extinguirse localmente, y para $\beta > \tau_c$ debería propagarse como epidemia global. La simulación confirma cualitativamente esta predicción: el caso sub-crítico produce un brote acotado del 28.8% y el sobre-crítico alcanza el 79.1%.
+
+Sin embargo, el resultado sub-crítico (28.8%) es mayor de lo que la teoría pura esperaría (casi 0%). Esto se debe a que $\tau_c = \langle k \rangle / \langle k^2 \rangle$ es una aproximación para redes grandes e infinitas. La red UCuenca tiene solo 177 nodos y asortatividad negativa (−0.15), lo que desplaza el umbral real respecto a la predicción teórica.
 
 ![Modelo SIR](results/imagenes/p9_sir.png)
 
 ### Ítem 4 · Estrategias de inmunización
+
+El ítem plantea un problema de **presupuesto fijo**: si el equipo de TI solo puede parchear $m$ equipos (instalar actualizaciones, aislar vulnerabilidades), ¿cuáles conviene elegir para minimizar el tamaño del brote? Se comparan cuatro estrategias con el mismo número de nodos inmunizados (misma fracción $f$ del total): aleatoria, por grado (parchear primero los switches más conectados), por betweenness (parchear los más intermediarios) y por vecino aleatorio (proxy práctico que no requiere conocer la topología completa). El escenario usa $\beta = 2\tau_c = 0.3722$ (régimen sobre-crítico) para que la diferencia entre estrategias sea visible.
 
 Fracción afectada ($R_{\text{final}}/n$) con $\beta = 0.3722$, $\gamma = 0.1$:
 
@@ -1950,18 +1992,25 @@ La **estrategia por vecino** es un buen proxy práctico: sin conocer la red comp
 
 La estrategia **aleatoria** es la menos eficiente: requiere el 30% de cobertura para llegar a 33% de afectados, mientras que por grado con 20% ya llega al 4%.
 
-### Ítem 5 · Nodo más crítico
+### Ítem 5 · Analogía con redes de transmisión eléctrica
 
-`DATCC-2A-C3` es el nodo más crítico por ambos criterios:
+Los modelos de cascadas de carga fueron desarrollados originalmente para redes de transmisión eléctrica (Motter & Lai, 2002). La analogía con la red UCuenca es directa:
 
-| Criterio | Impacto |
-|----------|---------|
-| Cascada de carga ($\alpha=0$) | 12 nodos adicionales fallan (6.8%) |
-| Propagación SIR ($\beta=2\tau_c$) | 140/177 nodos afectados (79.1%) |
-| Betweenness | 6880 (mayor de la red) |
-| Grado | 17 (mayor de la red) |
+| Concepto en red eléctrica | Equivalente en red UCuenca |
+|--------------------------|---------------------------|
+| **Carga** de una línea de transmisión | **Betweenness** del nodo: número de caminos más cortos que pasan por él. Mide cuánto "tráfico de datos" intermedia el switch. |
+| **Capacidad** de la línea | $C_i = (1+\alpha) \cdot B_i$: máximo betweenness que el switch puede manejar sin colapsar. Equivale al límite térmico de la línea eléctrica. |
+| **Redistribución de carga** tras una falla | Al caer un switch, los paquetes de datos se redirigen por los caminos alternativos, aumentando el betweenness de los nodos en esas rutas. En redes eléctricas, la potencia se redistribuye físicamente por las líneas restantes (ley de Kirchhoff). |
+| **Cascada** | En electricidad: una línea sobrecargada se desconecta automáticamente por protecciones, transfiriendo más carga a las líneas restantes hasta el apagón (blackout). En UCuenca: un switch que supera su capacidad de procesamiento entra en estado de error y cae, forzando más tráfico por otros caminos. |
+| **Umbral $\alpha$** | En electricidad: margen de reserva de capacidad de las líneas (spinning reserve). En UCuenca: sobreprovisionamiento de CPU/memoria del switch respecto a su carga nominal de betweenness. |
 
-La coincidencia de los rankings de betweenness, grado, cascada y propagación SIR en el mismo nodo confirma que **`DATCC-2A-C3` es el punto de mayor fragilidad operativa de la red UCuenca**.
+#### ¿Por qué las redes eléctricas son más vulnerables a cascadas?
+
+En redes eléctricas la redistribución de carga sigue las leyes de Kirchhoff y es **instantánea y global**: cuando una línea cae, la potencia se redistribuye simultáneamente por todas las líneas del sistema, pudiendo sobrecargar líneas en el extremo opuesto de la red. Este efecto a distancia es lo que produce grandes apagones en cascada (e.g. Northeast Blackout 2003: la falla de 3 líneas en Ohio cascadeó hasta afectar 55 millones de personas).
+
+En la red UCuenca, la redistribución de betweenness es **local**: solo los caminos que pasaban por el nodo caído se ven afectados, y la topología jerárquica con muchos nodos de grado 1 actúa como barrera natural que detiene la propagación. Esto explica por qué la cascada máxima observada es solo 6.8% frente a apagones que afectan el 100% de la red eléctrica.
+
+> **Referencia:** Motter, A. E., & Lai, Y.-C. (2002). *Cascade-based attacks on complex networks*. Physical Review E, 66(6), 065102. Este artículo introduce el modelo de carga-capacidad con betweenness utilizado en este problema y demuestra que redes heterogéneas con pocos hubs son especialmente vulnerables a cascadas iniciadas en esos hubs.
 
 ---
 
@@ -1994,6 +2043,165 @@ Con $\alpha \geq 1.5$, la cascada iniciada en `DATCC-2A-C3` se limita a 5 nodos 
 Sí, con la interpretación correcta. $\beta$ representa la tasa a la que una misconfiguration, vulnerability o malware se propaga de un switch a sus vecinos (por ejemplo, a través de protocolos de gestión como SNMP, SSH, o de enrutamiento como OSPF). $\gamma$ representa la tasa de parcheo o restauración. El umbral $\tau_c = 0.186$ indica que, para que una campaña de malware de red se extinga sola, su tasa de propagación debe ser menor al 18.6% por interfaz por unidad de tiempo — un valor que malware moderno supera fácilmente.
 
 ---
+
+## Problema P10 — Diagnóstico de puntos críticos
+
+Este problema sintetiza los resultados de las Fases 1 a 4 en un único ranking de criticidad. Se define un **Índice de Criticidad Compuesto (ICC)** que combina cuatro dimensiones: la centralidad estructural del nodo, su condición topológica como punto de separación, su participación en el cuello de botella de flujo, y el daño dinámico que genera al fallar.
+
+### Definición y justificación del ICC
+
+$$ICC_i = 0.35 \cdot \hat{B}_i + 0.25 \cdot A_i + 0.20 \cdot C_i + 0.20 \cdot \hat{D}_i$$
+
+| Componente | Símbolo | Origen | Peso | Justificación |
+|-----------|---------|--------|------|--------------|
+| Betweenness normalizada | $\hat{B}_i$ | Fase 1 — P1 | 0.35 | El nodo con mayor betweenness intermedia más flujo; su caída aumenta rutas alternativas más largas |
+| Punto de articulación | $A_i \in \{0,1\}$ | Fase 1 — P1 | 0.25 | Un punto de articulación desconecta la red al fallar; consecuencia irreversible sin redundancia |
+| En corte mínimo | $C_i \in \{0,1\}$ | Fase 3 — P6 | 0.20 | Los nodos del corte mínimo limitan la capacidad de flujo; su eliminación reduce la transferencia máxima a 0 |
+| Daño en cascada normalizado | $\hat{D}_i$ | Fase 4 — P9 | 0.20 | Mide el efecto dinámico: cuántos nodos adicionales caen en el modelo Motter-Lai con $\alpha=0.1$ |
+
+Los pesos reflejan que la centralidad y la condición estructural (articulación) son los indicadores más robustos y directamente medibles, mientras que el daño en cascada —aunque más informativo en términos de impacto operativo— depende del parámetro $\alpha$ del modelo.
+
+### Top-10 nodos críticos
+
+| Rank | Nodo | Campus | Función | Grado | $\hat{B}$ | Art. | Corte | $\hat{D}$ | **ICC** |
+|------|------|--------|---------|-------|-----------|------|-------|-----------|---------|
+| 1 | INTERNET-MPLS | Nube MPLS | Backbone MPLS / salida Internet | 8 | 0.819 | ✓ | ✓ | 0.91 | **0.9183** |
+| 2 | ROUTER-CAMPUS-HUAYNA-CAPAC | Campus Paraíso | Router de campus | 3 | 0.820 | ✓ | ✓ | 0.09 | **0.7551** |
+| 3 | CPAR-C10 | Campus Paraíso | Core — interconexión inter-campus | 7 | 0.905 | ✓ | — | 0.09 | **0.5849** |
+| 4 | DATCC-2A-C3 | Campus Central | Core — interconexión inter-campus | 17 | 1.000 | — | — | 0.82 | **0.5136** |
+| 5 | ROUTER-CAMPUS-YANUNCAY | Campus Yanuncay | Router de campus | 3 | 0.048 | ✓ | — | 0.09 | **0.3683** |
+| 6 | AGRPRI-1A-D10 | Campus Yanuncay | Agregación | 12 | 0.038 | ✓ | — | 0.09 | **0.3633** |
+| 7 | CC-ARQUITECTURA-D107 | Campus Central | Agregación | 10 | 0.027 | ✓ | — | 0.09 | **0.3632** |
+| 8 | BAL-AUL2-D1 | Campus Balzay | Agregación | 12 | 0.021 | ✓ | — | 0.09 | **0.3549** |
+| 9 | CP-EADMINA1-D6 | Campus Paraíso | Agregación | 9 | 0.022 | ✓ | — | 0.09 | **0.3380** |
+| 10 | CP-ODONTOLOGIA-D4 | Campus Paraíso | Agregación | 6 | 0.017 | ✓ | — | 0.09 | **0.3378** |
+
+### Fichas de los nodos #1 a #4 (mayor riesgo)
+
+**#1 · INTERNET-MPLS** — ICC = 0.9183 ⚠️ CRÍTICO INSTITUCIONAL
+
+El nodo de mayor criticidad compuesta de la red. Actúa como punto único de salida a Internet y concentrador del backbone MPLS que conecta todos los campus. Es simultáneamente punto de articulación (su caída desconecta al menos un subgrafo), nodo del corte mínimo (limita la capacidad de flujo máximo), y el segundo mayor generador de cascadas (91% de la carga máxima). *Consecuencia estimada:* pérdida total de conectividad a Internet y ruptura de la topología MPLS inter-campus; afecta servicios administrativos, académicos y de investigación de forma simultánea.
+
+**#2 · ROUTER-CAMPUS-HUAYNA-CAPAC** — ICC = 0.7551 ⚠️ CRÍTICO DE CAMPUS
+
+Router de acceso del Campus Paraíso al backbone. Tiene la segunda betweenness más alta de la red (0.820 normalizado) porque todos los flujos del campus pasan por él, y es punto de articulación y del corte mínimo. *Consecuencia estimada:* aislamiento completo del Campus Paraíso del resto de la red universitaria.
+
+**#3 · CPAR-C10** — ICC = 0.5849 ⚠️ CRÍTICO DE CAMPUS
+
+Switch de core del Campus Paraíso con el mayor betweenness de toda la red (0.905 normalizado, superior incluso a DATCC-2A-C3 por su posición topológica). Es punto de articulación — conecta 7 nodos de agregación/acceso al backbone. *Consecuencia estimada:* aunque no genera cascada masiva, su caída deja sin servicio a todos los edificios del Campus Paraíso de forma inmediata.
+
+**#4 · DATCC-2A-C3** — ICC = 0.5136 ⚠️ CRÍTICO INSTITUCIONAL
+
+Switch de core del Campus Central con el mayor betweenness absoluto de la red (1.000 normalizado), mayor grado (17 interfaces activas) y mayor daño en cascada estático (82% de la carga máxima). No es punto de articulación porque DATCC-2A-C2 provee redundancia parcial. *Consecuencia estimada:* degradación masiva del Campus Central con posible cascada que afecta hasta 14 nodos dependientes de sus rutas.
+
+### Análisis del ranking
+
+El ICC revela tres perfiles de criticidad distintos:
+
+**Criticidad MPLS/WAN** (ranks 1–2): nodos con betweenness alta y participación en el corte mínimo — son los cuellos de botella de capacidad de flujo. Una falla aquí interrumpe el tráfico inter-campus o hacia Internet de forma inmediata.
+
+**Criticidad de core** (ranks 3–4): switches de core con betweenness extrema. CPAR-C10 lidera porque su posición topológica lo convierte en intermediario de prácticamente todos los flujos del Campus Paraíso. DATCC-2A-C3 tiene el mayor daño en cascada pero no es punto de articulación gracias a su redundancia con DATCC-2A-C2.
+
+**Criticidad de agregación** (ranks 5–10): nodos de agregación de cada campus — todos son puntos de articulación porque los switches de acceso dependen de ellos como único camino al core. Su betweenness es baja (cada uno solo intermedia el tráfico de su edificio), pero al ser puntos de corte, su caída aísla decenas de equipos finales.
+
+![Ranking ICC](results/imagenes/p10_ranking_icc.png)
+
+![Radar top-5](results/imagenes/p10_radar_top5.png)
+
+---
+
+## Problema P11 — Intervención acotada y justificada
+
+Con el diagnóstico de P10 en mano, se propone una intervención de exactamente **cinco enlaces nuevos** sobre la red UCuenca. La restricción es dura: ningún enlace puede duplicar uno existente y cada uno debe resolver un problema identificado en el ranking ICC.
+
+### Ítem 1 · Descripción de los cinco enlaces propuestos
+
+| # | Enlace | Capacidad | Problema del diagnóstico que resuelve |
+|---|--------|-----------|--------------------------------------|
+| E1 | CPAR-C10 → INTERNET-MPLS | 1 000 Mbps | Elimina ROUTER-CAMPUS-HUAYNA-CAPAC (ICC #2) como único intermediario entre Campus Paraíso y backbone. Con E1, si el router falla, el tráfico sigue fluyendo por CPAR-C10 directamente. |
+| E2 | DATCC-2A-C3 → CPAR-C10 | 10 000 Mbps | Crea vía directa de 10 Gbps entre el core del Campus Central y el core del Campus Paraíso. Reduce el daño en cascada de DATCC-2A-C3 (ICC #4) y da a CPAR-C10 (ICC #3) una segunda ruta hacia el backbone. |
+| E3 | ROUTER-CAMPUS-YANUNCAY → PE2-CENTRAL | 1 000 Mbps | Elimina ROUTER-CAMPUS-YANUNCAY (ICC #5) como punto único de salida del Campus Yanuncay. PE2-CENTRAL es el segundo enlace PE del Campus Central, actualmente infrautilizado. |
+| E4 | CP-ODONTOLOGIA-D4 → CP-EADMINA1-D6 | 1 000 Gbps | Cross-link entre dos nodos de agregación del Campus Paraíso (ICC #9 y #10). Crea un anillo parcial en la capa de distribución: si uno cae, el otro absorbe sus flujos. |
+| E5 | BAL-EADM-D3 → DT-0A-C13 | 1 000 Mbps | Segundo uplink para el switch de administración del Campus Balzay (actualmente conectado a un solo nodo de core). Elimina BAL-EADM-D3 como punto de articulación. |
+
+### Ítem 2 · Cuantificación de la mejora — tabla antes / después / variación
+
+Las métricas se calcularon sobre la red original y sobre la red modificada con los cinco enlaces incorporados. Los valores de flujo máximo usan como fuente el nodo de core de cada campus hacia INTERNET-MPLS.
+
+| Métrica | Antes (original) | Después (propuesta ICC) | Δ absoluto | Δ relativo |
+|---------|-----------------|------------------------|-----------|-----------|
+| Aristas totales | 209 | 214 | +5 | +2.4% |
+| Puentes | 141 | 137 | −4 | −2.8% |
+| Puntos de articulación | 47 | 46 | −1 | −2.1% |
+| Distancia media | 5.830 | 4.976 | −0.855 | **−14.7%** |
+| Eficiencia global $E_0$ | 0.2082 | 0.2330 | +0.0247 | **+11.9%** |
+| Flujo máx. Campus Central | 5 000 Mbps | 6 318 Mbps | +1 318 | +26.4% |
+| Flujo máx. Campus Paraíso | 318 Mbps | 6 318 Mbps | +6 000 | **+19×** |
+| Flujo máx. Campus Balzay | 3 290 Mbps | 3 290 Mbps | 0 | 0% |
+| Flujo máx. Campus Yanuncay | 1 000 Mbps | 1 000 Mbps | 0 | 0% |
+
+El impacto más notable es sobre Campus Paraíso: el flujo máximo pasa de 318 Mbps a 6 318 Mbps porque E1 y E2 juntos abren una ruta de 10 Gbps entre CPAR-C10 y el backbone (Central → DATCC-2A-C3 → INTERNET-MPLS). La reducción del 14.7% en distancia media refleja que E2 (DATCC-2A-C3 ↔ CPAR-C10) acorta todos los caminos entre los dos campus más grandes.
+
+La reducción de puentes (−4) y articulaciones (−1) es modesta porque la mayoría de los puentes de la red son hojas de acceso conectadas a un único switch de agregación — esos no se pueden eliminar sin cableado adicional dentro de los edificios.
+
+![Percolación comparación](results/imagenes/p11_percolacion_comparacion.png)
+
+![Flujo comparación](results/imagenes/p11_flujo_comparacion.png)
+
+### Ítem 3 · Justificación frente a alternativas
+
+Se compararon dos conjuntos alternativos de cinco enlaces:
+
+**Alternativa A — criterio ingenuo (mayor grado):** conectar los cinco nodos de mayor grado entre sí cuando no hay enlace existente. Produce: DATCC-2A-C3 → {AGRPRI-1A-D10, BAL-AUL2-D1, CP-EADMINA1-D6, DT-0A-C13, INTERNET-MPLS}. La lógica es que los hubs ya concentran tráfico, así que conectarlos entre sí aumenta la capacidad del backbone.
+
+**Alternativa B — criterio de betweenness:** conectar los nodos de mayor betweenness pairwise. Produce: ROUTER-CAMPUS-HUAYNA-CAPAC → {DATCC-2A-C3, DATCC-2A-C2}, ROUTER-CAMPUS-YANUNCAY → DATCC-2A-C3, CPAR-C10 → DATCC-2A-C2, DT-0A-C13 → INTERNET-MPLS.
+
+| Métrica | Original | Propuesta ICC | Alt. A (grado) | Alt. B (btw) |
+|---------|----------|--------------|---------------|-------------|
+| Puentes | 141 | **137** | 138 | 140 |
+| Articulaciones | 47 | 46 | **45** | 46 |
+| Distancia media | 5.830 | 4.976 | **4.521** | 4.966 |
+| Eficiencia global | 0.2082 | 0.2330 | **0.2524** | 0.2339 |
+| Flujo Campus Paraíso | 318 | **6 318** | 395 | 1 318 |
+| Flujo Campus Yanuncay | 1 000 | **1 000** | 2 000 | 1 000 |
+
+La Alternativa A mejora mejor la eficiencia global (+21.2% vs +11.9%) y la distancia media. Sin embargo, **fracasa en resolver el problema más crítico del diagnóstico**: Campus Paraíso sigue con solo 395 Mbps de flujo máximo (vs 6 318 de la propuesta ICC). Esto se debe a que conectar los hubs de mayor grado entre sí no resuelve el cuello de botella de acceso de Campus Paraíso: el router de ese campus sigue siendo un único punto de paso.
+
+La Alternativa B mejora la eficiencia casi igual que la propuesta (+12.3% vs +11.9%), pero tampoco resuelve Campus Paraíso de forma efectiva (1 318 Mbps vs 6 318 Mbps). Al centrarse en betweenness, construye múltiples rutas paralelas al backbone pero no añade capacidad nueva hacia los campus que más la necesitan.
+
+**La propuesta ICC es superior en el indicador más relevante operativamente — flujo hacia Campus Paraíso — y es la única que aborda directamente los tres nodos en el top-4 del ranking ICC** (ROUTER-CAMPUS-HUAYNA-CAPAC #2, CPAR-C10 #3, DATCC-2A-C3 #4). Las alternativas optimizan métricas agregadas (distancia media, eficiencia global) pero no el problema de criticidad estructural.
+
+### Ítem 4 · Estimación de costo y factibilidad
+
+| Enlace | Factibilidad | Consideraciones |
+|--------|-------------|----------------|
+| E1: CPAR-C10 → INTERNET-MPLS | **Media.** CPAR-C10 está en Campus Paraíso; INTERNET-MPLS es un nodo lógico MPLS. Requiere contratar un segundo circuito MPLS al proveedor (ISP) para Campus Paraíso. Costo recurrente mensual. No requiere obra civil nueva si ya existe ducto al POP del ISP. | Principal obstáculo: costo operativo mensual de la segunda línea MPLS. |
+| E2: DATCC-2A-C3 → CPAR-C10 | **Baja** (enlace inter-campus). Los campus Central y Paraíso están separados por varios kilómetros. Requeriría fibra óptica oscura o un circuito dedicado entre edificios. Alta inversión inicial en tendido o alquiler de fibra. | La mayor barrera es la distancia física y el costo de obra civil. Alternativa: VPN sobre MPLS existente (virtual, sin fibra nueva). |
+| E3: ROUTER-CAMPUS-YANUNCAY → PE2-CENTRAL | **Media.** Similar a E1: requiere segundo circuito MPLS para Campus Yanuncay. PE2-CENTRAL ya existe en el backbone. Depende de disponibilidad de puertos en ambos extremos. | Más viable que E2 porque es un circuito WAN estándar. |
+| E4: CP-ODONTOLOGIA-D4 → CP-EADMINA1-D6 | **Alta.** Ambos nodos están en Campus Paraíso, probablemente en el mismo edificio o campus. Requiere cable de par trenzado o fibra corta (~100 m). Costo mínimo. | El obstáculo principal es verificar disponibilidad de puertos en los switches de agregación. |
+| E5: BAL-EADM-D3 → DT-0A-C13 | **Alta.** Ambos nodos están en Campus Balzay. BAL-EADM-D3 tiene solo grado 2, probablemente tiene puertos libres. Requiere cableado dentro del campus. | Obra civil mínima. Alta viabilidad técnica. |
+
+En resumen: E4 y E5 son inmediatamente ejecutables con recursos internos de TI. E1 y E3 requieren negociación con el ISP. E2 es la propuesta de mayor impacto pero también la de mayor inversión, y podría reemplazarse por una solución lógica (VPN entre campus) mientras se planifica el tendido físico.
+
+### Ítem 5 · Limitaciones del estudio
+
+**Lo que el modelo no captura:**
+
+El grafo de la red UCuenca fue construido a partir de diagramas de red, no de mediciones en tiempo real. Por tanto, los valores de tráfico (Mbps) son nominales — representan capacidades de enlace contratadas, no el tráfico real cursado. Un análisis de criticidad operativo requeriría datos de NetFlow o SNMP en producción para identificar qué enlaces están cerca de saturación.
+
+El modelo de betweenness como proxy de carga asume enrutamiento por caminos más cortos, pero la red UCuenca usa OSPF y MPLS, donde el enrutamiento depende de métricas configuradas (cost). Un enlace de baja capacidad puede tener OSPF cost alto y casi no recibir tráfico incluso si topológicamente sería el camino más corto.
+
+El modelo de cascadas de Motter-Lai supone redistribución instantánea y uniforme de carga, lo que no ocurre en redes reales con protocolos de convergencia (OSPF puede tardar segundos en recalcular rutas). Además, el modelo no contempla mecanismos de protección como Spanning Tree, HSRP/VRRP ni Fast Reroute MPLS, que en la práctica limitan las cascadas.
+
+La propuesta de cinco enlaces asume disponibilidad de puertos y ausencia de restricciones físicas entre edificios. En la red real puede que algunos switches de agregación no tengan puertos libres, o que los ductos entre edificios estén al límite de capacidad.
+
+**Qué datos harían falta:**
+
+Para un análisis más preciso sería necesario: matrices de tráfico origen-destino por campus y por hora, logs de incidentes de los últimos 2–3 años (qué nodos han fallado y cuánto duraron las afectaciones), topología completa incluyendo redundancias lógicas (VLANs, túneles VPN, rutas OSPF alternativas), e inventario de puertos disponibles por switch.
+
+**Conclusiones que NO pueden extraerse de este análisis:**
+
+No es posible predecir cuándo fallará un nodo específico — el modelo es estructural, no temporal. No se puede concluir que la red sea insegura en términos de ciberseguridad: alta betweenness y criticidad topológica son problemas de disponibilidad, no de confidencialidad. Tampoco se puede afirmar que la propuesta de cinco enlaces sea la solución óptima combinatoria — encontrar el conjunto óptimo de $k$ enlaces es un problema NP-difícil que aquí se resuelve con heurística guiada por el ICC.
 
 ---
 
@@ -2189,10 +2397,10 @@ Esta sección recoge una explicación en lenguaje llano de todos los conceptos m
 
 ## Fase 5 — Propuesta de Rediseño
 
-> *Peso: 8 puntos | Contenido 5.1 del sílabo*
+> *Peso: 3 puntos | Contenido 5.1 del sílabo — ver Problema P11 arriba*
 
-*(Pendiente — se completará con base en los resultados de las Fases 1–4)*
+El contenido completo de la Fase 5 se encuentra en la sección **Problema P11 — Intervención acotada y justificada** (cinco enlaces propuestos, tabla antes/después/variación, comparación de alternativas, factibilidad y limitaciones).
 
 ---
 
-*Scripts: `src/problema1.py` – `src/problema9.py` · Última actualización: Fases 1–4 completas.*
+*Scripts: `src/problema1.py` – `src/problema11.py` · Última actualización: Fases 1–5 completas.*
