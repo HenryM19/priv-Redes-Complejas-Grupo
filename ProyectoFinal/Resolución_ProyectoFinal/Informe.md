@@ -2131,10 +2131,11 @@ Las métricas se calcularon sobre la red original y sobre la red modificada con 
 | Métrica | Antes (original) | Después (propuesta ICC) | Δ absoluto | Δ relativo |
 |---------|-----------------|------------------------|-----------|-----------|
 | Aristas totales | 209 | 214 | +5 | +2.4% |
-| Puentes | 141 | 137 | −4 | −2.8% |
+| Puentes | 141 | 137 | −4 | **−2.8%** |
 | Puntos de articulación | 47 | 46 | −1 | −2.1% |
 | Distancia media | 5.830 | 4.976 | −0.855 | **−14.7%** |
 | Eficiencia global $E_0$ | 0.2082 | 0.2330 | +0.0247 | **+11.9%** |
+| $f_c$ bajo ataque por grado | 0.011 | 0.011 | 0 | 0% |
 | Flujo máx. Campus Central | 5 000 Mbps | 6 318 Mbps | +1 318 | +26.4% |
 | Flujo máx. Campus Paraíso | 318 Mbps | 6 318 Mbps | +6 000 | **+19×** |
 | Flujo máx. Campus Balzay | 3 290 Mbps | 3 290 Mbps | 0 | 0% |
@@ -2143,6 +2144,10 @@ Las métricas se calcularon sobre la red original y sobre la red modificada con 
 El impacto más notable es sobre Campus Paraíso: el flujo máximo pasa de 318 Mbps a 6 318 Mbps porque E1 y E2 juntos abren una ruta de 10 Gbps entre CPAR-C10 y el backbone (Central → DATCC-2A-C3 → INTERNET-MPLS). La reducción del 14.7% en distancia media refleja que E2 (DATCC-2A-C3 ↔ CPAR-C10) acorta todos los caminos entre los dos campus más grandes.
 
 La reducción de puentes (−4) y articulaciones (−1) es modesta porque la mayoría de los puentes de la red son hojas de acceso conectadas a un único switch de agregación — esos no se pueden eliminar sin cableado adicional dentro de los edificios.
+
+El umbral $f_c$ (fracción en que $E$ cae al 50% de $E_0$) es idéntico en todas las variantes: $f_c = 0.011$, equivalente a eliminar apenas 2 nodos. Esto confirma lo observado en P8: la red UCuenca es extremadamente frágil a ataques dirigidos a sus hubs, y 5 enlaces adicionales no cambian ese umbral porque el primer hub eliminado (DATCC-2A-C3, grado 17) desconecta masivamente la red en ambas versiones. La intervención mejora la operación normal pero no transforma el perfil de robustez ante ataque deliberado — eso requeriría redundancia a nivel de core, no a nivel de distribución.
+
+**Curva de percolación bajo ataque dirigido por grado** — la eficiencia se calcula sobre todos los pares originales (pares desconectados = 0), lo que produce curvas monotónicamente decrecientes que reflejan el daño real acumulado:
 
 ![Percolación comparación](results/imagenes/p11_percolacion_comparacion.png)
 

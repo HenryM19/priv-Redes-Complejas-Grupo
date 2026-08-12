@@ -163,52 +163,73 @@ def flujo_por_campus(G: nx.Graph) -> dict:
 def percolacion_ataque_grado(G: nx.Graph,
                               pasos: int = 30) -> pd.DataFrame:
     """
-    Simula percolación eliminando nodos en orden descendente de grado.
-    Calcula la eficiencia global tras cada eliminación.
+    Simula percolación eliminando nodos en orden descendente de grado
+    (recalculando el grado tras cada eliminación — atacante adaptativo).
+
+    La eficiencia se calcula sobre los n_total nodos ORIGINALES:
+    los pares desconectados contribuyen 1/d = 0, lo que refleja
+    honestamente el daño global de la red, sin el artefacto de medir
+    solo dentro de la componente gigante superviviente.
 
     Argumentos:
         G     (nx.Graph): grafo a analizar.
-        pasos (int)     : número de fracciones evaluadas.
+        pasos (int)     : número de puntos de muestreo en [0, 1].
 
     Salida:
-        pd.DataFrame [fraccion, eficiencia, tamanio_cgc].
+        pd.DataFrame [fraccion, eficiencia_global, tamanio_cgc].
     """
     n_total = G.number_of_nodes()
-    orden   = sorted(G.degree(), key=lambda x: x[1], reverse=True)
-    orden   = [v for v, _ in orden]
-    n_pasos = min(pasos, len(orden))
-    indices  = np.linspace(0, n_total - 1, n_pasos, dtype=int)
+    n_pasos = min(pasos, n_total)
 
-    Gaux = G.copy()
+    Gaux      = G.copy()
     eliminados = 0
-    filas = []
+    filas     = []
 
     for idx in range(n_pasos):
         f = eliminados / n_total
-        # Eficiencia sobre componente gigante
-        if Gaux.number_of_nodes() > 1:
-            cgc = max(nx.connected_components(Gaux), key=len)
-            Gcgc = Gaux.subgraph(cgc)
-            nc = len(cgc)
-            ef = 0.0
+
+        # Eficiencia GLOBAL: suma 1/d sobre todos los pares originales
+        # Los nodos eliminados no aparecen en Gaux → contribuyen 0
+        ef = 0.0
+        componentes = list(nx.connected_components(Gaux))
+        cgc_size = max(len(c) for c in componentes) if componentes else 0
+        for comp in componentes:
+            if len(comp) < 2:
+                continue
+            Gsub = Gaux.subgraph(comp)
+            for v in Gsub.nodes():
+                longs = nx.single_source_shortest_path_length(Gsub, v)
+                ef += sum(1.0 / d for u, d in longs.items() if d > 0)
+        # Normalizar sobre TODOS los pares originales n*(n-1)
+        ef /= (n_total * (n_total - 1))
+
+        # Distancia media sobre la componente gigante (pares alcanzables)
+        if cgc_size > 1:
+            cgc_nodes = max(componentes, key=len)
+            Gcgc = Gaux.subgraph(cgc_nodes)
+            suma_dist, pares = 0.0, 0
             for v in Gcgc.nodes():
                 longs = nx.single_source_shortest_path_length(Gcgc, v)
-                ef += sum(1.0 / d for u, d in longs.items() if d > 0)
-            ef = ef / (nc * (nc - 1)) if nc > 1 else 0.0
+                for u, d in longs.items():
+                    if d > 0:
+                        suma_dist += d
+                        pares += 1
+            dist_media = suma_dist / pares if pares > 0 else 0.0
         else:
-            cgc = set(Gaux.nodes())
-            ef  = 0.0
-        filas.append({"fraccion": round(f, 4),
-                      "eficiencia": round(ef, 5),
-                      "tamanio_cgc": len(cgc)})
+            dist_media = 0.0
 
-        # Eliminar el siguiente nodo de mayor grado restante
-        if idx < n_pasos - 1:
-            # Recalcular grado en grafo actual y eliminar el máximo
-            if Gaux.number_of_nodes() > 0:
-                siguiente = max(Gaux.degree(), key=lambda x: x[1])[0]
-                Gaux.remove_node(siguiente)
-                eliminados += 1
+        filas.append({
+            "fraccion"        : round(f, 4),
+            "eficiencia_global": round(ef, 5),
+            "tamanio_cgc"     : cgc_size,
+            "dist_media_cgc"  : round(dist_media, 4),
+        })
+
+        # Eliminar el nodo de mayor grado actual (atacante adaptativo)
+        if Gaux.number_of_nodes() > 0:
+            siguiente = max(Gaux.degree(), key=lambda x: x[1])[0]
+            Gaux.remove_node(siguiente)
+            eliminados += 1
 
     return pd.DataFrame(filas)
 
@@ -219,14 +240,18 @@ def percolacion_ataque_grado(G: nx.Graph,
 
 def graficar_percolacion(dfs: dict, titulo: str = "P11") -> None:
     """
-    Grafica las curvas de eficiencia vs fracción eliminada (ataque por grado)
-    para múltiples variantes de red en un mismo panel.
+    Grafica dos paneles bajo ataque dirigido por grado:
+      - Panel izquierdo : eficiencia global E(f) sobre todos los pares originales
+                          (pares desconectados = 0 → curva monotónicamente decreciente)
+      - Panel derecho   : distancia media dentro de la componente gigante restante
+                          (sube porque los fragmentos que quedan son más compactos)
 
     Argumentos:
-        dfs   (dict): {etiqueta: pd.DataFrame con columnas fraccion, eficiencia}.
+        dfs   (dict): {etiqueta: pd.DataFrame con columnas fraccion,
+                       eficiencia_global, tamanio_cgc, dist_media_cgc}.
         titulo (str): prefijo para el título del gráfico.
     """
-    fig, ax = plt.subplots(figsize=(9, 5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
     estilos = {
         "Original"      : ("k-",  2.5),
         "Propuesta ICC" : ("r-",  2.0),
@@ -235,14 +260,34 @@ def graficar_percolacion(dfs: dict, titulo: str = "P11") -> None:
     }
     for etiqueta, df in dfs.items():
         ls, lw = estilos.get(etiqueta, ("m:", 1.5))
-        ax.plot(df["fraccion"], df["eficiencia"], ls,
-                linewidth=lw, label=etiqueta)
 
-    ax.set_xlabel("Fracción de nodos eliminados (ataque por grado)")
-    ax.set_ylabel("Eficiencia global E(f)")
-    ax.set_title(f"{titulo} · Percolación bajo ataque dirigido\n"
-                 "Comparación original vs. propuestas", fontweight="bold")
-    ax.legend(); ax.grid(alpha=0.3)
+        # Panel izquierdo: eficiencia global
+        col_e = "eficiencia_global" if "eficiencia_global" in df.columns else "eficiencia"
+        e0    = df[col_e].iloc[0]
+        sub_fc = df[df[col_e] <= 0.5 * e0]
+        fc    = sub_fc["fraccion"].iloc[0] if not sub_fc.empty else None
+        label = f"{etiqueta} (fc≈{fc:.2f})" if fc else etiqueta
+        ax1.plot(df["fraccion"], df[col_e], ls, linewidth=lw, label=label)
+
+        # Panel derecho: distancia media en CGC
+        if "dist_media_cgc" in df.columns:
+            ax2.plot(df["fraccion"], df["dist_media_cgc"], ls,
+                     linewidth=lw, label=etiqueta)
+
+    ax1.set_xlabel("Fracción eliminada (ataque por grado)")
+    ax1.set_ylabel("E(f) global  [pares desconectados = 0]")
+    ax1.set_title("Eficiencia global bajo ataque\n(monotónicamente decreciente)",
+                  fontweight="bold")
+    ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
+
+    ax2.set_xlabel("Fracción eliminada (ataque por grado)")
+    ax2.set_ylabel("Distancia media (dentro de CGC)")
+    ax2.set_title("Distancia media en componente gigante\n(sube al fragmentarse la red)",
+                  fontweight="bold")
+    ax2.legend(fontsize=8); ax2.grid(alpha=0.3)
+
+    plt.suptitle(f"{titulo} · Percolación bajo ataque dirigido — Red UCuenca",
+                 fontweight="bold", fontsize=11)
     plt.tight_layout()
     ruta = os.path.join(DIR_IMG, "p11_percolacion_comparacion.png")
     fig.savefig(ruta, dpi=150, bbox_inches="tight"); plt.close(fig)
@@ -411,11 +456,14 @@ if __name__ == "__main__":
     print("\nFlujo máximo por campus (Mbps):")
     print(df_flujo.to_string())
 
-    # Eficiencia a f=0.10 (tras eliminar el 10% de nodos por grado)
-    print("\nEficiencia global tras eliminar 10% por grado:")
+    # fc: fracción donde E cae al 50% de E0 (ataque por grado)
+    print("\nUmbral fc (E cae al 50% de E0) bajo ataque por grado:")
     for nombre, df in dfs_perc.items():
-        fila = df[df["fraccion"] <= 0.10].iloc[-1]
-        print(f"  {nombre}: E={fila['eficiencia']:.5f}  CGC={fila['tamanio_cgc']}")
+        col = "eficiencia_global"
+        e0  = df[col].iloc[0]
+        sub = df[df[col] <= 0.5 * e0]
+        fc  = sub["fraccion"].iloc[0] if not sub.empty else ">max"
+        print(f"  {nombre}: E0={e0:.5f}  fc={fc}")
 
     # Guardar también percolación
     for nombre, df in dfs_perc.items():
