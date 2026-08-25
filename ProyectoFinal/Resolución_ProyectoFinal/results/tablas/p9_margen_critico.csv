@@ -1,0 +1,6 @@
+nodo,alpha_critico,fraccion_en_alpha_critico,fraccion_max_observada,dispara_cascada_grande
+DATCC-2A-C3,,,0.0678,False
+INTERNET-MPLS,,,0.0678,False
+PE2-CENTRAL,,,0.0678,False
+ROUTER-CAMPUS-HUAYNA-CAPAC,,,0.0282,False
+CPAR-C10,,,0.0056,False

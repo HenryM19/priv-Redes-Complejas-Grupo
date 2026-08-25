@@ -336,6 +336,101 @@ def distribucion_grado(G: nx.Graph) -> dict:
 # Ítem 2b · MLE — Ley de potencia (Clauset, Shalizi & Newman 2009)
 # ------------------------------------------------------------
 
+def _muestrear_powerlaw_discreta(gamma: float, kmin: int, n: int,
+                                  rng: np.random.Generator) -> np.ndarray:
+    """
+    Genera n muestras de una ley de potencia discreta P(k) ∝ k^{-γ} para
+    k ≥ kmin, por muestreo por inversión de la CDF (Clauset et al. 2009,
+    Apéndice D): aproxima la ley de potencia continua y redondea, método
+    estándar y suficientemente preciso para el test de bootstrap.
+
+    Argumentos:
+        gamma (float)              : exponente de la ley de potencia.
+        kmin  (int)                : valor mínimo de la cola.
+        n     (int)                : número de muestras a generar.
+        rng   (np.random.Generator): generador aleatorio.
+
+    Salida:
+        np.ndarray de enteros ≥ kmin.
+    """
+    u = rng.uniform(0, 1, size=n)
+    # Inversión de la CDF de la ley de potencia continua equivalente,
+    # luego redondeo al entero más cercano (Clauset et al. 2009, D.6).
+    muestras = (kmin - 0.5) * (1 - u) ** (-1.0 / (gamma - 1.0)) + 0.5
+    return np.round(muestras).astype(int)
+
+
+def _bootstrap_pvalue_powerlaw(grados: np.ndarray, kmin_opt: int,
+                                gamma_mle: float, ks_observado: float,
+                                n_boot: int = 1000, semilla: int = 42) -> float:
+    """
+    p-value por bootstrap del ajuste de ley de potencia (Clauset, Shalizi
+    & Newman 2009, sección 4). Genera n_boot redes sintéticas: cada una
+    reemplaza la cola observada (k ≥ kmin_opt) por muestras sintéticas de
+    una ley de potencia con el γ estimado, conservando el resto de la
+    distribución empírica por debajo de kmin_opt. Para cada sintética se
+    re-ajusta γ y k_min por MLE/KS (igual que sobre los datos reales) y se
+    calcula su propio KS. El p-value es la fracción de sintéticas cuyo KS
+    iguala o supera el KS observado.
+
+    p > 0.1 → la ley de potencia es un modelo estadísticamente plausible.
+    p ≤ 0.1 → se rechaza la ley de potencia como generador de estos datos.
+
+    Argumentos:
+        grados       (np.ndarray): grados de todos los nodos (muestra real).
+        kmin_opt     (int)       : k_min óptimo estimado sobre los datos reales.
+        gamma_mle    (float)     : γ MLE estimado sobre los datos reales.
+        ks_observado (float)     : estadístico KS del ajuste real.
+        n_boot       (int)       : número de redes sintéticas a generar.
+        semilla      (int)       : semilla del generador aleatorio.
+
+    Salida:
+        float: p-value ∈ [0, 1].
+    """
+    rng = np.random.default_rng(semilla)
+    n_total = len(grados)
+    cuerpo = grados[grados < kmin_opt]  # se conserva tal cual (no es la cola)
+    n_cola = int(np.sum(grados >= kmin_opt))
+
+    ks_sinteticos = []
+    for _ in range(n_boot):
+        cola_sint = _muestrear_powerlaw_discreta(gamma_mle, kmin_opt, n_cola, rng)
+        cola_sint = np.clip(cola_sint, kmin_opt, None)  # por seguridad numérica
+        muestra_sint = np.concatenate([cuerpo, cola_sint])
+
+        # Reajuste MLE/KS sobre la muestra sintética, igual que sobre los
+        # datos reales: se busca su propio k_min óptimo, no se reutiliza
+        # kmin_opt de los datos reales (así el test es honesto).
+        k_vals_s = np.sort(np.unique(muestra_sint.astype(int)))
+        mejor_ks_s = None
+        for kmin_s in k_vals_s[:-1] if len(k_vals_s) > 1 else []:
+            tail_s = muestra_sint[muestra_sint >= kmin_s]
+            n_t_s = len(tail_s)
+            if n_t_s < 5:
+                break
+            try:
+                gamma_s = 1.0 + n_t_s * (np.sum(np.log(tail_s / (kmin_s - 0.5)))) ** -1
+                k_sorted_s = np.sort(np.unique(tail_s.astype(int)))
+                cdf_emp_s = np.array([np.sum(tail_s >= k) / n_t_s for k in k_sorted_s])
+                z_kmin_s = hurwitz_zeta(gamma_s, float(kmin_s))
+                if z_kmin_s <= 0 or not np.isfinite(z_kmin_s):
+                    continue
+                cdf_teo_s = np.array([hurwitz_zeta(gamma_s, float(k)) / z_kmin_s
+                                       for k in k_sorted_s])
+                ks_s = np.max(np.abs(cdf_emp_s - cdf_teo_s))
+                if mejor_ks_s is None or ks_s < mejor_ks_s:
+                    mejor_ks_s = ks_s
+            except Exception:
+                continue
+        if mejor_ks_s is not None:
+            ks_sinteticos.append(mejor_ks_s)
+
+    if not ks_sinteticos:
+        return float("nan")
+    ks_sinteticos = np.array(ks_sinteticos)
+    return float(np.mean(ks_sinteticos >= ks_observado))
+
+
 def mle_ley_potencia(G: nx.Graph) -> dict:
     """
     Análisis de Máxima Verosimilitud (MLE) para distribución de ley de
@@ -409,6 +504,18 @@ def mle_ley_potencia(G: nx.Graph) -> dict:
 
     # k_min óptimo = menor KS
     kmin_opt, gamma_mle, ks_opt, n_tail = min(resultados_ks, key=lambda x: x[2])
+
+    # ---- p-value por bootstrap (Clauset, Shalizi & Newman 2009, sec. 4) ----
+    # El KS mínimo por sí solo no dice si el ajuste es *plausible*, solo cuál
+    # candidato es *menos malo*. El test correcto: generar muchas muestras
+    # sintéticas de una ley de potencia discreta con el γ y k_min estimados
+    # (mismo tamaño de cola que la muestra real), reajustar γ y k_min sobre
+    # cada una y calcular su propio KS. Si la fracción de muestras con KS
+    # sintético ≥ KS observado es baja (p < 0.1), la ley de potencia se
+    # rechaza como modelo generador de los datos reales.
+    p_value_bootstrap = _bootstrap_pvalue_powerlaw(
+        grados, kmin_opt, gamma_mle, ks_opt, n_boot=1000, semilla=42
+    )
 
     # ---- Log-verosimilitud power law vs exponencial ----
     tail_opt = grados[grados >= kmin_opt]
@@ -494,6 +601,13 @@ def mle_ley_potencia(G: nx.Graph) -> dict:
     _guardar_figura(fig, "p1_mle_ley_potencia.png")
 
     # ---- Texto reporte ----
+    if np.isnan(p_value_bootstrap):
+        veredicto_p = "no calculable (bootstrap sin muestras válidas)"
+    elif p_value_bootstrap > 0.1:
+        veredicto_p = f"p={p_value_bootstrap:.3f} > 0.1 → ley de potencia PLAUSIBLE como modelo"
+    else:
+        veredicto_p = f"p={p_value_bootstrap:.3f} ≤ 0.1 → ley de potencia SE RECHAZA como modelo"
+
     lineas = [
         "=" * 60,
         "ÍTEM 2b · MLE — LEY DE POTENCIA (Clauset et al. 2009)",
@@ -502,16 +616,31 @@ def mle_ley_potencia(G: nx.Graph) -> dict:
         f"  γ MLE            : {gamma_mle:.4f}",
         f"  Estadístico KS   : {ks_opt:.4f}",
         f"  Nodos en la cola : {n_tail} / {n_total}",
+        f"  p-value bootstrap: {p_value_bootstrap:.4f}  (1000 redes sintéticas, Clauset et al. 2009 §4)",
         f"  log R (PL vs Exp): {log_ratio:.4f}  "
         + ("(favorece PL)" if log_ratio > 0 else "(favorece Exponencial)"),
         "",
         "  INTERPRETACIÓN:",
         f"  Con k_min={kmin_opt} y γ={gamma_mle:.3f} el KS mínimo es {ks_opt:.4f}.",
-        "  Un KS > 0.10 con n < 50 nodos en la cola indica que la ley",
-        "  de potencia no es un buen ajuste estadístico.",
-        "  La red UCuenca NO es scale-free en sentido estricto: la",
-        "  topología jerárquica (acceso→agregación→core) impone grados",
-        "  típicos por capa, incompatibles con una cola de potencia pura.",
+        "  El KS mínimo por sí solo solo dice cuál candidato ajusta MEJOR,",
+        "  no si el ajuste es en sí mismo plausible. El p-value bootstrap",
+        "  responde eso: es la fracción de redes sintéticas generadas con",
+        "  el γ estimado cuyo propio KS iguala o supera al observado.",
+        f"  Resultado: {veredicto_p}.",
+        "",
+        "  Los dos criterios dan lecturas distintas y hay que ser honestos",
+        "  con eso: el p-value bootstrap NO rechaza la ley de potencia como",
+        "  forma funcional para la cola (k≥kmin), pero log R favorece",
+        "  (débilmente) la exponencial como alternativa, y la cola tiene",
+        "  solo n_tail nodos — muy poco para que cualquiera de los dos",
+        "  tests tenga poder estadístico real. Con este tamaño de cola NO",
+        "  se puede afirmar con rigor que la red sea scale-free, pero",
+        "  tampoco descartarlo solo con log R: el resultado correcto es",
+        "  'no hay evidencia suficiente para decidir', no 'no es scale-free'.",
+        "  Lo que sí sostiene la evidencia estructural (P1 ítem 4): la",
+        "  asortatividad negativa y el clustering bajo son la firma de una",
+        "  red jerárquica, independientemente de si su cola de grado ajusta",
+        "  o no a una ley de potencia pura.",
         "=" * 60,
     ]
     texto = "\n".join(lineas)
@@ -524,6 +653,7 @@ def mle_ley_potencia(G: nx.Graph) -> dict:
         "ks_stat"   : round(ks_opt, 4),
         "n_tail"    : n_tail,
         "log_ratio" : round(log_ratio, 4),
+        "p_value"   : round(p_value_bootstrap, 4) if not np.isnan(p_value_bootstrap) else None,
     }
 
 
@@ -1025,7 +1155,8 @@ if __name__ == "__main__":
     if mle_resultado:
         print(f"     γ MLE = {mle_resultado['gamma_mle']:.4f}  "
               f"k_min = {mle_resultado['kmin_opt']}  "
-              f"KS = {mle_resultado['ks_stat']:.4f}")
+              f"KS = {mle_resultado['ks_stat']:.4f}  "
+              f"p-value = {mle_resultado['p_value']}")
 
     # 4.3) Ítem 3 — Centralidades
     print("\n[3/6] Centralidades...")

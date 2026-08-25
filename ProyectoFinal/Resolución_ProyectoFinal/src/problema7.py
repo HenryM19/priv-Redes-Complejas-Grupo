@@ -12,10 +12,20 @@ Modela el problema de localización óptima de p servidores/repetidores:
 
 Los cinco ítems resueltos son:
   Ítem 1 · Matriz de distancias mínimas (Dijkstra con pesos por saltos)
-  Ítem 2 · Heurística greedy para p-Mediana con p∈{1,2,3,5}
-  Ítem 3 · Heurística greedy para p-Centro con p∈{1,2,3,5}
+  Ítem 2 · Heurística greedy para p-Mediana con p∈{1,2,3,5}, contrastada
+           con el óptimo exacto de un solver de programación entera (PuLP)
+  Ítem 3 · Heurística greedy para p-Centro con p∈{1,2,3,5}, contrastada
+           con el óptimo exacto (PuLP)
   Ítem 4 · Comparación de mediana/centro óptimos con centralidades (P1)
   Ítem 5 · Discusión de ventajas de c/modelo según objetivos de red
+
+El enunciado (P7.2) pide resolver con heurística voraz "y, si les es
+posible, con un solver de programación entera". Ambos modelos MIP son
+lineales estándar (p-median: minimizar suma de costos de asignación;
+p-center: minimizar el radio con una variable auxiliar) y con 177 nodos
+CBC (el solver por defecto de PuLP) los resuelve en segundos, así que se
+incluyen los dos: la heurística da una cota superior rápida y el solver
+exacto certifica qué tan lejos está esa heurística del óptimo real.
 
 Uso:
     python problema7.py
@@ -24,7 +34,9 @@ Salidas:
     results/tablas/p7_mediana.csv
     results/tablas/p7_centro.csv
     results/tablas/p7_comparacion_centralidades.csv
+    results/tablas/p7_comparacion_heuristica_vs_solver.csv
     results/imagenes/p7_mediana_vs_centro.png
+    results/imagenes/p7_heuristica_vs_solver.png
 """
 
 # ============================================================
@@ -37,6 +49,12 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import networkx as nx
+
+try:
+    import pulp
+    _PULP_DISPONIBLE = True
+except ImportError:
+    _PULP_DISPONIBLE = False
 
 DIR_SRC   = os.path.dirname(os.path.abspath(__file__))
 DIR_RESOL = os.path.dirname(DIR_SRC)
@@ -211,6 +229,130 @@ def p_centro_greedy(nodos: list, D: np.ndarray, p: int) -> dict:
 
 
 # ------------------------------------------------------------
+# Ítem 2b/3b — Solver exacto de programación entera (PuLP / CBC)
+# ------------------------------------------------------------
+
+def p_mediana_exacta(nodos: list, D: np.ndarray, p: int,
+                     tiempo_limite: int = 120) -> dict:
+    """
+    Resuelve el p-Mediana de forma exacta con programación lineal entera.
+
+    Formulación estándar (facility location):
+        variables:  y_j ∈ {0,1}  — 1 si el nodo j es mediana
+                    x_ij ∈ {0,1} — 1 si el nodo i se asigna a la mediana j
+        minimizar   Σ_i Σ_j D[i,j] · x_ij
+        sujeto a    Σ_j y_j = p                      (exactamente p medianas)
+                    Σ_j x_ij = 1  ∀i                  (cada nodo asignado a una)
+                    x_ij ≤ y_j    ∀i,j                (solo se asigna a medianas abiertas)
+                    x_ij, y_j ∈ {0,1}
+
+    Argumentos:
+        nodos          (list)      : lista de identificadores de nodos.
+        D              (np.ndarray): matriz N×N de distancias.
+        p              (int)       : número de medianas.
+        tiempo_limite  (int)       : límite de tiempo del solver, en segundos.
+
+    Salida:
+        dict: {'medianas', 'asignacion', 'obj', 'status', 'gap_heuristica'}
+              (gap_heuristica se rellena después, al comparar con el greedy)
+    """
+    if not _PULP_DISPONIBLE:
+        return {"medianas": None, "asignacion": None, "obj": None,
+                "status": "PuLP no disponible"}
+
+    N = len(nodos)
+    idx = range(N)
+    prob = pulp.LpProblem("p_mediana", pulp.LpMinimize)
+
+    y = pulp.LpVariable.dicts("y", idx, cat="Binary")
+    x = pulp.LpVariable.dicts("x", (idx, idx), cat="Binary")
+
+    prob += pulp.lpSum(D[i][j] * x[i][j] for i in idx for j in idx)
+    prob += pulp.lpSum(y[j] for j in idx) == p
+    for i in idx:
+        prob += pulp.lpSum(x[i][j] for j in idx) == 1
+        for j in idx:
+            prob += x[i][j] <= y[j]
+
+    solver = pulp.PULP_CBC_CMD(msg=0, timeLimit=tiempo_limite)
+    prob.solve(solver)
+
+    status = pulp.LpStatus[prob.status]
+    medianas = [nodos[j] for j in idx if pulp.value(y[j]) > 0.5]
+    asignacion = {}
+    for i in idx:
+        for j in idx:
+            if pulp.value(x[i][j]) > 0.5:
+                asignacion[nodos[i]] = nodos[j]
+                break
+
+    return {
+        "medianas"  : medianas,
+        "asignacion": asignacion,
+        "obj"       : pulp.value(prob.objective),
+        "status"    : status,
+    }
+
+
+def p_centro_exacto(nodos: list, D: np.ndarray, p: int,
+                    tiempo_limite: int = 120) -> dict:
+    """
+    Resuelve el p-Centro de forma exacta con programación lineal entera.
+
+    Formulación (min-max linealizado con variable auxiliar R):
+        variables:  y_j ∈ {0,1}, x_ij ∈ {0,1}, R ≥ 0 (radio de cobertura)
+        minimizar   R
+        sujeto a    Σ_j y_j = p
+                    Σ_j x_ij = 1  ∀i
+                    x_ij ≤ y_j    ∀i,j
+                    Σ_j D[i,j]·x_ij ≤ R  ∀i     (el radio cubre a todo nodo i)
+
+    Argumentos: igual que p_mediana_exacta.
+
+    Salida:
+        dict: {'centros', 'asignacion', 'radio', 'status'}
+    """
+    if not _PULP_DISPONIBLE:
+        return {"centros": None, "asignacion": None, "radio": None,
+                "status": "PuLP no disponible"}
+
+    N = len(nodos)
+    idx = range(N)
+    prob = pulp.LpProblem("p_centro", pulp.LpMinimize)
+
+    y = pulp.LpVariable.dicts("y", idx, cat="Binary")
+    x = pulp.LpVariable.dicts("x", (idx, idx), cat="Binary")
+    R = pulp.LpVariable("R", lowBound=0)
+
+    prob += R
+    prob += pulp.lpSum(y[j] for j in idx) == p
+    for i in idx:
+        prob += pulp.lpSum(x[i][j] for j in idx) == 1
+        prob += pulp.lpSum(D[i][j] * x[i][j] for j in idx) <= R
+        for j in idx:
+            prob += x[i][j] <= y[j]
+
+    solver = pulp.PULP_CBC_CMD(msg=0, timeLimit=tiempo_limite)
+    prob.solve(solver)
+
+    status = pulp.LpStatus[prob.status]
+    centros = [nodos[j] for j in idx if pulp.value(y[j]) > 0.5]
+    asignacion = {}
+    for i in idx:
+        for j in idx:
+            if pulp.value(x[i][j]) > 0.5:
+                asignacion[nodos[i]] = nodos[j]
+                break
+
+    return {
+        "centros"   : centros,
+        "asignacion": asignacion,
+        "radio"     : pulp.value(R),
+        "status"    : status,
+    }
+
+
+# ------------------------------------------------------------
 # Ítem 4 — Comparación con centralidades
 # ------------------------------------------------------------
 
@@ -288,6 +430,51 @@ def graficar_mediana_centro(p_vals: list, obj_med: list, radios: list) -> None:
     print(f"  [OK] {ruta}")
 
 
+def graficar_heuristica_vs_solver(df_comp: pd.DataFrame) -> None:
+    """
+    Barras agrupadas: objetivo/radio de la heurística greedy vs el óptimo
+    exacto del solver PuLP, para cada p y cada modelo (mediana/centro).
+    Un gap del 0% significa que el greedy ya encontró el óptimo.
+    """
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 4.5))
+
+    df_m = df_comp[df_comp["modelo"] == "mediana"]
+    x = np.arange(len(df_m))
+    w = 0.35
+    ax1.bar(x - w/2, df_m["valor_greedy"], w, label="Greedy", color="#2980b9")
+    ax1.bar(x + w/2, df_m["valor_exacto"], w, label="Óptimo (PuLP/CBC)", color="#27ae60")
+    ax1.set_xticks(x); ax1.set_xticklabels([f"p={p}" for p in df_m["p"]])
+    ax1.set_ylabel("Suma de distancias (saltos)")
+    ax1.set_title("p-Mediana: greedy vs óptimo exacto")
+    ax1.legend(fontsize=9); ax1.grid(axis="y", alpha=0.3)
+    for i, (g, e) in enumerate(zip(df_m["valor_greedy"], df_m["valor_exacto"])):
+        gap = 0.0 if e == 0 else 100 * (g - e) / e
+        ax1.annotate(f"+{gap:.1f}%" if gap > 0.05 else "óptimo",
+                    (i, max(g, e)), textcoords="offset points",
+                    xytext=(0, 4), ha="center", fontsize=8)
+
+    df_c = df_comp[df_comp["modelo"] == "centro"]
+    x = np.arange(len(df_c))
+    ax2.bar(x - w/2, df_c["valor_greedy"], w, label="Greedy", color="#e67e22")
+    ax2.bar(x + w/2, df_c["valor_exacto"], w, label="Óptimo (PuLP/CBC)", color="#27ae60")
+    ax2.set_xticks(x); ax2.set_xticklabels([f"p={p}" for p in df_c["p"]])
+    ax2.set_ylabel("Radio máximo (saltos)")
+    ax2.set_title("p-Centro: greedy vs óptimo exacto")
+    ax2.legend(fontsize=9); ax2.grid(axis="y", alpha=0.3)
+    for i, (g, e) in enumerate(zip(df_c["valor_greedy"], df_c["valor_exacto"])):
+        gap = 0.0 if e == 0 else 100 * (g - e) / e
+        ax2.annotate(f"+{gap:.1f}%" if gap > 0.05 else "óptimo",
+                    (i, max(g, e)), textcoords="offset points",
+                    xytext=(0, 4), ha="center", fontsize=8)
+
+    plt.suptitle("P7 · Heurística greedy vs solver exacto de programación entera",
+                fontweight="bold")
+    plt.tight_layout()
+    ruta = os.path.join(DIR_IMG, "p7_heuristica_vs_solver.png")
+    fig.savefig(ruta, dpi=150, bbox_inches="tight"); plt.close(fig)
+    print(f"  [OK] {ruta}")
+
+
 # ============================================================
 # CÓDIGO MAIN
 # ============================================================
@@ -298,6 +485,10 @@ if __name__ == "__main__":
 
     G = cargar_red(fuente="csv"); verificar(G)
 
+    if not _PULP_DISPONIBLE:
+        print("  [ADVERTENCIA] PuLP no está instalado: se omite el solver exacto.")
+        print("  Instalar con: pip install pulp\n")
+
     # Ítem 1: Matriz de distancias
     print("[Ítem 1] Construyendo matriz de distancias (saltos)...")
     nodos, D = matriz_distancias(G)
@@ -306,13 +497,14 @@ if __name__ == "__main__":
     P_VALS = [1, 2, 3, 5]
     filas_med, filas_cen = [], []
     obj_med_vals, radio_vals = [], []
+    filas_comp = []  # comparación heurística vs solver exacto
 
     for p in P_VALS:
         # Ítem 2: p-Mediana
         res_m = p_mediana_greedy(nodos, D, p)
         print(f"\n[Ítem 2] p-Mediana p={p}")
-        print(f"  Medianas    : {res_m['medianas']}")
-        print(f"  Objetivo    : {res_m['obj']:.1f} saltos·nodo")
+        print(f"  Medianas (greedy)    : {res_m['medianas']}")
+        print(f"  Objetivo (greedy)    : {res_m['obj']:.1f} saltos·nodo")
         filas_med.append({
             "p"        : p,
             "medianas" : "; ".join(res_m["medianas"]),
@@ -320,11 +512,29 @@ if __name__ == "__main__":
         })
         obj_med_vals.append(res_m["obj"])
 
+        if _PULP_DISPONIBLE:
+            print(f"  Resolviendo p-Mediana p={p} con PuLP/CBC (óptimo exacto)...")
+            res_m_ex = p_mediana_exacta(nodos, D, p)
+            print(f"  Medianas (exacto)    : {res_m_ex['medianas']}  [{res_m_ex['status']}]")
+            print(f"  Objetivo (exacto)    : {res_m_ex['obj']:.1f} saltos·nodo")
+            gap = 0.0 if res_m_ex['obj'] == 0 else \
+                100 * (res_m['obj'] - res_m_ex['obj']) / res_m_ex['obj']
+            print(f"  Gap greedy vs óptimo : {gap:.2f}%")
+            filas_comp.append({
+                "modelo": "mediana", "p": p,
+                "valor_greedy": round(res_m['obj'], 2),
+                "valor_exacto": round(res_m_ex['obj'], 2),
+                "gap_pct": round(gap, 2),
+                "medianas_greedy": "; ".join(res_m["medianas"]),
+                "medianas_exacto": "; ".join(res_m_ex["medianas"]) if res_m_ex["medianas"] else "",
+                "status_solver": res_m_ex["status"],
+            })
+
         # Ítem 3: p-Centro
         res_c = p_centro_greedy(nodos, D, p)
         print(f"[Ítem 3] p-Centro  p={p}")
-        print(f"  Centros     : {res_c['centros']}")
-        print(f"  Radio       : {res_c['radio']} saltos")
+        print(f"  Centros (greedy)     : {res_c['centros']}")
+        print(f"  Radio (greedy)       : {res_c['radio']} saltos")
         filas_cen.append({
             "p"      : p,
             "centros": "; ".join(res_c["centros"]),
@@ -332,11 +542,40 @@ if __name__ == "__main__":
         })
         radio_vals.append(res_c["radio"])
 
+        if _PULP_DISPONIBLE:
+            print(f"  Resolviendo p-Centro p={p} con PuLP/CBC (óptimo exacto)...")
+            res_c_ex = p_centro_exacto(nodos, D, p)
+            print(f"  Centros (exacto)     : {res_c_ex['centros']}  [{res_c_ex['status']}]")
+            print(f"  Radio (exacto)       : {res_c_ex['radio']:.1f} saltos")
+            gap = 0.0 if res_c_ex['radio'] == 0 else \
+                100 * (res_c['radio'] - res_c_ex['radio']) / res_c_ex['radio']
+            print(f"  Gap greedy vs óptimo : {gap:.2f}%")
+            filas_comp.append({
+                "modelo": "centro", "p": p,
+                "valor_greedy": round(res_c['radio'], 2),
+                "valor_exacto": round(res_c_ex['radio'], 2),
+                "gap_pct": round(gap, 2),
+                "medianas_greedy": "; ".join(res_c["centros"]),
+                "medianas_exacto": "; ".join(res_c_ex["centros"]) if res_c_ex["centros"] else "",
+                "status_solver": res_c_ex["status"],
+            })
+
     df_med = pd.DataFrame(filas_med)
     df_cen = pd.DataFrame(filas_cen)
     df_med.to_csv(os.path.join(DIR_TAB, "p7_mediana.csv"), index=False)
     df_cen.to_csv(os.path.join(DIR_TAB, "p7_centro.csv"),  index=False)
     print(f"\n  [OK] p7_mediana.csv y p7_centro.csv")
+
+    if _PULP_DISPONIBLE and filas_comp:
+        df_comp_solver = pd.DataFrame(filas_comp)
+        df_comp_solver.to_csv(
+            os.path.join(DIR_TAB, "p7_comparacion_heuristica_vs_solver.csv"),
+            index=False)
+        print(f"  [OK] p7_comparacion_heuristica_vs_solver.csv")
+        print(f"\n  Resumen greedy vs óptimo exacto:")
+        print(df_comp_solver[["modelo", "p", "valor_greedy", "valor_exacto", "gap_pct"]]
+              .to_string(index=False))
+        graficar_heuristica_vs_solver(df_comp_solver)
 
     # Ítem 4: comparar con centralidades (p=1)
     print("\n[Ítem 4] Comparación con centralidades (p=1)")

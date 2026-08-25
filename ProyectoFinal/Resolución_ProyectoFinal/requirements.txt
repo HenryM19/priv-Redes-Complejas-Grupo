@@ -1,0 +1,16 @@
+# Resolución del proyecto integrador -- Red UCuenca
+# Instalación:  python3 -m pip install -r requirements.txt
+# (además de codigo_base/requirements.txt, que ya cubre networkx/numpy/scipy/pandas/matplotlib)
+
+networkx>=3.0
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+matplotlib>=3.7
+
+# P4 — detección de comunidades y clustering espectral
+scikit-learn>=1.3
+python-louvain>=0.16
+
+# P7 — solver de programación entera exacto para p-mediana / p-centro
+pulp>=2.7
