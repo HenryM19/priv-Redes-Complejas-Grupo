@@ -1221,6 +1221,65 @@ tr.badrow td{background:var(--danger-soft);}
   </div>
 </section>
 
+<!-- ============ P8 ITEM 3-4 ============ -->
+<section class="tight" style="background:var(--bg-sunk);">
+  <div class="secmark">P8 · ÍTEM 3–4</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Percolación de aristas y degradación anticipada</div>
+    <h2 class="reveal">La eficiencia cae antes de que la red se rompa</h2>
+    <div class="cols reveal">
+      <div>
+        <h3 style="margin-bottom:.7rem;">Percolación de aristas — 3 estrategias</h3>
+        <div class="linechart" data-chart='{"xmax":1.0,"ymax":1.0,"xpct":true,"ypct":true,"xlabel":"fracción de aristas eliminadas (q)","series":[{"name":"Aleatoria","color":"core","fallback":"#2f6fb0","points":[[0.0,1.0],[0.05,0.9492],[0.1,0.9153],[0.15,0.8362],[0.2,0.791],[0.25,0.7006],[0.3,0.4972],[0.35,0.4633],[0.4,0.4124],[0.45,0.4124],[0.5,0.3616],[0.55,0.2938],[0.6,0.2316],[0.65,0.1921],[0.7,0.113],[0.75,0.0847],[0.8,0.0452],[0.85,0.0282],[0.9,0.0282],[0.95,0.0169],[1.0,0.0056]]},{"name":"Betweenness de arista","color":"amber","fallback":"#c8862c","points":[[0.0,1.0],[0.05,0.6836],[0.1,0.5932],[0.15,0.5932],[0.2,0.4124],[0.25,0.3107],[0.3,0.2881],[0.35,0.1299],[0.4,0.0678],[0.45,0.0678],[0.5,0.0678],[0.55,0.0678],[0.6,0.0678],[0.65,0.0508],[0.7,0.0508],[0.75,0.0395],[0.8,0.0395],[0.85,0.0395],[0.9,0.0395],[0.95,0.0395],[1.0,0.0056]]},{"name":"Puentes primero (141)","color":"danger","fallback":"#c05a3a","points":[[0.0,1.0],[0.05,0.6497],[0.1,0.5424],[0.15,0.5141],[0.2,0.5141],[0.25,0.4689],[0.3,0.4124],[0.35,0.3503],[0.4,0.2938],[0.45,0.2316],[0.5,0.2034],[0.55,0.2034],[0.6,0.2034],[0.65,0.2034],[0.7,0.2034],[0.75,0.2034],[0.8,0.1808],[0.85,0.1412],[0.9,0.0565],[0.95,0.0339],[1.0,0.0056]]}]}'></div>
+        <div class="chart-cap"><strong>Atacar los 141 puentes primero</strong> es destructivo desde el inicio: cada uno aísla un subgrafo. Tras agotarlos (q≈0.67), el resto son aristas de ciclo y no producen más desconexiones.</div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:.7rem;">E(f) se adelanta a S(f)</h3>
+        <div class="linechart" data-chart='{"xmax":0.3,"ymax":1.0,"xpct":true,"ypct":true,"xlabel":"fracción de nodos eliminados (ataque por grado)","series":[{"name":"Eficiencia E(f)/E0","color":"amber","fallback":"#c8862c","points":[[0.0,1.0],[0.05,0.2401],[0.1,0.0507],[0.15,0.0258],[0.2,0.0169],[0.25,0.0093],[0.3,0.0054]]},{"name":"Componente gigante S(f)","color":"core","fallback":"#2f6fb0","points":[[0.0,1.0],[0.05,0.4237],[0.1,0.0508],[0.15,0.0282],[0.2,0.0282],[0.25,0.0169],[0.3,0.0169]]}]}'></div>
+        <div class="chart-cap"><strong>Bajo ataque por grado</strong>, la eficiencia ya cayó a ~24% con solo <strong>f=0.05</strong> (9 nodos), mientras la componente gigante S(f) sigue casi intacta hasta f≈0.15 (27 nodos). En esa ventana la red "parece conectada" pero la comunicación efectiva ya está muy dañada.</div>
+      </div>
+    </div>
+    <div class="finding amber reveal" style="margin-top:1rem;">
+      <span class="flabel">E(f) mide algo que S(f) no ve</span>
+      <p>S(f) solo detecta la ruptura de la componente gigante. E(f) también capta cuando los caminos se alargan aunque la red siga en una sola pieza — la eficiencia inicial es <strong>E₀=0.2082</strong>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ P8 ITEM 5 + PARADOJA ============ -->
+<section class="tight">
+  <div class="secmark">P8 · ÍTEM 5</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Contraste con los modelos nulos de P2</div>
+    <h2 class="reveal">Más eficiente que ER y CM, pero más frágil</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Modelo</th><th class="num">E₀</th><th class="num">f_c (ataque por grado)</th></tr></thead>
+          <tbody>
+            <tr class="hlrow"><td>Red UCuenca</td><td class="num"><strong>0.2082</strong></td><td class="num"><strong>0.15</strong></td></tr>
+            <tr><td>Erdős–Rényi (ER)</td><td class="num">0.1397</td><td class="num">0.35</td></tr>
+            <tr><td>Configuración (CM)</td><td class="num">0.1565</td><td class="num">0.20</td></tr>
+          </tbody>
+        </table>
+        <div class="finding amber" style="margin-top:1.2rem;">
+          <span class="flabel">La secuencia de grados no explica la fragilidad</span>
+          <p>El CM tiene la <strong>misma secuencia de grados</strong> que la red real pero resiste más (f_c=0.20 vs 0.15): en el CM los nodos de alto grado están distribuidos sin estructura geográfica; en la red real los hubs están concentrados en una jerarquía estricta — eliminar el core desconecta todos los campus a la vez.</p>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:.8rem;">La paradoja de la robustez</h3>
+        <div class="barchart" data-series='[{"k": "Fallo aleatorio", "v": 0.75, "d": "f_c = 0.75", "c": "core"}, {"k": "Ataque por grado", "v": 0.15, "d": "f_c = 0.15", "c": "amber"}, {"k": "Ataque btw recalculada", "v": 0.1, "d": "f_c = 0.10", "c": "danger"}]' data-unit=""></div>
+        <div class="finding" style="margin-top:1rem;">
+          <span class="flabel">Ratio 7.5 : 1 — la firma de una red heterogénea</span>
+          <p>132 de 177 nodos son acceso de grado 1–2: el 75% de probabilidad de que un fallo aleatorio caiga ahí y aísle solo un equipo. Un ataque dirigido va directo a los 5 switches de core y 27 de agregación, cuya pérdida aísla campus enteros.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 <section class="tight" style="background:var(--bg-sunk);">
   <div class="secmark">P9 · ÍTEM 1–2</div>
   <div class="wrap cols">
