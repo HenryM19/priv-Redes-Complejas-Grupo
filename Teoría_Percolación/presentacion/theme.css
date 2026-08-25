@@ -1,15 +1,16 @@
 /* ============================================================
    theme.css — Sistema visual compartido (tema claro)
-   Deck: Flujo máximo — Ford-Fulkerson vs. Edmonds-Karp
+   Deck: Teoría de Percolación — Robustez y vulnerabilidad de redes
    Base: 1280 x 720 (16:9)
 
-   Hereda el sistema del deck de Dijkstra/Floyd-Warshall del módulo.
-   Añade el vocabulario propio de flujo máximo:
-     --flow    flujo / BFS / Edmonds-Karp   (el "bien")
-     --back    arcos de retroceso           (naranja, como en los GIF de Julia)
-     --cut     corte mínimo                 (púrpura, como en los GIF de Julia)
-   Los colores de retroceso y corte coinciden a propósito con los que usa
-   `dibujar_red` en Julia, para que las slides y los GIF se lean igual.
+   Hereda el sistema visual compartido de los decks del módulo
+   (mismas fuentes, tipografía y paleta base). Vocabulario propio:
+     --blue    nodo normal / red base
+     --crit    hub / nodo crítico / ataque dirigido
+     --amber   fallo aleatorio / advertencia
+   --flow/--back/--cut quedan definidas por compatibilidad con el
+   sistema compartido pero no se usan en este deck (son del deck de
+   flujo máximo).
    ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 

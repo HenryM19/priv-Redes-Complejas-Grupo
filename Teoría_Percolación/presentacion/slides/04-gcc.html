@@ -140,7 +140,7 @@ function draw(active){
   });
   Object.entries(POS).forEach(([n,[x,y]])=>{
     const on=active.includes(n);
-    let fill=on?(n==='s'?'#2980b9':n==='t'?'#e74c3c':n==='c'||n==='d'||n==='f'?'#e74c3c':'#aed6f1'):'#e0e6f0';
+    let fill=on?(n==='s'||n==='t'?'#2980b9':n==='c'||n==='d'||n==='f'?'#e74c3c':'#aed6f1'):'#e0e6f0';
     let r=n==='c'?16:n==='s'||n==='t'?14:11;
     let op=on?1:0.3;
     html+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" opacity="${op}" stroke="${on?'#fff':'#ccc'}" stroke-width="1.5"/>`;
