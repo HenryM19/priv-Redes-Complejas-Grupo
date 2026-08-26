@@ -3,6 +3,9 @@
 Solución de los 11 problemas (P1–P11) del enunciado `../proyecto_red_ucuenca.pdf`
 sobre la red de datos de la Universidad de Cuenca (177 nodos, 209 aristas).
 
+**Repositorio de entrega del proyecto final:**
+[jeanaucapina/ProeyctoFinal_RedesComplejas_Aucapina_Maldonado](https://github.com/jeanaucapina/ProeyctoFinal_RedesComplejas_Aucapina_Maldonado)
+
 ## Reproducir todos los resultados
 
 ```bash
