@@ -556,6 +556,15 @@ tiempos de descubrimiento y de retroceso (algoritmo de Tarjan).
     \label{fig:articulacion}
 \end{figure}
 
+La Figura~\ref{fig:centralidades} presenta el ranking de los 10 nodos más
+centrales según betweenness, closeness, grado y eigenvector.
+\texttt{DATCC-2A-C3} (core, Campus Central) encabeza las cuatro métricas:
+grado 17, betweenness 0.447, closeness 0.268 y eigenvector 0.502.
+La Figura~\ref{fig:articulacion} desglosa los puntos de articulación y puentes
+por campus y por capa (core, agregación, acceso): el Campus Central concentra
+23 de los 47 puntos de articulación, lo que refleja su rol de concentrador
+institucional.
+
 La Figura~\ref{fig:betweenness_viz} complementa el análisis mostrando la
 red completa con los nodos escalados y coloreados según su betweenness,
 lo que permite identificar visualmente los equipos que concentran el mayor
@@ -569,15 +578,6 @@ flujo de caminos cortos.
              intermediarios de la red.}
     \label{fig:betweenness_viz}
 \end{figure}
-
-La Figura~\ref{fig:centralidades} presenta el ranking de los 10 nodos más
-centrales según betweenness, closeness, grado y eigenvector.
-\texttt{DATCC-2A-C3} (core, Campus Central) encabeza las cuatro métricas:
-grado 17, betweenness 0.447, closeness 0.268 y eigenvector 0.502.
-La Figura~\ref{fig:articulacion} desglosa los puntos de articulación y puentes
-por campus y por capa (core, agregación, acceso): el Campus Central concentra
-23 de los 47 puntos de articulación, lo que refleja su rol de concentrador
-institucional.
 
 \subsection{Modelos nulos y comparación estructural}
 
@@ -612,6 +612,13 @@ Se comparan tres modelos nulos con la red real:
     \label{fig:modelos}
 \end{figure}
 
+La Figura~\ref{fig:modelos}a compara visualmente las métricas de UCuenca
+(distancia media, clustering, eficiencia global y asortatividad) frente a
+los tres modelos nulos; la Figura~\ref{fig:modelos}b muestra la topología
+real coloreada por campus, donde se aprecia la estructura jerárquica
+core–agregación–acceso y el aislamiento geográfico entre sedes.
+La Tabla~\ref{tab:modelos_nulos} resume la comparación con tres modelos nulos.
+
 La Figura~\ref{fig:barabasi} muestra un grafo Barabási-Albert generado
 con los mismos parámetros que UCuenca ($n=177$, $m \approx 209$),
 ilustrando la topología \textit{hub-and-spoke} característica del modelo
@@ -625,13 +632,6 @@ muchos nodos de grado bajo.
              visual con la topología real de UCuenca.}
     \label{fig:barabasi}
 \end{figure}
-
-La Figura~\ref{fig:modelos}a compara visualmente las métricas de UCuenca
-(distancia media, clustering, eficiencia global y asortatividad) frente a
-los tres modelos nulos; la Figura~\ref{fig:modelos}b muestra la topología
-real coloreada por campus, donde se aprecia la estructura jerárquica
-core–agregación–acceso y el aislamiento geográfico entre sedes.
-La Tabla~\ref{tab:modelos_nulos} resume la comparación con tres modelos nulos.
 
 \begin{table}[H]
 \centering
