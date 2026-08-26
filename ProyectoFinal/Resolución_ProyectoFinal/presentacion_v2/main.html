@@ -58,7 +58,7 @@
 </div>
 <div id="bar">
   <button id="prev" title="Anterior (←)">◀</button>
-  <span id="counter">01 / 34</span>
+  <span id="counter">01 / 35</span>
   <button id="next" title="Siguiente (→)">▶</button>
   <span id="label"></span>
 </div>
@@ -78,32 +78,33 @@ const SLIDES = [
   {f:"slides/06-p1-metricas-basicas.html",       t:"P1 · Métricas básicas"},
   {f:"slides/07-p1-distribucion-grado.html",     t:"P1 · Distribución de grado y MLE"},
   {f:"slides/08-p1-centralidades.html",          t:"P1 · Centralidades"},
-  {f:"slides/09-p1-puentes-articulacion.html",   t:"P1 · Puentes y articulación"},
-  {f:"slides/10-p2-modelos-nulos.html",          t:"P2 · Modelos nulos ER/CM"},
-  {f:"slides/11-p2-barabasi-albert.html",        t:"P2 · Barabási-Albert"},
-  {f:"slides/12-p3-bfs-dfs-ciclos.html",         t:"P3 · BFS, DFS y ciclos"},
-  {f:"slides/13-p4-louvain.html",                t:"P4 · Louvain y modularidad"},
-  {f:"slides/14-p4-kmeans-espectral.html",       t:"P4 · k-means espectral"},
-  {f:"slides/15-p5-caminos-minimos.html",        t:"P5 · Caminos mínimos"},
-  {f:"slides/16-p6-flujo-maximo.html",           t:"P6 · Flujo máximo y corte mínimo"},
-  {f:"slides/17-p7-p-mediana.html",              t:"P7 · p-Mediana"},
-  {f:"slides/18-p7-p-centro.html",               t:"P7 · p-Centro"},
-  {f:"slides/19-p7-hallazgo-gap.html",           t:"P7 · El gap del 100%"},
-  {f:"slides/20-p8-percolacion-nodos.html",      t:"P8 · Percolación de nodos"},
-  {f:"slides/21-p8-percolacion-aristas.html",    t:"P8 · Percolación de aristas"},
-  {f:"slides/22-p8-paradoja-robustez.html",      t:"P8 · Paradoja de la robustez"},
-  {f:"slides/23-p9-cascada-motter-lai.html",     t:"P9 · Cascadas Motter-Lai"},
-  {f:"slides/24-p9-sir-epidemico.html",          t:"P9 · Modelo SIR"},
-  {f:"slides/25-p9-inmunizacion.html",           t:"P9 · Inmunización"},
-  {f:"slides/26-p10-icc.html",                   t:"P10 · Índice de Criticidad Compuesto"},
-  {f:"slides/27-p11-cinco-enlaces.html",         t:"P11 · Cinco enlaces propuestos"},
-  {f:"slides/28-p11-antes-despues.html",         t:"P11 · Antes y después"},
-  {f:"slides/29-p11-alternativas.html",          t:"P11 · Comparación con alternativas"},
-  {f:"slides/30-limitaciones.html",              t:"Limitaciones del estudio"},
-  {f:"slides/31-preguntas-fase1-2.html",         t:"Preguntas · Fases 1 y 2"},
-  {f:"slides/32-conclusiones.html",              t:"Conclusiones generales"},
-  {f:"slides/33-preguntas-fase3-4.html",         t:"Preguntas · Fases 3 y 4"},
-  {f:"slides/34-referencias.html",               t:"Referencias y cierre"},
+  {f:"slides/09-explorador-red.html",            t:"Explora la red · grafo interactivo"},
+  {f:"slides/10-p1-puentes-articulacion.html",   t:"P1 · Puentes y articulación"},
+  {f:"slides/11-p2-modelos-nulos.html",          t:"P2 · Modelos nulos ER/CM"},
+  {f:"slides/12-p2-barabasi-albert.html",        t:"P2 · Barabási-Albert"},
+  {f:"slides/13-p3-bfs-dfs-ciclos.html",         t:"P3 · BFS, DFS y ciclos"},
+  {f:"slides/14-p4-louvain.html",                t:"P4 · Louvain y modularidad"},
+  {f:"slides/15-p4-kmeans-espectral.html",       t:"P4 · k-means espectral"},
+  {f:"slides/16-p5-caminos-minimos.html",        t:"P5 · Caminos mínimos"},
+  {f:"slides/17-p6-flujo-maximo.html",           t:"P6 · Flujo máximo y corte mínimo"},
+  {f:"slides/18-p7-p-mediana.html",              t:"P7 · p-Mediana"},
+  {f:"slides/19-p7-p-centro.html",               t:"P7 · p-Centro"},
+  {f:"slides/20-p7-hallazgo-gap.html",           t:"P7 · El gap del 100%"},
+  {f:"slides/21-p8-percolacion-nodos.html",      t:"P8 · Percolación de nodos"},
+  {f:"slides/22-p8-percolacion-aristas.html",    t:"P8 · Percolación de aristas"},
+  {f:"slides/23-p8-paradoja-robustez.html",      t:"P8 · Paradoja de la robustez"},
+  {f:"slides/24-p9-cascada-motter-lai.html",     t:"P9 · Cascadas Motter-Lai"},
+  {f:"slides/25-p9-sir-epidemico.html",          t:"P9 · Modelo SIR"},
+  {f:"slides/26-p9-inmunizacion.html",           t:"P9 · Inmunización"},
+  {f:"slides/27-p10-icc.html",                   t:"P10 · Índice de Criticidad Compuesto"},
+  {f:"slides/28-p11-cinco-enlaces.html",         t:"P11 · Cinco enlaces propuestos"},
+  {f:"slides/29-p11-antes-despues.html",         t:"P11 · Antes y después"},
+  {f:"slides/30-p11-alternativas.html",          t:"P11 · Comparación con alternativas"},
+  {f:"slides/31-limitaciones.html",              t:"Limitaciones del estudio"},
+  {f:"slides/32-preguntas-fase1-2.html",         t:"Preguntas · Fases 1 y 2"},
+  {f:"slides/33-conclusiones.html",              t:"Conclusiones generales"},
+  {f:"slides/34-preguntas-fase3-4.html",         t:"Preguntas · Fases 3 y 4"},
+  {f:"slides/35-referencias.html",               t:"Referencias y cierre"},
 ];
 const N=SLIDES.length; let i=0;
 const deck=document.getElementById('deck'),wrap=document.getElementById('frameWrap');

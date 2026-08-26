@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Explorador de la red</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .body{flex:1;display:grid;grid-template-columns:1.55fr 1fr;gap:22px;margin-top:14px;min-height:0}
+  .stage{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);overflow:hidden;display:flex;flex-direction:column}
+  .stage-hd{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;
+    border-bottom:1px solid var(--line);flex:none}
+  .stage-hd .h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--flow);font-weight:600}
+  .modebar{display:flex;gap:4px}
+  .modebar button{border:1px solid var(--line);background:var(--panel);border-radius:7px;
+    padding:4px 9px;font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;color:var(--muted)}
+  .modebar button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  svg#net{flex:1;width:100%;height:100%;cursor:pointer}
+  .stage-ft{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;
+    border-top:1px solid var(--line);flex:none;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted)}
+  .stage-ft .ctrl{display:flex;gap:6px}
+  .stage-ft button{border:1px solid var(--line);background:var(--panel);border-radius:7px;
+    padding:4px 11px;font-family:'JetBrains Mono',monospace;font-size:10.5px;cursor:pointer;color:var(--txt)}
+  .stage-ft button:hover{background:var(--panel-2)}
+  .stage-ft button.danger{color:var(--crit);border-color:rgba(226,58,86,.4)}
+  #tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;
+    font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 10px;border-radius:7px;
+    box-shadow:0 10px 24px rgba(0,0,0,.28);z-index:5;max-width:230px;line-height:1.5;display:none}
+  #tip b{color:#8fc4ff}
+  .side{display:flex;flex-direction:column;gap:12px;min-height:0}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px;box-shadow:var(--shadow-sm)}
+  .panel .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin-bottom:8px}
+  #card-empty{font-size:12.5px;color:var(--muted);line-height:1.55}
+  #card-body{display:none}
+  #card-body .name{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--ink);
+    word-break:break-all;line-height:1.3}
+  #card-body .sub{font-size:11px;color:var(--muted);margin-top:2px;margin-bottom:9px}
+  .kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:12px}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--ink)}
+  .kv .v.crit{color:var(--crit)}
+  .badge{display:inline-block;margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:10px;
+    padding:4px 10px;border-radius:20px;font-weight:700}
+  .badge.hi{background:rgba(226,58,86,.12);color:var(--crit)}
+  .badge.md{background:rgba(224,138,0,.12);color:var(--amber)}
+  .badge.lo{background:rgba(15,163,107,.12);color:var(--green)}
+  .stat-row{display:flex;gap:10px}
+  .mt{flex:1;text-align:center;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:9px 6px}
+  .mt .n{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+  .mt .l{font-size:9px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;font-family:'JetBrains Mono',monospace}
+  .legend{display:flex;flex-direction:column;gap:5px}
+  .leg{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+  .leg .sw{width:9px;height:9px;border-radius:50%;flex:none}
+</style></head>
+<body><div class="slide">
+  <div class="grid-bg"></div>
+  <div class="masthead"><span><span class="dot"></span>09 · Explora la red real</span><span>177 nodos · 209 aristas · datos de graphdata.json</span></div>
+
+  <div class="body">
+    <div class="stage anim d1">
+      <div class="stage-hd">
+        <span class="h">▸ pasa el cursor · haz clic en un nodo</span>
+        <div class="modebar" id="modebar">
+          <button data-m="capa" class="on">capa</button>
+          <button data-m="btw">intermediación</button>
+          <button data-m="icc">criticidad</button>
+          <button data-m="art">articulación</button>
+        </div>
+      </div>
+      <svg id="net" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid meet"></svg>
+      <div id="tip"></div>
+      <div class="stage-ft">
+        <span id="status">177 nodos activos · componente gigante 100%</span>
+        <div class="ctrl">
+          <button id="btnAttack">▶ simular ataque dirigido</button>
+          <button id="btnReset" class="danger">↺ restaurar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="panel anim d2">
+        <div class="h">Ficha del nodo</div>
+        <div id="card-empty">Pasa el cursor o haz clic sobre un nodo del grafo para ver su ficha completa: grado, intermediación, índice ICC y si es punto de articulación.</div>
+        <div id="card-body">
+          <div class="name" id="c-name"></div>
+          <div class="sub" id="c-sub"></div>
+          <div class="kv"><span class="k">Grado (k)</span><span class="v" id="c-deg"></span></div>
+          <div class="kv"><span class="k">Intermediación</span><span class="v" id="c-btw"></span></div>
+          <div class="kv"><span class="k">Índice ICC</span><span class="v" id="c-icc"></span></div>
+          <div class="kv"><span class="k">¿Articulación?</span><span class="v" id="c-art"></span></div>
+          <span class="badge" id="c-badge"></span>
+        </div>
+      </div>
+      <div class="panel anim d3">
+        <div class="h">Estado de la simulación</div>
+        <div class="stat-row">
+          <div class="mt"><div class="n c-blue" id="m-active">177</div><div class="l">activos</div></div>
+          <div class="mt"><div class="n c-green" id="m-gcc">177</div><div class="l">GCC</div></div>
+          <div class="mt"><div class="n c-crit" id="m-pinf">1.000</div><div class="l">P∞</div></div>
+        </div>
+      </div>
+      <div class="panel anim d4">
+        <div class="h">Leyenda — modo capa</div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Layout Kamada-Kawai · ataque = orden de intermediación descendente (igual que P8, Ítem 1c)</span><span>09 / 35</span></div>
+</div>
+
+<script>
+const DATA = {"nodes":[{"i":0,"n":"AETUC-0A-A76","c":"Campus Central","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":49,"x":0.8921,"y":0.4314},{"i":1,"n":"AETUC-0A-A97","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":73,"x":0.8458,"y":0.3957},{"i":2,"n":"AETUCCF-2A-A79","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":72,"x":0.9951,"y":0.4112},{"i":3,"n":"AGRPRI-1A-A19","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":70,"x":0.6,"y":0.1006},{"i":4,"n":"AGRPRI-1A-D10","c":"Campus Yanuncay","l":"agregacion","d":12,"b":0.1214,"a":1,"k":0.3633,"r":6,"x":0.5274,"y":0.1897},{"i":5,"n":"ANF-0A-A14","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":71,"x":0.5803,"y":0.15},{"i":6,"n":"ARQ-0A-A84","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":67,"x":0.9582,"y":0.6087},{"i":7,"n":"ARQ-0A-A85","c":"Campus Central","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":44,"x":0.8743,"y":0.5613},{"i":8,"n":"ARQ-0B-A87","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":74,"x":0.8735,"y":0.5188},{"i":9,"n":"ARQ-0D-A88","c":"Campus Central","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":40,"x":0.8138,"y":0.6218},{"i":10,"n":"ARQ-0D-A89","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":69,"x":0.9017,"y":0.6772},{"i":11,"n":"ARQ-0D-A90","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":68,"x":0.8508,"y":0.4974},{"i":12,"n":"ARQ-0G-A93-CEPAUC","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":78,"x":0.8399,"y":0.5503},{"i":13,"n":"ARQ-1C-A86","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":75,"x":0.7708,"y":0.6059},{"i":14,"n":"ARQ-1C-A96","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":76,"x":0.8165,"y":0.5747},{"i":15,"n":"ARQ-1E-A91","c":"Campus Central","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":43,"x":0.8355,"y":0.6065},{"i":16,"n":"ARQ-1E-A92","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":77,"x":0.8764,"y":0.6976},{"i":17,"n":"ART-0A-A15","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":66,"x":0.5041,"y":0.1343},{"i":18,"n":"AUL1-2A-A110","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":85,"x":0.599,"y":0.7666},{"i":19,"n":"AUL1-2A-A111","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":88,"x":0.5824,"y":0.7969},{"i":20,"n":"AUL1-3A-A104","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":89,"x":0.5009,"y":0.7885},{"i":21,"n":"AUL1-3A-A112","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":86,"x":0.5381,"y":0.7797},{"i":22,"n":"AUL2-01A-A124-SUBLAB2","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":87,"x":0.447,"y":0.7585},{"i":23,"n":"AUL2-01A-A24-SUB","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":91,"x":0.4291,"y":0.7938},{"i":24,"n":"AUL2-0A-A106","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":90,"x":0.4069,"y":0.7539},{"i":25,"n":"AUL2-0A-A118","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":92,"x":0.395,"y":0.7945},{"i":26,"n":"AUL2-0A-A119","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":65,"x":0.3634,"y":0.7813},{"i":27,"n":"AUL2-0A-A120","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":79,"x":0.3342,"y":0.7611},{"i":28,"n":"AUL2-0A-A121","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":64,"x":0.3142,"y":0.7336},{"i":29,"n":"AUL2-0A-A122","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":81,"x":0.3145,"y":0.7027},{"i":30,"n":"AUL2-0A-A123","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":80,"x":0.3436,"y":0.6765},{"i":31,"n":"BAL-AUL1-D4","c":"Campus Balzay","l":"agregacion","d":6,"b":0.0451,"a":1,"k":0.3035,"r":24,"x":0.5257,"y":0.6925},{"i":32,"n":"BAL-AUL2-D1","c":"Campus Balzay","l":"agregacion","d":12,"b":0.1107,"a":1,"k":0.3549,"r":8,"x":0.4153,"y":0.6879},{"i":33,"n":"BAL-CENTEC-D2","c":"Campus Balzay","l":"agregacion","d":7,"b":0.0562,"a":1,"k":0.3122,"r":19,"x":0.3953,"y":0.6239},{"i":34,"n":"BAL-EADM-D3","c":"Campus Balzay","l":"agregacion","d":2,"b":0.0226,"a":1,"k":0.2859,"r":34,"x":0.4933,"y":0.827},{"i":35,"n":"BIB-2A-A16","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":83,"x":0.4671,"y":0.1693},{"i":36,"n":"BLOQUED-0A-A21","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":84,"x":0.4727,"y":0.1049},{"i":37,"n":"CB-EADMI-D6","c":"Campus Balzay","l":"agregacion","d":6,"b":0.067,"a":1,"k":0.3207,"r":16,"x":0.4988,"y":0.7055},{"i":38,"n":"CC-ADM-D40","c":"Campus Central","l":"agregacion","d":7,"b":0.0562,"a":1,"k":0.3122,"r":20,"x":0.7144,"y":0.5281},{"i":39,"n":"CC-AETUC-D30","c":"Campus Central","l":"agregacion","d":4,"b":0.0338,"a":1,"k":0.2947,"r":29,"x":0.7578,"y":0.4411},{"i":40,"n":"CC-ARQUITECTURA-D107","c":"Campus Central","l":"agregacion","d":10,"b":0.1212,"a":1,"k":0.3632,"r":7,"x":0.7696,"y":0.5161},{"i":41,"n":"CC-BIBLIOTECA-D112","c":"Campus Central","l":"agregacion","d":4,"b":0.0227,"a":1,"k":0.2859,"r":38,"x":0.6987,"y":0.497},{"i":42,"n":"CC-BLOQUE-IQ","c":"Campus Central","l":"agregacion","d":2,"b":0.0,"a":0,"k":0.0182,"r":82,"x":0.6558,"y":0.4378},{"i":43,"n":"CC-ECONOMIA-D51","c":"Campus Central","l":"agregacion","d":6,"b":0.067,"a":1,"k":0.3207,"r":17,"x":0.7778,"y":0.4643},{"i":44,"n":"CC-FILOSOFIA-A-D108","c":"Campus Central","l":"agregacion","d":5,"b":0.056,"a":1,"k":0.312,"r":23,"x":0.7166,"y":0.3732},{"i":45,"n":"CC-FILOSOFIA-B-D111","c":"Campus Central","l":"agregacion","d":4,"b":0.0227,"a":1,"k":0.2859,"r":35,"x":0.6742,"y":0.4896},{"i":46,"n":"CC-JURISPRUDENCIA-D110","c":"Campus Central","l":"agregacion","d":6,"b":0.0451,"a":1,"k":0.3035,"r":26,"x":0.6749,"y":0.3791},{"i":47,"n":"CC-MONJAS-D126","c":"Campus Central","l":"agregacion","d":8,"b":0.0781,"a":1,"k":0.3294,"r":13,"x":0.737,"y":0.3641},{"i":48,"n":"CC-PROMAS-D31","c":"Campus Central","l":"agregacion","d":4,"b":0.0338,"a":1,"k":0.2947,"r":28,"x":0.7368,"y":0.4021},{"i":49,"n":"CC-PSICOLOGIA-D125","c":"Campus Central","l":"agregacion","d":4,"b":0.0227,"a":1,"k":0.2859,"r":37,"x":0.6628,"y":0.4023},{"i":50,"n":"CC-QUIMICA-D109","c":"Campus Central","l":"agregacion","d":5,"b":0.045,"a":1,"k":0.3034,"r":27,"x":0.7659,"y":0.4198},{"i":51,"n":"CCADM-2A-A43","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":112,"x":0.7792,"y":0.6233},{"i":52,"n":"CCADM-2A-A44","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":113,"x":0.7939,"y":0.5724},{"i":53,"n":"CCADM-2A-A45","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":110,"x":0.7183,"y":0.6346},{"i":54,"n":"CCBIB-1A-A71","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":111,"x":0.691,"y":0.6001},{"i":55,"n":"CCJ-1A-A10","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":104,"x":0.3845,"y":0.4094},{"i":56,"n":"CCJ-1A-A11","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":105,"x":0.4444,"y":0.2966},{"i":57,"n":"CCJ-CJURIDICO-D4","c":"Campus Central","l":"agregacion","d":3,"b":0.0227,"a":1,"k":0.2859,"r":36,"x":0.4581,"y":0.3746},{"i":58,"n":"CEA-0A-A108","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":103,"x":0.3527,"y":0.706},{"i":59,"n":"CEN-1A-A20","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":108,"x":0.4578,"y":0.138},{"i":60,"n":"CENDIA-0A-A19","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":109,"x":0.1432,"y":0.4266},{"i":61,"n":"CMED-0A-A42","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":102,"x":0.6882,"y":0.6216},{"i":62,"n":"CP-EADMINA1-D6","c":"Campus Paraiso","l":"agregacion","d":9,"b":0.0891,"a":1,"k":0.338,"r":9,"x":0.2012,"y":0.3314},{"i":63,"n":"CP-ENFERMERIA-D1","c":"Campus Paraiso","l":"agregacion","d":3,"b":0.0338,"a":1,"k":0.2947,"r":30,"x":0.2409,"y":0.3617},{"i":64,"n":"CP-INVESTIGACION-D5","c":"Campus Paraiso","l":"agregacion","d":5,"b":0.0561,"a":1,"k":0.3121,"r":22,"x":0.2283,"y":0.397},{"i":65,"n":"CP-ODONTOLOGIA-D4","c":"Campus Paraiso","l":"agregacion","d":6,"b":0.0888,"a":1,"k":0.3378,"r":10,"x":0.223,"y":0.2576},{"i":66,"n":"CP-POSGRADO-D2","c":"Campus Paraiso","l":"agregacion","d":6,"b":0.0671,"a":1,"k":0.3208,"r":15,"x":0.2804,"y":0.2315},{"i":67,"n":"CP-TECMEDICO-D3","c":"Campus Paraiso","l":"agregacion","d":5,"b":0.0561,"a":1,"k":0.3121,"r":21,"x":0.3109,"y":0.2274},{"i":68,"n":"CPAR-C10","c":"Campus Paraiso","l":"core","d":7,"b":0.4043,"a":1,"k":0.5849,"r":3,"x":0.2883,"y":0.315},{"i":69,"n":"CREDU-0B-A94","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":94,"x":0.7952,"y":0.3239},{"i":70,"n":"CTBLOQ1-0A-A101","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":95,"x":0.2931,"y":0.6837},{"i":71,"n":"CTBLOQ2-0A-A102","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":107,"x":0.2858,"y":0.6444},{"i":72,"n":"CTBLOQ3-0A-A103","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":106,"x":0.31,"y":0.6107},{"i":73,"n":"DAN-1A-A11","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":101,"x":0.5027,"y":0.0867},{"i":74,"n":"DATCC-2A-C2","c":"Campus Central","l":"core","d":16,"b":0.1706,"a":0,"k":0.2427,"r":54,"x":0.7172,"y":0.4516},{"i":75,"n":"DATCC-2A-C3","c":"Campus Central","l":"core","d":17,"b":0.4468,"a":0,"k":0.5136,"r":4,"x":0.6948,"y":0.4435},{"i":76,"n":"DT-0A-C12","c":"Campus Balzay","l":"core","d":7,"b":0.0833,"a":0,"k":0.1562,"r":56,"x":0.485,"y":0.6417},{"i":77,"n":"DT-0A-C13","c":"Campus Balzay","l":"core","d":8,"b":0.2235,"a":0,"k":0.2842,"r":39,"x":0.4713,"y":0.6107},{"i":78,"n":"EA-0A-A114","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":100,"x":0.5682,"y":0.7763},{"i":79,"n":"EA-1A-A115","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":99,"x":0.5413,"y":0.805},{"i":80,"n":"EA-1A-A116","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":98,"x":0.4673,"y":0.7904},{"i":81,"n":"ECOK1-1A-A101","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":97,"x":0.8689,"y":0.4146},{"i":82,"n":"ECOK1-1A-A102","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":130,"x":0.8671,"y":0.4669},{"i":83,"n":"ECOK2-1A-A52","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":131,"x":0.8445,"y":0.5247},{"i":84,"n":"ECOK3-0A-A63","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":96,"x":0.7514,"y":0.2581},{"i":85,"n":"ENF-2B-A122","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":135,"x":0.0,"y":0.4246},{"i":86,"n":"ENF-2B-A22","c":"Campus Paraiso","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":42,"x":0.1037,"y":0.4076},{"i":87,"n":"ENF-3A-A21","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":136,"x":0.178,"y":0.4391},{"i":88,"n":"FILOA-0B-A56","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":93,"x":0.7263,"y":0.2587},{"i":89,"n":"FILOA-2A-A55","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":134,"x":0.7656,"y":0.2887},{"i":90,"n":"FILOB-1B-A58","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":132,"x":0.7193,"y":0.5945},{"i":91,"n":"FILOB-2A-A57","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":133,"x":0.661,"y":0.585},{"i":92,"n":"FORTIGATE-1800F-BALZAY","c":"Campus Balzay","l":"interconexion","d":5,"b":0.149,"a":0,"k":0.3167,"r":18,"x":0.529,"y":0.5432},{"i":93,"n":"FORTIGATE-1800F-CENTRAL","c":"Campus Central","l":"interconexion","d":5,"b":0.1863,"a":0,"k":0.3278,"r":14,"x":0.6025,"y":0.4662},{"i":94,"n":"HOS-0A-A10","c":"Campus Hospitalidad","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":128,"x":0.3865,"y":0.4959},{"i":95,"n":"HOS-0A-A13","c":"Campus Hospitalidad","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":129,"x":0.3606,"y":0.4801},{"i":96,"n":"HOS-0A-D05","c":"Campus Hospitalidad","l":"agregacion","d":5,"b":0.0451,"a":1,"k":0.3035,"r":25,"x":0.437,"y":0.4332},{"i":97,"n":"HOS-1A-A12","c":"Campus Hospitalidad","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":126,"x":0.3641,"y":0.4447},{"i":98,"n":"HOS-2A-A11","c":"Campus Hospitalidad","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":127,"x":0.3898,"y":0.3827},{"i":99,"n":"INTERNET-MPLS","c":"Nube MPLS","l":"wan","d":8,"b":0.3657,"a":1,"k":0.9183,"r":1,"x":0.4872,"y":0.407},{"i":100,"n":"INV-1A-A161","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":125,"x":0.1879,"y":0.4746},{"i":101,"n":"INV-1A-A61","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":124,"x":0.1556,"y":0.4802},{"i":102,"n":"INV-1B-A162","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":123,"x":0.0196,"y":0.4921},{"i":103,"n":"INV-1B-A62","c":"Campus Paraiso","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":48,"x":0.1114,"y":0.4573},{"i":104,"n":"JUR-0A-A59","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":122,"x":0.7334,"y":0.2989},{"i":105,"n":"JUR-0A-A60","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":121,"x":0.6588,"y":0.2843},{"i":106,"n":"JUR-1A-A61","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":120,"x":0.6896,"y":0.2658},{"i":107,"n":"JUR-1A-A62","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":119,"x":0.6276,"y":0.3217},{"i":108,"n":"LAB-1A-A18","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":118,"x":0.571,"y":0.0853},{"i":109,"n":"LABMAC-1A-A13","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":117,"x":0.5491,"y":0.1233},{"i":110,"n":"LAC-0A-A17","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":116,"x":0.5362,"y":0.0803},{"i":111,"n":"MEDADM-0F-A16","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":115,"x":0.1643,"y":0.3928},{"i":112,"n":"MEDADM-0G-A17","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":114,"x":0.1263,"y":0.3925},{"i":113,"n":"MEDADM-1A-A11","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":140,"x":0.0945,"y":0.3704},{"i":114,"n":"MEDADM-1B-A12","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":141,"x":0.1358,"y":0.3349},{"i":115,"n":"MEDADM-1C-A13","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":144,"x":0.0897,"y":0.3346},{"i":116,"n":"MEDADM-1D-A14","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":145,"x":0.0972,"y":0.2992},{"i":117,"n":"MEDADM-1E-A15","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":142,"x":0.1242,"y":0.2764},{"i":118,"n":"MEDADM-1H-A18","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":143,"x":0.165,"y":0.2765},{"i":119,"n":"MICRORED-1A-A109","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":155,"x":0.3658,"y":0.7362},{"i":120,"n":"MON-0A-A103","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":139,"x":0.7147,"y":0.2756},{"i":121,"n":"MON-0A-A104","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":157,"x":0.7924,"y":0.2936},{"i":122,"n":"MON-1B-A67","c":"Campus Central","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":47,"x":0.7938,"y":0.2563},{"i":123,"n":"MON-1B-A68","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":156,"x":0.8523,"y":0.1785},{"i":124,"n":"MON-1C-A105","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":158,"x":0.8241,"y":0.3442},{"i":125,"n":"MON-1C-A106","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":159,"x":0.8341,"y":0.3133},{"i":126,"n":"ODO-0B-A152","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":137,"x":0.0101,"y":0.2233},{"i":127,"n":"ODO-0B-A52","c":"Campus Paraiso","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":41,"x":0.1046,"y":0.24},{"i":128,"n":"ODO-0C-A153","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":138,"x":0.0621,"y":0.1245},{"i":129,"n":"ODO-0C-A154","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":152,"x":0.1471,"y":0.2415},{"i":130,"n":"ODO-0C-A53","c":"Campus Paraiso","l":"acceso","d":3,"b":0.0227,"a":1,"k":0.2859,"r":33,"x":0.1484,"y":0.1594},{"i":131,"n":"ODO-0C-A54","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":151,"x":0.1182,"y":0.0707},{"i":132,"n":"ODO-1A-A151","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":154,"x":0.1616,"y":0.2047},{"i":133,"n":"ODO-1A-A51","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":153,"x":0.1996,"y":0.1703},{"i":134,"n":"PE1-BALZAY","c":"Campus Balzay","l":"wan","d":4,"b":0.0056,"a":0,"k":0.0226,"r":63,"x":0.5174,"y":0.4645},{"i":135,"n":"PE1-CENTRAL","c":"Campus Central","l":"wan","d":5,"b":0.0675,"a":0,"k":0.1256,"r":57,"x":0.5264,"y":0.4204},{"i":136,"n":"PE2-BALZAY","c":"Campus Balzay","l":"wan","d":5,"b":0.146,"a":0,"k":0.2235,"r":55,"x":0.4661,"y":0.5111},{"i":137,"n":"PE2-CENTRAL","c":"Campus Central","l":"wan","d":6,"b":0.2881,"a":0,"k":0.3348,"r":11,"x":0.5855,"y":0.4159},{"i":138,"n":"POS-0A-A131","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":150,"x":0.2088,"y":0.1975},{"i":139,"n":"POS-0A-A31","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":148,"x":0.222,"y":0.1505},{"i":140,"n":"POS-1B-A32","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":149,"x":0.3006,"y":0.1259},{"i":141,"n":"POS-2C-A133","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":147,"x":0.2078,"y":0.0191},{"i":142,"n":"POS-2C-A33","c":"Campus Paraiso","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":46,"x":0.2423,"y":0.1099},{"i":143,"n":"POSLAB-0D-A34","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":146,"x":0.2965,"y":0.161},{"i":144,"n":"POST-1A-A64","c":"Campus Central","l":"acceso","d":2,"b":0.0226,"a":1,"k":0.2859,"r":32,"x":0.8257,"y":0.284},{"i":145,"n":"POST-1A-A65","c":"Campus Central","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":52,"x":0.9009,"y":0.2126},{"i":146,"n":"POST-2A-A66","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":164,"x":0.9709,"y":0.1568},{"i":147,"n":"PRO-1A-A73","c":"Campus Central","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":53,"x":0.862,"y":0.3403},{"i":148,"n":"PRO-3A-A74","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":165,"x":0.9496,"y":0.2817},{"i":149,"n":"PSIC-1A-A53","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":166,"x":0.6431,"y":0.3126},{"i":150,"n":"PSIC-2B-A54","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":167,"x":0.6845,"y":0.3014},{"i":151,"n":"QUI-0A-A78","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":161,"x":0.843,"y":0.3636},{"i":152,"n":"QUI-1A-A83","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":160,"x":0.8602,"y":0.4418},{"i":153,"n":"QUI-2A-A81","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":162,"x":0.9811,"y":0.3422},{"i":154,"n":"QUI-2A-A82","c":"Campus Central","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":51,"x":0.886,"y":0.3786},{"i":155,"n":"QUIN-1A-A117","c":"Campus Balzay","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":45,"x":0.4859,"y":0.9193},{"i":156,"n":"QUIN-1A-A128","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":163,"x":0.4691,"y":1.0},{"i":157,"n":"ROUTER-CAMPUS-CENTRO-HISTORICO","c":"Sede Centro Historico","l":"wan","d":2,"b":0.0044,"a":0,"k":0.058,"r":62,"x":0.5988,"y":0.5796},{"i":158,"n":"ROUTER-CAMPUS-HUAYNA-CAPAC","c":"Campus Paraiso","l":"wan","d":3,"b":0.3663,"a":1,"k":0.7551,"r":2,"x":0.3924,"y":0.3525},{"i":159,"n":"ROUTER-CAMPUS-MUSEO","c":"Sede Museo","l":"wan","d":2,"b":0.0044,"a":0,"k":0.058,"r":61,"x":0.62,"y":0.6115},{"i":160,"n":"ROUTER-CAMPUS-PARAISO","c":"Campus Paraiso","l":"wan","d":2,"b":0.1018,"a":0,"k":0.3343,"r":12,"x":0.5021,"y":0.3596},{"i":161,"n":"ROUTER-CAMPUS-YANUNCAY","c":"Campus Yanuncay","l":"wan","d":3,"b":0.1278,"a":1,"k":0.3683,"r":5,"x":0.5055,"y":0.3072},{"i":162,"n":"ROUTER-L2TP-BALZAY","c":"Campus Balzay","l":"wan","d":4,"b":0.0142,"a":0,"k":0.0657,"r":60,"x":0.5333,"y":0.6137},{"i":163,"n":"SW-ARUBA-CENTRO-HISTORICO","c":"Sede Centro Historico","l":"acceso","d":2,"b":0.0097,"a":0,"k":0.0803,"r":58,"x":0.6405,"y":0.4912},{"i":164,"n":"SW-ARUBA-MUSEO","c":"Sede Museo","l":"acceso","d":2,"b":0.0072,"a":0,"k":0.0784,"r":59,"x":0.6701,"y":0.5189},{"i":165,"n":"TALL-0A-A12","c":"Campus Yanuncay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":168,"x":0.6085,"y":0.1293},{"i":166,"n":"TEAT-0A-A75","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":169,"x":0.7475,"y":0.6358},{"i":167,"n":"TECMED-0B-A42","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":171,"x":0.2565,"y":0.1573},{"i":168,"n":"TECMED-1A-A141","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":170,"x":0.2687,"y":0.0},{"i":169,"n":"TECMED-1A-A41","c":"Campus Paraiso","l":"acceso","d":2,"b":0.0114,"a":1,"k":0.2771,"r":50,"x":0.2871,"y":0.097},{"i":170,"n":"TECMED-2C-A43","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":172,"x":0.3339,"y":0.1533},{"i":171,"n":"TECMED-3D-A44","c":"Campus Paraiso","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":173,"x":0.3347,"y":0.119},{"i":172,"n":"TECQUI-0A-A10","c":"Campus Central","l":"acceso","d":3,"b":0.0227,"a":1,"k":0.2859,"r":31,"x":0.9035,"y":0.4874},{"i":173,"n":"TECQUI-0A-A11","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":174,"x":1.0,"y":0.4715},{"i":174,"n":"TECQUI-0A-A12","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":175,"x":0.9862,"y":0.541},{"i":175,"n":"VIN-0A-A72","c":"Campus Central","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":176,"x":0.7536,"y":0.5857},{"i":176,"n":"VLIR-0A-A107","c":"Campus Balzay","l":"acceso","d":1,"b":0.0,"a":0,"k":0.0182,"r":177,"x":0.3221,"y":0.6453}],"edges":[{"s":0,"t":39,"b":1,"c":""},{"s":0,"t":2,"b":1,"c":""},{"s":1,"t":39,"b":1,"c":""},{"s":3,"t":4,"b":1,"c":""},{"s":4,"t":161,"b":1,"c":""},{"s":4,"t":165,"b":1,"c":""},{"s":4,"t":73,"b":1,"c":""},{"s":4,"t":109,"b":1,"c":""},{"s":4,"t":17,"b":1,"c":""},{"s":4,"t":36,"b":1,"c":""},{"s":4,"t":35,"b":1,"c":""},{"s":4,"t":110,"b":1,"c":""},{"s":4,"t":108,"b":1,"c":""},{"s":4,"t":5,"b":1,"c":""},{"s":4,"t":59,"b":1,"c":""},{"s":6,"t":7,"b":1,"c":""},{"s":7,"t":40,"b":1,"c":""},{"s":8,"t":40,"b":1,"c":""},{"s":9,"t":40,"b":1,"c":""},{"s":9,"t":10,"b":1,"c":""},{"s":11,"t":40,"b":1,"c":""},{"s":12,"t":40,"b":1,"c":""},{"s":13,"t":40,"b":1,"c":""},{"s":14,"t":40,"b":1,"c":""},{"s":15,"t":40,"b":1,"c":""},{"s":15,"t":16,"b":1,"c":""},{"s":18,"t":31,"b":1,"c":""},{"s":19,"t":31,"b":1,"c":""},{"s":20,"t":31,"b":1,"c":""},{"s":21,"t":31,"b":1,"c":""},{"s":22,"t":32,"b":1,"c":""},{"s":23,"t":32,"b":1,"c":""},{"s":24,"t":32,"b":1,"c":""},{"s":25,"t":32,"b":1,"c":""},{"s":26,"t":32,"b":1,"c":""},{"s":27,"t":32,"b":1,"c":""},{"s":28,"t":32,"b":1,"c":""},{"s":29,"t":32,"b":1,"c":""},{"s":30,"t":32,"b":1,"c":""},{"s":31,"t":76,"b":0,"c":""},{"s":31,"t":77,"b":0,"c":""},{"s":32,"t":76,"b":0,"c":""},{"s":32,"t":77,"b":0,"c":""},{"s":32,"t":119,"b":1,"c":""},{"s":33,"t":76,"b":0,"c":""},{"s":33,"t":77,"b":0,"c":""},{"s":33,"t":58,"b":1,"c":""},{"s":33,"t":176,"b":1,"c":""},{"s":33,"t":70,"b":1,"c":""},{"s":33,"t":71,"b":1,"c":""},{"s":33,"t":72,"b":1,"c":""},{"s":34,"t":37,"b":1,"c":""},{"s":34,"t":155,"b":1,"c":""},{"s":37,"t":76,"b":0,"c":""},{"s":37,"t":77,"b":0,"c":""},{"s":37,"t":79,"b":1,"c":""},{"s":37,"t":78,"b":1,"c":""},{"s":37,"t":80,"b":1,"c":""},{"s":38,"t":74,"b":0,"c":""},{"s":38,"t":75,"b":0,"c":""},{"s":38,"t":166,"b":1,"c":""},{"s":38,"t":61,"b":1,"c":""},{"s":38,"t":51,"b":1,"c":""},{"s":38,"t":52,"b":1,"c":""},{"s":38,"t":53,"b":1,"c":""},{"s":39,"t":74,"b":0,"c":""},{"s":39,"t":75,"b":0,"c":""},{"s":40,"t":74,"b":0,"c":""},{"s":40,"t":75,"b":0,"c":""},{"s":41,"t":74,"b":0,"c":""},{"s":41,"t":75,"b":0,"c":""},{"s":41,"t":54,"b":1,"c":""},{"s":41,"t":175,"b":1,"c":""},{"s":42,"t":74,"b":0,"c":""},{"s":42,"t":75,"b":0,"c":""},{"s":43,"t":75,"b":0,"c":""},{"s":43,"t":74,"b":0,"c":""},{"s":43,"t":83,"b":1,"c":""},{"s":43,"t":81,"b":1,"c":""},{"s":43,"t":82,"b":1,"c":""},{"s":43,"t":172,"b":1,"c":""},{"s":44,"t":75,"b":0,"c":""},{"s":44,"t":74,"b":0,"c":""},{"s":44,"t":144,"b":1,"c":""},{"s":44,"t":88,"b":1,"c":""},{"s":44,"t":89,"b":1,"c":""},{"s":45,"t":75,"b":0,"c":""},{"s":45,"t":74,"b":0,"c":""},{"s":45,"t":91,"b":1,"c":""},{"s":45,"t":90,"b":1,"c":""},{"s":46,"t":75,"b":0,"c":""},{"s":46,"t":74,"b":0,"c":""},{"s":46,"t":104,"b":1,"c":""},{"s":46,"t":105,"b":1,"c":""},{"s":46,"t":106,"b":1,"c":""},{"s":46,"t":107,"b":1,"c":""},{"s":47,"t":75,"b":0,"c":""},{"s":47,"t":74,"b":0,"c":""},{"s":47,"t":120,"b":1,"c":""},{"s":47,"t":121,"b":1,"c":""},{"s":47,"t":124,"b":1,"c":""},{"s":47,"t":125,"b":1,"c":""},{"s":47,"t":122,"b":1,"c":""},{"s":47,"t":84,"b":1,"c":""},{"s":48,"t":74,"b":0,"c":""},{"s":48,"t":75,"b":0,"c":""},{"s":48,"t":147,"b":1,"c":""},{"s":48,"t":69,"b":1,"c":""},{"s":49,"t":75,"b":0,"c":""},{"s":49,"t":74,"b":0,"c":""},{"s":49,"t":149,"b":1,"c":""},{"s":49,"t":150,"b":1,"c":""},{"s":50,"t":74,"b":0,"c":""},{"s":50,"t":75,"b":0,"c":""},{"s":50,"t":152,"b":1,"c":""},{"s":50,"t":151,"b":1,"c":""},{"s":50,"t":154,"b":1,"c":""},{"s":55,"t":57,"b":1,"c":""},{"s":56,"t":57,"b":1,"c":""},{"s":57,"t":99,"b":1,"c":""},{"s":60,"t":64,"b":1,"c":""},{"s":62,"t":68,"b":1,"c":""},{"s":62,"t":113,"b":1,"c":""},{"s":62,"t":114,"b":1,"c":""},{"s":62,"t":115,"b":1,"c":""},{"s":62,"t":116,"b":1,"c":""},{"s":62,"t":117,"b":1,"c":""},{"s":62,"t":111,"b":1,"c":""},{"s":62,"t":112,"b":1,"c":""},{"s":62,"t":118,"b":1,"c":""},{"s":63,"t":68,"b":1,"c":""},{"s":63,"t":86,"b":1,"c":""},{"s":63,"t":87,"b":1,"c":""},{"s":64,"t":68,"b":1,"c":""},{"s":64,"t":101,"b":1,"c":""},{"s":64,"t":100,"b":1,"c":""},{"s":64,"t":103,"b":1,"c":""},{"s":65,"t":68,"b":1,"c":""},{"s":65,"t":132,"b":1,"c":""},{"s":65,"t":133,"b":1,"c":""},{"s":65,"t":127,"b":1,"c":""},{"s":65,"t":130,"b":1,"c":""},{"s":65,"t":129,"b":1,"c":""},{"s":66,"t":68,"b":1,"c":""},{"s":66,"t":139,"b":1,"c":""},{"s":66,"t":140,"b":1,"c":""},{"s":66,"t":142,"b":1,"c":""},{"s":66,"t":143,"b":1,"c":""},{"s":66,"t":138,"b":1,"c":""},{"s":67,"t":68,"b":1,"c":""},{"s":67,"t":169,"b":1,"c":""},{"s":67,"t":167,"b":1,"c":""},{"s":67,"t":170,"b":1,"c":""},{"s":67,"t":171,"b":1,"c":""},{"s":68,"t":158,"b":1,"c":""},{"s":74,"t":75,"b":0,"c":""},{"s":74,"t":93,"b":0,"c":"10000"},{"s":74,"t":164,"b":0,"c":"10000"},{"s":75,"t":93,"b":0,"c":"10000"},{"s":75,"t":137,"b":0,"c":"20000"},{"s":75,"t":163,"b":0,"c":"10000"},{"s":76,"t":77,"b":0,"c":""},{"s":76,"t":92,"b":0,"c":"10000"},{"s":76,"t":162,"b":0,"c":"1000"},{"s":77,"t":92,"b":0,"c":"10000"},{"s":77,"t":136,"b":0,"c":"20000"},{"s":77,"t":162,"b":0,"c":"1000"},{"s":85,"t":86,"b":1,"c":""},{"s":92,"t":134,"b":0,"c":"10000"},{"s":92,"t":136,"b":0,"c":"10000"},{"s":92,"t":93,"b":0,"c":"1000"},{"s":93,"t":135,"b":0,"c":"10000"},{"s":93,"t":137,"b":0,"c":"10000"},{"s":94,"t":96,"b":1,"c":""},{"s":95,"t":96,"b":1,"c":""},{"s":96,"t":99,"b":1,"c":""},{"s":96,"t":98,"b":1,"c":""},{"s":96,"t":97,"b":1,"c":""},{"s":99,"t":158,"b":0,"c":"10000"},{"s":99,"t":161,"b":0,"c":"10000"},{"s":99,"t":134,"b":0,"c":"10000"},{"s":99,"t":136,"b":0,"c":"10000"},{"s":99,"t":135,"b":0,"c":"10000"},{"s":99,"t":137,"b":0,"c":"10000"},{"s":102,"t":103,"b":1,"c":""},{"s":122,"t":123,"b":1,"c":""},{"s":126,"t":127,"b":1,"c":""},{"s":128,"t":130,"b":1,"c":""},{"s":130,"t":131,"b":1,"c":""},{"s":134,"t":137,"b":0,"c":"10000"},{"s":134,"t":136,"b":0,"c":""},{"s":135,"t":161,"b":0,"c":"10000"},{"s":135,"t":136,"b":0,"c":"10000"},{"s":135,"t":137,"b":0,"c":""},{"s":137,"t":160,"b":0,"c":"10000"},{"s":141,"t":142,"b":1,"c":""},{"s":144,"t":145,"b":1,"c":""},{"s":145,"t":146,"b":1,"c":""},{"s":147,"t":148,"b":1,"c":""},{"s":153,"t":154,"b":1,"c":""},{"s":155,"t":156,"b":1,"c":""},{"s":157,"t":162,"b":0,"c":"1000"},{"s":157,"t":163,"b":0,"c":""},{"s":158,"t":160,"b":0,"c":"10000"},{"s":159,"t":162,"b":0,"c":"1000"},{"s":159,"t":164,"b":0,"c":""},{"s":168,"t":169,"b":1,"c":""},{"s":172,"t":173,"b":1,"c":""},{"s":172,"t":174,"b":1,"c":""}]};
+
+const CAPA_COL = {core:'#e23a56',agregacion:'#e08a00',acceso:'#2f6bff',wan:'#5b4be0',interconexion:'#0fa36b'};
+const CAPA_LABEL = {core:'Core',agregacion:'Agregación',acceso:'Acceso',wan:'WAN / interconexión',interconexion:'Interconexión (firewall)'};
+
+const nodes = DATA.nodes.map(n=>({...n, dead:false}));
+const edges = DATA.edges;
+const byId = {}; nodes.forEach(n=>byId[n.i]=n);
+const adj = {}; nodes.forEach(n=>adj[n.i]=[]);
+edges.forEach(e=>{adj[e.s].push(e.t); adj[e.t].push(e.s);});
+
+const maxB = Math.max(...nodes.map(n=>n.b));
+const maxK = Math.max(...nodes.map(n=>n.k));
+let mode = 'capa';
+const PAD = 26, W = 900, H = 560;
+
+function ramp(t, from, to){
+  function hx(c){c=c.replace('#','');return [parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];}
+  const a=hx(from), b=hx(to);
+  return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`;
+}
+function nodeColor(n){
+  if(n.dead) return '#d8dee9';
+  if(mode==='capa') return CAPA_COL[n.l]||'#999';
+  if(mode==='btw') return ramp(Math.pow(n.b/(maxB||1),.45),'#d8dee9','#e23a56');
+  if(mode==='icc') return ramp(Math.pow(n.k/(maxK||1),.55),'#d8dee9','#8b1f2f');
+  if(mode==='art') return n.a ? '#e23a56' : '#c6d0e0';
+  return '#2f6bff';
+}
+function nodeRadius(n){
+  let base = 2.2 + Math.sqrt(n.d)*1.35;
+  if(mode==='btw') base = 2.2 + Math.sqrt(n.b/(maxB||1))*11;
+  if(mode==='icc') base = 2.2 + Math.sqrt(n.k/(maxK||1))*11;
+  return base;
+}
+function sx(n){ return PAD + n.x*(W-PAD*2); }
+function sy(n){ return PAD + n.y*(H-PAD*2); }
+
+const svg = document.getElementById('net');
+let hover=null, selected=null;
+
+function render(){
+  let html='';
+  edges.forEach(e=>{
+    const a=byId[e.s], b=byId[e.t];
+    const dead = a.dead||b.dead;
+    const conn = hover && (e.s===hover.i||e.t===hover.i);
+    let stroke, w, op;
+    if(dead){ stroke='#e6eaf1'; w=.6; op=.5; }
+    else if(conn){ stroke='#2f6bff'; w=1.9; op=.9; }
+    else { stroke='#c6d0e0'; w=.8; op=.5; }
+    html += `<line x1="${sx(a)}" y1="${sy(a)}" x2="${sx(b)}" y2="${sy(b)}" stroke="${stroke}" stroke-width="${w}" opacity="${op}"/>`;
+  });
+  nodes.forEach(n=>{
+    const X=sx(n), Y=sy(n), R=nodeRadius(n);
+    const hi = (n===hover || n===selected);
+    if(hi){
+      html += `<circle cx="${X}" cy="${Y}" r="${R+6}" fill="rgba(47,107,255,.18)"/>`;
+    }
+    html += `<circle data-i="${n.i}" cx="${X}" cy="${Y}" r="${R}" fill="${nodeColor(n)}" opacity="${n.dead?0.25:1}" stroke="${hi?'#fff':'none'}" stroke-width="1.6"/>`;
+  });
+  // labels for the biggest hubs + selected/hover
+  nodes.forEach(n=>{
+    if(n.dead) return;
+    const show = n.d>=8 || n.r<=4 || n===hover || n===selected;
+    if(!show) return;
+    const X=sx(n), Y=sy(n)-nodeRadius(n)-5;
+    html += `<text x="${X}" y="${Y}" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#101725" text-anchor="middle" stroke="#fff" stroke-width="3" paint-order="stroke">${n.n}</text>`;
+    html += `<text x="${X}" y="${Y}" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#101725" text-anchor="middle">${n.n}</text>`;
+  });
+  svg.innerHTML = html;
+}
+
+const tip = document.getElementById('tip');
+const stageEl = document.querySelector('.stage');
+
+function showCard(n){
+  if(!n){
+    document.getElementById('card-empty').style.display='block';
+    document.getElementById('card-body').style.display='none';
+    return;
+  }
+  document.getElementById('card-empty').style.display='none';
+  document.getElementById('card-body').style.display='block';
+  document.getElementById('c-name').textContent = n.n;
+  document.getElementById('c-sub').textContent = n.c + ' · capa ' + n.l;
+  document.getElementById('c-deg').textContent = n.d;
+  document.getElementById('c-btw').textContent = n.b.toFixed(4);
+  document.getElementById('c-icc').textContent = n.k>0 ? n.k.toFixed(4) : '—';
+  const artEl = document.getElementById('c-art');
+  artEl.textContent = n.a ? 'Sí' : 'No';
+  artEl.className = 'v' + (n.a ? ' crit' : '');
+  const badge = document.getElementById('c-badge');
+  if(n.r<=4){ badge.textContent='CRÍTICO · ICC #'+n.r; badge.className='badge hi'; }
+  else if(n.r<=15){ badge.textContent='ALTA CRITICIDAD · #'+n.r; badge.className='badge md'; }
+  else { badge.textContent='criticidad baja'; badge.className='badge lo'; }
+}
+
+function pick(evt){
+  const pt = svg.createSVGPoint();
+  pt.x = evt.clientX; pt.y = evt.clientY;
+  const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+  let best=null, bd=1e9;
+  nodes.forEach(n=>{
+    const dx=loc.x-sx(n), dy=loc.y-sy(n);
+    const d=dx*dx+dy*dy, r=nodeRadius(n)+4;
+    if(d<r*r && d<bd){bd=d;best=n;}
+  });
+  return best;
+}
+svg.addEventListener('mousemove', e=>{
+  const n = pick(e);
+  if(n!==hover){
+    hover=n; render();
+    if(n && !selected) showCard(n);
+    if(!n && !selected) showCard(null);
+  }
+  if(n){
+    const rect = stageEl.getBoundingClientRect();
+    tip.style.display='block';
+    tip.style.left = (e.clientX-rect.left+14)+'px';
+    tip.style.top = (e.clientY-rect.top-10)+'px';
+    tip.innerHTML = `<b>${n.n}</b><br>k=${n.d} · btw=${n.b.toFixed(3)}<br>${n.c}`;
+  } else {
+    tip.style.display='none';
+  }
+});
+svg.addEventListener('mouseleave', ()=>{ hover=null; tip.style.display='none'; if(!selected){render();showCard(null);} });
+svg.addEventListener('click', e=>{
+  const n = pick(e);
+  selected = (selected===n) ? null : n;
+  showCard(selected||hover);
+  render();
+});
+
+document.getElementById('modebar').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  mode = b.dataset.m;
+  [...document.getElementById('modebar').children].forEach(x=>x.classList.toggle('on', x===b));
+  renderLegend(); render();
+});
+
+function renderLegend(){
+  const el = document.getElementById('legend');
+  if(mode==='capa'){
+    el.innerHTML = Object.entries(CAPA_LABEL).map(([k,v])=>
+      `<div class="leg"><span class="sw" style="background:${CAPA_COL[k]}"></span>${v}</div>`).join('');
+  } else if(mode==='btw'){
+    el.innerHTML = `<div class="leg">Tamaño y color ∝ intermediación</div>
+      <div class="leg"><span class="sw" style="background:#d8dee9"></span>baja</div>
+      <div class="leg"><span class="sw" style="background:#e23a56"></span>alta (cuello de botella)</div>`;
+  } else if(mode==='icc'){
+    el.innerHTML = `<div class="leg">Tamaño y color ∝ Índice ICC</div>
+      <div class="leg"><span class="sw" style="background:#d8dee9"></span>no crítico</div>
+      <div class="leg"><span class="sw" style="background:#8b1f2f"></span>crítico</div>`;
+  } else if(mode==='art'){
+    el.innerHTML = `<div class="leg"><span class="sw" style="background:#e23a56"></span>Punto de articulación (47)</div>
+      <div class="leg"><span class="sw" style="background:#c6d0e0"></span>resto (130)</div>`;
+  }
+}
+
+// --- attack simulation: deterministic, betweenness-descending (matches P8 Item 1c) ---
+const attackOrder = [...nodes].sort((a,b)=>b.b-a.b);
+let attackTimer=null, attackStep=0;
+
+function gccSize(){
+  const alive = new Set(nodes.filter(n=>!n.dead).map(n=>n.i));
+  const seen = new Set(); let best=0;
+  for(const id of alive){
+    if(seen.has(id)) continue;
+    const stack=[id]; seen.add(id); let size=0;
+    while(stack.length){
+      const c=stack.pop(); size++;
+      (adj[c]||[]).forEach(nb=>{ if(alive.has(nb) && !seen.has(nb)){ seen.add(nb); stack.push(nb); } });
+    }
+    best = Math.max(best, size);
+  }
+  return best;
+}
+function updateStatus(){
+  const deadN = nodes.filter(n=>n.dead).length;
+  const gcc = gccSize();
+  const pinf = (gcc/177).toFixed(3);
+  document.getElementById('m-active').textContent = 177-deadN;
+  document.getElementById('m-gcc').textContent = gcc;
+  document.getElementById('m-pinf').textContent = pinf;
+  document.getElementById('status').innerHTML = deadN===0
+    ? '177 nodos activos · componente gigante 100%'
+    : `<b style="color:var(--crit)">${deadN} eliminados</b> · GCC ${Math.round(gcc/177*100)}% (${gcc} nodos)`;
+}
+function stopAttack(){ if(attackTimer){ clearInterval(attackTimer); attackTimer=null; } }
+document.getElementById('btnAttack').addEventListener('click', function(){
+  stopAttack();
+  nodes.forEach(n=>n.dead=false);
+  attackStep=0;
+  const btn=this; btn.textContent='atacando…';
+  attackTimer = setInterval(()=>{
+    if(attackStep>=26){ stopAttack(); btn.textContent='▶ simular ataque dirigido'; return; }
+    attackOrder[attackStep].dead=true; attackStep++;
+    updateStatus(); render();
+  }, 220);
+});
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  stopAttack();
+  document.getElementById('btnAttack').textContent='▶ simular ataque dirigido';
+  nodes.forEach(n=>n.dead=false);
+  selected=null; showCard(null);
+  updateStatus(); render();
+});
+
+renderLegend();
+render();
+</script>
+</body></html>
