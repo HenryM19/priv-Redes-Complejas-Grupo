@@ -1,0 +1,17 @@
+# ROS2 colcon
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# LaTeX (informe/Informe_latex) - salida de compilación centralizada en build/, solo se versiona el PDF
+build/*
+!build/*.pdf
