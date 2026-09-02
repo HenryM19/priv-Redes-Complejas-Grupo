@@ -938,6 +938,50 @@ tr.badrow td{background:var(--danger-soft);}
   </div>
 </section>
 
+
+<!-- ============ P1 · TABLA COMPARATIVA DE CENTRALIDADES ============ -->
+<section class="tight">
+  <div class="secmark">P1 · ÍTEM 3 · CENTRALIDADES</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Cada métrica mide un papel distinto</div>
+    <h2 class="reveal">Cuatro rankings, una sola tabla</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>Grado</th><th>Betweenness</th><th>Closeness</th><th>Eigenvector</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>DATCC-2A-C3</td><td>DATCC-2A-C3</td><td><strong>INTERNET-MPLS</strong></td><td>DATCC-2A-C3</td></tr>
+            <tr><td class="num">2</td><td>DATCC-2A-C2</td><td>CPAR-C10</td><td>DATCC-2A-C3</td><td>DATCC-2A-C2</td></tr>
+            <tr><td class="num">3</td><td>AGRPRI-1A-D10</td><td>RC-HUAYNA-CAPAC</td><td>PE2-CENTRAL</td><td>FG-CENTRAL</td></tr>
+            <tr><td class="num">4</td><td>BAL-AUL2-D1</td><td><strong>INTERNET-MPLS</strong></td><td>FG-CENTRAL</td><td>CC-ARQUITECTURA</td></tr>
+            <tr><td class="num">5</td><td>CC-ARQUITECTURA</td><td>PE2-CENTRAL</td><td>PE1-CENTRAL</td><td>CC-MONJAS-D126</td></tr>
+            <tr><td class="num">…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+            <tr><td class="num">9</td><td><strong>INTERNET-MPLS</strong></td><td>FG-BALZAY</td><td>FG-BALZAY</td><td>CC-FILOSOFIA-A</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.82em;color:var(--ink-soft);margin-top:.6em">Top-10 completo en el informe. <strong>FG</strong>=FORTIGATE-1800F, <strong>RC</strong>=ROUTER-CAMPUS.</p>
+      </div>
+      <div>
+        <div class="finding amber">
+          <span class="flabel">INTERNET-MPLS: grado 9.º, betweenness 4.º, closeness 1.º</span>
+          <p>Es el <strong>único</strong> enlace WAN entre los campus dispersos y el Central. No necesita muchos vecinos: le basta ser el <strong>único puente</strong>. Todo camino intercampus está <em>obligado</em> a atravesarlo.</p>
+          <p><strong>El grado subestima sistemáticamente el riesgo de los nodos articuladores.</strong></p>
+        </div>
+        <div class="finding good">
+          <span class="flabel">Tres papeles, no uno</span>
+          <p><strong>Concentradores de core</strong> (DATCC-2A-C3/C2): altos en las cuatro — los hubs clásicos.<br>
+             <strong>Pasarelas</strong> (INTERNET-MPLS, CPAR-C10): altas en betweenness, discretas en grado. <em>Aquí está el riesgo real.</em><br>
+             <strong>Periferia bien conectada</strong> (CC-ARQUITECTURA, CC-MONJAS): en eigenvector pero no en betweenness — cuelgan del core sin que nadie las atraviese.</p>
+        </div>
+        <div class="finding">
+          <span class="flabel">El diagnóstico más útil</span>
+          <p>Eigenvector premia estar <em>cerca del poder</em>; betweenness, <em>controlar el paso</em>. Alto en eigenvector y bajo en betweenness = <strong>reemplazable</strong>. Al revés = <strong>punto único de fallo</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ PREGUNTAS FASE 1 ============ -->
 <section class="tight" id="qa-fase1" style="background:var(--bg-sunk);">
   <div class="secmark">FASE 1 · PREGUNTAS DE LA GUÍA</div>
@@ -1022,6 +1066,101 @@ tr.badrow td{background:var(--danger-soft);}
   </div>
 </section>
 
+
+<!-- ============ P3 · IMPLEMENTACIÓN Y EL TÉCNICO ============ -->
+<section class="tight" style="background:var(--bg-sunk);">
+  <div class="secmark">P3 · ÍTEM 1 · IMPLEMENTACIÓN</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Sin nx.bfs_* ni nx.dfs_*</div>
+    <h2 class="reveal">Los dos recorridos, escritos desde cero</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Recorrido</th><th>Estructura</th><th class="num">Costo</th></tr></thead>
+          <tbody>
+            <tr><td><strong>BFS</strong></td><td>Cola <strong>FIFO</strong><br><code>deque.popleft()</code></td><td class="num">O(n+m)</td></tr>
+            <tr><td><strong>DFS</strong></td><td>Pila <strong>LIFO</strong><br><code>list.pop()</code></td><td class="num">O(n+m)</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.82em;color:var(--ink-soft);margin-top:.6em">Cada nodo entra y sale una vez; cada arista se examina dos veces. La única diferencia es la <strong>disciplina de extracción</strong>.</p>
+      </div>
+      <div>
+        <div class="finding good">
+          <span class="flabel">¿Y para el técnico que visita los armarios?</span>
+          <p><strong>DFS</strong>, no BFS — y la razón es que <strong>moverse cuesta</strong>.</p>
+          <p>BFS visita un armario de cada piso, baja, y vuelve a subir para el siguiente nivel: correcto en saltos lógicos, absurdo en desplazamiento físico.</p>
+          <p>DFS <strong>agota un edificio entero antes de pasar al siguiente</strong>. Como la jerarquía ya está alineada con la geografía —un distribuidor por edificio—, <strong>una rama del DFS es un edificio</strong>. Sobre un árbol, el DFS recorre cada arista dos veces y es óptimo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ P4 · ESTABILIDAD Y ARI ============ -->
+<section class="tight" style="background:var(--bg-sunk);">
+  <div class="secmark">P4 · ÍTEM 3 · ESTABILIDAD</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Un solo Q no demuestra nada</div>
+    <h2 class="reveal">Cinco semillas, la misma estructura</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th colspan="3">Louvain es estocástico — se repitió 5 veces</th></tr>
+          <tr><th class="num">Semilla</th><th class="num">Comunidades</th><th class="num">Q</th></tr></thead>
+          <tbody>
+            <tr><td class="num">0</td><td class="num">14</td><td class="num">0.7632</td></tr>
+            <tr><td class="num">7</td><td class="num">15</td><td class="num">0.7615</td></tr>
+            <tr><td class="num">13</td><td class="num">13</td><td class="num">0.7587</td></tr>
+            <tr><td class="num">42</td><td class="num">15</td><td class="num">0.7590</td></tr>
+            <tr><td class="num">99</td><td class="num">15</td><td class="num">0.7312</td></tr>
+            <tr><td class="num"><strong>σ</strong></td><td class="num"><strong>0.89</strong></td><td class="num"><strong>0.0133</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="metrics">
+          <div class="metric"><span class="v hl" data-count="1.8" data-dec="1" data-suffix="%">1.8%</span><span class="k">coef. de variación de Q</span></div>
+          <div class="metric"><span class="v" data-count="0.327" data-dec="3">0.327</span><span class="k">ARI vs. campus</span></div>
+        </div>
+        <div class="finding good">
+          <span class="flabel">Estabilidad confirmada</span>
+          <p>Q varía apenas <strong>0.032</strong> entre semillas. La estructura modular <strong>no es un artefacto del azar</strong>.</p>
+        </div>
+        <div class="finding">
+          <span class="flabel">NMI 0.618 vs. ARI 0.327</span>
+          <p>El <strong>ARI corrige el acuerdo esperable por azar</strong>; por eso es más exigente. La brecha entre ambos revela que Louvain <strong>no confunde campus</strong>, los <strong>subdivide por edificio</strong>: Central se reparte en 7 comunidades, Paraíso en 4.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ P4 · LÍMITE DE RESOLUCIÓN + K-MEANS ============ -->
+<section class="tight">
+  <div class="secmark">P4 · ÍTEM 4 · LÍMITES DEL MÉTODO</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Dos objeciones que hay que declarar</div>
+    <h2 class="reveal">Qué no puede ver la modularidad</h2>
+    <div class="cols reveal">
+      <div>
+        <div class="finding">
+          <span class="flabel">Límite de resolución</span>
+          <p>Maximizar Q tiene un sesgo conocido: una comunidad con menos de <strong>√(2m) ≈ 20 enlaces internos</strong> tiende a <strong>fusionarse</strong> con su vecina aunque esté bien definida.</p>
+          <p>Ocurre aquí: la <strong>comunidad 9</strong> agrupa 18 nodos de <strong>cinco campus</strong>. Para el algoritmo es legítima —son core e interconexión, densamente enlazados—. Para un administrador son <strong>dominios de gestión distintos</strong>.</p>
+        </div>
+      </div>
+      <div>
+        <div class="finding">
+          <span class="flabel">¿k-means sobre un grafo?</span>
+          <p>k-means exige <strong>coordenadas y distancia euclídea</strong>; un grafo no las tiene. Su métrica natural es el número de saltos.</p>
+          <p>Además presupone clústeres <strong>convexos y de tamaño similar</strong> —aquí van de 5 a 31 nodos— y obliga a <strong>fijar k de antemano</strong>, justo lo que se quiere descubrir.</p>
+          <p><strong>Veredicto:</strong> no es válido como método directo, sí como segunda etapa de un clustering espectral. El NMI=0.91 valida el <em>embedding</em>, no a k-means.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ PREGUNTAS FASE 2 ============ -->
 <section class="tight" id="qa-fase2" style="background:var(--bg-sunk);">
   <div class="secmark">FASE 2 · PREGUNTAS DE LA GUÍA</div>
@@ -1070,7 +1209,7 @@ tr.badrow td{background:var(--danger-soft);}
     <div>
       <div class="eyebrow reveal">P5 — Caminos mínimos, tres modelos de peso</div>
       <h2 class="reveal">"El nodo más cercano" depende de qué mides</h2>
-      <p class="reveal">Saltos, latencia y carga (utilización) dan rankings distintos. Dijkstra y Floyd-Warshall coinciden en <strong>60/60</strong> pares verificados; para este grafo disperso (m≈1.18n), Dijkstra×n es hasta <strong>9.6× más rápido</strong> que Floyd-Warshall.</p>
+      <p class="reveal">Saltos, latencia y carga (utilización) dan rankings distintos. Dijkstra y Floyd-Warshall coinciden en <strong>20/20</strong> pares verificados; para este grafo disperso (m≈1.18n), Dijkstra×n es hasta <strong>9.6× más rápido</strong> que Floyd-Warshall.</p>
       <div class="finding amber reveal">
         <span class="flabel">El ranking cambia con carga</span>
         <p>DATCC-2A-C3 lidera cercanía por saltos y latencia. Pero <strong>FORTIGATE-1800F-CENTRAL sube al puesto 1 en carga</strong> — concentra el mayor tráfico real, lo que lo hace "más cercano" en unidades de utilización, no de topología.</p>
@@ -1152,6 +1291,119 @@ tr.badrow td{background:var(--danger-soft);}
         <div class="finding good">
           <span class="flabel">Lección metodológica</span>
           <p>Cuando el objetivo es <strong>min-suma</strong> (p-Mediana), la heurística voraz es prácticamente óptima. Cuando es <strong>min-máx</strong> (p-Centro), hay que verificar contra un solver exacto — la intuición de "agregar el mejor siguiente" deja de funcionar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ P5 · MODELOS DE PESO Y PROTOCOLOS ============ -->
+<section class="tight">
+  <div class="secmark">P5 · ÍTEMS 2-4 · PESOS Y PROTOCOLOS</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">La métrica no es cosmética: cambia el resultado</div>
+    <h2 class="reveal">Tres pesos, tres protocolos, tres peores casos</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Modelo</th><th>Par más distante</th><th class="num">Dist.</th><th>Protocolo real</th></tr></thead>
+          <tbody>
+            <tr><td>Saltos</td><td>ENF-2B-A122 → POST-2A-A66</td><td class="num">11</td><td>RIP</td></tr>
+            <tr><td>Latencia</td><td>POST-2A-A66 → QUIN-1A-A128</td><td class="num">34.7 ms</td><td><strong>OSPF / IS-IS</strong></td></tr>
+            <tr><td>Carga</td><td>ARQ-1E-A92 → INV-1B-A162</td><td class="num">1.706</td><td>EIGRP</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.82em;color:var(--ink-soft);margin-top:.6em">α = 0.1 ms (conmutación por salto) · β = 1000 Mbps·ms (serialización). <strong>β/α = 10⁴</strong> fija dónde domina cada término. Los tres caminos pasan por <strong>INTERNET-MPLS</strong>.</p>
+      </div>
+      <div>
+        <div class="finding">
+          <span class="flabel">Pesos no negativos ⇒ no hace falta Bellman-Ford</span>
+          <p>w<sub>saltos</sub>=1&gt;0 · w<sub>latencia</sub>&gt;α=0.1&gt;0 · w<sub>carga</sub>=1/[c(1−ℓ)]&gt;0. Los tres son <strong>estrictamente positivos</strong>, así que Dijkstra es válido y Bellman-Ford solo añadiría un factor O(n).</p>
+        </div>
+        <div class="finding amber">
+          <span class="flabel">¿Y si el peso siguiera al tráfico instantáneo?</span>
+          <p><strong>Oscilación de rutas.</strong> El enlace descargado atrae tráfico → se satura → todos huyen → el otro se satura. Realimentación positiva sin amortiguamiento.</p>
+          <p>Le pasó a <strong>ARPANET en 1987</strong>. Por eso OSPF e IS-IS usan costos <strong>estáticos</strong>: se prioriza estabilidad sobre optimalidad instantánea.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ P6 · VERIFICACIÓN DEL CORTE + P7 RESTRICCIONES ============ -->
+<section class="tight" style="background:var(--bg-sunk);">
+  <div class="secmark">P6-P7 · VERIFICACIÓN Y LÍMITES DEL MODELO</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Sumar el corte a mano, y admitir qué falta</div>
+    <h2 class="reveal">43 Gbps, verificado arista por arista</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th colspan="2">Corte mínimo · Campus Central</th></tr>
+          <tr><th>Arista</th><th class="num">Mbps</th></tr></thead>
+          <tbody>
+            <tr><td>DATCC-2A-C3 → PE2-CENTRAL</td><td class="num">20 000</td></tr>
+            <tr><td>DATCC-2A-C3 → FORTIGATE-CENTRAL</td><td class="num">10 000</td></tr>
+            <tr><td>DATCC-2A-C2 → FORTIGATE-CENTRAL</td><td class="num">10 000</td></tr>
+            <tr><td>ROUTER-C-HISTORICO → L2TP-BALZAY</td><td class="num">1 000</td></tr>
+            <tr><td>ROUTER-MUSEO → L2TP-BALZAY</td><td class="num">1 000</td></tr>
+            <tr><td>CCJ-CJURIDICO-D4 → INTERNET-MPLS</td><td class="num">1 000</td></tr>
+            <tr><td><strong>Σ capacidad del corte</strong></td><td class="num"><strong>43 000</strong></td></tr>
+            <tr><td><strong>Flujo máximo (Edmonds-Karp)</strong></td><td class="num"><strong>43 000</strong></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.82em;color:var(--ink-soft);margin-top:.6em"><strong>f* = c(S,S̄) ✓</strong> — el teorema, verificado sobre esta red. Tres aristas aportan el <strong>93%</strong>: ampliar las de 1 Gbps no serviría de nada.</p>
+      </div>
+      <div>
+        <div class="finding">
+          <span class="flabel">Capacidades: 28 declaradas, 181 inferidas</span>
+          <p>Regla por rol y capa: WAN y core → <strong>10 GbE</strong>; agregación → <strong>1 GbE</strong>; resto → <strong>100 Mbps</strong>. Criterio de <strong>prudencia</strong>: ante la duda, la menor ⇒ el flujo es una <strong>cota inferior</strong>.</p>
+        </div>
+        <div class="finding amber">
+          <span class="flabel">P7 · Lo que el modelo NO ve</span>
+          <p><strong>Energía</strong> (E·y<sub>j</sub> ≤ e<sub>j</sub>) · <strong>espacio en rack</strong> (U·y<sub>j</sub> ≤ u<sub>j</sub>) · <strong>seguridad física</strong> (y<sub>j</sub>=0 ∀j∉S) · <strong>licencias</strong> (Σf<sub>j</sub>y<sub>j</sub> ≤ B).</p>
+          <p>Consecuencia concreta: la heurística elige <strong>INTERNET-MPLS</strong> para p=3, pero es un nodo del <strong>proveedor</strong> — la universidad no puede instalar equipo ahí. El óptimo real se desplaza a PE2-CENTRAL.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ P5 · VERIFICACION CUANTITATIVA ============ -->
+<section class="tight" style="background:var(--bg-sunk);">
+  <div class="secmark">P5 · ÍTEM 1 · VERIFICACIÓN</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">No basta decir "coinciden"</div>
+    <h2 class="reveal">Dijkstra vs. Floyd-Warshall: 20/20</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Origen</th><th>Destino</th><th class="num">d<sub>Dij</sub></th><th class="num">d<sub>FW</sub></th></tr></thead>
+          <tbody>
+            <tr><td>SW-ARUBA-C-HIST.</td><td>AUL2-0A-A121</td><td class="num">5</td><td class="num">5</td></tr>
+            <tr><td>ARQ-0A-A84</td><td>CTBLOQ1-0A-A101</td><td class="num">8</td><td class="num">8</td></tr>
+            <tr><td>CP-EADMINA1-D6</td><td>CCJ-CJURIDICO-D4</td><td class="num">4</td><td class="num">4</td></tr>
+            <tr><td>TECQUI-0A-A11</td><td>POS-0A-A31</td><td class="num">9</td><td class="num">9</td></tr>
+            <tr><td>CC-QUIMICA-D109</td><td>TEAT-0A-A75</td><td class="num">3</td><td class="num">3</td></tr>
+            <tr><td>AUL2-0A-A119</td><td>AUL2-01A-A24-SUB</td><td class="num">2</td><td class="num">2</td></tr>
+            <tr><td colspan="4" style="text-align:center;color:var(--ink-faint)">… 14 pares más, todos coincidentes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="metrics">
+          <div class="metric"><span class="v hl" data-count="20" data-suffix="/20">20/20</span><span class="k">pares coincidentes</span></div>
+          <div class="metric"><span class="v" data-count="0">0</span><span class="k">discrepancias · |Δ| máx = 0</span></div>
+        </div>
+        <div class="finding good">
+          <span class="flabel">Por qué no es redundante</span>
+          <p>Ambos resuelven el mismo problema, así que coincidir es lo <em>esperado</em>. Pero la prueba confirma que la <strong>implementación manual de Dijkstra</strong> —con cola de prioridad propia— no introduce errores frente a la formulación <strong>matricial</strong> de Floyd-Warshall, que sigue una lógica completamente distinta.</p>
+        </div>
+        <div class="finding">
+          <span class="flabel">Cuándo usar cada uno</span>
+          <p><strong>Dijkstra</strong> O((m+n)·log n) para un origen: la opción en redes dispersas como ésta. <strong>Floyd-Warshall</strong> O(n³) da la matriz completa de una vez — útil para métricas globales, inviable sobre n &gt; 500.</p>
         </div>
       </div>
     </div>
@@ -1342,6 +1594,116 @@ tr.badrow td{background:var(--danger-soft);}
         <div class="finding amber" style="margin-top:1rem;">
           <span class="flabel">La estrategia intuitiva no es la mejor</span>
           <p>La estrategia "por vecino" (proxy práctico sin necesitar topología completa) es <strong>menos eficiente</strong> de lo que sugería una sola corrida — promediada sobre 30 realizaciones, queda por debajo de grado y betweenness.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ P8 · PERCOLACIÓN VS MODELOS NULOS ============ -->
+<section class="tight">
+  <div class="secmark">P8 · ÍTEM 4 · CONTRA LOS MODELOS NULOS</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">La pregunta comparativa, respondida</div>
+    <h2 class="reveal">La más robusta al azar, la más frágil al ataque</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Modelo</th><th class="num">E₀</th><th class="num">f<sub>c</sub> azar</th><th class="num">f<sub>c</sub> ataque</th></tr></thead>
+          <tbody>
+            <tr><td><strong>UCuenca</strong></td><td class="num"><strong>0.208</strong></td><td class="num"><strong>0.750</strong></td><td class="num"><strong>0.125</strong></td></tr>
+            <tr><td>Erdős–Rényi</td><td class="num">0.162</td><td class="num">0.699</td><td class="num">0.293</td></tr>
+            <tr><td>Conf. Model</td><td class="num">0.169</td><td class="num">0.735</td><td class="num">0.169</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.82em;color:var(--ink-soft);margin-top:.6em">20 realizaciones por modelo. f<sub>c</sub> = fracción eliminada que deja la componente gigante bajo el 5%.</p>
+      </div>
+      <div>
+        <div class="metrics">
+          <div class="metric"><span class="v dg" data-count="2.3" data-dec="1" data-suffix="×">2.3×</span><span class="k">más frágil que ER ante ataque</span></div>
+          <div class="metric"><span class="v" data-count="6.0" data-dec="1" data-suffix="×">6.0×</span><span class="k">azar / ataque — la paradoja</span></div>
+        </div>
+        <div class="finding good">
+          <span class="flabel">El dato que zanja la discusión: CM</span>
+          <p>El Modelo de Configuración <strong>preserva la secuencia de grados exacta</strong> y aun así resiste mejor (0.169 vs 0.125).</p>
+          <p>Si la fragilidad viniera solo de <em>tener hubs</em>, CM sería igual de frágil. No lo es ⇒ la culpa es de <strong>cómo están conectados</strong>: una cadena core–agregación sin rutas alternativas. Al recablear al azar, CM genera atajos que actúan como redundancia.</p>
+        </div>
+        <div class="finding">
+          <span class="flabel">Eficiencia y resiliencia están en tensión</span>
+          <p>UCuenca es la <strong>más eficiente</strong> (E₀=0.208) y la <strong>más frágil</strong>. Optimizar para la operación normal es lo que la deja peor preparada ante un adversario.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ P9 · ANALOGÍA ELÉCTRICA ============ -->
+<section class="tight" style="background:var(--bg-sunk);">
+  <div class="secmark">P9 · ÍTEM 3 · ANALOGÍA</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Motter–Lai nació para redes de transmisión</div>
+    <h2 class="reveal">La misma ecuación que un apagón</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Concepto</th><th>Red eléctrica</th><th>Red UCuenca</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Carga</strong> L<sub>j</sub></td><td>Potencia activa (MW)</td><td>Betweenness</td></tr>
+            <tr><td><strong>Capacidad</strong> C<sub>j</sub></td><td>Límite térmico del conductor</td><td>Capacidad de conmutación</td></tr>
+            <tr><td><strong>Tolerancia</strong> α</td><td>Margen de reserva</td><td>Sobredimensionamiento</td></tr>
+            <tr><td><strong>Redistribución</strong></td><td>Leyes de Kirchhoff</td><td>Reconvergencia OSPF</td></tr>
+            <tr><td><strong>Cascada</strong></td><td>Apagón en cadena</td><td>Congestión propagada</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.82em;color:var(--ink-soft);margin-top:.6em">C<sub>j</sub> = (1+α)·L<sub>j</sub><sup>(0)</sup> — en ambos dominios, α es <strong>capacidad instalada que no se usa</strong>. Sobredimensionar cuesta.</p>
+      </div>
+      <div>
+        <div class="finding amber">
+          <span class="flabel">Apagón del noreste de EE.UU., 2003</span>
+          <p>Una línea tocó un árbol en Ohio. En una hora: <strong>508 generadores</strong> desconectados, <strong>55 millones</strong> de personas sin luz. Ninguna de las líneas que cayó después estaba averiada — <strong>se dispararon por sobrecarga</strong>.</p>
+        </div>
+        <div class="finding good">
+          <span class="flabel">Por qué a UCuenca no le pasa (y es contraintuitivo)</span>
+          <p>Una red eléctrica es <strong>mallada</strong>: la carga se redistribuye y cada vecino puede ser el siguiente eslabón. UCuenca es un <strong>árbol</strong>: al caer un nodo <strong>no hay ruta alternativa</strong>, los de abajo quedan aislados pero <strong>no sobrecargan a nadie</strong>.</p>
+          <p><strong>La misma pobreza de redundancia que la hace frágil ante percolación es la que la protege de las cascadas.</strong> Cascada máxima: 6.8%.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ P10 · CONSECUENCIA DE LA FALLA ============ -->
+<section class="tight">
+  <div class="secmark">P10 · ÍTEM 3 · CONSECUENCIA OPERATIVA</div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Un número entre 0 y 1 no le dice nada a un administrador</div>
+    <h2 class="reveal">Qué pasa exactamente si cae cada nodo</h2>
+    <div class="cols reveal">
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>Nodo</th><th class="num">ICC</th><th>Consecuencia estimada</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>INTERNET-MPLS</td><td class="num">0.918</td><td><strong>Pérdida total</strong> de conectividad entre campus y hacia Internet. Cada campus queda como isla.</td></tr>
+            <tr><td class="num">2</td><td>ROUTER-HUAYNA-CAPAC</td><td class="num">0.755</td><td><strong>Aísla Paraíso completo</strong> (44 nodos, árbol puro, sin alternativa).</td></tr>
+            <tr><td class="num">3</td><td>CPAR-C10</td><td class="num">0.585</td><td>Corta la conectividad inter-campus desde Paraíso.</td></tr>
+            <tr><td class="num">4</td><td>DATCC-2A-C3</td><td class="num">0.514</td><td><strong>No fragmenta</strong> (existe C2) pero concentra el <strong>82% de la carga</strong>: degradación institucional.</td></tr>
+            <tr><td class="num">5</td><td>ROUTER-YANUNCAY</td><td class="num">0.368</td><td>Aísla Yanuncay (13 nodos).</td></tr>
+            <tr><td class="num">6-10</td><td>Distribuidores</td><td class="num">0.34-0.36</td><td>Aíslan su bloque: de 6 a 12 accesos cada uno.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="finding">
+          <span class="flabel">Tres niveles de gravedad</span>
+          <p><strong>Institucional</strong> (#1): único nodo que afecta a los ocho campus.<br>
+             <strong>De campus</strong> (#2,#3,#5): aíslan una sede completa.<br>
+             <strong>De edificio</strong> (#6–#10): dejan sin servicio un bloque.</p>
+        </div>
+        <div class="finding good">
+          <span class="flabel">#4 rompe el patrón</span>
+          <p><strong>DATCC-2A-C3 no es punto de articulación</strong> y aun así es cuarto. Su riesgo es de <strong>rendimiento</strong>, no de conectividad: el equipo redundante recibiría una carga que no puede absorber.</p>
+          <p>El ≈9% que se repite en el resto es el tamaño típico del subárbol colgante — al ser árbol, la cascada <strong>se detiene sola</strong>.</p>
         </div>
       </div>
     </div>
